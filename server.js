@@ -9,7 +9,13 @@ const io = new Server(server, {
     cors: { origin: "*" }
 });
 
-app.use(express.static(path.join(__dirname, '')));
+// Render'ın index.html'i kesin bulabilmesi için statik klasör yolunu netleştiriyoruz
+app.use(express.static(__dirname));
+
+// Tarayıcı direkt siteye girdiğinde index.html'i zorunlu olarak fırlat diyoruz
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 let rooms = {};
 
@@ -28,20 +34,16 @@ io.on('connection', (socket) => {
             
             socket.emit('initPlayer', role);
             io.to(roomId).emit('roomStatus', rooms[roomId].players.length);
-            
-            console.log(`Kullanıcı ${socket.id}, ${roomId} odasına ${role}. oyuncu olarak katıldı.`);
         } else {
             socket.emit('roomFull');
         }
     });
 
-    // Mekaniğin ve hareketlerin senkronizasyonu
     socket.on('updateState', (data) => {
         socket.to(data.roomId).emit('peerState', data.state);
     });
 
     socket.on('disconnect', () => {
-        console.log('Kullanıcı ayrıldı:', socket.id);
         for (const roomId in rooms) {
             rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== socket.id);
             io.to(roomId).emit('roomStatus', rooms[roomId].players.length);
@@ -52,7 +54,8 @@ io.on('connection', (socket) => {
     });
 });
 
+// Render için en kritik kısım: Portu 0.0.0.0 üzerinden dinlemek
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Sunucu ${PORT} portunda çalışıyor.`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Sunucu ${PORT} portunda başarıyla çalışıyor.`);
 });
