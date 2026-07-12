@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Çivili Futbol - Taktik v14</title>
+    <title>Çivili Futbol - Pro v15</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
@@ -11,23 +11,28 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white;
         }
         
-        /* Ana menü yerleşimi tamamen düzeltildi */
         #menu {
             position: absolute; background: rgba(20, 30, 20, 0.98); border: 4px solid #4a754a;
-            border-radius: 12px; padding: 25px; text-align: center; z-index: 100; width: 90%; max-width: 350px;
+            border-radius: 12px; padding: 25px; text-align: center; z-index: 100; width: 90%; max-width: 360px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: block;
         }
-        h1 { color: #2ecc71; margin-bottom: 20px; font-size: 26px; text-shadow: 2px 2px black; font-weight: bold; }
+        h1 { color: #2ecc71; margin-bottom: 20px; font-size: 24px; text-shadow: 2px 2px black; font-weight: bold; }
         .input-group { margin-bottom: 14px; text-align: left; }
         .input-group label { font-size: 11px; color: #2ecc71; font-weight: bold; display: block; margin-bottom: 4px; letter-spacing: 1px; }
         input, select {
             width: 100%; padding: 10px; border-radius: 4px; border: 2px solid #4a754a; background: #1a1a1a; color: white; font-size: 14px; font-family: inherit;
         }
+        
+        .mode-container { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
         .main-btn {
-            display: block; width: 100%; padding: 12px; margin: 10px 0; background: #2e7d32; color: white; border: none;
-            border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: inherit; box-shadow: 0 4px #1b5e20;
+            display: block; width: 100%; padding: 12px; background: #2e7d32; color: white; border: none;
+            border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; font-family: inherit; box-shadow: 0 4px #1b5e20;
+            text-align: center;
         }
         .main-btn:active { transform: translateY(2px); box-shadow: 0 2px #1b5e20; }
+        .btn-ai { background: #2e7d32; box-shadow: 0 4px #1b5e20; }
+        .btn-local { background: #2980b9; box-shadow: 0 4px #1f618d; }
+        .btn-online { background: #8e44ad; box-shadow: 0 4px #6c3483; }
         
         #top-bar {
             position: absolute; top: 10px; width: 95%; max-width: 380px;
@@ -42,16 +47,13 @@
         #score-board { color: #fff; min-width: 80px; pointer-events: auto; }
         #shot-timer-ui { color: #2ecc71; border-color: #2ecc71; }
         
-        #exit-btn {
-            background: #c0392b; color: white; border: 2px solid #fff; border-radius: 4px;
+        #exit-btn, #start-match-btn {
+            color: white; border: 2px solid #fff; border-radius: 4px;
             font-size: 13px; font-weight: bold; cursor: pointer; pointer-events: auto;
             padding: 6px 12px; font-family: inherit;
         }
-        #start-match-btn {
-            background: #27ae60; color: white; border: 2px solid #fff; border-radius: 4px;
-            font-size: 13px; font-weight: bold; cursor: pointer; pointer-events: auto;
-            padding: 6px 12px; font-family: inherit; display: none;
-        }
+        #exit-btn { background: #c0392b; }
+        #start-match-btn { background: #27ae60; display: none; }
 
         #goal-banner {
             position: absolute; top: 40%; font-size: 70px; font-weight: 900;
@@ -68,7 +70,7 @@
 </head>
 <body>
 
-    <!-- ANA MENÜ -->
+    <!-- YENİLENEN ANA MENÜ (TÜM MODLAR GERİ GELDİ) -->
     <div id="menu">
         <h1>ÇİVİLİ FUTBOL</h1>
         <div class="input-group">
@@ -83,7 +85,12 @@
                 <option value="5">5 Dakika</option>
             </select>
         </div>
-        <button class="main-btn" onclick="startSetupPhase('ai')">🤖 Oyuna Başla (Diziliş Ekranı)</button>
+        
+        <div class="mode-container">
+            <button class="main-btn btn-ai" onclick="startSetupPhase('ai')">🤖 Bilgisayara Karşı Oyna</button>
+            <button class="main-btn btn-local" onclick="startSetupPhase('local')">👥 Aynı Cihazda 2 Kişi</button>
+            <button class="main-btn btn-online" onclick="startSetupPhase('online')">🌐 Online Eşleşme</button>
+        </div>
     </div>
 
     <!-- ÜST HUD PANELİ -->
@@ -108,7 +115,7 @@
         const height = Math.min(window.innerHeight - 80, 620);
         canvas.width = width; canvas.height = height;
 
-        // Web Audio Efektleri
+        // Ses Efektleri
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playKickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -133,7 +140,7 @@
         }
 
         let currentPhase = 'menu'; 
-        let gameMode = 'ai';
+        let gameMode = 'ai'; // 'ai', 'local', 'online'
         let score = { p1: 0, p2: 0 };
         let turn = 1;
         let matchTimeRemaining = 120;
@@ -158,10 +165,8 @@
         
         const p1BoxY1 = height - penaltyBoxH, p1BoxY2 = height;
         const p2BoxY1 = 0, p2BoxY2 = penaltyBoxH;
-
         const benchY = 45;
 
-        // Menü bozulmasını engellemek için açılışta boş sahayı bir kez çiz
         drawFieldLinesOnly();
 
         function drawFieldLinesOnly() {
@@ -175,6 +180,11 @@
 
         function startSetupPhase(mode) {
             gameMode = mode;
+            
+            if (mode === 'online') {
+                alert("Online Mod Bağlantısı Aranıyor... (Demo Modunda Başlatılıyor)");
+            }
+
             currentPhase = 'setup';
             score = { p1: 0, p2: 0 };
             document.getElementById('score-board').innerText = "0 - 0";
@@ -191,31 +201,27 @@
             benchPins = [];
             for(let i=0; i<11; i++) {
                 benchPins.push({
-                    id: i,
-                    x: 25 + i * ((width - 40) / 10),
-                    y: benchY,
-                    homeX: 25 + i * ((width - 40) / 10),
-                    homeY: benchY,
-                    team: 1,
-                    onField: false
+                    id: i, x: 25 + i * ((width - 40) / 10), y: benchY,
+                    homeX: 25 + i * ((width - 40) / 10), homeY: benchY,
+                    team: 1, onField: false
                 });
             }
 
-            // Yapay zekanın tüm sahaya dengeli dağılması sağlandı
-            generateAIFormation();
+            // Rakip Takım Dağılımı (AI veya 2. Oyuncu için otomatik dengeli dağılım)
+            generateOpponentFormation();
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
             animate();
         }
 
-        function generateAIFormation() {
-            let aiPositions = [
-                {x: width/2, y: height*0.12}, // Kaleci
-                {x: width*0.2, y: height*0.26}, {x: width*0.5, y: height*0.24}, {x: width*0.8, y: height*0.26}, // Defans
-                {x: width*0.15, y: height*0.45}, {x: width*0.38, y: height*0.42}, {x: width*0.62, y: height*0.42}, {x: width*0.85, y: height*0.45}, // Orta Saha
-                {x: width*0.25, y: height*0.65}, {x: width*0.75, y: height*0.65}, {x: width/2, y: height*0.75} // İleri Uç (Tüm sahaya dağılım)
+        function generateOpponentFormation() {
+            let oppPositions = [
+                {x: width/2, y: height*0.12}, 
+                {x: width*0.2, y: height*0.26}, {x: width*0.5, y: height*0.24}, {x: width*0.8, y: height*0.26}, 
+                {x: width*0.15, y: height*0.45}, {x: width*0.38, y: height*0.42}, {x: width*0.62, y: height*0.42}, {x: width*0.85, y: height*0.45}, 
+                {x: width*0.25, y: height*0.65}, {x: width*0.75, y: height*0.65}, {x: width/2, y: height*0.75}
             ];
-            aiPositions.forEach(pos => {
+            oppPositions.forEach(pos => {
                 pins.push({ x: pos.x, y: pos.y, team: 2 });
             });
         }
@@ -228,7 +234,7 @@
 
         function confirmFormationsAndStart() {
             if (!benchPins.every(p => p.onField)) {
-                alert("Lütfen yukarıdaki tüm oyuncularınızı sürükleyerek sahaya yerleştirin!");
+                alert("Lütfen üstteki tüm oyuncularınızı sahaya yerleştirin!");
                 return;
             }
             
@@ -300,11 +306,7 @@
 
         function triggerGoalAnimation(scoringTeam) {
             playGoalSound();
-            if(scoringTeam === 1) {
-                score.p1++;
-            } else {
-                score.p2++;
-            }
+            if(scoringTeam === 1) score.p1++; else score.p2++;
             document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
 
             const banner = document.getElementById('goal-banner');
@@ -341,7 +343,12 @@
                 }
             } 
             else if (currentPhase === 'playing') {
-                if (turn === 2 || Math.hypot(cap.vx, cap.vy) > 0.2) return;
+                const isMoving = Math.hypot(cap.vx, cap.vy) > 0.2;
+                if (isMoving) return;
+
+                // Local modda iki taraf da vurabilir, AI modunda sadece sıra sizdeyken (turn=1)
+                if (gameMode === 'ai' && turn === 2) return;
+
                 if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
                     isDraggingBall = true;
                     dragStart = { x: cap.x, y: cap.y };
@@ -364,43 +371,23 @@
         window.addEventListener('mouseup', () => {
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
+                if (selectedPin.x < 10 || selectedPin.x > width - 10 || selectedPin.y < 75 || selectedPin.y > height - 10) valid = false;
 
-                // Kural 1: Tüm sahaya dağıtma aktif (sınır çizgileri dışına çıkamaz)
-                if (selectedPin.x < 10 || selectedPin.x > width - 10 || selectedPin.y < 75 || selectedPin.y > height - 10) {
-                    valid = false;
-                }
-
-                // Kural 2: En az 2.5 top mesafe kontrolü
                 if (valid) {
                     for (let p of benchPins) {
                         if (p.id !== selectedPin.id && p.onField) {
-                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
-                                valid = false;
-                                break;
-                            }
+                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { valid = false; break; }
                         }
                     }
                 }
 
-                // Kural 3: Kendi Ceza sahası içine maksimum 1 oyuncu bırakma kuralı
                 if (valid && isInsideP1PenaltyBox(selectedPin.x, selectedPin.y)) {
-                    if (countPlayersInP1PenaltyBox(selectedPin.id) >= 1) {
-                        valid = false;
-                    }
+                    if (countPlayersInP1PenaltyBox(selectedPin.id) >= 1) valid = false;
                 }
+                if (valid && isInsideP2PenaltyBox(selectedPin.x, selectedPin.y)) valid = false;
 
-                // Kural 4: Rakip ceza sahasına taktiksel olarak girilemesin
-                if (valid && isInsideP2PenaltyBox(selectedPin.x, selectedPin.y)) {
-                    valid = false;
-                }
-
-                if (valid) {
-                    selectedPin.onField = true;
-                } else {
-                    selectedPin.x = selectedPin.homeX;
-                    selectedPin.y = selectedPin.homeY;
-                    selectedPin.onField = false;
-                }
+                if (valid) { selectedPin.onField = true; } 
+                else { selectedPin.x = selectedPin.homeX; selectedPin.y = selectedPin.homeY; selectedPin.onField = false; }
 
                 selectedPin = null;
                 checkFormationsReady();
@@ -411,7 +398,7 @@
                 cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                 cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
                 playKickSound();
-                turn = 2;
+                turn = turn === 1 ? 2 : 1;
                 resetShotTimer();
             }
         });
@@ -446,14 +433,9 @@
             if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
             if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
             
-            // Skor tetikleme toleransı artırıldı ve kesinleştirildi
             if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                 if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                    if (cap.y < height / 2) {
-                        triggerGoalAnimation(1); // Mavi takım attı
-                    } else {
-                        triggerGoalAnimation(2); // Kırmızı takım attı
-                    }
+                    if (cap.y < height / 2) triggerGoalAnimation(1); else triggerGoalAnimation(2);
                     cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                     resetShotTimer();
                     return;
@@ -475,7 +457,8 @@
                 }
             });
 
-            if (turn === 2 && !isMoving && shotTimeLeft === 3.0) {
+            // Bilgisayar hamlesi sadece AI modunda devreye girer
+            if (gameMode === 'ai' && turn === 2 && !isMoving && shotTimeLeft === 3.0) {
                 setTimeout(makeAIMove, 600);
             }
         }
@@ -514,7 +497,7 @@
             
             ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2.5;
             ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
-            ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); stroke();
+            ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); ctx.stroke();
             
             ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
@@ -539,7 +522,7 @@
             }
 
             if (currentPhase === 'playing' && isDraggingBall) {
-                ctx.strokeStyle = '#0044ff'; ctx.lineWidth = 4;
+                ctx.strokeStyle = (turn === 1) ? '#0044ff' : '#cc0000'; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
                 ctx.lineTo(cap.x + (dragStart.x - dragCurrent.x), cap.y + (dragStart.y - dragCurrent.y));
                 ctx.stroke();
