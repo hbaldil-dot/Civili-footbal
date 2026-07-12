@@ -1,7 +1,7 @@
 {
-  "name": "online-civili-futbol",
+  "name": "civili-futbol-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Çivili Futbol Sunucusu",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
