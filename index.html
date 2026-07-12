@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Çivili Futbol - Retro v12</title>
+    <title>Çivili Futbol - Taktik v13</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
@@ -26,35 +26,31 @@
             border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: inherit; box-shadow: 0 4px #1b5e20;
         }
         .main-btn:active { transform: translateY(2px); box-shadow: 0 2px #1b5e20; }
-        .online-btn { background: #1976d2; box-shadow: 0 4px #0d47a1; }
-        .online-btn:active { box-shadow: 0 2px #0d47a1; }
         
-        #status-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; display: none;
-        }
-
-        /* YENİ ÜST ARAYÜZ DÜZENİ */
         #top-bar {
-            position: absolute; top: 10px; width: 90%; max-width: 360px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 15; pointer-events: none; display: none;
+            position: absolute; top: 10px; width: 95%; max-width: 380px;
+            display: flex; flex-direction: column; gap: 5px; align-items: center; z-index: 15; pointer-events: none; display: none;
         }
-        #match-timer {
-            background: rgba(0, 0, 0, 0.75); padding: 6px 16px; border-radius: 4px;
-            font-size: 20px; font-weight: bold; color: #f1c40f; border: 2px solid #f1c40f;
+        .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; }
+        #match-timer, #score-board, #shot-timer-ui {
+            background: rgba(0, 0, 0, 0.85); padding: 6px 12px; border-radius: 4px;
+            font-size: 18px; font-weight: bold; border: 2px solid #fff; text-align: center;
         }
-        #shot-timer-ui {
-            background: rgba(0, 0, 0, 0.75); padding: 6px 14px; border-radius: 4px;
-            font-size: 20px; font-weight: bold; color: #2ecc71; border: 2px solid #2ecc71;
-        }
+        #match-timer { color: #f1c40f; border-color: #f1c40f; }
+        #score-board { color: #fff; min-width: 70px; }
+        #shot-timer-ui { color: #2ecc71; border-color: #2ecc71; }
+        
         #exit-btn {
             background: #c0392b; color: white; border: 2px solid #fff; border-radius: 4px;
-            font-size: 14px; font-weight: bold; cursor: pointer; pointer-events: auto;
+            font-size: 13px; font-weight: bold; cursor: pointer; pointer-events: auto;
             padding: 6px 12px; font-family: inherit;
         }
-        #exit-btn:active { background: #962d22; }
+        #start-match-btn {
+            background: #27ae60; color: white; border: 2px solid #fff; border-radius: 4px;
+            font-size: 13px; font-weight: bold; cursor: pointer; pointer-events: auto;
+            padding: 6px 12px; font-family: inherit; display: none;
+        }
 
-        /* GOAL ANİMASYONU */
         #goal-banner {
             position: absolute; top: 40%; font-size: 70px; font-weight: 900;
             text-shadow: 4px 4px 0px #000, -2px -2px 0px #000;
@@ -62,84 +58,59 @@
             font-style: italic; font-family: sans-serif;
             animation: goalPop 0.5s ease-out infinite alternate;
         }
-        #goal-banner::before {
-            content: "GOAL!"; position: absolute; left: -5px; top: -5px; color: #f1c40f; z-index: -1;
-        }
-        @keyframes goalPop {
-            0% { transform: scale(0.9) rotate(-5deg); }
-            100% { transform: scale(1.1) rotate(5deg); }
-        }
+        #goal-banner::before { content: "GOAL!"; position: absolute; left: -5px; top: -5px; color: #f1c40f; z-index: -1; }
+        @keyframes goalPop { 0% { transform: scale(0.9) rotate(-5deg); } 100% { transform: scale(1.1) rotate(5deg); } }
 
         canvas { background: #2e7d32; border: 10px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     </style>
-    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
     <!-- ANA MENÜ -->
     <div id="menu">
         <h1>ÇİVİLİ FUTBOL</h1>
-        
         <div class="input-group">
             <label>OYUNCU İSMİ</label>
             <input type="text" id="player-name" value="Oyuncu 1" maxlength="12">
         </div>
-
         <div class="input-group">
-            <label>AYARLAR (SÜRE / RENKLER)</label>
-            <div style="display: flex; gap: 5px;">
-                <select id="match-duration">
-                    <option value="2">2 Dakika</option>
-                    <option value="3">3 Dakika</option>
-                    <option value="5">5 Dakika</option>
-                </select>
-                <select id="team-color">
-                    <option value="blue">Mavi Takım</option>
-                    <option value="red">Kırmızı Takım</option>
-                    <option value="green">Yeşil Takım</option>
-                </select>
-            </div>
+            <label>MAÇ SÜRESİ</label>
+            <select id="match-duration">
+                <option value="2">2 Dakika</option>
+                <option value="3">3 Dakika</option>
+                <option value="5">5 Dakika</option>
+            </select>
         </div>
-
-        <button class="main-btn" onclick="startLocalGame('ai')">🤖 Bilgisayara Karşı</button>
-        <button class="main-btn" onclick="startLocalGame('2p')">👥 Aynı Ekranda 2 Kişi</button>
-        <button class="main-btn online-btn" onclick="startOnlineMatchmaking()">🌐 Online Eşleşme (Havuz)</button>
+        <button class="main-btn" onclick="startSetupPhase('ai')">🤖 Oyuna Başla (Diziliş Ekranı)</button>
     </div>
 
-    <!-- ONLINE BEKLEME EKRANI -->
-    <div id="status-overlay">
-        <h3 id="status-text">Online havuzuna giriliyor...</h3>
-        <p style="font-size: 12px; color: #aaa; margin-top: 10px;">Rakip aranıyor, lütfen bekleyin.</p>
-        <button class="main-btn" style="width: 150px; margin-top: 20px; background:#555; box-shadow:none;" onclick="cancelMatchmaking()">Vazgeç</button>
-    </div>
-
-    <!-- YENİ ÜST HUD PANELİ -->
+    <!-- ÜST HUD PANELİ -->
     <div id="top-bar">
-        <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
-        <div id="match-timer">02:00</div>
-        <div id="shot-timer-ui">3.0</div>
+        <div class="hud-row">
+            <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
+            <div id="match-timer">02:00</div>
+            <div id="score-board">0 - 0</div>
+            <div id="shot-timer-ui">3.0</div>
+            <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+        </div>
     </div>
 
-    <!-- ANIMASYONLU GOL YAZISI -->
     <div id="goal-banner">GOAL!</div>
-
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        const socket = io();
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         const width = Math.min(window.innerWidth - 20, 360);
-        const height = Math.min(window.innerHeight - 100, 600);
+        const height = Math.min(window.innerHeight - 80, 620);
         canvas.width = width; canvas.height = height;
 
-        // Ses Motoru (Tarayıcı içi Synthesizer)
+        // Ses Sentezleyici
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playKickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.type = 'triangle'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
@@ -147,128 +118,126 @@
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
             osc.start(); osc.stop(audioCtx.currentTime + 0.12);
         }
-
         function playGoalSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             let now = audioCtx.currentTime;
-            // Düdük efekti
             [300, 400, 500].forEach((f, i) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.frequency.setValueAtTime(f, now + i*0.1);
-                gain.gain.setValueAtTime(0.3, now + i*0.1);
+                osc.frequency.setValueAtTime(f, now + i*0.1); gain.gain.setValueAtTime(0.3, now + i*0.1);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.15);
                 osc.start(now + i*0.1); osc.stop(now + i*0.1 + 0.15);
             });
         }
 
-        // Oyun Değişkenleri
-        let gameMode = 'local';
-        let myRole = 1;
-        let currentRoom = "";
+        // Oyun Durumları: 'menu', 'setup', 'playing'
+        let currentPhase = 'menu'; 
+        let gameMode = 'ai';
+        let score = { p1: 0, p2: 0 };
         let turn = 1;
-        let gameActive = false;
-        
         let matchTimeRemaining = 120;
         let matchInterval = null;
         let shotTimeLeft = 3.0;
         let shotTimerInterval = null;
 
-        let p1Color = "#0044ff", p2Color = "#cc0000";
-
         let cap = { x: width/2, y: height/2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
-        let pins = [];
-        let isDragging = false;
+        let pins = []; // Sahadaki oyuncular
+        let benchPins = []; // Yedek kulübesindeki (yerleştirilmeyi bekleyen) oyuncular
+        
+        let selectedPin = null; 
+        let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
+        const ballDiameter = cap.radius * 2;
+        const minAllowedDistance = ballDiameter * 2.5; // Kural: En az 2.5 top mesafe (55px)
+
+        // Sahadaki Statik Ölçüler
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
-        const penaltyBoxX1 = (width - penaltyBoxW) / 2;
+        const pBoxX1 = (width - penaltyBoxW) / 2, pBoxX2 = pBoxX1 + penaltyBoxW;
+        
+        // P1 ve P2 Ceza Sahaları Y sınırları
+        const p1BoxY1 = height - penaltyBoxH, p1BoxY2 = height;
+        const p2BoxY1 = 0, p2BoxY2 = penaltyBoxH;
 
-        function initPins() {
+        // Yedek Kulübesi Alanı (Taktik Ekranı Üst Bölümü)
+        const benchY = 45;
+
+        function startSetupPhase(mode) {
+            gameMode = mode;
+            currentPhase = 'setup';
+            score = { p1: 0, p2: 0 };
+            document.getElementById('score-board').innerText = "0 - 0";
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('top-bar').style.display = 'flex';
+            document.getElementById('start-match-btn').style.display = 'block';
+            document.getElementById('start-match-btn').style.opacity = '0.5';
+
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
-            let p1Positions = [
-                {x: width/2, y: height*0.88}, {x: width*0.2, y: height*0.72}, {x: width*0.5, y: height*0.74}, {x: width*0.8, y: height*0.72},
-                {x: width*0.15, y: height*0.58}, {x: width*0.38, y: height*0.58}, {x: width*0.62, y: height*0.58}, {x: width*0.85, y: height*0.58},
-                {x: width*0.3, y: height*0.46}, {x: width*0.7, y: height*0.46}, {x: width/2, y: height*0.34}
+
+            // P1 (Oyuncu) için 11 adet pulu yedek kulübesine diz
+            benchPins = [];
+            for(let i=0; i<11; i++) {
+                benchPins.push({
+                    id: i,
+                    x: 25 + i * ((width - 40) / 10),
+                    y: benchY,
+                    homeX: 25 + i * ((width - 40) / 10),
+                    homeY: benchY,
+                    team: 1,
+                    onField: false
+                });
+            }
+
+            // P2 (Yapay Zeka) otomatik kurallara uygun dizilsin
+            generateAIFormation();
+
+            cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
+            animate();
+        }
+
+        function generateAIFormation() {
+            let aiPositions = [
+                {x: width/2, y: height*0.12}, // Kaleci (Ceza sahası içi)
+                {x: width*0.2, y: height*0.26}, {x: width*0.5, y: height*0.24}, {x: width*0.8, y: height*0.26},
+                {x: width*0.15, y: height*0.38}, {x: width*0.38, y: height*0.38}, {x: width*0.62, y: height*0.38}, {x: width*0.85, y: height*0.38},
+                {x: width*0.3, y: height*0.48}, {x: width*0.7, y: height*0.48}, {x: width/2, y: height*0.58}
             ];
-            let p2Positions = [
-                {x: width/2, y: height*0.12}, {x: width*0.8, y: height*0.28}, {x: width*0.5, y: height*0.26}, {x: width*0.2, y: height*0.28},
-                {x: width*0.85, y: height*0.42}, {x: width*0.62, y: height*0.42}, {x: width*0.38, y: height*0.42}, {x: width*0.15, y: height*0.42},
-                {x: width*0.7, y: height*0.54}, {x: width*0.3, y: height*0.54}, {x: width/2, y: height*0.66}
-            ];
-            p1Positions.forEach(p => pins.push({x: p.x, y: p.y, team: 1}));
-            p2Positions.forEach(p => pins.push({x: p.x, y: p.y, team: 2}));
+            aiPositions.forEach(pos => {
+                pins.push({ x: pos.x, y: pos.y, team: 2 });
+            });
         }
 
-        function startLocalGame(mode) {
-            gameMode = mode;
-            myRole = 1;
-            setColorsBySelection();
-            matchTimeRemaining = parseInt(document.getElementById('match-duration').value) * 60;
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('top-bar').style.display = 'flex';
-            launchEngine();
+        function checkFormationsReady() {
+            const allPlaced = benchPins.every(p => p.onField);
+            const btn = document.getElementById('start-match-btn');
+            if (allPlaced) {
+                btn.style.opacity = '1';
+            } else {
+                btn.style.opacity = '0.5';
+            }
         }
 
-        function startOnlineMatchmaking() {
-            gameMode = 'online';
-            setColorsBySelection();
-            document.getElementById('status-overlay').style.display = 'flex';
-            document.getElementById('status-text').innerText = "Online havuzda rakip aranıyor...";
-            socket.emit('joinPool', document.getElementById('player-name').value.trim() || "Oyuncu");
-        }
+        function confirmFormationsAndStart() {
+            if (!benchPins.every(p => p.onField)) {
+                alert("Lütfen yukarıdaki tüm oyuncularınızı sürükleyerek sahaya yerleştirin!");
+                return;
+            }
+            
+            // Yedek kulübesindeki oyuncuları kalıcı sahaya aktar
+            benchPins.forEach(p => {
+                pins.push({ x: p.x, y: p.y, team: 1 });
+            });
+            benchPins = [];
 
-        function cancelMatchmaking() {
-            socket.emit('leaveOnline');
-            document.getElementById('status-overlay').style.display = 'none';
-            gameMode = 'local';
-        }
-
-        function setColorsBySelection() {
-            const sel = document.getElementById('team-color').value;
-            if(sel === 'blue') { p1Color = '#0044ff'; p2Color = '#cc0000'; }
-            else if(sel === 'red') { p1Color = '#cc0000'; p2Color = '#0044ff'; }
-            else { p1Color = '#27ae60'; p2Color = '#e67e22'; }
-        }
-
-        socket.on('waitingInPool', () => {
-            document.getElementById('status-text').innerText = "Havuzdasınız. Oyuncu bekleniyor...";
-        });
-
-        socket.on('matchFound', (data) => {
-            currentRoom = data.roomId;
-            myRole = data.role;
-            if(myRole === 1) { p1Color = '#0044ff'; p2Color = '#cc0000'; } 
-            else { p1Color = '#cc0000'; p2Color = '#0044ff'; }
-            document.getElementById('status-overlay').style.display = 'none';
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('top-bar').style.display = 'flex';
-            matchTimeRemaining = parseInt(document.getElementById('match-duration').value) * 60;
-            launchEngine();
-        });
-
-        socket.on('peerState', (peerState) => {
-            cap.x = peerState.cap.x; cap.y = peerState.cap.y;
-            cap.vx = peerState.cap.vx; cap.vy = peerState.cap.vy;
-            cap.rotation = peerState.cap.rotation;
-            turn = peerState.turn;
-            if (peerState.hasKicked) playKickSound();
-            resetShotTimer();
-        });
-
-        socket.on('opponentDisconnected', () => {
-            alert("Rakip oyundan ayrıldı.");
-            exitToMenu();
-        });
-
-        function launchEngine() {
+            document.getElementById('start-match-btn').style.display = 'none';
+            currentPhase = 'playing';
             turn = 1;
-            initPins();
+            
+            matchTimeRemaining = parseInt(document.getElementById('match-duration').value) * 60;
             
             clearInterval(matchInterval);
             matchInterval = setInterval(() => {
@@ -278,22 +247,32 @@
                 document.getElementById('match-timer').innerText = `${m}:${s}`;
                 
                 if(matchTimeRemaining <= 0) {
-                    gameActive = false;
-                    alert("Maç süresi bitti!");
+                    currentPhase = 'menu';
+                    alert(`Maç bitti! Skor: ${score.p1} - ${score.p2}`);
                     exitToMenu();
                 }
             }, 1000);
 
             resetShotTimer();
-            cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-            gameActive = true;
-            animate();
+        }
+
+        function isInsideP1PenaltyBox(x, y) {
+            return (x >= pBoxX1 && x <= pBoxX2 && y >= p1BoxY1 && y <= p1BoxY2);
+        }
+
+        function countPlayersInP1PenaltyBox(excludeId) {
+            let count = 0;
+            benchPins.forEach(p => {
+                if(p.onField && p.id !== excludeId && isInsideP1PenaltyBox(p.x, p.y)) {
+                    count++;
+                }
+            });
+            return count;
         }
 
         function resetShotTimer() {
             clearInterval(shotTimerInterval);
-            if (!gameActive) return;
-            
+            if (currentPhase !== 'playing') return;
             shotTimeLeft = 3.0;
             updateShotTimerUI();
 
@@ -303,12 +282,13 @@
                     if (shotTimeLeft <= 0) {
                         shotTimeLeft = 0;
                         updateShotTimerUI();
-                        switchTurnDueToTimeout();
+                        turn = turn === 1 ? 2 : 1;
+                        resetShotTimer();
                     } else {
                         updateShotTimerUI();
                     }
                 }
-            }, 100); 
+            }, 100);
         }
 
         function updateShotTimerUI() {
@@ -319,39 +299,25 @@
             else { ui.style.color = '#e74c3c'; ui.style.borderColor = '#e74c3c'; }
         }
 
-        function switchTurnDueToTimeout() {
-            isDragging = false;
-            turn = (turn === 1) ? 2 : 1;
-            if (gameMode === 'online') broadcastState(false);
-            resetShotTimer();
-        }
-
-        function triggerGoalAnimation() {
+        function triggerGoalAnimation(scoringTeam) {
             playGoalSound();
+            if(scoringTeam === 1) score.p1++;
+            else score.p2++;
+            document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
+
             const banner = document.getElementById('goal-banner');
             banner.style.display = 'block';
             setTimeout(() => { banner.style.display = 'none'; }, 2000);
         }
 
         function exitToMenu() {
-            gameActive = false;
+            currentPhase = 'menu';
             clearInterval(matchInterval);
             clearInterval(shotTimerInterval);
-            socket.emit('leaveOnline');
-            
             document.getElementById('menu').style.display = 'block';
             document.getElementById('top-bar').style.display = 'none';
-            document.getElementById('status-overlay').style.display = 'none';
             document.getElementById('goal-banner').style.display = 'none';
             ctx.clearRect(0, 0, width, height);
-        }
-
-        function broadcastState(hasKicked = false) {
-            if(gameMode !== 'online') return;
-            socket.emit('updateState', {
-                roomId: currentRoom,
-                state: { cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation }, turn: turn, hasKicked }
-            });
         }
 
         function getCanvasTouchPos(e) {
@@ -362,30 +328,89 @@
         }
 
         canvas.addEventListener('mousedown', (e) => {
-            if (!gameActive) return;
-            if (gameMode === 'online' && turn !== myRole) return;
-            if (gameMode === 'ai' && turn === 2) return;
-            if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-
             const pos = getCanvasTouchPos(e);
-            if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
-                isDragging = true; dragStart = { x: cap.x, y: cap.y }; dragCurrent = pos;
+
+            if (currentPhase === 'setup') {
+                // Taktik aşamasında yukarıdaki veya sahadaki pulları seçme
+                for (let p of benchPins) {
+                    if (Math.hypot(pos.x - p.x, pos.y - p.y) < 16) {
+                        selectedPin = p;
+                        break;
+                    }
+                }
+            } 
+            else if (currentPhase === 'playing') {
+                if (turn === 2 || Math.hypot(cap.vx, cap.vy) > 0.2) return;
+                if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
+                    isDraggingBall = true;
+                    dragStart = { x: cap.x, y: cap.y };
+                    dragCurrent = pos;
+                }
             }
         });
 
-        canvas.addEventListener('mousemove', (e) => { if (isDragging) dragCurrent = getCanvasTouchPos(e); });
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getCanvasTouchPos(e);
+            
+            if (currentPhase === 'setup' && selectedPin) {
+                selectedPin.x = pos.x;
+                selectedPin.y = pos.y;
+            } 
+            else if (currentPhase === 'playing' && isDraggingBall) {
+                dragCurrent = pos;
+            }
+        });
 
         window.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
-            cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+            if (currentPhase === 'setup' && selectedPin) {
+                // Bırakılan yer kurallara uyuyor mu?
+                let valid = true;
+
+                // Kural 1: Sadece sahanın kendi yarı alanına (alt yarıya) koyulabilir
+                if (selectedPin.y < height / 2) {
+                    valid = false;
+                }
+
+                // Kural 2: En az 2.5 top mesafe kontrolü
+                if (valid) {
+                    for (let p of benchPins) {
+                        if (p.id !== selectedPin.id && p.onField) {
+                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
+                                valid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Kural 3: Ceza sahası içine maksimum 1 oyuncu
+                if (valid && isInsideP1PenaltyBox(selectedPin.x, selectedPin.y)) {
+                    if (countPlayersInP1PenaltyBox(selectedPin.id) >= 1) {
+                        valid = false;
+                    }
+                }
+
+                if (valid) {
+                    selectedPin.onField = true;
+                } else {
+                    // Kurallara uyulmadıysa kulübeye geri yolla
+                    selectedPin.x = selectedPin.homeX;
+                    selectedPin.y = selectedPin.homeY;
+                    selectedPin.onField = false;
+                }
+
+                selectedPin = null;
+                checkFormationsReady();
+            } 
             
-            playKickSound();
-            turn = turn === 1 ? 2 : 1;
-            
-            if (gameMode === 'online') broadcastState(true);
-            resetShotTimer();
+            if (currentPhase === 'playing' && isDraggingBall) {
+                isDraggingBall = false;
+                cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
+                cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+                playKickSound();
+                turn = 2;
+                resetShotTimer();
+            }
         });
 
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY })); }, {passive:false});
@@ -393,7 +418,7 @@
         window.addEventListener('touchend', () => window.dispatchEvent(new MouseEvent('mouseup')));
 
         function makeAIMove() {
-            if(!gameActive) return;
+            if(currentPhase !== 'playing') return;
             const targetX = width / 2 + (Math.random() - 0.5) * (goalWidth * 0.8);
             const dx = targetX - cap.x, dy = height - cap.y;
             const angle = Math.atan2(dy, dx);
@@ -404,9 +429,8 @@
             resetShotTimer();
         }
 
-        let wasMoving = false;
         function updatePhysics() {
-            if(!gameActive) return;
+            if(currentPhase !== 'playing') return;
             
             cap.x += cap.vx; cap.y += cap.vy;
             cap.vx *= cap.friction; cap.vy *= cap.friction;
@@ -414,16 +438,20 @@
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                if(gameMode === 'online' && turn !== myRole) broadcastState(false);
             }
-
-            if (wasMoving && !isMoving) resetShotTimer();
-            wasMoving = isMoving;
 
             if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
             if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
+            
             if (cap.y - cap.radius < 0 || cap.y + cap.radius > height) {
-                if (!(cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2)) {
+                if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
+                    if (cap.y < 0) triggerGoalAnimation(1);
+                    if (cap.y > height) triggerGoalAnimation(2);
+                    
+                    cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
+                    resetShotTimer();
+                    return;
+                } else {
                     if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; }
                     if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; }
                 }
@@ -441,56 +469,25 @@
                 }
             });
 
-            // GOL DURUMU (Skor silindi, sadece animasyon tetiklenir)
-            if (gameMode !== 'online' || myRole === 1) {
-                if (cap.y < 0 || cap.y > height) {
-                    triggerGoalAnimation();
-                    resetBallAfterGoal();
-                }
-            }
-
-            if (gameMode === 'ai' && turn === 2 && !isMoving && shotTimeLeft === 3.0) {
+            if (turn === 2 && !isMoving && shotTimeLeft === 3.0) {
                 setTimeout(makeAIMove, 600);
             }
         }
 
-        function resetBallAfterGoal() {
-            cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-            if(gameMode === 'online') broadcastState(false);
-            resetShotTimer();
-        }
-
-        // RETRO PİKSEL OYUNCU ÇİZİMİ (Eklediğin görsele sadık kalınarak tasarlandı)
         function drawRetroPlayer(x, y, team) {
-            ctx.save();
-            ctx.translate(x, y);
+            ctx.save(); ctx.translate(x, y);
             if (team === 2) ctx.rotate(Math.PI);
+            const bodyColor = (team === 1) ? '#0044ff' : '#cc0000';
+            const skinColor = '#ffad87', hairColor = '#111111';
 
-            const bodyColor = (team === 1) ? p1Color : p2Color;
-            const skinColor = '#ffad87';
-            const hairColor = '#111111';
-
-            // Kollar (Görseldeki gibi yana/yukarı doğru açılmış piksel blokları)
             ctx.fillStyle = bodyColor;
-            ctx.fillRect(-14, -4, 5, 4);  // Sol Kol üst parça
-            ctx.fillRect(9, -4, 5, 4);   // Sağ Kol üst parça
+            ctx.fillRect(-14, -4, 5, 4); ctx.fillRect(9, -4, 5, 4);
             ctx.fillStyle = skinColor;
-            ctx.fillRect(-14, -8, 4, 4);  // Sol El
-            ctx.fillRect(10, -8, 4, 4);   // Sağ El
-
-            // Gövde (Geniş omuzlu mavi/kırmızı piksel alan)
+            ctx.fillRect(-14, -8, 4, 4); ctx.fillRect(10, -8, 4, 4);
             ctx.fillStyle = bodyColor;
-            ctx.fillRect(-9, -2, 18, 7);  // Ana göğüs blok
-            ctx.fillRect(-6, 5, 12, 4);   // Bel kısmı
-
-            // Boyun ve Baş
-            ctx.fillStyle = skinColor;
-            ctx.fillRect(-3, -5, 6, 4);   // Yüz alanı
-
-            // Saçlar (Görseldeki gibi arkaya/aşağı doğru uzanan koyu alan)
-            ctx.fillStyle = hairColor;
-            ctx.fillRect(-4, 4, 8, 7);    // Arkaya sarkan saç/ense bloku
-
+            ctx.fillRect(-9, -2, 18, 7); ctx.fillRect(-6, 5, 12, 4);
+            ctx.fillStyle = skinColor; ctx.fillRect(-3, -5, 6, 4);
+            ctx.fillStyle = hairColor; ctx.fillRect(-4, 4, 8, 7);
             ctx.restore();
         }
 
@@ -503,21 +500,34 @@
                 let a = (Math.PI * 2 / 5) * i - Math.PI / 2;
                 ctx.lineTo(Math.cos(a) * (r * 0.4), Math.sin(a) * (r * 0.4));
             }
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.restore();
+            ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
         }
 
         function draw() {
             ctx.clearRect(0, 0, width, height);
             
-            // Saha Hatları
-            ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2.5;
+            // Saha Çizgileri
+            ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2.5;
             ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
             ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); ctx.stroke();
-            ctx.strokeRect(penaltyBoxX1, 0, penaltyBoxW, penaltyBoxH);
-            ctx.strokeRect(penaltyBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
+            
+            // Ceza Sahaları
+            ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
+            ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
-            // Oyuncular ve Kale Direkleri
+            // Taktik Aşaması Yedek Kulübesi Çizgisi
+            if (currentPhase === 'setup') {
+                ctx.fillStyle = "rgba(0,0,0,0.4)";
+                ctx.fillRect(0, 0, width, 70);
+                ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(0, 70); ctx.lineTo(width, 70); ctx.stroke();
+                
+                // Oyuncuların yerleşeceği kendi alan sınırını (alt yarıyı) hafifçe renklendir
+                ctx.fillStyle = "rgba(39, 174, 96, 0.15)";
+                ctx.fillRect(0, height/2, width, height/2);
+            }
+
+            // Aktif Sahadaki Oyuncular ve Direkler
             pins.forEach(pin => {
                 if(pin.isPost) {
                     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2); ctx.fill();
@@ -526,20 +536,29 @@
                 }
             });
 
-            // Şut Çekme Çizgisi
-            if (isDragging) {
-                ctx.strokeStyle = (turn === 1) ? p1Color : p2Color; ctx.lineWidth = 4;
+            // Yedek Kulübesi/Dizilim Aşamasındaki Oyuncular
+            if (currentPhase === 'setup') {
+                benchPins.forEach(p => {
+                    drawRetroPlayer(p.x, p.y, p.team);
+                });
+            }
+
+            // Şut Çizgisi
+            if (currentPhase === 'playing' && isDraggingBall) {
+                ctx.strokeStyle = '#0044ff'; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
                 ctx.lineTo(cap.x + (dragStart.x - dragCurrent.x), cap.y + (dragStart.y - dragCurrent.y));
                 ctx.stroke();
             }
 
             // Top
-            drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+            if (currentPhase === 'playing') {
+                drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+            }
         }
 
         function animate() {
-            if (!gameActive) return;
+            if (currentPhase === 'menu') return;
             updatePhysics();
             draw();
             requestAnimationFrame(animate);
