@@ -33,6 +33,30 @@
         .btn-ai { background: #2e7d32; box-shadow: 0 4px #1b5e20; }
         .btn-local { background: #2980b9; box-shadow: 0 4px #1f618d; }
         .btn-online { background: #8e44ad; box-shadow: 0 4px #6c3483; }
+
+        /* ONLINE OYUNCU HAVUZU PENCERESİ */
+        #online-lobby {
+            position: absolute; background: rgba(20, 20, 30, 0.98); border: 4px solid #6c3483;
+            border-radius: 12px; padding: 20px; text-align: center; z-index: 110; width: 90%; max-width: 360px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9); display: none;
+        }
+        #online-lobby h2 { color: #9b59b6; margin-bottom: 15px; font-size: 20px; text-shadow: 1px 1px black; }
+        .player-list {
+            background: #111; border: 2px solid #444; border-radius: 6px; 
+            max-height: 180px; overflow-y: auto; margin-bottom: 15px; text-align: left;
+        }
+        .player-item {
+            padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .player-item:hover { background: #2c1d3a; }
+        .player-item .status { font-size: 11px; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+        .status.online { background: #27ae60; color: white; }
+        .status.waiting { background: #e67e22; color: white; }
+        .lobby-close-btn {
+            width: 100%; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 6px;
+            font-weight: bold; cursor: pointer; font-family: inherit;
+        }
         
         #top-bar {
             position: absolute; top: 10px; width: 95%; max-width: 380px;
@@ -70,7 +94,7 @@
 </head>
 <body>
 
-    <!-- YENİLENEN ANA MENÜ (TÜM MODLAR GERİ GELDİ) -->
+    <!-- ANA MENÜ -->
     <div id="menu">
         <h1>ÇİVİLİ FUTBOL</h1>
         <div class="input-group">
@@ -89,8 +113,17 @@
         <div class="mode-container">
             <button class="main-btn btn-ai" onclick="startSetupPhase('ai')">🤖 Bilgisayara Karşı Oyna</button>
             <button class="main-btn btn-local" onclick="startSetupPhase('local')">👥 Aynı Cihazda 2 Kişi</button>
-            <button class="main-btn btn-online" onclick="startSetupPhase('online')">🌐 Online Eşleşme</button>
+            <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Eşleşme</button>
         </div>
+    </div>
+
+    <!-- ONLINE OYUNCU HAVUZU (LOBİ) PENCERESİ -->
+    <div id="online-lobby">
+        <h2>ÇEVRİMİÇİ HAVUZ</h2>
+        <div class="player-list" id="lobby-list">
+            <!-- Oyuncular JS ile dinamik eklenecek -->
+        </div>
+        <button class="lobby-close-btn" onclick="closeOnlineLobby()">Geri Dön</button>
     </div>
 
     <!-- ÜST HUD PANELİ -->
@@ -140,7 +173,7 @@
         }
 
         let currentPhase = 'menu'; 
-        let gameMode = 'ai'; // 'ai', 'local', 'online'
+        let gameMode = 'ai'; 
         let score = { p1: 0, p2: 0 };
         let turn = 1;
         let matchTimeRemaining = 120;
@@ -178,13 +211,58 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
         }
 
+        // --- ONLINE LOBİ FONKSİYONLARI ---
+        function openOnlineLobby() {
+            document.getElementById('menu').style.display = 'none';
+            const lobby = document.getElementById('online-lobby');
+            lobby.style.display = 'block';
+            
+            // Havuzdaki sahte aktif oyuncuları listele
+            const mockPlayers = [
+                { name: "Sergen_10", status: "online" },
+                { name: "Hagi_Pro", status: "online" },
+                { name: "Alex__De", status: "waiting" },
+                { name: "Çivici_Kemal", status: "online" }
+            ];
+            
+            const listContainer = document.getElementById('lobby-list');
+            listContainer.innerHTML = "";
+            
+            mockPlayers.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                item.innerHTML = `
+                    <span>⚽ ${player.name}</span>
+                    <span class="status ${player.status}">${player.status === 'online' ? 'Müsait' : 'Maçta'}</span>
+                `;
+                item.onclick = () => sendOnlineInvite(player.name, player.status);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function closeOnlineLobby() {
+            document.getElementById('online-lobby').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+        }
+
+        function sendOnlineInvite(playerName, status) {
+            if (status === 'waiting') {
+                alert(`${playerName} şu an başka bir maçta, davet gönderilemez.`);
+                return;
+            }
+            
+            alert(`${playerName} kullanıcısına davet gönderildi. Yanıt bekleniyor...`);
+            
+            // Simüle edilmiş kabul süreci (2 saniye sonra otomatik kabul edip setup'a atar)
+            setTimeout(() => {
+                document.getElementById('online-lobby').style.display = 'none';
+                startSetupPhase('online');
+            }, 2000);
+        }
+        // ---------------------------------
+
         function startSetupPhase(mode) {
             gameMode = mode;
-            
-            if (mode === 'online') {
-                alert("Online Mod Bağlantısı Aranıyor... (Demo Modunda Başlatılıyor)");
-            }
-
             currentPhase = 'setup';
             score = { p1: 0, p2: 0 };
             document.getElementById('score-board').innerText = "0 - 0";
@@ -207,9 +285,7 @@
                 });
             }
 
-            // Rakip Takım Dağılımı (AI veya 2. Oyuncu için otomatik dengeli dağılım)
             generateOpponentFormation();
-
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
             animate();
         }
@@ -321,6 +397,7 @@
             document.getElementById('menu').style.display = 'block';
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('goal-banner').style.display = 'none';
+            document.getElementById('online-lobby').style.display = 'none';
             drawFieldLinesOnly(); 
         }
 
@@ -346,7 +423,6 @@
                 const isMoving = Math.hypot(cap.vx, cap.vy) > 0.2;
                 if (isMoving) return;
 
-                // Local modda iki taraf da vurabilir, AI modunda sadece sıra sizdeyken (turn=1)
                 if (gameMode === 'ai' && turn === 2) return;
 
                 if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
@@ -457,7 +533,6 @@
                 }
             });
 
-            // Bilgisayar hamlesi sadece AI modunda devreye girer
             if (gameMode === 'ai' && turn === 2 && !isMoving && shotTimeLeft === 3.0) {
                 setTimeout(makeAIMove, 600);
             }
