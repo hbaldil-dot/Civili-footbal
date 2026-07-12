@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çivili Futbol - Online Multiplayer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body {
+            background: #111; font-family: sans-serif; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white;
+        }
+        #menu {
+            position: absolute; background: rgba(30, 20, 10, 0.98); border: 4px solid #6e4720;
+            border-radius: 15px; padding: 25px; text-align: center; z-index: 10; width: 85%; max-width: 340px;
+        }
+        h1 { color: #f1c40f; margin-bottom: 5px; font-size: 24px; text-shadow: 2px 2px black; }
+        input {
+            width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; text-align: center;
+        }
+        button.main-btn {
+            display: block; width: 100%; padding: 14px; background: #6e4720; color: white; border: none;
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        #status-bar {
+            position: absolute; top: 70px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 10px; font-size: 12px; z-index: 8;
+        }
+        #scoreboard {
+            position: absolute; top: 15px; display: flex; justify-content: space-between; align-items: center;
+            width: 90%; max-width: 360px; font-weight: bold; background: rgba(0,0,0,0.8);
+            padding: 8px 15px; border-radius: 20px; font-size: 13px; z-index: 6; pointer-events: none;
+        }
+        canvas { background: #33a047; border: 10px solid #422a13; border-radius: 6px; }
+    </style>
+    <!-- Socket.io kütüphanesini çekiyoruz -->
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+    <div id="menu">
+        <h1>ÇİVİLİ FUTBOL ONLINE</h1>
+        <p style="font-size: 11px; color: #ccc; margin-bottom: 15px;">Aynı oda adını girerek eşleşin</p>
+        <input type="text" id="room-input" placeholder="Oda Adı (Örn: mac123)" value="mac123">
+        <button class="main-btn" onclick="connectToMatch()">Odaya Katıl ⚽</button>
+    </div>
+
+    <div id="status-bar" style="display: none;">Bağlantı bekleniyor...</div>
+
+    <div id="scoreboard" style="display:none;">
+        <span id="p2-name" style="color: #ff3333;">Rakip: 0</span>
+        <span id="my-role" style="color: #fff; background: #444; padding: 2px 6px; border-radius: 4px;">-</span>
+        <span id="p1-name" style="color: #33ccff;">Siz: 0</span>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const socket = io();
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = Math.min(window.innerWidth - 20, 360);
+        const height = Math.min(window.innerHeight - 90, 600);
+        canvas.width = width; canvas.height = height;
+
+        let myRole = null; // 1 veya 2
+        let currentRoom = "";
+        let score = { p1: 0, p2: 0 };
+        let turn = 1;
+        let gameActive = false;
+
+        let cap = { x: width/2, y: height/2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
+        let pins = [];
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
+
+        const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
+        const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
+        const penaltyBoxX1 = (width - penaltyBoxW) / 2, penaltyBoxX2 = penaltyBoxX1 + penaltyBoxW;
+
+        function initPins() {
+            pins = [
+                {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
+                {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
+            ];
+            // Sabit 11'er oyuncu formasyonu (Online senkron kolaylığı için standart dizilim)
+            let p1Positions = [
+                {x: width/2, y: height*0.85}, {x: width*0.2, y: height*0.7}, {x: width*0.5, y: height*0.72}, {x: width*0.8, y: height*0.7},
+                {x: width*0.15, y: height*0.58}, {x: width*0.4, y: height*0.58}, {x: width*0.6, y: height*0.58}, {x: width*0.85, y: height*0.58},
+                {x: width*0.3, y: height*0.45}, {x: width*0.7, y: height*0.45}, {x: width/2, y: height*0.35}
+            ];
+            let p2Positions = [
+                {x: width/2, y: height*0.15}, {x: width*0.8, y: height*0.3}, {x: width*0.5, y: height*0.28}, {x: width*0.2, y: height*0.3},
+                {x: width*0.85, y: height*0.42}, {x: width*0.6, y: height*0.42}, {x: width*0.4, y: height*0.42}, {x: width*0.15, y: height*0.42},
+                {x: width*0.7, y: height*0.55}, {x: width*0.3, y: height*0.55}, {x: width/2, y: height*0.65}
+            ];
+            p1Positions.forEach(p => pins.push({x: p.x, y: p.y, team: 1}));
+            p2Positions.forEach(p => pins.push({x: p.x, y: p.y, team: 2}));
+        }
+
+        function connectToMatch() {
+            currentRoom = document.getElementById('room-input').value.trim();
+            if(!currentRoom) return alert("Lütfen geçerli bir oda adı girin!");
+            
+            socket.emit('joinRoom', currentRoom);
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('status-bar').style.display = 'block';
+        }
+
+        socket.on('initPlayer', (role) => {
+            myRole = role;
+            document.getElementById('my-role').innerText = `Siz: Oyuncu ${role}`;
+            document.getElementById('my-role').style.color = role === 1 ? '#33ccff' : '#ff3333';
+            initPins();
+            draw();
+        });
+
+        socket.on('roomStatus', (count) => {
+            if (count === 2) {
+                document.getElementById('status-bar').style.display = 'none';
+                document.getElementById('scoreboard').style.display = 'flex';
+                gameActive = true;
+                animate();
+            } else {
+                document.getElementById('status-bar').innerText = "Rakip oyuncunun bağlanması bekleniyor...";
+                gameActive = false;
+            }
+        });
+
+        socket.on('peerState', (peerState) => {
+            // Rakibin gönderdiği top fizik verilerini alıp kendi ekranımızda eşitliyoruz
+            cap.x = peerState.cap.x; cap.y = peerState.cap.y;
+            cap.vx = peerState.cap.vx; cap.vy = peerState.cap.vy;
+            cap.rotation = peerState.cap.rotation;
+            turn = peerState.turn;
+            score = peerState.score;
+        });
+
+        socket.on('roomFull', () => {
+            alert("Bu oda dolu! Lütfen başka bir oda adı yazın.");
+            window.location.reload();
+        });
+
+        function broadcastState() {
+            if(!gameActive) return;
+            socket.emit('updateState', {
+                roomId: currentRoom,
+                state: { cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation }, turn: turn, score: score }
+            });
+        }
+
+        function getCanvasTouchPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!gameActive || turn !== myRole) return;
+            if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+            const pos = getCanvasTouchPos(e);
+            if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 40) {
+                isDragging = true; dragStart = { x: cap.x, y: cap.y }; dragCurrent = pos;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            dragCurrent = getCanvasTouchPos(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
+            cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+            turn = turn === 1 ? 2 : 1;
+            broadcastState();
+        });
+
+        // Touch eventleri mobil uyumluluk için aynen mouse eventlerine bağlandı
+        canvas.addEventListener('touchstart', (e) => canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY })), {passive:false});
+        canvas.addEventListener('touchmove', (e) => canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY })), {passive:false});
+        window.addEventListener('touchend', () => window.dispatchEvent(new MouseEvent('mouseup')));
+
+        function updatePhysics() {
+            if(!gameActive) return;
+            
+            cap.x += cap.vx; cap.y += cap.vy;
+            cap.vx *= cap.friction; cap.vy *= cap.friction;
+
+            if (Math.hypot(cap.vx, cap.vy) > 0.1) {
+                cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
+                // Fizik değişimlerini o an vuruşu yapan/yöneten taraf etrafa bildirir
+                if(turn !== myRole) broadcastState(); 
+            }
+
+            // Duvar Çarpışmaları
+            if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
+            if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
+
+            if (cap.y - cap.radius < 0 || cap.y + cap.radius > height) {
+                const inGoal = (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2);
+                if (!inGoal) {
+                    if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; }
+                    if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; }
+                }
+            }
+
+            // Oyuncu Çarpışmaları
+            pins.forEach(pin => {
+                const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
+                const pinRadius = pin.isPost ? 4 : 7;
+                const minDist = cap.radius + pinRadius;
+                if (dist < minDist) {
+                    const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
+                    cap.x = pin.x + Math.cos(angle) * minDist; cap.y = pin.y + Math.sin(angle) * minDist;
+                    const hitSpeed = Math.hypot(cap.vx, cap.vy);
+                    cap.vx = Math.cos(angle) * hitSpeed * 0.88; cap.vy = Math.sin(angle) * hitSpeed * 0.88;
+                }
+            });
+
+            // Gol Kontrolleri (Sadece oda sahibi 1. oyuncu golü tescil eder, karmaşayı önler)
+            if (myRole === 1) {
+                if (cap.y < 0) { score.p1++; resetBall(); }
+                else if (cap.y > height) { score.p2++; resetBall(); }
+            }
+        }
+
+        function resetBall() {
+            cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
+            broadcastState();
+        }
+
+        function drawSoccerBall(x, y, r, rotation) {
+            ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+            ctx.lineWidth = 1; ctx.strokeStyle = '#000000'; ctx.stroke();
+            ctx.fillStyle = '#111111'; ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                let angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                let px = Math.cos(angle) * (r * 0.35); let py = Math.sin(angle) * (r * 0.35);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            for (let i = 0; i < 5; i++) {
+                let angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                let x1 = Math.cos(angle) * (r * 0.35); let y1 = Math.sin(angle) * (r * 0.35);
+                let x2 = Math.cos(angle) * (r * 0.75); let y2 = Math.sin(angle) * (r * 0.75);
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.strokeStyle = '#000000'; ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawPlayer(x, y, team) {
+            ctx.save(); ctx.translate(x, y);
+            if (team === 2) ctx.rotate(Math.PI);
+            const jerseyColor = (team === 1) ? '#0044ff' : '#cc0000';
+            const sleeveColor = (team === 1) ? '#0022aa' : '#990000';
+            const skinColor = '#ffad87';
+            ctx.fillStyle = jerseyColor; ctx.fillRect(-10, -5, 20, 9); ctx.fillRect(-8, 4, 16, 4);
+            ctx.fillStyle = sleeveColor; ctx.fillRect(-12, -5, 3, 5); ctx.fillRect(9, -5, 3, 5);
+            ctx.fillStyle = skinColor; ctx.fillRect(-12, -9, 3, 4); ctx.fillRect(9, -9, 3, 4);
+            ctx.fillStyle = '#ffad87'; ctx.fillRect(-3, -2, 6, 7);
+            ctx.fillStyle = (team === 1) ? '#111111' : '#5c4033'; ctx.fillRect(-4, 1, 8, 5);
+            ctx.restore();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); ctx.stroke();
+            ctx.strokeRect(penaltyBoxX1, 0, penaltyBoxW, penaltyBoxH);
+            ctx.strokeRect(penaltyBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
+
+            pins.forEach(pin => {
+                if(pin.isPost) {
+                    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2); ctx.fill();
+                } else {
+                    drawPlayer(pin.x, pin.y, pin.team);
+                }
+            });
+
+            if (isDragging) {
+                ctx.strokeStyle = myRole === 1 ? '#33ccff' : '#ff3333'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
+                ctx.lineTo(cap.x + (dragStart.x - dragCurrent.x), cap.y + (dragStart.y - dragCurrent.y));
+                ctx.stroke();
+            }
+
+            drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+            document.getElementById('p1-name').innerText = `Siz: ${myRole === 1 ? score.p1 : score.p2}`;
+            document.getElementById('p2-name').innerText = `Rakip: ${myRole === 1 ? score.p2 : score.p1}`;
+        }
+
+        function animate() {
+            if (!gameActive) return;
+            updatePhysics();
+            draw();
+            requestAnimationFrame(animate);
+        }
+    </script>
+</body>
+</html>
