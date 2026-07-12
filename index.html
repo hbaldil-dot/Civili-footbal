@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Çivili Futbol - Online Multiplayer</title>
+    <title>Çivili Futbol - Tüm Modlar v11</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
@@ -12,45 +12,95 @@
         }
         #menu {
             position: absolute; background: rgba(30, 20, 10, 0.98); border: 4px solid #6e4720;
-            border-radius: 15px; padding: 25px; text-align: center; z-index: 10; width: 85%; max-width: 340px;
+            border-radius: 15px; padding: 20px; text-align: center; z-index: 10; width: 90%; max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
-        h1 { color: #f1c40f; margin-bottom: 5px; font-size: 24px; text-shadow: 2px 2px black; }
-        input {
-            width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; text-align: center;
+        h1 { color: #f1c40f; margin-bottom: 15px; font-size: 24px; text-shadow: 2px 2px black; }
+        .input-group { margin-bottom: 12px; text-align: left; }
+        .input-group label { font-size: 12px; color: #e67e22; font-weight: bold; display: block; margin-bottom: 4px; }
+        input, select {
+            width: 100%; padding: 10px; border-radius: 6px; border: 2px solid #6e4720; background: #222; color: white; font-size: 14px;
         }
-        button.main-btn {
-            display: block; width: 100%; padding: 14px; background: #6e4720; color: white; border: none;
-            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+        .main-btn {
+            display: block; width: 100%; padding: 12px; margin: 8px 0; background: #6e4720; color: white; border: none;
+            border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #422a13;
         }
-        #status-bar {
-            position: absolute; top: 70px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 10px; font-size: 12px; z-index: 8;
+        .main-btn:active { transform: translateY(2px); box-shadow: 0 2px #422a13; }
+        .online-btn { background: #2980b9; box-shadow: 0 4px #1f618d; }
+        .online-btn:active { box-shadow: 0 2px #1f618d; }
+        
+        #status-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; display: none;
+        }
+        #exit-btn {
+            position: absolute; top: 15px; right: 20px; width: 35px; height: 35px; background: #c0392b; color: white;
+            border: 2px solid #fff; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 15; display: none;
         }
         #scoreboard {
             position: absolute; top: 15px; display: flex; justify-content: space-between; align-items: center;
             width: 90%; max-width: 360px; font-weight: bold; background: rgba(0,0,0,0.8);
-            padding: 8px 15px; border-radius: 20px; font-size: 13px; z-index: 6; pointer-events: none;
+            padding: 8px 15px; border-radius: 20px; font-size: 13px; z-index: 6; pointer-events: none; display: none;
+        }
+        #timer { color: #f1c40f; font-size: 14px; background: #222; padding: 2px 8px; border-radius: 10px; }
+        #shot-timer-ui {
+            position: absolute; top: 70px; right: 25px; font-size: 38px; font-weight: 900; color: #2ecc71;
+            text-shadow: 2px 2px 0px #000; z-index: 7; display: none; pointer-events: none;
         }
         canvas { background: #33a047; border: 10px solid #422a13; border-radius: 6px; }
     </style>
-    <!-- Socket.io kütüphanesini çekiyoruz -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
+    <!-- ANA MENÜ -->
     <div id="menu">
-        <h1>ÇİVİLİ FUTBOL ONLINE</h1>
-        <p style="font-size: 11px; color: #ccc; margin-bottom: 15px;">Aynı oda adını girerek eşleşin</p>
-        <input type="text" id="room-input" placeholder="Oda Adı (Örn: mac123)" value="mac123">
-        <button class="main-btn" onclick="connectToMatch()">Odaya Katıl ⚽</button>
+        <h1>ÇİVİLİ FUTBOL</h1>
+        
+        <div class="input-group">
+            <label>OYUNCU İSMİ</label>
+            <input type="text" id="player-name" value="Oyuncu 1" maxlength="12">
+        </div>
+
+        <div class="input-group">
+            <label>AYARLAR (SÜRE / RENKLER)</label>
+            <div style="display: flex; gap: 5px;">
+                <select id="match-duration">
+                    <option value="2">2 Dakika</option>
+                    <option value="3">3 Dakika</option>
+                    <option value="5">5 Dakika</option>
+                </select>
+                <select id="team-color">
+                    <option value="blue">Mavi Takım</option>
+                    <option value="red">Kırmızı Takım</option>
+                    <option value="green">Yeşil Takım</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="main-btn" onclick="startLocalGame('ai')">🤖 Bilgisayara Karşı</button>
+        <button class="main-btn" onclick="startLocalGame('2p')">👥 Aynı Ekranda 2 Kişi</button>
+        <button class="main-btn online-btn" onclick="startOnlineMatchmaking()">🌐 Online Eşleşme (Havuz)</button>
     </div>
 
-    <div id="status-bar" style="display: none;">Bağlantı bekleniyor...</div>
-
-    <div id="scoreboard" style="display:none;">
-        <span id="p2-name" style="color: #ff3333;">Rakip: 0</span>
-        <span id="my-role" style="color: #fff; background: #444; padding: 2px 6px; border-radius: 4px;">-</span>
-        <span id="p1-name" style="color: #33ccff;">Siz: 0</span>
+    <!-- ONLINE BEKLEME EKRANI -->
+    <div id="status-overlay">
+        <h3 id="status-text">Online havuzuna giriliyor...</h3>
+        <p style="font-size: 12px; color: #aaa; margin-top: 10px;">Rakip aranıyor, lütfen bekleyin.</p>
+        <button class="main-btn" style="width: 150px; margin-top: 20px; background:#7f8c8d;" onclick="cancelMatchmaking()">Vazgeç</button>
     </div>
+
+    <!-- OYUN İÇİ ARAYÜZLER -->
+    <button id="exit-btn" onclick="exitToMenu()">X</button>
+
+    <div id="scoreboard">
+        <span id="p2-display" style="color: #ff3333;">Rakip: 0</span>
+        <span id="timer">02:00</span>
+        <span id="p1-display" style="color: #33ccff;">Siz: 0</span>
+    </div>
+
+    <div id="shot-timer-ui">3.0</div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -63,12 +113,26 @@
         const height = Math.min(window.innerHeight - 90, 600);
         canvas.width = width; canvas.height = height;
 
-        let myRole = null; // 1 veya 2
+        // Oyun Ayarları ve Modları
+        let gameMode = 'local'; // 'ai', '2p', 'online'
+        let myRole = 1; // 1: Ev Sahibi, 2: Deplasman
         let currentRoom = "";
         let score = { p1: 0, p2: 0 };
         let turn = 1;
         let gameActive = false;
+        
+        // Zamanlayıcılar
+        let matchTimeRemaining = 120;
+        let matchInterval = null;
+        let shotTimeLeft = 3.0;
+        let shotTimerInterval = null;
 
+        // İsimler ve Renkler
+        let p1Name = "Siz";
+        let p2Name = "Rakip";
+        let p1Color = "#0044ff", p2Color = "#cc0000";
+
+        // Fizik Nesneleri
         let cap = { x: width/2, y: height/2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
         let pins = [];
         let isDragging = false;
@@ -83,7 +147,6 @@
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
-            // Sabit 11'er oyuncu formasyonu (Online senkron kolaylığı için standart dizilim)
             let p1Positions = [
                 {x: width/2, y: height*0.85}, {x: width*0.2, y: height*0.7}, {x: width*0.5, y: height*0.72}, {x: width*0.8, y: height*0.7},
                 {x: width*0.15, y: height*0.58}, {x: width*0.4, y: height*0.58}, {x: width*0.6, y: height*0.58}, {x: width*0.85, y: height*0.58},
@@ -98,57 +161,197 @@
             p2Positions.forEach(p => pins.push({x: p.x, y: p.y, team: 2}));
         }
 
-        function connectToMatch() {
-            currentRoom = document.getElementById('room-input').value.trim();
-            if(!currentRoom) return alert("Lütfen geçerli bir oda adı girin!");
+        // MOD BAŞLATMA FONKSİYONLARI
+        function startLocalGame(mode) {
+            gameMode = mode;
+            myRole = 1;
+            p1Name = document.getElementById('player-name').value.trim() || "Oyuncu 1";
+            p2Name = (mode === 'ai') ? "🤖 Bilgisayar" : "Oyuncu 2";
             
-            socket.emit('joinRoom', currentRoom);
+            // Renk Atama
+            setColorsBySelection();
+
+            matchTimeRemaining = parseInt(document.getElementById('match-duration').value) * 60;
+            
             document.getElementById('menu').style.display = 'none';
-            document.getElementById('status-bar').style.display = 'block';
+            setupMatchUI();
+            launchEngine();
         }
 
-        socket.on('initPlayer', (role) => {
-            myRole = role;
-            document.getElementById('my-role').innerText = `Siz: Oyuncu ${role}`;
-            document.getElementById('my-role').style.color = role === 1 ? '#33ccff' : '#ff3333';
-            initPins();
-            draw();
+        function startOnlineMatchmaking() {
+            gameMode = 'online';
+            p1Name = document.getElementById('player-name').value.trim() || "Oyuncu 1";
+            setColorsBySelection();
+
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Online havuzda rakip aranıyor...";
+            
+            socket.emit('joinPool', p1Name);
+        }
+
+        function cancelMatchmaking() {
+            socket.emit('leaveOnline');
+            document.getElementById('status-overlay').style.display = 'none';
+            gameMode = 'local';
+        }
+
+        function setColorsBySelection() {
+            const sel = document.getElementById('team-color').value;
+            if(sel === 'blue') { p1Color = '#0044ff'; p2Color = '#cc0000'; }
+            else if(sel === 'red') { p1Color = '#cc0000'; p2Color = '#0044ff'; }
+            else { p1Color = '#27ae60'; p2Color = '#e67e22'; }
+        }
+
+        // SOCKET EVENTLERİ
+        socket.on('waitingInPool', () => {
+            document.getElementById('status-text').innerText = "Havuzdasınız. Oyuncu bekleniyor...";
         });
 
-        socket.on('roomStatus', (count) => {
-            if (count === 2) {
-                document.getElementById('status-bar').style.display = 'none';
-                document.getElementById('scoreboard').style.display = 'flex';
-                gameActive = true;
-                animate();
+        socket.on('matchFound', (data) => {
+            currentRoom = data.roomId;
+            myRole = data.role;
+            p2Name = data.opponentName;
+
+            // Online modda renkleri rol dağılımına göre ayarla
+            if(myRole === 1) {
+                p1Color = '#0044ff'; p2Color = '#cc0000';
             } else {
-                document.getElementById('status-bar').innerText = "Rakip oyuncunun bağlanması bekleniyor...";
-                gameActive = false;
+                p1Color = '#cc0000'; p2Color = '#0044ff';
             }
+
+            document.getElementById('status-overlay').style.display = 'none';
+            document.getElementById('menu').style.display = 'none';
+            
+            matchTimeRemaining = parseInt(document.getElementById('match-duration').value) * 60;
+            setupMatchUI();
+            launchEngine();
         });
 
         socket.on('peerState', (peerState) => {
-            // Rakibin gönderdiği top fizik verilerini alıp kendi ekranımızda eşitliyoruz
             cap.x = peerState.cap.x; cap.y = peerState.cap.y;
             cap.vx = peerState.cap.vx; cap.vy = peerState.cap.vy;
             cap.rotation = peerState.cap.rotation;
             turn = peerState.turn;
             score = peerState.score;
+            resetShotTimer();
         });
 
-        socket.on('roomFull', () => {
-            alert("Bu oda dolu! Lütfen başka bir oda adı yazın.");
-            window.location.reload();
+        socket.on('opponentDisconnected', () => {
+            alert("Rakip oyundan ayrıldı! Maç sonlandırılıyor.");
+            exitToMenu();
         });
+
+        // OYUN MOTORU ARAYÜZ AYARLARI
+        function setupMatchUI() {
+            document.getElementById('scoreboard').style.display = 'flex';
+            document.getElementById('exit-btn').style.display = 'flex';
+            document.getElementById('shot-timer-ui').style.display = 'block';
+            updateScoreboardText();
+        }
+
+        function updateScoreboardText() {
+            document.getElementById('p1-display').innerText = `${p1Name}: ${score.p1}`;
+            document.getElementById('p2-display').innerText = `${p2Name}: ${score.p2}`;
+            document.getElementById('p1-display').style.color = p1Color;
+            document.getElementById('p2-display').style.color = p2Color;
+        }
+
+        function launchEngine() {
+            score = { p1: 0, p2: 0 };
+            turn = 1;
+            initPins();
+            
+            // Maç süresi sayacı
+            clearInterval(matchInterval);
+            matchInterval = setInterval(() => {
+                matchTimeRemaining--;
+                const m = Math.floor(matchTimeRemaining / 60).toString().padStart(2, '0');
+                const s = (matchTimeRemaining % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+                
+                if(matchTimeRemaining <= 0) {
+                    announceWinner();
+                }
+            }, 1000);
+
+            resetShotTimer();
+            cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
+            gameActive = true;
+            animate();
+        }
+
+        // 3 SANİYE KURALI VE ŞUT ZAMANLAYICI ENGINE
+        function resetShotTimer() {
+            clearInterval(shotTimerInterval);
+            if (!gameActive) return;
+            
+            shotTimeLeft = 3.0;
+            updateShotTimerUI();
+
+            shotTimerInterval = setInterval(() => {
+                // Top duruyorsa süreyi geri say
+                if (Math.hypot(cap.vx, cap.vy) < 0.15) {
+                    shotTimeLeft -= 0.1;
+                    if (shotTimeLeft <= 0) {
+                        shotTimeLeft = 0;
+                        updateShotTimerUI();
+                        switchTurnDueToTimeout();
+                    } else {
+                        updateShotTimerUI();
+                    }
+                }
+            }, 100); 
+        }
+
+        function updateShotTimerUI() {
+            const ui = document.getElementById('shot-timer-ui');
+            ui.innerText = shotTimeLeft.toFixed(1);
+            if (shotTimeLeft > 1.5) ui.style.color = '#2ecc71';
+            else if (shotTimeLeft > 0.7) ui.style.color = '#f1c40f';
+            else ui.style.color = '#e74c3c';
+        }
+
+        function switchTurnDueToTimeout() {
+            isDragging = false;
+            turn = (turn === 1) ? 2 : 1;
+            if (gameMode === 'online') broadcastState();
+            resetShotTimer();
+        }
+
+        function announceWinner() {
+            gameActive = false;
+            clearInterval(matchInterval);
+            clearInterval(shotTimerInterval);
+            let winText = "Maç berabere bitti!";
+            if(score.p1 > score.p2) winText = `${p1Name} kazandı! 🎉`;
+            else if(score.p2 > score.p1) winText = `${p2Name} kazandı! 🎉`;
+            alert(winText);
+            exitToMenu();
+        }
+
+        function exitToMenu() {
+            gameActive = false;
+            clearInterval(matchInterval);
+            clearInterval(shotTimerInterval);
+            socket.emit('leaveOnline');
+            
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('exit-btn').style.display = 'none';
+            document.getElementById('shot-timer-ui').style.display = 'none';
+            document.getElementById('status-overlay').style.display = 'none';
+            ctx.clearRect(0, 0, width, height);
+        }
 
         function broadcastState() {
-            if(!gameActive) return;
+            if(gameMode !== 'online') return;
             socket.emit('updateState', {
                 roomId: currentRoom,
                 state: { cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation }, turn: turn, score: score }
             });
         }
 
+        // FİZİK VE GİRDİ YÖNETİMİ
         function getCanvasTouchPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -157,18 +360,18 @@
         }
 
         canvas.addEventListener('mousedown', (e) => {
-            if (!gameActive || turn !== myRole) return;
+            if (!gameActive) return;
+            if (gameMode === 'online' && turn !== myRole) return;
+            if (gameMode === 'ai' && turn === 2) return; // Yapay zeka sırası
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+
             const pos = getCanvasTouchPos(e);
             if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 40) {
                 isDragging = true; dragStart = { x: cap.x, y: cap.y }; dragCurrent = pos;
             }
         });
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            dragCurrent = getCanvasTouchPos(e);
-        });
+        canvas.addEventListener('mousemove', (e) => { if (isDragging) dragCurrent = getCanvasTouchPos(e); });
 
         window.addEventListener('mouseup', () => {
             if (!isDragging) return;
@@ -176,39 +379,53 @@
             cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
             cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
             turn = turn === 1 ? 2 : 1;
-            broadcastState();
+            
+            if (gameMode === 'online') broadcastState();
+            resetShotTimer();
         });
 
-        // Touch eventleri mobil uyumluluk için aynen mouse eventlerine bağlandı
         canvas.addEventListener('touchstart', (e) => canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY })), {passive:false});
         canvas.addEventListener('touchmove', (e) => canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY })), {passive:false});
         window.addEventListener('touchend', () => window.dispatchEvent(new MouseEvent('mouseup')));
 
+        function makeAIMove() {
+            if(!gameActive) return;
+            const targetX = width / 2 + (Math.random() - 0.5) * (goalWidth * 0.8);
+            const dx = targetX - cap.x, dy = height - cap.y;
+            const angle = Math.atan2(dy, dx);
+            const speed = 8 + Math.random() * 5;
+            cap.vx = Math.cos(angle) * speed; cap.vy = Math.sin(angle) * speed;
+            turn = 1;
+            resetShotTimer();
+        }
+
+        let wasMoving = false;
         function updatePhysics() {
             if(!gameActive) return;
             
             cap.x += cap.vx; cap.y += cap.vy;
             cap.vx *= cap.friction; cap.vy *= cap.friction;
 
-            if (Math.hypot(cap.vx, cap.vy) > 0.1) {
+            const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
+            if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                // Fizik değişimlerini o an vuruşu yapan/yöneten taraf etrafa bildirir
-                if(turn !== myRole) broadcastState(); 
+                if(gameMode === 'online' && turn !== myRole) broadcastState();
             }
 
-            // Duvar Çarpışmaları
+            if (wasMoving && !isMoving) resetShotTimer();
+            wasMoving = isMoving;
+
+            // Duvarlar
             if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
             if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
-
             if (cap.y - cap.radius < 0 || cap.y + cap.radius > height) {
-                const inGoal = (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2);
-                if (!inGoal) {
+                if (!(cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2)) {
                     if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; }
                     if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; }
                 }
             }
 
-            // Oyuncu Çarpışmaları
+            // Çiviler
             pins.forEach(pin => {
                 const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
                 const pinRadius = pin.isPost ? 4 : 7;
@@ -221,49 +438,53 @@
                 }
             });
 
-            // Gol Kontrolleri (Sadece oda sahibi 1. oyuncu golü tescil eder, karmaşayı önler)
-            if (myRole === 1) {
-                if (cap.y < 0) { score.p1++; resetBall(); }
-                else if (cap.y > height) { score.p2++; resetBall(); }
+            // Gol Noktaları
+            if (gameMode !== 'online' || myRole === 1) {
+                if (cap.y < 0) { score.p1++; resetBallAfterGoal(); }
+                else if (cap.y > height) { score.p2++; resetBallAfterGoal(); }
+            }
+
+            // Bot hamlesi tetikleme
+            if (gameMode === 'ai' && turn === 2 && !isMoving && shotTimeLeft === 3.0) {
+                setTimeout(makeAIMove, 600);
             }
         }
 
-        function resetBall() {
+        function resetBallAfterGoal() {
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-            broadcastState();
+            updateScoreboardText();
+            if(gameMode === 'online') broadcastState();
+            resetShotTimer();
+        }
+
+        // ÇİZİM MOTORU
+        function drawPlayer(x, y, team) {
+            ctx.save(); ctx.translate(x, y);
+            if (team === 2) ctx.rotate(Math.PI);
+            
+            const jerseyColor = (team === 1) ? p1Color : p2Color;
+            const sleeveColor = (team === 1) ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.2)';
+            const skinColor = '#ffad87';
+
+            ctx.fillStyle = jerseyColor; ctx.fillRect(-10, -5, 20, 9); ctx.fillRect(-8, 4, 16, 4);
+            ctx.fillStyle = sleeveColor; ctx.fillRect(-12, -5, 3, 5); ctx.fillRect(9, -5, 3, 5);
+            ctx.fillStyle = skinColor; ctx.fillRect(-12, -9, 3, 4); ctx.fillRect(9, -9, 3, 4);
+            ctx.fillRect(-3, -2, 6, 7);
+            ctx.fillStyle = (team === 1) ? '#111111' : '#5c4033'; ctx.fillRect(-4, 1, 8, 5);
+            ctx.restore();
         }
 
         function drawSoccerBall(x, y, r, rotation) {
             ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
             ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-            ctx.lineWidth = 1; ctx.strokeStyle = '#000000'; ctx.stroke();
-            ctx.fillStyle = '#111111'; ctx.beginPath();
+            ctx.lineWidth = 1; ctx.strokeStyle = '#000'; ctx.stroke();
+            ctx.fillStyle = '#111'; ctx.beginPath();
             for (let i = 0; i < 5; i++) {
-                let angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
-                let px = Math.cos(angle) * (r * 0.35); let py = Math.sin(angle) * (r * 0.35);
+                let a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                let px = Math.cos(a) * (r * 0.35), py = Math.sin(a) * (r * 0.35);
                 if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
             }
             ctx.closePath(); ctx.fill(); ctx.stroke();
-            for (let i = 0; i < 5; i++) {
-                let angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
-                let x1 = Math.cos(angle) * (r * 0.35); let y1 = Math.sin(angle) * (r * 0.35);
-                let x2 = Math.cos(angle) * (r * 0.75); let y2 = Math.sin(angle) * (r * 0.75);
-                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.strokeStyle = '#000000'; ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawPlayer(x, y, team) {
-            ctx.save(); ctx.translate(x, y);
-            if (team === 2) ctx.rotate(Math.PI);
-            const jerseyColor = (team === 1) ? '#0044ff' : '#cc0000';
-            const sleeveColor = (team === 1) ? '#0022aa' : '#990000';
-            const skinColor = '#ffad87';
-            ctx.fillStyle = jerseyColor; ctx.fillRect(-10, -5, 20, 9); ctx.fillRect(-8, 4, 16, 4);
-            ctx.fillStyle = sleeveColor; ctx.fillRect(-12, -5, 3, 5); ctx.fillRect(9, -5, 3, 5);
-            ctx.fillStyle = skinColor; ctx.fillRect(-12, -9, 3, 4); ctx.fillRect(9, -9, 3, 4);
-            ctx.fillStyle = '#ffad87'; ctx.fillRect(-3, -2, 6, 7);
-            ctx.fillStyle = (team === 1) ? '#111111' : '#5c4033'; ctx.fillRect(-4, 1, 8, 5);
             ctx.restore();
         }
 
@@ -284,15 +505,13 @@
             });
 
             if (isDragging) {
-                ctx.strokeStyle = myRole === 1 ? '#33ccff' : '#ff3333'; ctx.lineWidth = 4;
+                ctx.strokeStyle = (turn === 1) ? p1Color : p2Color; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
                 ctx.lineTo(cap.x + (dragStart.x - dragCurrent.x), cap.y + (dragStart.y - dragCurrent.y));
                 ctx.stroke();
             }
 
             drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
-            document.getElementById('p1-name').innerText = `Siz: ${myRole === 1 ? score.p1 : score.p2}`;
-            document.getElementById('p2-name').innerText = `Rakip: ${myRole === 1 ? score.p2 : score.p1}`;
         }
 
         function animate() {
