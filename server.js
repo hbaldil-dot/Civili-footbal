@@ -1,79 +1,59 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-app.use(express.static(__dirname));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Online havuzda bekleyen oyuncular
-let onlinePool = [];
-let activeRooms = {};
+let lobbyPlayers = []; // Havuzdaki oyuncular
 
 io.on('connection', (socket) => {
-    console.log('Yeni bağlantı:', socket.id);
+    
+    // Lobiye katılma
+    socket.on('join-lobby', (playerName) => {
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        lobbyPlayers.push({ id: socket.id, name: playerName });
+        io.emit('update-lobby-players', lobbyPlayers);
+    });
 
-    socket.on('joinPool', (playerName) => {
-        // Havuzda zaten varsa temizle
-        onlinePool = onlinePool.filter(p => p.id !== socket.id);
+    // Lobiden ayrılma
+    socket.on('leave-lobby', () => {
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        io.emit('update-lobby-players', lobbyPlayers);
+    });
+
+    // Davet gönderme
+    socket.on('send-invite', (toId) => {
+        io.to(toId).emit('receive-invite', socket.id);
+    });
+
+    // Davet kabul edildiğinde oda yarat ve maçı başlat
+    socket.on('accept-invite', (fromId) => {
+        const roomId = "room_" + fromId + "_" + socket.id;
         
-        // Havuza ekle
-        onlinePool.push({ id: socket.id, name: playerName });
-        console.log(`${playerName} havuza girdi. Havuz mevcudu:`, onlinePool.length);
+        socket.join(roomId);
+        io.sockets.sockets.get(fromId)?.join(roomId);
 
-        // Havuzda en az 2 kişi varsa hemen eşleştir
-        if (onlinePool.length >= 2) {
-            const p1 = onlinePool.shift();
-            const p2 = onlinePool.shift();
-            const roomId = `room_${p1.id}_${p2.id}`;
+        // Havuzdan temizle
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id && p.id !== fromId);
+        io.emit('update-lobby-players', lobbyPlayers);
 
-            activeRooms[roomId] = {
-                p1: { id: p1.id, name: p1.name },
-                p2: { id: p2.id, name: p2.name }
-            };
-
-            // İki oyuncuyu da odaya al
-            io.sockets.sockets.get(p1.id)?.join(roomId);
-            io.sockets.sockets.get(p2.id)?.join(roomId);
-
-            // Oyunculara rolleri ve rakip isimlerini bildir
-            io.to(p1.id).emit('matchFound', { roomId, role: 1, opponentName: p2.name });
-            io.to(p2.id).emit('matchFound', { roomId, role: 2, opponentName: p1.name });
-            
-            console.log(`Maç başladı: ${p1.name} vs ${p2.name}`);
-        } else {
-            socket.emit('waitingInPool');
-        }
+        // Takımları ata (1: Ev Sahibi, 2: Deplasman)
+        io.to(fromId).emit('start-online-match', { roomId, team: 1 });
+        io.to(socket.id).emit('start-online-match', { roomId, team: 2 });
     });
 
-    socket.on('updateState', (data) => {
-        socket.to(data.roomId).emit('peerState', data.state);
-    });
-
-    socket.on('leaveOnline', () => {
-        onlinePool = onlinePool.filter(p => p.id !== socket.id);
+    // Vuruş verisini odadaki diğer oyuncuya aktar
+    socket.on('player-shot', (data) => {
+        socket.to(data.roomId).emit('opponent-shot', data);
     });
 
     socket.on('disconnect', () => {
-        onlinePool = onlinePool.filter(p => p.id !== socket.id);
-        // Aktif odalardan düşen varsa diğerine bildir
-        for (const roomId in activeRooms) {
-            if (activeRooms[roomId].p1.id === socket.id || activeRooms[roomId].p2.id === socket.id) {
-                io.to(roomId).emit('opponentDisconnected');
-                delete activeRooms[roomId];
-            }
-        }
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        io.emit('update-lobby-players', lobbyPlayers);
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Sunucu ${PORT} portunda aktif.`);
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
