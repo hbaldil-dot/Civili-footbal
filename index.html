@@ -61,13 +61,14 @@
             position: absolute; top: 10px; width: 95%; max-width: 380px;
             display: flex; flex-direction: column; gap: 5px; align-items: center; z-index: 15; pointer-events: none; display: none;
         }
-        .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; }
-        #score-board, #turn-indicator, #time-board {
-            background: rgba(0, 0, 0, 0.85); padding: 6px 12px; border-radius: 4px;
-            font-size: 14px; font-weight: bold; border: 2px solid #fff; text-align: center;
+        .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 5px; }
+        #score-board, #turn-indicator, #time-board, #shot-timer {
+            background: rgba(0, 0, 0, 0.85); padding: 6px 10px; border-radius: 4px;
+            font-size: 13px; font-weight: bold; border: 2px solid #fff; text-align: center;
         }
-        #turn-indicator { color: #f1c40f; border-color: #f1c40f; min-width: 100px; }
-        #time-board { color: #e74c3c; border-color: #e74c3c; }
+        #turn-indicator { color: #f1c40f; border-color: #f1c40f; min-width: 90px; }
+        #time-board { color: #3498db; border-color: #3498db; }
+        #shot-timer { color: #e74c3c; border-color: #e74c3c; min-width: 60px; display: none; }
         
         #exit-btn, #start-match-btn {
             color: white; border: 2px solid #fff; border-radius: 4px;
@@ -120,9 +121,10 @@
     <div id="top-bar">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
-            <div id="turn-indicator">Diziliş Yapılıyor</div>
+            <div id="turn-indicator">Diziliş</div>
             <div id="score-board">0 - 0</div>
             <div id="time-board">90s</div>
+            <div id="shot-timer">ŞUT: 3s</div>
             <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
         </div>
     </div>
@@ -150,6 +152,10 @@
         let matchSecondsLeft = 90;
         let timerInterval = null;
 
+        // 3 Saniye Şut Çekme Sayacı
+        let shotSecondsLeft = 3;
+        let shotTimerInterval = null;
+
         let cap = { x: width/2, y: height/2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
         let pins = []; 
         let benchPins = []; 
@@ -157,7 +163,8 @@
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
-        const minAllowedDistance = 18;
+        // 2.5 TOP MESAFESİ: Top yarıçapı 11px ise çapı 22px'dir. 2.5 katı => 55px.
+        const minAllowedDistance = 55; 
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
@@ -238,7 +245,6 @@
             document.getElementById('online-lobby').style.display = 'none';
             document.getElementById('top-bar').style.display = 'flex';
             
-            // Online'da süre ayarını menüden alıyoruz
             const selectedDuration = parseInt(document.getElementById('match-duration').value);
             matchSecondsLeft = selectedDuration;
             document.getElementById('time-board').innerText = matchSecondsLeft + "s";
@@ -256,8 +262,10 @@
             benchPins = [];
             currentPhase = 'playing';
             document.getElementById('start-match-btn').style.display = 'none';
+            document.getElementById('shot-timer').style.display = 'block';
             updateHUDTurn();
             startMatchTimer();
+            resetShotTimer();
             animate();
         });
 
@@ -269,6 +277,7 @@
             score = state.score;
             document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
             updateHUDTurn();
+            resetShotTimer();
         });
 
         function broadcastState() {
@@ -283,7 +292,7 @@
             });
         }
 
-        // --- MAÇ SÜRESİ SAYACI ---
+        // --- MAÇ SÜRESİ VE ŞUT SÜRESİ SAYACI ---
         function startMatchTimer() {
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -298,13 +307,44 @@
             }, 1000);
         }
 
+        function resetShotTimer() {
+            if(shotTimerInterval) clearInterval(shotTimerInterval);
+            shotSecondsLeft = 3;
+            document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
+
+            // Eğer yapay zekanın sırasıysa oyuncu için vuruş süresi saymaya gerek yok
+            if (gameMode === 'ai' && turn === 2) {
+                document.getElementById('shot-timer').style.display = 'none';
+                return;
+            } else {
+                document.getElementById('shot-timer').style.display = 'block';
+            }
+
+            shotTimerInterval = setInterval(() => {
+                if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
+                    shotSecondsLeft--;
+                    document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
+
+                    if (shotSecondsLeft <= 0) {
+                        clearInterval(shotTimerInterval);
+                        // Süre dolduğunda sırayı diğer oyuncuya devret
+                        turn = turn === 1 ? 2 : 1;
+                        updateHUDTurn();
+                        broadcastState();
+                        resetShotTimer();
+                    }
+                }
+            }, 1000);
+        }
+
         function endMatch() {
             currentPhase = 'ended';
             clearInterval(timerInterval);
+            clearInterval(shotTimerInterval);
             
             let resultMessage = "Maç Berabere Bitti!";
             if (score.p1 > score.p2) {
-                resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kaybettiniz!" : "Mavi Takım (Siz) Kazandı! 🎉";
+                resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kaybettiniz!" : "Mavi Takım Kazandı! 🎉";
             } else if (score.p2 > score.p1) {
                 resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kazandınız! 🎉" : "Kırmızı Takım Kazandı! 🎉";
             }
@@ -322,7 +362,8 @@
             document.getElementById('start-match-btn').style.opacity = '0.5';
             document.getElementById('start-match-btn').innerText = "BAŞLAT";
             document.getElementById('start-match-btn').disabled = false;
-            document.getElementById('turn-indicator').innerText = "Kadro Kuruluyor";
+            document.getElementById('turn-indicator').innerText = "Kadro Kur";
+            document.getElementById('shot-timer').style.display = 'none';
 
             // Sabit kale direkleri
             pins = [
@@ -352,28 +393,27 @@
 
         function confirmFormationsAndStart() {
             if (!benchPins.every(p => p.onField)) {
-                alert("Lütfen üstteki tüm çivilerinizi (oyuncularınızı) yeşil alana sürükleyip yerleştirin!");
+                alert("Lütfen üstteki tüm çivilerinizi (oyuncularınızı) sahaya sürükleyip yerleştirin!");
                 return;
             }
             
             const placedPins = benchPins.map(p => ({ x: p.x, y: p.y }));
 
             if (gameMode === 'online') {
-                // Çevrimiçi oyun eşleşmesini sunucu yönetir
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
                 socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins });
             } else {
-                // Yerel veya Yapay Zekalı oyun modu lokal başlatılır
+                // Yerel modlarda "Bekleniyor"da KALMAMAK için direkt yerel dizilimi başlatıyoruz
                 pins = [
                     {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                     {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
                 ];
 
-                // 1. Oyuncunun (Mavi) yerleştirdiği kadro
+                // 1. Oyuncunun yerleştirdiği kadro
                 placedPins.forEach(p => pins.push({ x: p.x, y: p.y, team: 1 }));
 
-                // 2. Oyuncunun (Kırmızı) veya Yapay Zekanın Hazır standart kadrosu (Üst Sahaya Yerleşir)
+                // 2. Oyuncu / Yapay Zeka için hazır takım yerleşimi
                 let p2Positions = [
                     {x: width/2, y: height*0.15}, {x: width*0.8, y: height*0.3}, {x: width*0.5, y: height*0.28}, {x: width*0.2, y: height*0.3},
                     {x: width*0.85, y: height*0.42}, {x: width*0.6, y: height*0.42}, {x: width*0.4, y: height*0.42}, {x: width*0.15, y: height*0.42},
@@ -384,8 +424,10 @@
                 benchPins = [];
                 currentPhase = 'playing';
                 document.getElementById('start-match-btn').style.display = 'none';
+                document.getElementById('shot-timer').style.display = 'block';
                 updateHUDTurn();
                 startMatchTimer();
+                resetShotTimer();
                 animate();
             }
         }
@@ -413,19 +455,19 @@
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
             setTimeout(() => {
-                // Topun kalesine olan açısını hesaplayıp kaleye doğru vurmaya çalışır
                 const targetX = width / 2;
-                const targetY = height; // Alt kaleye hücum eder
+                const targetY = height; 
                 
                 const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
-                const power = 4 + Math.random() * 6; // Rastgele vuruş hızı
+                const power = 4 + Math.random() * 6;
 
                 cap.vx = Math.cos(angle) * power;
                 cap.vy = Math.sin(angle) * power;
 
                 turn = 1;
                 updateHUDTurn();
-            }, 1200);
+                resetShotTimer();
+            }, 1000);
         }
 
         // --- FİZİK DÖNGÜSÜ ---
@@ -440,7 +482,6 @@
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
                 if(gameMode === 'online' && turn !== myTeamNumber) broadcastState();
             } else {
-                // Top durduğunda ve sıra AI'daysa yapay zekayı tetikleriz
                 if (gameMode === 'ai' && turn === 2) {
                     runAIMove();
                 }
@@ -451,15 +492,15 @@
             
             if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                 if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                    // GOL TESCİLİ
                     if (cap.y < height / 2) {
-                        score.p2++; // Üst kaleye girdi (Kırmızı kazandı)
+                        score.p2++; 
                     } else {
-                        score.p1++; // Alt kaleye girdi (Mavi kazandı)
+                        score.p1++; 
                     }
                     document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
                     cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                     broadcastState();
+                    resetShotTimer();
                     return;
                 } else {
                     if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; }
@@ -501,7 +542,7 @@
             } 
             else if (currentPhase === 'playing') {
                 if (gameMode === 'online' && turn !== myTeamNumber) return; 
-                if (gameMode === 'ai' && turn === 2) return; // AI sırasındayken oyuncu müdahale edemez
+                if (gameMode === 'ai' && turn === 2) return; 
                 if (Math.hypot(cap.vx, cap.vy) > 0.2) return; 
 
                 if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
@@ -527,11 +568,12 @@
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
 
-                // Sadece alt yarı alana yerleştirilebilir
-                if (selectedPin.x < 15 || selectedPin.x > width - 15 || selectedPin.y < height / 2 + 15 || selectedPin.y > height - 15) {
+                // TAM SAHADA SERBEST DİZİLİM: Kale arkaları hariç, tüm aktif sahaya yerleştirilebilir.
+                if (selectedPin.x < 15 || selectedPin.x > width - 15 || selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) {
                     valid = false;
                 }
 
+                // 2.5 Top Mesafe Sınırı Kontrolü (Diğer çivilere ve kalelere olan uzaklık)
                 if (valid) {
                     for (let p of benchPins) {
                         if (p.id !== selectedPin.id && p.onField) {
@@ -541,6 +583,15 @@
                             }
                         }
                     }
+                    
+                    // Sabit kale direklerine de çok yakın olmamalı
+                    pins.forEach(pin => {
+                        if (pin.isPost) {
+                            if (Math.hypot(selectedPin.x - pin.x, selectedPin.y - pin.y) < minAllowedDistance) {
+                                valid = false;
+                            }
+                        }
+                    });
                 }
 
                 if (valid) { 
@@ -563,6 +614,7 @@
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
                 broadcastState();
+                resetShotTimer(); // Başarılı vuruştan sonra 3s sayacını sıfırla
             }
         });
 
@@ -572,6 +624,7 @@
 
         function exitToMenu() {
             if(timerInterval) clearInterval(timerInterval);
+            if(shotTimerInterval) clearInterval(shotTimerInterval);
             socket.emit("leave-lobby");
             currentPhase = 'menu';
             document.getElementById('menu').style.display = 'block';
@@ -622,12 +675,12 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
             if (currentPhase === 'setup') {
-                // Yerleşim Alanı Bölgesi (Alt Yarı Saha Hafif Yeşil Parlasın)
-                ctx.fillStyle = "rgba(46, 204, 113, 0.15)";
-                ctx.fillRect(10, height/2 + 10, width - 20, height/2 - 25);
-                ctx.strokeStyle = "rgba(46, 204, 113, 0.4)";
+                // TAM SAHA YERLEŞİM ALANI PARLAMASI (Tüm oynanabilir alan hafif yeşil)
+                ctx.fillStyle = "rgba(46, 204, 113, 0.12)";
+                ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
+                ctx.strokeStyle = "rgba(46, 204, 113, 0.35)";
                 ctx.lineWidth = 2;
-                ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - 25);
+                ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
 
                 // Yedek Çivi barı arka planı
                 ctx.fillStyle = "rgba(0,0,0,0.6)";
