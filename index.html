@@ -34,7 +34,7 @@
         .btn-ai { background: #e67e22; box-shadow: 0 4px #d35400; }
         .btn-online { background: #8e44ad; box-shadow: 0 4px #6c3483; }
 
-        /* GERÇEK LOBİ (HAVUZ) PANELİ */
+        /* GERÇEK LOBİ PANELİ */
         #online-lobby {
             position: absolute; background: rgba(20, 20, 30, 0.98); border: 4px solid #6c3483;
             border-radius: 12px; padding: 20px; text-align: center; z-index: 110; width: 90%; max-width: 360px;
@@ -80,7 +80,6 @@
 
         canvas { background: #2e7d32; border: 10px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     </style>
-    <!-- Soket Kütüphanesi -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -107,7 +106,7 @@
         </div>
     </div>
 
-    <!-- ONLINE OYUNCU HAVUZU (LOBİ) -->
+    <!-- ONLINE OYUNCU HAVUZU -->
     <div id="online-lobby">
         <h2>ÇEVRİMİÇİ HAVUZ</h2>
         <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
@@ -140,35 +139,31 @@
         const height = 620;
         canvas.width = width; canvas.height = height;
 
-        // Oyun Modları ve Durumları
+        // Oyun durumları
         let currentPhase = 'menu'; // menu, setup, playing, ended
         let gameMode = 'local'; // local, ai, online
         let score = { p1: 0, p2: 0 };
-        let turn = 1; // 1: Ev Sahibi (Mavi), 2: Deplasman (Kırmızı)
+        let turn = 1; // 1: Mavi, 2: Kırmızı
         let myTeamNumber = 1; 
         let currentRoomId = null;
 
-        // Süre Ayarları
         let matchSecondsLeft = 90;
         let timerInterval = null;
-
-        // 3 Saniye Şut Çekme Sayacı
         let shotSecondsLeft = 3;
         let shotTimerInterval = null;
 
         let cap = { x: width/2, y: height/2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
-        let pins = []; 
-        let benchPins = []; 
+        let pins = []; // Sahadaki tüm aktif çiviler (direkler + oyuncular)
+        let editableTeam = 1; // Düzenleme aşamasında hangi takımın çivilerini sürükleyebileceğiz?
         let selectedPin = null; 
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
-        // 2.5 TOP MESAFESİ: Top yarıçapı 11px ise çapı 22px'dir. 2.5 katı => 55px.
+        // 2.5 top boyu sınırı (Top çapı 22px => 2.5 katı 55px)
         const minAllowedDistance = 55; 
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
-        const benchY = 40;
 
         drawFieldLinesOnly();
 
@@ -181,7 +176,6 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
         }
 
-        // --- YEREL (LOKAL & AI) MAÇ BAŞLATMA ---
         function startLocalGame(mode) {
             gameMode = mode;
             document.getElementById('menu').style.display = 'none';
@@ -194,7 +188,6 @@
             startSetupPhase();
         }
 
-        // --- ONLINE LOBİ SOKET ALTYAPISI ---
         function openOnlineLobby() {
             gameMode = 'online';
             const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random()*100);
@@ -259,7 +252,6 @@
 
         socket.on("match-go", ({ pins: finalPins }) => {
             pins = finalPins;
-            benchPins = [];
             currentPhase = 'playing';
             document.getElementById('start-match-btn').style.display = 'none';
             document.getElementById('shot-timer').style.display = 'block';
@@ -292,14 +284,13 @@
             });
         }
 
-        // --- MAÇ SÜRESİ VE ŞUT SÜRESİ SAYACI ---
+        // --- SAYAÇLAR ---
         function startMatchTimer() {
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 if (currentPhase === 'playing') {
                     matchSecondsLeft--;
                     document.getElementById('time-board').innerText = matchSecondsLeft + "s";
-                    
                     if (matchSecondsLeft <= 0) {
                         endMatch();
                     }
@@ -312,7 +303,6 @@
             shotSecondsLeft = 3;
             document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
 
-            // Eğer yapay zekanın sırasıysa oyuncu için vuruş süresi saymaya gerek yok
             if (gameMode === 'ai' && turn === 2) {
                 document.getElementById('shot-timer').style.display = 'none';
                 return;
@@ -327,7 +317,6 @@
 
                     if (shotSecondsLeft <= 0) {
                         clearInterval(shotTimerInterval);
-                        // Süre dolduğunda sırayı diğer oyuncuya devret
                         turn = turn === 1 ? 2 : 1;
                         updateHUDTurn();
                         broadcastState();
@@ -353,75 +342,70 @@
             exitToMenu();
         }
 
-        // --- TAKTİK DİZİLİŞ (SETUP) AŞAMASI ---
+        // --- TAKTİK DİZİLİŞ (4-4-2 HAZIR ŞABLON) ---
         function startSetupPhase() {
             currentPhase = 'setup';
             score = { p1: 0, p2: 0 };
             document.getElementById('score-board').innerText = "0 - 0";
             document.getElementById('start-match-btn').style.display = 'block';
-            document.getElementById('start-match-btn').style.opacity = '0.5';
+            document.getElementById('start-match-btn').style.opacity = '1';
             document.getElementById('start-match-btn').innerText = "BAŞLAT";
             document.getElementById('start-match-btn').disabled = false;
-            document.getElementById('turn-indicator').innerText = "Kadro Kur";
+            document.getElementById('turn-indicator').innerText = "Kadro Ayarla";
             document.getElementById('shot-timer').style.display = 'none';
 
-            // Sabit kale direkleri
+            editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
+
+            // Sabit Direkler
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            // Yedek Kulübesi
-            benchPins = [];
-            for(let i=0; i<11; i++) {
-                benchPins.push({
-                    id: i, 
-                    x: 20 + i * ((width - 40) / 10), y: benchY,
-                    homeX: 20 + i * ((width - 40) / 10), homeY: benchY,
-                    team: 1, onField: false
-                });
-            }
+            // Mavi Takım (Ev Sahibi - Alt Sahaya Yayılmış 4-4-2)
+            const blue442 = [
+                {x: width * 0.50, y: height * 0.88, team: 1}, // Kaleci
+                {x: width * 0.15, y: height * 0.73, team: 1}, // Sol Bek
+                {x: width * 0.38, y: height * 0.77, team: 1}, // Sol Stoper
+                {x: width * 0.62, y: height * 0.77, team: 1}, // Sağ Stoper
+                {x: width * 0.85, y: height * 0.73, team: 1}, // Sağ Bek
+                {x: width * 0.15, y: height * 0.58, team: 1}, // Sol Açık
+                {x: width * 0.38, y: height * 0.60, team: 1}, // Sol Orta Saha
+                {x: width * 0.62, y: height * 0.60, team: 1}, // Sağ Orta Saha
+                {x: width * 0.85, y: height * 0.58, team: 1}, // Sağ Açık
+                {x: width * 0.35, y: height * 0.45, team: 1}, // Sol Forvet
+                {x: width * 0.65, y: height * 0.45, team: 1}  // Sağ Forvet
+            ];
+
+            // Kırmızı Takım (Deplasman - Üst Sahaya Yayılmış 4-4-2)
+            const red442 = [
+                {x: width * 0.50, y: height * 0.12, team: 2}, // Kaleci
+                {x: width * 0.85, y: height * 0.27, team: 2}, // Sol Bek (Rakip açısına göre simetrik)
+                {x: width * 0.62, y: height * 0.23, team: 2}, // Sol Stoper
+                {x: width * 0.38, y: height * 0.23, team: 2}, // Sağ Stoper
+                {x: width * 0.15, y: height * 0.27, team: 2}, // Sağ Bek
+                {x: width * 0.85, y: height * 0.42, team: 2}, // Sol Açık
+                {x: width * 0.62, y: height * 0.40, team: 2}, // Sol Orta Saha
+                {x: width * 0.38, y: height * 0.40, team: 2}, // Sağ Orta Saha
+                {x: width * 0.15, y: height * 0.42, team: 2}, // Sağ Açık
+                {x: width * 0.65, y: height * 0.55, team: 2}, // Sol Forvet
+                {x: width * 0.35, y: height * 0.55, team: 2}  // Sağ Forvet
+            ];
+
+            blue442.forEach(p => pins.push(p));
+            red442.forEach(p => pins.push(p));
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
             animate();
         }
 
-        function checkFormationsReady() {
-            const allPlaced = benchPins.every(p => p.onField);
-            document.getElementById('start-match-btn').style.opacity = allPlaced ? '1' : '0.5';
-        }
-
         function confirmFormationsAndStart() {
-            if (!benchPins.every(p => p.onField)) {
-                alert("Lütfen üstteki tüm çivilerinizi (oyuncularınızı) sahaya sürükleyip yerleştirin!");
-                return;
-            }
-            
-            const placedPins = benchPins.map(p => ({ x: p.x, y: p.y }));
-
             if (gameMode === 'online') {
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
-                socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins });
+                const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => ({ x: p.x, y: p.y }));
+                socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
             } else {
-                // Yerel modlarda "Bekleniyor"da KALMAMAK için direkt yerel dizilimi başlatıyoruz
-                pins = [
-                    {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
-                    {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
-                ];
-
-                // 1. Oyuncunun yerleştirdiği kadro
-                placedPins.forEach(p => pins.push({ x: p.x, y: p.y, team: 1 }));
-
-                // 2. Oyuncu / Yapay Zeka için hazır takım yerleşimi
-                let p2Positions = [
-                    {x: width/2, y: height*0.15}, {x: width*0.8, y: height*0.3}, {x: width*0.5, y: height*0.28}, {x: width*0.2, y: height*0.3},
-                    {x: width*0.85, y: height*0.42}, {x: width*0.6, y: height*0.42}, {x: width*0.4, y: height*0.42}, {x: width*0.15, y: height*0.42},
-                    {x: width*0.7, y: height*0.55}, {x: width*0.3, y: height*0.55}, {x: width/2, y: height*0.45}
-                ];
-                p2Positions.forEach(p => pins.push({ x: p.x, y: p.y, team: 2 }));
-
-                benchPins = [];
                 currentPhase = 'playing';
                 document.getElementById('start-match-btn').style.display = 'none';
                 document.getElementById('shot-timer').style.display = 'block';
@@ -497,7 +481,7 @@
                     } else {
                         score.p1++; 
                     }
-                    document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
+                    document.getElementById('score-board').innerText = `${score.p1} - `${score.p2}`;
                     cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                     broadcastState();
                     resetShotTimer();
@@ -529,14 +513,20 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
+        let dragStartPinPos = { x: 0, y: 0 };
+
         canvas.addEventListener('mousedown', (e) => {
             const pos = getCanvasTouchPos(e);
 
             if (currentPhase === 'setup') {
-                for (let p of benchPins) {
-                    if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
-                        selectedPin = p;
-                        break;
+                // Sadece düzenlememize izin verilen takımın oyuncularını yakalayabiliriz
+                for (let p of pins) {
+                    if (!p.isPost && p.team === editableTeam) {
+                        if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
+                            selectedPin = p;
+                            dragStartPinPos = { x: p.x, y: p.y }; // Geçersiz yerleşim durumunda geri dönmek için
+                            break;
+                        }
                     }
                 }
             } 
@@ -568,42 +558,39 @@
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
 
-                // TAM SAHADA SERBEST DİZİLİM: Kale arkaları hariç, tüm aktif sahaya yerleştirilebilir.
+                // Oyun alanında tut (kale arkası koridorları hariç)
                 if (selectedPin.x < 15 || selectedPin.x > width - 15 || selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) {
                     valid = false;
                 }
 
-                // 2.5 Top Mesafe Sınırı Kontrolü (Diğer çivilere ve kalelere olan uzaklık)
+                // Mesafe Sınırı Kontrolü: AYNI takımdaki diğer oyuncularla ve kale direkleriyle olan mesafe
                 if (valid) {
-                    for (let p of benchPins) {
-                        if (p.id !== selectedPin.id && p.onField) {
-                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { 
-                                valid = false; 
-                                break; 
+                    for (let p of pins) {
+                        if (p !== selectedPin) {
+                            if (p.isPost) {
+                                // Sabit kale direklerine güvenli mesafe
+                                if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
+                                    valid = false;
+                                    break;
+                                }
+                            } else if (p.team === selectedPin.team) {
+                                // Aynı takım oyuncusuyla 2.5 top boyu kontrolü
+                                if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
+                                    valid = false;
+                                    break;
+                                }
                             }
                         }
                     }
-                    
-                    // Sabit kale direklerine de çok yakın olmamalı
-                    pins.forEach(pin => {
-                        if (pin.isPost) {
-                            if (Math.hypot(selectedPin.x - pin.x, selectedPin.y - pin.y) < minAllowedDistance) {
-                                valid = false;
-                            }
-                        }
-                    });
                 }
 
-                if (valid) { 
-                    selectedPin.onField = true; 
-                } else { 
-                    selectedPin.x = selectedPin.homeX; 
-                    selectedPin.y = selectedPin.homeY; 
-                    selectedPin.onField = false; 
+                if (!valid) { 
+                    // Sınır aşılırsa oyuncuyu sürüklemeye başladığı eski konumuna fırlat
+                    selectedPin.x = dragStartPinPos.x; 
+                    selectedPin.y = dragStartPinPos.y; 
                 }
 
                 selectedPin = null;
-                checkFormationsReady();
             } 
             
             if (currentPhase === 'playing' && isDraggingBall) {
@@ -614,7 +601,7 @@
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
                 broadcastState();
-                resetShotTimer(); // Başarılı vuruştan sonra 3s sayacını sıfırla
+                resetShotTimer(); 
             }
         });
 
@@ -633,7 +620,7 @@
             drawFieldLinesOnly(); 
         }
 
-        // --- ÇİZİM İŞLEMLERİ ---
+        // --- RETRO OYUNCU ÇİZİMİ ---
         function drawRetroPlayer(x, y, team) {
             ctx.save(); ctx.translate(x, y);
             if (team === 2) ctx.rotate(Math.PI);
@@ -652,11 +639,16 @@
             ctx.restore();
         }
 
+        // --- RETRO TOP ÇİZİMİ (MERKEZİ DINAMİK RENKLİ) ---
         function drawSoccerBall(x, y, r, rotation) {
             ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
             ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
             ctx.lineWidth = 1.5; ctx.strokeStyle = '#000'; ctx.stroke();
-            ctx.fillStyle = '#111'; ctx.beginPath();
+            
+            // Oyun sırasındaki takımın rengi topun merkezindeki panele işlenir
+            ctx.fillStyle = (turn === 1) ? '#3498db' : '#cc0000'; 
+            
+            ctx.beginPath();
             for (let i = 0; i < 5; i++) {
                 let a = (Math.PI * 2 / 5) * i - Math.PI / 2;
                 ctx.lineTo(Math.cos(a) * (r * 0.4), Math.sin(a) * (r * 0.4));
@@ -675,18 +667,12 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
             if (currentPhase === 'setup') {
-                // TAM SAHA YERLEŞİM ALANI PARLAMASI (Tüm oynanabilir alan hafif yeşil)
+                // TAM SAHA YERLEŞİM ALANI PARLAMASI
                 ctx.fillStyle = "rgba(46, 204, 113, 0.12)";
                 ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
                 ctx.strokeStyle = "rgba(46, 204, 113, 0.35)";
                 ctx.lineWidth = 2;
                 ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
-
-                // Yedek Çivi barı arka planı
-                ctx.fillStyle = "rgba(0,0,0,0.6)";
-                ctx.fillRect(0, 0, width, 65);
-                ctx.strokeStyle = "#9b59b6"; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(0, 65); ctx.lineTo(width, 65); ctx.stroke();
             }
 
             pins.forEach(pin => {
@@ -700,10 +686,6 @@
                     drawRetroPlayer(pin.x, pin.y, renderTeam);
                 }
             });
-
-            if (currentPhase === 'setup') {
-                benchPins.forEach(p => { drawRetroPlayer(p.x, p.y, p.team); });
-            }
 
             if (currentPhase === 'playing' && isDraggingBall) {
                 ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 4;
