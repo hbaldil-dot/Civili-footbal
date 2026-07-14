@@ -116,7 +116,6 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Bulunduğumuz sunucuya dinamik bağlanıyoruz
         const socket = io();
 
         const canvas = document.getElementById('gameCanvas');
@@ -138,11 +137,12 @@
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
+        const minAllowedDistance = 18; // KOPUK OLAN DEĞİŞKEN BURAYA EKLENDİ
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2, pBoxX2 = pBoxX1 + penaltyBoxW;
         const p1BoxY1 = height - penaltyBoxH;
-        const benchY = 45;
+        const benchY = 40;
 
         drawFieldLinesOnly();
 
@@ -169,7 +169,6 @@
             document.getElementById('menu').style.display = 'block';
         }
 
-        // Havuzdaki oyuncu listesini güncelle
         socket.on("update-lobby-players", (players) => {
             const listContainer = document.getElementById('lobby-list');
             listContainer.innerHTML = "";
@@ -194,14 +193,12 @@
             }
         });
 
-        // Davet Alma
         socket.on("receive-invite", (data) => {
             if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
                 socket.emit("accept-invite", data.fromId);
             }
         });
 
-        // Maçın Kurulması (Diziliş Aşaması Başlıyor)
         socket.on("start-online-match", ({ roomId, team }) => {
             currentRoomId = roomId;
             myTeamNumber = team; 
@@ -211,13 +208,11 @@
             startSetupPhase();
         });
 
-        // Rakip Oyuncu Çıkarsa
         socket.on("opponent-disconnected", () => {
             alert("Rakip oyundan ayrıldı.");
             exitToMenu();
         });
 
-        // Maçın Resmen Başlaması (Kadrolar yerleştikten sonra sunucudan gelen tetikleyici)
         socket.on("match-go", ({ pins: finalPins }) => {
             pins = finalPins;
             benchPins = [];
@@ -227,7 +222,6 @@
             animate();
         });
 
-        // Rakibin vuruşunu senkronize etme
         socket.on("peerState", (state) => {
             cap.x = state.cap.x; cap.y = state.cap.y;
             cap.vx = state.cap.vx; cap.vy = state.cap.vy;
@@ -257,15 +251,15 @@
             document.getElementById('score-board').innerText = "0 - 0";
             document.getElementById('start-match-btn').style.display = 'block';
             document.getElementById('start-match-btn').style.opacity = '0.5';
+            document.getElementById('start-match-btn').innerText = "BAŞLAT";
+            document.getElementById('start-match-btn').disabled = false;
             document.getElementById('turn-indicator').innerText = "Kadro Kuruluyor";
 
-            // Kale direkleri
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            // Oyuncu yedek kulübesi (Yukarıda 11 oyuncu sırayla bekler)
             benchPins = [];
             for(let i=0; i<11; i++) {
                 benchPins.push({
@@ -287,13 +281,12 @@
 
         function confirmFormationsAndStart() {
             if (!benchPins.every(p => p.onField)) {
-                alert("Lütfen üstteki tüm çivilerinizi (oyuncularınızı) sahaya yerleştirin!");
+                alert("Lütfen üstteki tüm çivilerinizi (oyuncularınızı) yeşil alana sürükleyip yerleştirin!");
                 return;
             }
             
-            // Hazır bilgisini ve kendi yerleştirdiğimiz kadromuzu sunucuya gönderiyoruz
             const placedPins = benchPins.map(p => ({ x: p.x, y: p.y }));
-            document.getElementById('start-match-btn').innerText = "Rakip Bekleniyor...";
+            document.getElementById('start-match-btn').innerText = "Bekleniyor..";
             document.getElementById('start-match-btn').disabled = true;
 
             socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins });
@@ -322,18 +315,15 @@
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                // Vuruşun fiziğini anlık olarak karşıya senkronize et
                 if(turn !== myTeamNumber) broadcastState();
             }
 
-            // Çarpışmalar
             if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
             if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
             
             if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                 if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                    // Gol Atıldı
-                    if (myTeamNumber === 1) { // Çakışmayı önlemek için gol hesabını 1. oyuncu tescil eder
+                    if (myTeamNumber === 1) { 
                         if (cap.y < height / 2) score.p2++; else score.p1++;
                         document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
@@ -371,17 +361,16 @@
             const pos = getCanvasTouchPos(e);
 
             if (currentPhase === 'setup') {
-                // Kadro yerleşiminde üst kısımdaki yedek taşları sürüklüyoruz
                 for (let p of benchPins) {
-                    if (Math.hypot(pos.x - p.x, pos.y - p.y) < 20) {
+                    if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
                         selectedPin = p;
                         break;
                     }
                 }
             } 
             else if (currentPhase === 'playing') {
-                if (turn !== myTeamNumber) return; // Sıra sende değilse vuramazsın
-                if (Math.hypot(cap.vx, cap.vy) > 0.2) return; // Top hareketliyken vuramazsın
+                if (turn !== myTeamNumber) return; 
+                if (Math.hypot(cap.vx, cap.vy) > 0.2) return; 
 
                 if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
                     isDraggingBall = true;
@@ -405,15 +394,19 @@
         window.addEventListener('mouseup', () => {
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
-                // Oyuncu sadece kendi sahasının (alt yarı alanın) içine taş yerleştirebilir (y > height / 2)
-                if (selectedPin.x < 10 || selectedPin.x > width - 10 || selectedPin.y < height / 2 + 10 || selectedPin.y > height - 10) {
+
+                // Oyuncuyu yerleştirebileceği sınır (Alt Yarı Saha)
+                if (selectedPin.x < 15 || selectedPin.x > width - 15 || selectedPin.y < height / 2 + 15 || selectedPin.y > height - 15) {
                     valid = false;
                 }
 
                 if (valid) {
                     for (let p of benchPins) {
                         if (p.id !== selectedPin.id && p.onField) {
-                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { valid = false; break; }
+                            if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { 
+                                valid = false; 
+                                break; 
+                            }
                         }
                     }
                 }
@@ -421,7 +414,10 @@
                 if (valid) { 
                     selectedPin.onField = true; 
                 } else { 
-                    selectedPin.x = selectedPin.homeX; selectedPin.y = selectedPin.homeY; selectedPin.onField = false; 
+                    // Geçersizse yedek kulübesindeki yerine geri gönder
+                    selectedPin.x = selectedPin.homeX; 
+                    selectedPin.y = selectedPin.homeY; 
+                    selectedPin.onField = false; 
                 }
 
                 selectedPin = null;
@@ -433,7 +429,6 @@
                 cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                 cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
                 
-                // Sırayı karşıya geçirmek
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
                 broadcastState();
@@ -450,15 +445,12 @@
             document.getElementById('menu').style.display = 'block';
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('online-lobby').style.display = 'none';
-            document.getElementById('start-match-btn').innerText = "BAŞLAT";
-            document.getElementById('start-match-btn').disabled = false;
             drawFieldLinesOnly(); 
         }
 
         // --- ÇİZİM İŞLEMLERİ ---
         function drawRetroPlayer(x, y, team) {
             ctx.save(); ctx.translate(x, y);
-            // Karşı takımın oyuncularını ters yöne çeviriyoruz
             if (team === 2) ctx.rotate(Math.PI);
             
             const bodyColor = (team === 1) ? '#0044ff' : '#cc0000';
@@ -498,21 +490,26 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
             if (currentPhase === 'setup') {
-                // Yedek Çivi barı
-                ctx.fillStyle = "rgba(0,0,0,0.5)";
-                ctx.fillRect(0, 0, width, 70);
-                ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.moveTo(0, 70); ctx.lineTo(width, 70); ctx.stroke();
+                // Yerleşim Alanı Bölgesi (Alt Yarı Saha Hafif Yeşil Parlasın)
+                ctx.fillStyle = "rgba(46, 204, 113, 0.15)";
+                ctx.fillRect(10, height/2 + 10, width - 20, height/2 - 25);
+                ctx.strokeStyle = "rgba(46, 204, 113, 0.4)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - 25);
+
+                // Yedek Çivi barı arka planı
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(0, 0, width, 65);
+                ctx.strokeStyle = "#9b59b6"; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(0, 65); ctx.lineTo(width, 65); ctx.stroke();
             }
 
             pins.forEach(pin => {
                 if(pin.isPost) {
                     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2); ctx.fill();
                 } else {
-                    // Takım numaraları oyuncuların rolleriyle eşleştirilerek render edilir
                     let renderTeam = pin.team;
                     if(myTeamNumber === 2) {
-                        // Kendi ekranında deplasman olan oyuncunun renkleri ve sahası düzgün gözüksün diye takımları yer değiştiriyoruz
                         renderTeam = pin.team === 1 ? 2 : 1;
                     }
                     drawRetroPlayer(pin.x, pin.y, renderTeam);
