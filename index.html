@@ -5,29 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Çivili Futbol - Klasik & Online</title>
     <style>
-        /* Genel seçilememe kuralı */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        
-        /* Klavyenin yazabilmesi için input alanlarını serbest bırakıyoruz */
-        input, select, textarea {
-            user-select: text !important;
-            -webkit-user-select: text !important;
-        }
-        
+        input, select, textarea { user-select: text !important; -webkit-user-select: text !important; }
         body {
-            background: #111; 
-            font-family: 'Courier New', Courier, monospace; 
-            overflow: hidden;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100dvh; 
-            width: 100vw;
-            color: white;
-            padding: 8px;
+            background: #111; font-family: 'Courier New', Courier, monospace; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100dvh; width: 100vw; color: white; padding: 8px;
         }
-        
         #menu {
             position: absolute; background: rgba(20, 30, 20, 0.98); border: 4px solid #4a754a;
             border-radius: 12px; padding: 25px; text-align: center; z-index: 100; width: 90%; max-width: 360px;
@@ -74,16 +58,7 @@
         }
 
         #top-bar {
-            width: 100%; 
-            max-width: 360px;
-            display: flex; 
-            flex-direction: column; 
-            gap: 5px; 
-            align-items: center; 
-            z-index: 15; 
-            pointer-events: none; 
-            display: none;
-            margin-bottom: 6px;
+            width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 5px; align-items: center; z-index: 15; pointer-events: none; display: none; margin-bottom: 6px;
         }
         .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 4px; }
         #score-board, #turn-indicator, #time-board, #shot-timer {
@@ -103,14 +78,8 @@
         #start-match-btn { background: #27ae60; display: none; }
 
         canvas { 
-            background: #2e7d32; 
-            border: 6px solid #1b5e20; 
-            border-radius: 8px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            max-height: 82dvh;
-            max-width: 100%;
-            aspect-ratio: 360 / 620;
-            object-fit: contain;
+            background: #2e7d32; border: 6px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            max-height: 82dvh; max-width: 100%; aspect-ratio: 360 / 620; object-fit: contain;
         }
     </style>
     <script src="/socket.io/socket.io.js"></script>
@@ -162,7 +131,6 @@
 
     <script>
         const socket = io();
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const width = 360;
@@ -192,7 +160,6 @@
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
-        
         const MAX_DRAG_DIST = cap.radius * 2 * 7; 
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -268,20 +235,16 @@
                     count++;
                     const item = document.createElement('div');
                     item.className = 'player-item';
-                    
                     const nameSpan = document.createElement('span');
                     nameSpan.innerHTML = `⚽ ${p.name}`;
-                    
                     const btn = document.createElement('button');
                     btn.className = 'status';
                     btn.innerText = 'Davet Et';
-                    
                     btn.onclick = () => {
                         btn.innerText = "Bekleniyor...";
                         btn.style.background = "#e67e22";
                         socket.emit("send-invite", p.id);
                     };
-
                     item.appendChild(nameSpan);
                     item.appendChild(btn);
                     listContainer.appendChild(item);
@@ -316,6 +279,7 @@
                 let targetX = x;
                 let targetY = y;
                 
+                // Gelen hamleyi kendi ayna görüntümüze çeviriyoruz
                 if (myTeamNumber === 2) {
                     targetX = width - x;
                     targetY = height - y;
@@ -348,7 +312,7 @@
                     actualX = width - p.x;
                     actualY = height - p.y;
                 }
-                // Sorun 2 Çözümü: Gelen takım bilgisi doğrudan atanıyor (p.team), böylece renk karışmıyor!
+                // Sorun 2 Çözümü: Takım bilgisi doğrudan p.team'den alınarak atanıyor, böylece renkler asla karışmaz.
                 pins.push({ x: actualX, y: actualY, team: p.team });
             });
 
@@ -359,18 +323,35 @@
         });
 
         socket.on("peerState", (state) => {
-            cap.x = state.cap.x; cap.y = state.cap.y;
-            cap.vx = state.cap.vx; cap.vy = state.cap.vy;
-            cap.rotation = state.cap.rotation; turn = state.turn; score = state.score;
+            // Top koordinatlarını senkronize et
+            if (myTeamNumber === 2) {
+                cap.x = width - state.cap.x;
+                cap.y = height - state.cap.y;
+                cap.vx = -state.cap.vx;
+                cap.vy = -state.cap.vy;
+            } else {
+                cap.x = state.cap.x; cap.y = state.cap.y;
+                cap.vx = state.cap.vx; cap.vy = state.cap.vy;
+            }
+            cap.rotation = state.cap.rotation; 
+            turn = state.turn; 
+            score = state.score;
             document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
             updateHUDTurn(); resetShotTimer();
         });
 
         function broadcastState() {
             if(gameMode !== 'online' || currentPhase !== 'playing') return;
+            let sendCap = { ...cap };
+            if (myTeamNumber === 2) {
+                sendCap.x = width - cap.x;
+                sendCap.y = height - cap.y;
+                sendCap.vx = -cap.vx;
+                sendCap.vy = -cap.vy;
+            }
             socket.emit('updateState', {
                 roomId: currentRoomId,
-                state: { cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation }, turn: turn, score: score }
+                state: { cap: { x: sendCap.x, y: sendCap.y, vx: sendCap.vx, vy: sendCap.vy, rotation: cap.rotation }, turn: turn, score: score }
             });
         }
 
@@ -486,9 +467,11 @@
                 {x: width * 0.35, y: height * 0.55, team: 2}  
             ];
             
+            // Sorun 1 & 2 Köklü Çözümü: 
+            // Misafir oyuncu diziliş yaparken kendini aşağıda (Team 1 alanında) hissetmelidir.
+            // Bu yüzden yerel ekranında dizilişi oluştururken, takımları ve renkleri koruyarak ekliyoruz.
             if (gameMode === 'online' && myTeamNumber === 2) {
-                // Sorun 1 Çözümü: Misafir de kurulum yaparken kendisini aşağıda (hücum yönü yukarıda olacak şekilde) görmeli.
-                // Bu yüzden diziliş aşamasında her iki takımın koordinatlarını ayna görüntüsüyle ters yerleştiriyoruz.
+                // Misafir oyuncunun kendi takımı (Team 2) görsel olarak altta (kendi kalesi önünde) yerleşmeli.
                 const localRed = red442.map(p => ({ x: width - p.x, y: height - p.y, team: 2 }));
                 const localBlue = blue442.map(p => ({ x: width - p.x, y: height - p.y, team: 1 }));
                 localBlue.forEach(p => pins.push(p));
@@ -570,8 +553,8 @@
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
                     } else {
-                        if (cap.y - cap.radius < 0) { y = cap.radius; cap.vy *= -0.85; playSound('hit'); }
-                        if (cap.y + cap.radius > height) { y = height - cap.radius; cap.vy *= -0.85; playSound('hit'); }
+                        if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; playSound('hit'); }
+                        if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; playSound('hit'); }
                     }
                 }
 
@@ -612,8 +595,8 @@
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
 
-            // Sorun 1 Çözümü: Kurulum (setup) aşamasında da 180 derece ters dönen kamerayı desteklediğimiz için,
-            // dokunma simetrisini hem kurulumda hem de oyunda misafir oyuncu (Team 2) için aktif hale getirdik.
+            // Dokunma Simetrisi Çözümü:
+            // Görsel olarak sahayı (ctx.rotate) çevirdiğimiz için, dokunulan koordinatı da simetrik olarak tersine çevirmeliyiz.
             if (gameMode === 'online' && myTeamNumber === 2) {
                 x = width - x;
                 y = height - y;
@@ -720,8 +703,9 @@
         function drawRetroPlayer(x, y, team) {
             ctx.save(); ctx.translate(x, y);
             
-            // Sorun 2 Çözümü: Misafir kamera dönüşünden bağımsız olarak, 
-            // mavi takımın (Team 1) gövdesi maviye, kırmızı takımın (Team 2) kırmızıya boyanır.
+            // Sorun 2 Köklü Çözümü: 
+            // `team` verisi ne ise her şartta o rengi basıyoruz. 
+            // 1 ise mavi (#3498db), 2 ise kırmızı (#cc0000).
             const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
             const skinColor = '#ffad87';
 
@@ -738,7 +722,6 @@
             ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
             ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
             ctx.lineWidth = 1.5; ctx.strokeStyle = '#000'; ctx.stroke();
-            
             ctx.fillStyle = (turn === 1) ? '#3498db' : '#cc0000'; 
             ctx.beginPath();
             for (let i = 0; i < 5; i++) {
@@ -752,8 +735,8 @@
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
-            // Sorun 1 Çözümü: Misafir oyuncu (myTeamNumber === 2) hem kurulum (setup) hem de oyun (playing) aşamasında,
-            // sahayı kendi kalesi aşağıda, rakip kalesi yukarıda olacak şekilde simetrik olarak ters görmeli.
+            // Sorun 1 Çözümü: 
+            // Misafir oyuncu (myTeamNumber === 2) hem kurulumda hem oyunda sahayı ters görür (kendi kalesi aşağıda olur).
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
@@ -770,7 +753,6 @@
                 ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
                 ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
                 ctx.lineWidth = 2;
-                
                 ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
                 ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
             }
@@ -791,7 +773,6 @@
             }
 
             if (currentPhase === 'playing' && cap) drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
-            
             ctx.restore(); 
         }
 
