@@ -222,8 +222,8 @@
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
-        // AI'ın sanal nişan almasını belirtmek için yeni bir bayrak ekledik
-        let isAiDragging = false; 
+        // AI'ın sanal el hareketini kitlemek ve yönetmek için yeni bayrak
+        let isAiThinking = false; 
 
         const minAllowedDistance = 45; 
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
@@ -591,49 +591,63 @@
             }
         }
 
-        // 🌟 DÜZELTME: AI sanal çekim hesaplama yöntemi fiziksel olarak topun konumundan izole edildi!
+        // 🌟 KUSURSUZ ÇÖZÜM: Bilgisayar (AI), tamamen sanal bir 2. Oyuncu olarak fiziksel girdileri simüle ediyor!
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+            if (isAiThinking) return;
+
+            isAiThinking = true;
 
             setTimeout(() => {
-                // Bilgisayar mavi kaleyi hedef alıyor
+                // 1. ADIM: Mavi kaleye (Aşağıdaki kale: height - goalHeight) doğru açı belirleme
                 const targetX = width / 2;
                 const targetY = height - goalHeight;
-                
-                // Hedef ile top arasındaki saf açı
                 const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
 
-                // AI vuruşunun max 20 top boyunu geçmesini engelleyen makul germe mesafesi
+                // Makul çekme gücü mesafesi
                 const aiPullDistance = 72; 
 
-                // ÖNEMLİ DÜZELTME: Topun x ve y koordinatlarına asla dokunmuyoruz! 
-                // AI'ın yaptığı "geriye çekme" hareketini fizik motoruna hissettirmek için sanal konumları top üzerinden kuruyoruz:
-                isAiDragging = true;
+                // 2. ADIM: 'mousedown' Oyuncu tıkını taklit et
+                // Oyuncu dokunma mesafesi limiti altında topun tam merkezini hedefleyip basıyoruz
+                isDraggingBall = true;
                 dragStart = { x: cap.x, y: cap.y };
-                
-                // Sanal çizgi tam olarak hedefin ters yönünde çizilir (topun kendi fiziksel yerini kaydırmadan)
-                dragCurrent = {
-                    x: cap.x - Math.cos(angle) * aiPullDistance,
-                    y: cap.y - Math.sin(angle) * aiPullDistance
-                };
+                dragCurrent = { x: cap.x, y: cap.y };
 
-                // Oyuncu yeşil nişan çizgisini net görebilsin diye küçük bir nişan süresi
-                setTimeout(() => {
-                    isAiDragging = false; 
-                    playSound('kick');
+                // 3. ADIM: 'mousemove' ile geriye çekerek nişanı (yeşil çizgiyi) ekrana veriyoruz.
+                // Bu süreç boyunca top hareket etmez, sadece fizik gerilimi oluşur.
+                let stepCount = 0;
+                const totalSteps = 10; // Çizginin pürüzsüz gerilme animasyonu
+                const pullInterval = setInterval(() => {
+                    stepCount++;
+                    const ratio = stepCount / totalSteps;
+                    
+                    dragCurrent = {
+                        x: cap.x - Math.cos(angle) * (aiPullDistance * ratio),
+                        y: cap.y - Math.sin(angle) * (aiPullDistance * ratio)
+                    };
 
-                    // Sanal gerilme kuvveti, topun o anki ORİJİNAL koordinatından itibaren uygulanır.
-                    // Böylece top, üzerinde bulunduğu koordinattan fırladığı için önündeki oyuncularla birebir fiziksel çarpışmaya girer.
-                    cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
-                    cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+                    if (stepCount >= totalSteps) {
+                        clearInterval(pullInterval);
 
-                    turn = 1; 
-                    updateHUDTurn(); 
-                    resetShotTimer();
-                }, 600); 
+                        // 4. ADIM: Nişan alma bittikten sonra 'mouseup' (bırakma) tetikleniyor!
+                        setTimeout(() => {
+                            isDraggingBall = false;
+                            isAiThinking = false;
+                            playSound('kick');
 
-            }, 800);
+                            // Birebir 2 kişilik moddaki fırlatma fiziği çalışıyor
+                            cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
+                            cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+
+                            turn = 1; 
+                            updateHUDTurn(); 
+                            resetShotTimer();
+                        }, 300); // Nişanı doğrulttuktan sonra 300ms bekleyip şut çekiyor
+                    }
+                }, 30); // 300ms boyunca nişan çizgisi geriye doğru uzuyor
+
+            }, 800); // Sıra bilgisayara geçtikten sonra 800ms "düşünme" payı
         }
 
         function updatePhysics() {
@@ -689,7 +703,7 @@
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
                 if(gameMode === 'online' && turn === myTeamNumber) broadcastState(); 
-            } else if (gameMode === 'ai' && turn === 2 && !isAiDragging) {
+            } else if (gameMode === 'ai' && turn === 2) {
                 runAIMove();
             }
         }
@@ -715,6 +729,8 @@
         let dragStartPinPos = { x: 0, y: 0 };
 
         canvas.addEventListener('mousedown', (e) => {
+            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken tıklamaları kapat
+
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup') {
                 for (let p of pins) {
@@ -731,7 +747,6 @@
             } 
             else if (currentPhase === 'playing') {
                 if (gameMode === 'online' && turn !== myTeamNumber) return; 
-                if (gameMode === 'ai' && turn === 2) return; 
                 if (Math.hypot(cap.vx, cap.vy) > 0.2) return; 
 
                 if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
@@ -741,6 +756,8 @@
         });
 
         canvas.addEventListener('mousemove', (e) => {
+            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken hareketleri kapat
+
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
                 selectedPin.x = pos.x; 
@@ -748,7 +765,6 @@
                 broadcastMyPinMove(selectedPin);
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
-                if (gameMode === 'ai' && turn === 2) return; 
                 let dx = pos.x - dragStart.x;
                 let dy = pos.y - dragStart.y;
                 let dist = Math.hypot(dx, dy);
@@ -762,6 +778,8 @@
         });
 
         window.addEventListener('mouseup', () => {
+            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken elinizi çekme tetiklemelerini engelle
+
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
 
@@ -786,7 +804,6 @@
             } 
             
             if (currentPhase === 'playing' && isDraggingBall) {
-                if (gameMode === 'ai' && turn === 2) return; 
                 isDraggingBall = false; playSound('kick');
                 cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                 cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
@@ -810,7 +827,8 @@
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('online-lobby').style.display = 'none';
             document.getElementById('start-match-btn').style.display = 'none';
-            isAiDragging = false;
+            isAiThinking = false;
+            isDraggingBall = false;
             drawFieldLinesOnly(); 
         }
 
@@ -860,7 +878,7 @@
             }
             
             ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); stroke();
             ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); ctx.stroke();
             ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
@@ -881,8 +899,8 @@
                 }
             });
 
-            // Hem oyuncunun sürükleme çizgisini hem de AI'ın sanal nişan çizgisini çizer
-            if (currentPhase === 'playing' && (isDraggingBall || isAiDragging)) {
+            // Gerek insan gerek bilgisayar sürüklemesi olsun, her iki durumda da ekrandaki vuruş çizgisi tamamen aynı fiziksel kurallarla çizilir
+            if (currentPhase === 'playing' && isDraggingBall) {
                 ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
                 ctx.lineTo(cap.x + (dragStart.x - dragCurrent.x), cap.y + (dragStart.y - dragCurrent.y));
