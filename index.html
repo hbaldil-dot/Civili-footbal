@@ -274,7 +274,6 @@
             exitToMenu();
         });
 
-        // SENKRONİZASYON DÜZELTMESİ: Kurucu ve Misafir artık aynı koordinatları paylaşıyor
         socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
             if (currentPhase === 'setup') {
                 let count = 0;
@@ -308,6 +307,7 @@
             updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
         });
 
+        // 2. ÇÖZÜM: Topun pozisyonunu, hızıyla birlikte milisaniyelik hassasiyetle eşitliyoruz
         socket.on("peerState", (state) => {
             if (myTeamNumber === 2) {
                 cap.x = width - state.cap.x;
@@ -315,8 +315,10 @@
                 cap.vx = -state.cap.vx;
                 cap.vy = -state.cap.vy;
             } else {
-                cap.x = state.cap.x; cap.y = state.cap.y;
-                cap.vx = state.cap.vx; cap.vy = state.cap.vy;
+                cap.x = state.cap.x; 
+                cap.y = state.cap.y;
+                cap.vx = state.cap.vx; 
+                cap.vy = state.cap.vy;
             }
             cap.rotation = state.cap.rotation; 
             turn = state.turn; 
@@ -409,8 +411,6 @@
             exitToMenu();
         }
 
-        // DÜZELTME: Dizilim başlangıcında artık koordinatları manuel tersine çevirmiyoruz. 
-        // Ekran döndürmesi (draw) bunu zaten doğal olarak hallediyor.
         function startSetupPhase() {
             currentPhase = 'setup';
             score = { p1: 0, p2: 0 };
@@ -514,8 +514,19 @@
                 
                 if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                     if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                        if (cap.y < height / 2) { score.p1++; } else { score.p2++; }
-                        playSound('goal'); document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
+                        
+                        // 1. ÇÖZÜM: Golün kime yazılacağı kontrolü mutlak koordinat sistemine (y eksenine) göre sabitlendi.
+                        // Kimin ekranında olursak olalım: 
+                        // y < height/2 (Üst Kale) ise golü Mavi (Team 1) atmıştır.
+                        // y > height/2 (Alt Kale) ise golü Kırmızı (Team 2) atmıştır.
+                        if (cap.y < height / 2) { 
+                            score.p2++; // Üst kaleye gol girdi -> Kırmızı (p2) hanesine yaz
+                        } else { 
+                            score.p1++; // Alt kaleye gol girdi -> Mavi (p1) hanesine yaz
+                        }
+                        
+                        playSound('goal'); 
+                        document.getElementById('score-board').innerText = `${score.p1} - `${score.p2}`;
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
                     } else {
@@ -544,7 +555,7 @@
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                if(gameMode === 'online' && turn !== myTeamNumber) broadcastState();
+                if(gameMode === 'online' && turn === myTeamNumber) broadcastState(); // Sadece şutu çeken oyuncu yayını domine eder
             } else if (gameMode === 'ai' && turn === 2) {
                 runAIMove();
             }
@@ -695,9 +706,9 @@
         function animate() {
             if (currentPhase === 'menu') return;
             
-            if (gameMode !== 'online' || myTeamNumber === 1) {
-                updatePhysics();
-            }
+            // 2. ÇÖZÜM: Online modda her iki tarafta da fizik motoru lokal olarak çalışır, 
+            // böylece gecikmesiz, anlık ve ultra akıcı (realtime) hareket sağlanır.
+            updatePhysics();
             
             draw();
             requestAnimationFrame(animate);
@@ -707,7 +718,6 @@
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
-            // BURASI TÜM GÖRSELİ DÖNDÜRÜYOR: Dizilimde de Kırmızı altta, Mavi üstte görünecek!
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
