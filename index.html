@@ -82,7 +82,8 @@
             max-height: 82dvh; max-width: 100%; aspect-ratio: 360 / 620; object-fit: contain;
         }
     </style>
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- Socket.IO kütüphanesini yüklerken hata oluşursa sayfanın çökmesini engelliyoruz -->
+    <script src="/socket.io/socket.io.js" onerror="console.warn('Sunucu bulunamadı, online mod devre dışı.')"></script>
 </head>
 <body>
 
@@ -130,7 +131,17 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        const socket = io();
+        // DÜZELTME: Socket kütüphanesi yüklendiyse bağlan, yüklenmediyse güvenli şekilde 'null' yapıp devam et
+        let socket = null;
+        if (typeof io !== 'undefined') {
+            try {
+                socket = io();
+                setupSocketListeners();
+            } catch (e) {
+                console.error("Socket bağlantı hatası:", e);
+            }
+        }
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const width = 360;
@@ -213,6 +224,10 @@
         }
 
         function openOnlineLobby() {
+            if (!socket) {
+                alert("Şu anda bir sunucuya bağlı değilsiniz! Lütfen Node.js sunucusunu çalıştırın veya internet bağlantınızı kontrol edin.");
+                return;
+            }
             gameMode = 'online';
             const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random()*100);
             socket.emit("join-lobby", name);
@@ -221,114 +236,115 @@
         }
 
         function closeOnlineLobby() {
-            socket.emit("leave-lobby");
+            if (socket) socket.emit("leave-lobby");
             document.getElementById('online-lobby').style.display = 'none';
             document.getElementById('menu').style.display = 'block';
         }
 
-        socket.on("update-lobby-players", (players) => {
-            const listContainer = document.getElementById('lobby-list');
-            listContainer.innerHTML = "";
-            let count = 0;
-            players.forEach(p => {
-                if (p.id !== socket.id) {
-                    count++;
-                    const item = document.createElement('div');
-                    item.className = 'player-item';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.innerHTML = `⚽ ${p.name}`;
-                    const btn = document.createElement('button');
-                    btn.className = 'status';
-                    btn.innerText = 'Davet Et';
-                    btn.onclick = () => {
-                        btn.innerText = "Bekleniyor...";
-                        btn.style.background = "#e67e22";
-                        socket.emit("send-invite", p.id);
-                    };
-                    item.appendChild(nameSpan);
-                    item.appendChild(btn);
-                    listContainer.appendChild(item);
+        function setupSocketListeners() {
+            socket.on("update-lobby-players", (players) => {
+                const listContainer = document.getElementById('lobby-list');
+                listContainer.innerHTML = "";
+                let count = 0;
+                players.forEach(p => {
+                    if (p.id !== socket.id) {
+                        count++;
+                        const item = document.createElement('div');
+                        item.className = 'player-item';
+                        const nameSpan = document.createElement('span');
+                        nameSpan.innerHTML = `⚽ ${p.name}`;
+                        const btn = document.createElement('button');
+                        btn.className = 'status';
+                        btn.innerText = 'Davet Et';
+                        btn.onclick = () => {
+                            btn.innerText = "Bekleniyor...";
+                            btn.style.background = "#e67e22";
+                            socket.emit("send-invite", p.id);
+                        };
+                        item.appendChild(nameSpan);
+                        item.appendChild(btn);
+                        listContainer.appendChild(item);
+                    }
+                });
+                if (count === 0) listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş. Diğer telefondan da girin.</div>";
+            });
+
+            socket.on("receive-invite", (data) => {
+                if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+                    socket.emit("accept-invite", data.fromId);
                 }
             });
-            if (count === 0) listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş. Diğer telefondan da girin.</div>";
-        });
 
-        socket.on("receive-invite", (data) => {
-            if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
-                socket.emit("accept-invite", data.fromId);
-            }
-        });
+            socket.on("start-online-match", ({ roomId, team }) => {
+                currentRoomId = roomId;
+                myTeamNumber = team; 
+                document.getElementById('online-lobby').style.display = 'none';
+                document.getElementById('top-bar').style.display = 'flex';
+                matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+                document.getElementById('time-board').innerText = matchSecondsLeft + "s";
+                startSetupPhase();
+            });
 
-        socket.on("start-online-match", ({ roomId, team }) => {
-            currentRoomId = roomId;
-            myTeamNumber = team; 
-            document.getElementById('online-lobby').style.display = 'none';
-            document.getElementById('top-bar').style.display = 'flex';
-            matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
-            document.getElementById('time-board').innerText = matchSecondsLeft + "s";
-            startSetupPhase();
-        });
+            socket.on("opponent-disconnected", () => {
+                alert("Rakip oyundan ayrıldı.");
+                exitToMenu();
+            });
 
-        socket.on("opponent-disconnected", () => {
-            alert("Rakip oyundan ayrıldı.");
-            exitToMenu();
-        });
-
-        socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
-            if (currentPhase === 'setup') {
-                let count = 0;
-                for (let p of pins) {
-                    if (!p.isPost && p.team === team) {
-                        if (count === index) {
-                            p.x = x;
-                            p.y = y;
-                            break;
+            socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
+                if (currentPhase === 'setup') {
+                    let count = 0;
+                    for (let p of pins) {
+                        if (!p.isPost && p.team === team) {
+                            if (count === index) {
+                                p.x = x;
+                                p.y = y;
+                                break;
+                            }
+                            count++;
                         }
-                        count++;
                     }
                 }
-            }
-        });
-
-        socket.on("match-go", ({ pins: finalPins }) => {
-            pins = [
-                {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
-                {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
-            ];
-
-            finalPins.forEach((p, index) => {
-                let assignedTeam = p.team || (index < 11 ? 1 : 2);
-                pins.push({ x: p.x, y: p.y, team: assignedTeam });
             });
 
-            currentPhase = 'playing';
-            document.getElementById('start-match-btn').style.display = 'none';
-            document.getElementById('shot-timer').style.display = 'block';
-            updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
-        });
+            socket.on("match-go", ({ pins: finalPins }) => {
+                pins = [
+                    {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
+                    {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
+                ];
 
-        // 2. ÇÖZÜM: Topun pozisyonunu, hızıyla birlikte milisaniyelik hassasiyetle eşitliyoruz
-        socket.on("peerState", (state) => {
-            if (myTeamNumber === 2) {
-                cap.x = width - state.cap.x;
-                cap.y = height - state.cap.y;
-                cap.vx = -state.cap.vx;
-                cap.vy = -state.cap.vy;
-            } else {
-                cap.x = state.cap.x; 
-                cap.y = state.cap.y;
-                cap.vx = state.cap.vx; 
-                cap.vy = state.cap.vy;
-            }
-            cap.rotation = state.cap.rotation; 
-            turn = state.turn; 
-            score = state.score;
-            document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
-            updateHUDTurn(); resetShotTimer();
-        });
+                finalPins.forEach((p, index) => {
+                    let assignedTeam = p.team || (index < 11 ? 1 : 2);
+                    pins.push({ x: p.x, y: p.y, team: assignedTeam });
+                });
+
+                currentPhase = 'playing';
+                document.getElementById('start-match-btn').style.display = 'none';
+                document.getElementById('shot-timer').style.display = 'block';
+                updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
+            });
+
+            socket.on("peerState", (state) => {
+                if (myTeamNumber === 2) {
+                    cap.x = width - state.cap.x;
+                    cap.y = height - state.cap.y;
+                    cap.vx = -state.cap.vx;
+                    cap.vy = -state.cap.vy;
+                } else {
+                    cap.x = state.cap.x; 
+                    cap.y = state.cap.y;
+                    cap.vx = state.cap.vx; 
+                    cap.vy = state.cap.vy;
+                }
+                cap.rotation = state.cap.rotation; 
+                turn = state.turn; 
+                score = state.score;
+                document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
+                updateHUDTurn(); resetShotTimer();
+            });
+        }
 
         function broadcastState() {
-            if(gameMode !== 'online' || currentPhase !== 'playing') return;
+            if(!socket || gameMode !== 'online' || currentPhase !== 'playing') return;
             let sendCap = { ...cap };
             if (myTeamNumber === 2) {
                 sendCap.x = width - cap.x;
@@ -343,7 +359,7 @@
         }
 
         function broadcastMyPinMove(pin) {
-            if (gameMode !== 'online' || currentPhase !== 'setup') return;
+            if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
             
             let index = -1;
             let count = 0;
@@ -455,7 +471,7 @@
         }
 
         function confirmFormationsAndStart() {
-            if (gameMode === 'online') {
+            if (gameMode === 'online' && socket) {
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
 
@@ -515,18 +531,14 @@
                 if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                     if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
                         
-                        // 1. ÇÖZÜM: Golün kime yazılacağı kontrolü mutlak koordinat sistemine (y eksenine) göre sabitlendi.
-                        // Kimin ekranında olursak olalım: 
-                        // y < height/2 (Üst Kale) ise golü Mavi (Team 1) atmıştır.
-                        // y > height/2 (Alt Kale) ise golü Kırmızı (Team 2) atmıştır.
                         if (cap.y < height / 2) { 
-                            score.p2++; // Üst kaleye gol girdi -> Kırmızı (p2) hanesine yaz
+                            score.p2++; 
                         } else { 
-                            score.p1++; // Alt kaleye gol girdi -> Mavi (p1) hanesine yaz
+                            score.p1++; 
                         }
                         
                         playSound('goal'); 
-                        document.getElementById('score-board').innerText = `${score.p1} - `${score.p2}`;
+                        document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
                     } else {
@@ -555,7 +567,7 @@
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                if(gameMode === 'online' && turn === myTeamNumber) broadcastState(); // Sadece şutu çeken oyuncu yayını domine eder
+                if(gameMode === 'online' && turn === myTeamNumber) broadcastState(); 
             } else if (gameMode === 'ai' && turn === 2) {
                 runAIMove();
             }
@@ -668,7 +680,8 @@
         function exitToMenu() {
             if(timerInterval) clearInterval(timerInterval);
             if(shotTimerInterval) clearInterval(shotTimerInterval);
-            socket.emit("leave-lobby"); currentPhase = 'menu';
+            if(socket) socket.emit("leave-lobby"); 
+            currentPhase = 'menu';
             document.getElementById('menu').style.display = 'block';
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('online-lobby').style.display = 'none';
@@ -705,11 +718,7 @@
 
         function animate() {
             if (currentPhase === 'menu') return;
-            
-            // 2. ÇÖZÜM: Online modda her iki tarafta da fizik motoru lokal olarak çalışır, 
-            // böylece gecikmesiz, anlık ve ultra akıcı (realtime) hareket sağlanır.
             updatePhysics();
-            
             draw();
             requestAnimationFrame(animate);
         }
