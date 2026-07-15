@@ -7,12 +7,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// İstemci dosyalarını (index.html, resimler vb.) sunmak için public klasörünü belirliyoruz
-app.use(express.static(path.join(__dirname, 'public')));
+// --- DÜZELTME: Statik dosyaları ve ana sayfayı doğrudan ana dizinden (root) sunuyoruz ---
+app.use(express.static(__dirname));
 
-// Ana sayfa isteğinde index.html dosyasını gönder
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Çevrimiçi havuzdaki (lobideki) aktif oyuncular listesi
