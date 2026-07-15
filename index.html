@@ -96,7 +96,7 @@
             <select id="match-duration">
                 <option value="60">1 Dakika (60s)</option>
                 <option value="90" selected>1.5 Dakika (90s)</option>
-                <option value="120">2 Dakika (120s)</option>
+                <option value="120">2 Dokika (120s)</option>
             </select>
         </div>
         <div class="mode-container">
@@ -140,10 +140,10 @@
         canvas.width = width; canvas.height = height;
 
         // Oyun durumları
-        let currentPhase = 'menu'; // menu, setup, playing, ended
-        let gameMode = 'local'; // local, ai, online
+        let currentPhase = 'menu'; 
+        let gameMode = 'local'; 
         let score = { p1: 0, p2: 0 };
-        let turn = 1; // 1: Mavi, 2: Kırmızı
+        let turn = 1; 
         let myTeamNumber = 1; 
         let currentRoomId = null;
 
@@ -163,6 +163,49 @@
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
+
+        // Web Audio API Ses Sentezleyici Motoru
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'kick') { // Şut sesi (Kalın, tok bas)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } 
+            else if (type === 'hit') { // Çivi çarpışması (Metalik kısa klik)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } 
+            else if (type === 'goal') { // Gol sesi (Yükselen retro siren)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            }
+        }
 
         drawFieldLinesOnly();
 
@@ -250,7 +293,16 @@
         });
 
         socket.on("match-go", ({ pins: finalPins }) => {
-            pins = finalPins;
+            // Online lobi eşleşmesinde oyuncuları doğru yarım sahalara dağıtıyoruz.
+            pins = [
+                {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
+                {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
+            ];
+            
+            finalPins.forEach(p => {
+                pins.push(p);
+            });
+
             currentPhase = 'playing';
             document.getElementById('start-match-btn').style.display = 'none';
             document.getElementById('shot-timer').style.display = 'block';
@@ -434,12 +486,10 @@
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
             setTimeout(() => {
-                const targetX = width / 2;
-                const targetY = height; 
-                
-                const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
-                const power = 4 + Math.random() * 6;
+                const angle = Math.atan2(height - cap.y, width/2 - cap.x);
+                const power = 3.5 + Math.random() * 4.5; // Güç miktarını tünellemeyi önlemek için biraz düşürdük
 
+                playSound('kick');
                 cap.vx = Math.cos(angle) * power;
                 cap.vy = Math.sin(angle) * power;
 
@@ -449,11 +499,80 @@
             }, 1000);
         }
 
+        // --- Gelişmiş Fizik Güncellemesi (Alt Adım ve Tünelleme Önleyici) ---
         function updatePhysics() {
             if(currentPhase !== 'playing') return;
+
+            const SUB_STEPS = 4; // Topun çok hızlıyken adamlardan geçip gitmesini engelleyen mikro-çözünürlük adımları
             
-            cap.x += cap.vx; cap.y += cap.vy;
-            cap.vx *= cap.friction; cap.vy *= cap.friction;
+            for(let step = 0; step < SUB_STEPS; step++) {
+                // Her alt adımda hızın küçük bir parçasını ekle
+                cap.x += cap.vx / SUB_STEPS; 
+                cap.y += cap.vy / SUB_STEPS;
+
+                // Duvarlardan sekme
+                if (cap.x - cap.radius < 0) { 
+                    cap.x = cap.radius; 
+                    cap.vx *= -0.85; 
+                    playSound('hit'); 
+                }
+                if (cap.x + cap.radius > width) { 
+                    cap.x = width - cap.radius; 
+                    cap.vx *= -0.85; 
+                    playSound('hit'); 
+                }
+                
+                // Kale ve kale arkası koridoru kontrolü
+                if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
+                    if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
+                        if (cap.y < height / 2) {
+                            score.p2++; 
+                        } else {
+                            score.p1++; 
+                        }
+                        playSound('goal');
+                        document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
+                        cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
+                        broadcastState();
+                        resetShotTimer();
+                        return; // Gol olunca bu karenin fiziğini tamamen durdur
+                    } else {
+                        if (cap.y - cap.radius < 0) { 
+                            cap.y = cap.radius; 
+                            cap.vy *= -0.85; 
+                            playSound('hit'); 
+                        }
+                        if (cap.y + cap.radius > height) { 
+                            cap.y = height - cap.radius; 
+                            cap.vy *= -0.85; 
+                            playSound('hit'); 
+                        }
+                    }
+                }
+
+                // Çivilere ve Oyunculara Çarpma Algoritması
+                pins.forEach(pin => {
+                    const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
+                    const pinRadius = pin.isPost ? 4 : 8;
+                    const minDist = cap.radius + pinRadius;
+                    
+                    if (dist < minDist) {
+                        playSound('hit');
+                        const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
+                        // Çakışmayı gider (İç içe geçmeyi engeller)
+                        cap.x = pin.x + Math.cos(angle) * minDist; 
+                        cap.y = pin.y + Math.sin(angle) * minDist;
+                        
+                        const hitSpeed = Math.hypot(cap.vx, cap.vy);
+                        cap.vx = Math.cos(angle) * Math.max(hitSpeed, 1.5) * 0.85; 
+                        cap.vy = Math.sin(angle) * Math.max(hitSpeed, 1.5) * 0.85;
+                    }
+                });
+            }
+
+            // Sürtünme her büyük karede bir kez uygulanır
+            cap.vx *= cap.friction; 
+            cap.vy *= cap.friction;
 
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
@@ -464,39 +583,6 @@
                     runAIMove();
                 }
             }
-
-            if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; }
-            if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; }
-            
-            if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
-                if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                    if (cap.y < height / 2) {
-                        score.p2++; 
-                    } else {
-                        score.p1++; 
-                    }
-                    document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
-                    cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-                    broadcastState();
-                    resetShotTimer();
-                    return;
-                } else {
-                    if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; }
-                    if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; }
-                }
-            }
-
-            pins.forEach(pin => {
-                const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
-                const pinRadius = pin.isPost ? 4 : 8;
-                const minDist = cap.radius + pinRadius;
-                if (dist < minDist) {
-                    const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
-                    cap.x = pin.x + Math.cos(angle) * minDist; cap.y = pin.y + Math.sin(angle) * minDist;
-                    const hitSpeed = Math.hypot(cap.vx, cap.vy);
-                    cap.vx = Math.cos(angle) * hitSpeed * 0.85; cap.vy = Math.sin(angle) * hitSpeed * 0.85;
-                }
-            });
         }
 
         function getCanvasTouchPos(e) {
@@ -582,6 +668,7 @@
             
             if (currentPhase === 'playing' && isDraggingBall) {
                 isDraggingBall = false;
+                playSound('kick');
                 cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                 cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
                 
@@ -626,7 +713,7 @@
             ctx.restore();
         }
 
-        // --- RETRO TOP ÇİZİMİ (MERKEZİ DINAMİK RENKLİ) ---
+        // --- RETRO TOP ÇİZİMİ ---
         function drawSoccerBall(x, y, r, rotation) {
             ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
             ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
