@@ -5,7 +5,14 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// Render.com için CORS ve transport ayarları
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Statik dosyaları doğrudan ana dizinden sunuyoruz
 app.use(express.static(__dirname));
@@ -75,10 +82,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- DIZILIS SENKRONIZASYONU ---
+    // --- DİZİLİŞ SENKRONİZASYONU ---
     socket.on('setup-pin-move', ({ roomId, team, index, x, y }) => {
-        // Gelen koordinatları doğrudan (düzlemsel olarak) diğer oyuncuya fırlatıyoruz.
-        // İstemci kendi ekran açısına göre simetri işlemini kendisi yapacak.
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
@@ -89,7 +94,6 @@ io.on('connection', (socket) => {
         const player = room.players.find(p => p.team === team);
         if (player) {
             player.ready = true;
-            // Gelen koordinatlar istemci tarafında zaten düzlemsel olarak düzeltildi (Team 1 bakışına uyarlandı).
             player.placedPins = placedPins;
         }
 
@@ -99,17 +103,24 @@ io.on('connection', (socket) => {
                 ...room.players[1].placedPins
             ];
 
-            // Maçı başlatıyoruz
             io.to(roomId).emit('match-go', { pins: combinedPins });
             console.log(`Dizilimler onaylandı, maç başlıyor. Oda: ${roomId}`);
         }
     });
 
-    // --- OYNANIS SENKRONIZASYONU ---
-    socket.on('updateState', ({ roomId, state }) => {
-        socket.to(roomId).emit('peerState', state);
+    // --- YENİ: VURUŞ BAZLI SENKRONİZASYON ---
+    socket.on('playerShot', ({ roomId, shotData }) => {
+        // Vuruş verilerini diğer oyuncuya ilet
+        socket.to(roomId).emit('opponentShot', shotData);
+        console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
+    // --- YENİ: PERİYODİK SENKRONİZASYON (DÜZELTME) ---
+    socket.on('syncBallPosition', ({ roomId, ballState }) => {
+        socket.to(roomId).emit('correctBallPosition', ballState);
+    });
+
+    // --- BAĞLANTI KOPMASI ---
     socket.on('disconnect', () => {
         console.log(`Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
@@ -144,7 +155,8 @@ function handlePlayerDisconnection(socket) {
     }
 }
 
+// Render.com için PORT ve host ayarı
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} portunda başarıyla çalışıyor!`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
 });
