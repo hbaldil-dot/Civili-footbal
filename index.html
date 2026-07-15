@@ -2,15 +2,27 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Çivili Futbol - Klasik & Online</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        
         body {
-            background: #111; font-family: 'Courier New', Courier, monospace; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white;
+            background: #111; 
+            font-family: 'Courier New', Courier, monospace; 
+            overflow: hidden;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            /* Safari arama çubuğuna göre dinamik olarak değişen yükseklik birimi (dvh) */
+            height: 100dvh; 
+            width: 100vw;
+            color: white;
+            padding: 8px;
         }
         
+        /* ANA MENÜ */
         #menu {
             position: absolute; background: rgba(20, 30, 20, 0.98); border: 4px solid #4a754a;
             border-radius: 12px; padding: 25px; text-align: center; z-index: 100; width: 90%; max-width: 360px;
@@ -33,6 +45,7 @@
         .btn-ai { background: #e67e22; box-shadow: 0 4px #d35400; }
         .btn-online { background: #8e44ad; box-shadow: 0 4px #6c3483; }
 
+        /* ONLINE LOBİ */
         #online-lobby {
             position: absolute; background: rgba(20, 20, 30, 0.98); border: 4px solid #6c3483;
             border-radius: 12px; padding: 20px; text-align: center; z-index: 110; width: 90%; max-width: 360px;
@@ -45,7 +58,6 @@
         }
         .player-item {
             padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
-            transition: background 0.2s;
         }
         .player-item .status { 
             font-size: 11px; padding: 6px 10px; border-radius: 4px; font-weight: bold; 
@@ -57,33 +69,53 @@
             font-weight: bold; cursor: pointer; font-family: inherit;
         }
 
+        /* DİNAMİK HUD / ÜST BAR */
         #top-bar {
-            position: absolute; top: 10px; width: 95%; max-width: 380px;
-            display: flex; flex-direction: column; gap: 5px; align-items: center; z-index: 15; pointer-events: none; display: none;
+            width: 100%; 
+            max-width: 360px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+            align-items: center; 
+            z-index: 15; 
+            pointer-events: none; 
+            display: none;
+            margin-bottom: 6px; /* Canvas ile arasına küçük bir boşluk bırakır */
         }
-        .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 5px; }
+        .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 4px; }
         #score-board, #turn-indicator, #time-board, #shot-timer {
-            background: rgba(0, 0, 0, 0.85); padding: 6px 10px; border-radius: 4px;
-            font-size: 13px; font-weight: bold; border: 2px solid #fff; text-align: center;
+            background: rgba(0, 0, 0, 0.85); padding: 5px 8px; border-radius: 4px;
+            font-size: 12px; font-weight: bold; border: 2px solid #fff; text-align: center;
         }
-        #turn-indicator { color: #f1c40f; border-color: #f1c40f; min-width: 90px; }
+        #turn-indicator { color: #f1c40f; border-color: #f1c40f; min-width: 85px; }
         #time-board { color: #3498db; border-color: #3498db; }
-        #shot-timer { color: #e74c3c; border-color: #e74c3c; min-width: 60px; display: none; }
+        #shot-timer { color: #e74c3c; border-color: #e74c3c; min-width: 55px; display: none; }
         
         #exit-btn, #start-match-btn {
             color: white; border: 2px solid #fff; border-radius: 4px;
-            font-size: 13px; font-weight: bold; cursor: pointer; pointer-events: auto;
-            padding: 6px 12px; font-family: inherit;
+            font-size: 12px; font-weight: bold; cursor: pointer; pointer-events: auto;
+            padding: 5px 10px; font-family: inherit;
         }
         #exit-btn { background: #c0392b; }
         #start-match-btn { background: #27ae60; display: none; }
 
-        canvas { background: #2e7d32; border: 10px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        /* DİNAMİK CANVAS ÖLÇEKLENDİRME */
+        canvas { 
+            background: #2e7d32; 
+            border: 6px solid #1b5e20; 
+            border-radius: 8px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            max-height: 82dvh; /* Safari barları açıkken bile dikeyde asla taşmaz */
+            max-width: 100%;
+            aspect-ratio: 360 / 620; /* Oyunun en-boy oranını kusursuz korur */
+            object-fit: contain;
+        }
     </style>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
+    <!-- MENÜ -->
     <div id="menu">
         <h1>ÇİVİLİ FUTBOL</h1>
         <div class="input-group">
@@ -105,6 +137,7 @@
         </div>
     </div>
 
+    <!-- ONLINE OYUNCU HAVUZU -->
     <div id="online-lobby">
         <h2>ÇEVRİMİÇİ HAVUZ</h2>
         <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
@@ -114,6 +147,7 @@
         <button class="lobby-close-btn" onclick="closeOnlineLobby()">Geri Dön</button>
     </div>
 
+    <!-- ÜST BAR HUD -->
     <div id="top-bar">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
@@ -160,7 +194,6 @@
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
         
-        // 7 TOP BOYU LİMİTİ HESAPLAMASI
         const MAX_DRAG_DIST = cap.radius * 2 * 7; 
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -244,7 +277,6 @@
                     btn.className = 'status';
                     btn.innerText = 'Davet Et';
                     
-                    // Alert kaldırıldı, görsel efektle davet gönderimi
                     btn.onclick = () => {
                         btn.innerText = "Bekleniyor...";
                         btn.style.background = "#e67e22";
@@ -426,7 +458,6 @@
 
             setTimeout(() => {
                 const angle = Math.atan2(height - cap.y, width/2 - cap.x);
-                // AI vuruş gücü de 7 top boyu limiti dengesinde tutuldu (~18px hız)
                 const power = 10 + Math.random() * 8; 
                 playSound('kick');
                 cap.vx = Math.cos(angle) * power; cap.vy = Math.sin(angle) * power;
@@ -437,7 +468,6 @@
         function updatePhysics() {
             if(currentPhase !== 'playing') return;
 
-            // FİZİK MOTORU ALT ADIMLARI 8'E ÇIKARILDI (Asla iç içe geçme olmaz)
             const SUB_STEPS = 8; 
             
             for(let step = 0; step < SUB_STEPS; step++) {
@@ -448,7 +478,7 @@
                 
                 if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                     if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
-                        if (cap.y < height / 2) { score.p1++; } else { score.p2++; } // Skor mantığı düzeltildi
+                        if (cap.y < height / 2) { score.p1++; } else { score.p2++; }
                         playSound('goal'); document.getElementById('score-board').innerText = `${score.p1} - ${score.p2}`;
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
@@ -484,7 +514,6 @@
             }
         }
 
-        // Oyuncu 2 için Ters Kamera Hesaplaması Modülü
         function getCanvasTouchPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -510,7 +539,6 @@
             if (currentPhase === 'setup') {
                 for (let p of pins) {
                     if (!p.isPost) {
-                        // Kendi oyuncularını kısıtla, lokalde ikisini de sürükle
                         if (gameMode === 'online' && p.team !== editableTeam) continue;
                         
                         if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
@@ -536,7 +564,6 @@
                 selectedPin.x = pos.x; selectedPin.y = pos.y;
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
-                // 7 TOP BOYU (ÇAP) GÖRSEL VE GÜÇ LİMİTLEMESİ 
                 let dx = pos.x - dragStart.x;
                 let dy = pos.y - dragStart.y;
                 let dist = Math.hypot(dx, dy);
@@ -553,7 +580,6 @@
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
 
-                // Sınır koruması ve karşı yarı sahaya geçmeme kısıtlaması
                 if (selectedPin.x < 15 || selectedPin.x > width - 15) valid = false;
                 if (selectedPin.team === 1) { 
                     if (selectedPin.y < height/2 + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
@@ -632,7 +658,6 @@
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
-            // OYUNCU 2 (KIRMIZI) İÇİN KAMERAYI TAMAMEN TERS ÇEVİR (Simetri Sorununu Çözer)
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
@@ -651,14 +676,14 @@
                 ctx.lineWidth = 2;
                 
                 if (gameMode === 'online') {
-                    if (editableTeam === 1) { // Mavi takım alanı
+                    if (editableTeam === 1) { 
                         ctx.fillRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
                         ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
-                    } else { // Kırmızı takım alanı
+                    } else { 
                         ctx.fillRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
                         ctx.strokeRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
                     }
-                } else { // Lokal oyun alanı
+                } else { 
                     ctx.fillRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
                     ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
                     ctx.fillRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
@@ -683,7 +708,7 @@
 
             if (currentPhase === 'playing') drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
             
-            ctx.restore(); // Kamera rotasyonunu bitir
+            ctx.restore(); 
         }
 
         function animate() {
