@@ -588,24 +588,48 @@
             }
         }
 
-        // 2. ÇÖZÜM: AI vuruşunun max 20 top boyu (~440px mesafe) alacak şekilde ayarlanması
+        // 🌟 KÖKLÜ DÜZELTME: AI vuruş fiziği artık tamamen oyuncu mekaniğine (Drag-and-Release) dönüştürüldü!
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
+            // AI düşünme süresi (1 saniye) sonrasında nişan almaya başlar
             setTimeout(() => {
-                const angle = Math.atan2(height - cap.y, width/2 - cap.x);
+                // Bilgisayar (P2), Mavi kaleyi (Yönü aşağıya doğru: height - cap.y) hedef alıyor
+                const targetX = width / 2;
+                const targetY = height - goalHeight;
                 
-                // Top Çapı: 2 * cap.radius = 22px. 20 top boyu = 440px mesafe.
-                // Sürtünme katsayısı (0.983) ile 16 alt adımda simüle edilen hızı tam 440px sınırlayacak vuruş gücü:
-                const maxAIPower = 9.8; 
+                const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
+
+                // Top Çapı: 22px. Maksimum 20 top boyu fırlatma mesafesi limiti = 440px yol alma gücü.
+                // Bu mesafeyi fizik motorunun fırlatma çarpanıyla (0.13) simüle etmek için gereken germe miktarı:
+                const aiPullDistance = 75; // En fazla 75px sanal geriye çekme uyguluyoruz (tutarlı ve kurallara uygun)
+
+                // 1. ADIM: Bilgisayar topu sanal olarak "tutuyor" ve geriye doğru nişan alıyor
+                isDraggingBall = true;
+                dragStart = { x: cap.x, y: cap.y };
                 
-                playSound('kick');
-                cap.vx = Math.cos(angle) * maxAIPower; 
-                cap.vy = Math.sin(angle) * maxAIPower;
-                
-                turn = 1; updateHUDTurn(); resetShotTimer();
-            }, 1000);
+                // Sanal geriye çekme çizgisinin konumunu (hedefin tam tersi yönde) hesaplıyoruz
+                dragCurrent = {
+                    x: cap.x - Math.cos(angle) * aiPullDistance,
+                    y: cap.y - Math.sin(angle) * aiPullDistance
+                };
+
+                // 2. ADIM: Nişanı oyuncuya yarım saniye gösterip fırlatıyor (Gerçekçi vuruş hissi)
+                setTimeout(() => {
+                    isDraggingBall = false; // "Bırakma" tetikleniyor
+                    playSound('kick');
+
+                    // Oyuncunun fırlatma hesaplama formülünün BİREBİR aynısı çalışıyor:
+                    cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
+                    cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+
+                    turn = 1; 
+                    updateHUDTurn(); 
+                    resetShotTimer();
+                }, 600); // 600ms nişan alma görsel süresi
+
+            }, 800);
         }
 
         function updatePhysics() {
@@ -622,12 +646,9 @@
                 if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                     if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
                         
-                        // 1. ÇÖZÜM: Kaleler ve sayı dağılımı mantığı tamamen düzeltildi
                         if (cap.y < height / 2) { 
-                            // Top Üst Kaleye (Kırmızı Takım'ın kalesi) girdi -> Sayı Mavi Takım'a (P1) yazılır.
                             score.p1++; 
                         } else { 
-                            // Top Alt Kaleye (Mavi Takım'ın kalesi) girdi -> Sayı Kırmızı Takım'a (P2) yazılır.
                             score.p2++; 
                         }
                         
@@ -723,6 +744,7 @@
                 broadcastMyPinMove(selectedPin);
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
+                if (gameMode === 'ai' && turn === 2) return; // AI nişan alırken oyuncu müdahale edemez
                 let dx = pos.x - dragStart.x;
                 let dy = pos.y - dragStart.y;
                 let dist = Math.hypot(dx, dy);
@@ -760,6 +782,7 @@
             } 
             
             if (currentPhase === 'playing' && isDraggingBall) {
+                if (gameMode === 'ai' && turn === 2) return; // AI atışı ise bu el yordamıyla tetiklenmez
                 isDraggingBall = false; playSound('kick');
                 cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                 cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
