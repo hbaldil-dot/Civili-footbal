@@ -311,17 +311,13 @@
             exitToMenu();
         });
 
-        // --- YENİLENEN SİMETRİK SENKRONİZASYON ALICISI ---
         socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
             if (currentPhase === 'setup') {
-                // Rakibin gönderdiği koordinatları, kendi ekran açımıza göre dönüştürmeliyiz.
-                // Eğer biz Team 2 (Misafir) isek, rakip Team 1 (Ev Sahibi) kendi ekranına göre (düz) gönderdi. 
-                // Biz ters ekran olduğumuz için gelen koordinatları tersine çevirmeliyiz: (width-x, height-y).
-                // Eğer biz Team 1 (Ev Sahibi) isek, rakip Team 2 zaten ters koordinat çevirip gönderdiği için 
-                // gelen koordinatı doğrudan kullanabiliriz.
                 let targetX = x;
                 let targetY = y;
                 
+                // Rakibin gönderdiği (Ev sahibi koordinatı) veriyi eğer biz misafirsek
+                // kendi ters ekranımıza göre simetrisini alarak güncelliyoruz.
                 if (myTeamNumber === 2) {
                     targetX = width - x;
                     targetY = height - y;
@@ -347,7 +343,6 @@
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            // Gelen pinleri kendi ekran açımıza göre diziye ekliyoruz
             finalPins.forEach(p => {
                 let actualX = p.x;
                 let actualY = p.y;
@@ -380,7 +375,6 @@
             });
         }
 
-        // --- YENİLENEN SİMETRİK SENKRONİZASYON GÖNDERİCİSİ ---
         function broadcastMyPinMove(pin) {
             if (gameMode !== 'online' || currentPhase !== 'setup') return;
             
@@ -394,9 +388,6 @@
             }
 
             if (index !== -1) {
-                // Sunucuya ve diğer rakibe daima "Ev Sahibi (Team 1) bakış açısına" göre senkronize koordinat gönderiyoruz.
-                // Eğer biz Team 2 (misafir) isek, kendi ekranımızda yaptığımız koordinatı 
-                // 180 derece çevirerek (düzleştirerek) sunucuya/rakibe yollarız.
                 let sendX = pin.x;
                 let sendY = pin.y;
                 if (myTeamNumber === 2) {
@@ -478,8 +469,6 @@
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            // Çivilerin varsayılan konumlarını, ekranın alt yarısı bizim kalemiz olacak şekilde tanımlıyoruz.
-            // Mavi takım (Düz Ekran) her zaman sahayı düz, Kırmızı takım (Ters Ekran) ise sahayı ters görür.
             const blue442 = [
                 {x: width * 0.50, y: height * 0.88, team: 1}, {x: width * 0.15, y: height * 0.73, team: 1}, 
                 {x: width * 0.38, y: height * 0.77, team: 1}, {x: width * 0.62, y: height * 0.77, team: 1}, 
@@ -498,10 +487,9 @@
                 {x: width * 0.35, y: height * 0.55, team: 2}  
             ];
             
-            // Eğer Online oynuyorsak, 2. takım (Misafir) ekranı 180 derece dönmüş göreceği için 
-            // kırmızı çivilerin default koordinatlarını onun ekranına göre düzeltiyoruz (aşağıya çekiyoruz).
             if (gameMode === 'online' && myTeamNumber === 2) {
-                // Kendi takımımızı (Red) ekranın alt yarısında göreceğiz.
+                // Misafir ekranında her şey ters döndüğü için görsel olarak kendisini aşağıda (savunmada), 
+                // rakibi ise yukarıda (hücumda) hissetmeli.
                 const localRed = red442.map(p => ({ x: width - p.x, y: height - p.y, team: 2 }));
                 const localBlue = blue442.map(p => ({ x: width - p.x, y: height - p.y, team: 1 }));
                 localBlue.forEach(p => pins.push(p));
@@ -520,7 +508,6 @@
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
 
-                // Onaylanan dizilimleri sunucuya daima Team 1'in (Ev Sahibi) düz bakış açısında kaydediyoruz.
                 const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
                     if (myTeamNumber === 2) {
                         return { x: width - p.x, y: height - p.y };
@@ -615,6 +602,8 @@
             }
         }
 
+        // --- DÜZELTİLEN KOORDİNAT SİMETRİSİ ---
+        // getCanvasTouchPos artık ekrana dokunduğun fiziksel pikseli hatasız şekilde hesaplar.
         function getCanvasTouchPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -626,6 +615,10 @@
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
 
+            // KROKİ GÜNCELLEMESİ: 
+            // Görsel ekranı canvas renderında 180 derece ters çevirdiğimiz için, 
+            // dokunma lokasyonunun koordinatını da doğrudan tersine çeviriyoruz. 
+            // Böylece misafir oyuncu artık tam olarak parmağıyla bastığı nesneyi hatasız kontrol edebilir.
             if (gameMode === 'online' && myTeamNumber === 2) {
                 x = width - x;
                 y = height - y;
@@ -642,15 +635,12 @@
                     if (!p.isPost) {
                         if (gameMode === 'online' && p.team !== editableTeam) continue;
                         
-                        let touchX = pos.x;
-                        let touchY = pos.y;
-                        if (gameMode === 'online' && myTeamNumber === 2) {
-                            touchX = width - pos.x;
-                            touchY = height - pos.y;
-                        }
-
-                        if (Math.hypot(touchX - p.x, touchY - p.y) < 22) {
-                            selectedPin = p; dragStartPinPos = { x: p.x, y: p.y }; break;
+                        // getCanvasTouchPos fonksiyonu içerisinde 2. takım için dönüştürmeyi zaten yaptık.
+                        // Bu yüzden burada ekstra bir dönüştürme uygulamadan doğrudan pos.x/pos.y kullanıyoruz!
+                        if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
+                            selectedPin = p; 
+                            dragStartPinPos = { x: p.x, y: p.y }; 
+                            break;
                         }
                     }
                 }
@@ -669,13 +659,9 @@
         canvas.addEventListener('mousemove', (e) => {
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
-                let currentX = pos.x;
-                let currentY = pos.y;
-                if (gameMode === 'online' && myTeamNumber === 2) {
-                    currentX = width - pos.x;
-                    currentY = height - pos.y;
-                }
-                selectedPin.x = currentX; selectedPin.y = currentY;
+                // Doğrudan hatasız koordinatları uyguluyoruz
+                selectedPin.x = pos.x; 
+                selectedPin.y = pos.y;
                 broadcastMyPinMove(selectedPin);
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
