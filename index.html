@@ -279,7 +279,6 @@
                 let targetX = x;
                 let targetY = y;
                 
-                // Gelen hamleyi kendi ayna görüntümüze çeviriyoruz
                 if (myTeamNumber === 2) {
                     targetX = width - x;
                     targetY = height - y;
@@ -299,21 +298,24 @@
             }
         });
 
+        // 1. DÜZELTME: match-go GELDİĞİNDE RENKLERİN KARIŞMASI KESİN OLARAK ÇÖZÜLDÜ
         socket.on("match-go", ({ pins: finalPins }) => {
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            finalPins.forEach(p => {
+            finalPins.forEach((p, index) => {
                 let actualX = p.x;
                 let actualY = p.y;
                 if (myTeamNumber === 2) {
                     actualX = width - p.x;
                     actualY = height - p.y;
                 }
-                // Sorun 2 Çözümü: Takım bilgisi doğrudan p.team'den alınarak atanıyor, böylece renkler asla karışmaz.
-                pins.push({ x: actualX, y: actualY, team: p.team });
+                
+                // Server takım verilerini unuttuysa, ilk 11 piyonu Mavi (1), kalanları Kırmızı (2) olarak dağıtıyoruz.
+                let assignedTeam = p.team || (index < 11 ? 1 : 2);
+                pins.push({ x: actualX, y: actualY, team: assignedTeam });
             });
 
             currentPhase = 'playing';
@@ -323,7 +325,6 @@
         });
 
         socket.on("peerState", (state) => {
-            // Top koordinatlarını senkronize et
             if (myTeamNumber === 2) {
                 cap.x = width - state.cap.x;
                 cap.y = height - state.cap.y;
@@ -467,11 +468,7 @@
                 {x: width * 0.35, y: height * 0.55, team: 2}  
             ];
             
-            // Sorun 1 & 2 Köklü Çözümü: 
-            // Misafir oyuncu diziliş yaparken kendini aşağıda (Team 1 alanında) hissetmelidir.
-            // Bu yüzden yerel ekranında dizilişi oluştururken, takımları ve renkleri koruyarak ekliyoruz.
             if (gameMode === 'online' && myTeamNumber === 2) {
-                // Misafir oyuncunun kendi takımı (Team 2) görsel olarak altta (kendi kalesi önünde) yerleşmeli.
                 const localRed = red442.map(p => ({ x: width - p.x, y: height - p.y, team: 2 }));
                 const localBlue = blue442.map(p => ({ x: width - p.x, y: height - p.y, team: 1 }));
                 localBlue.forEach(p => pins.push(p));
@@ -595,8 +592,6 @@
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
 
-            // Dokunma Simetrisi Çözümü:
-            // Görsel olarak sahayı (ctx.rotate) çevirdiğimiz için, dokunulan koordinatı da simetrik olarak tersine çevirmeliyiz.
             if (gameMode === 'online' && myTeamNumber === 2) {
                 x = width - x;
                 y = height - y;
@@ -703,9 +698,6 @@
         function drawRetroPlayer(x, y, team) {
             ctx.save(); ctx.translate(x, y);
             
-            // Sorun 2 Köklü Çözümü: 
-            // `team` verisi ne ise her şartta o rengi basıyoruz. 
-            // 1 ise mavi (#3498db), 2 ise kırmızı (#cc0000).
             const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
             const skinColor = '#ffad87';
 
@@ -731,12 +723,23 @@
             ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
         }
 
+        // 2. DÜZELTME: GOL VE FİZİK ÇAKIŞMASINI ENGELLEYEN YENİ SÜRÜM
+        function animate() {
+            if (currentPhase === 'menu') return;
+            
+            // Fizik hesaplama yetkisini sadece kurucuya (Mavi - Team 1) devrederek eşgüdümlü skor sağlıyoruz.
+            if (gameMode !== 'online' || myTeamNumber === 1) {
+                updatePhysics();
+            }
+            
+            draw();
+            requestAnimationFrame(animate);
+        }
+
         function draw() {
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
-            // Sorun 1 Çözümü: 
-            // Misafir oyuncu (myTeamNumber === 2) hem kurulumda hem oyunda sahayı ters görür (kendi kalesi aşağıda olur).
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
@@ -774,11 +777,6 @@
 
             if (currentPhase === 'playing' && cap) drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
             ctx.restore(); 
-        }
-
-        function animate() {
-            if (currentPhase === 'menu') return;
-            updatePhysics(); draw(); requestAnimationFrame(animate);
         }
     </script>
 </body>
