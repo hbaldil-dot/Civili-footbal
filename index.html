@@ -316,8 +316,6 @@
                 let targetX = x;
                 let targetY = y;
                 
-                // Rakibin gönderdiği (Ev sahibi koordinatı) veriyi eğer biz misafirsek
-                // kendi ters ekranımıza göre simetrisini alarak güncelliyoruz.
                 if (myTeamNumber === 2) {
                     targetX = width - x;
                     targetY = height - y;
@@ -350,6 +348,7 @@
                     actualX = width - p.x;
                     actualY = height - p.y;
                 }
+                // Sorun 2 Çözümü: Gelen takım bilgisi doğrudan atanıyor (p.team), böylece renk karışmıyor!
                 pins.push({ x: actualX, y: actualY, team: p.team });
             });
 
@@ -488,8 +487,8 @@
             ];
             
             if (gameMode === 'online' && myTeamNumber === 2) {
-                // Misafir ekranında her şey ters döndüğü için görsel olarak kendisini aşağıda (savunmada), 
-                // rakibi ise yukarıda (hücumda) hissetmeli.
+                // Sorun 1 Çözümü: Misafir de kurulum yaparken kendisini aşağıda (hücum yönü yukarıda olacak şekilde) görmeli.
+                // Bu yüzden diziliş aşamasında her iki takımın koordinatlarını ayna görüntüsüyle ters yerleştiriyoruz.
                 const localRed = red442.map(p => ({ x: width - p.x, y: height - p.y, team: 2 }));
                 const localBlue = blue442.map(p => ({ x: width - p.x, y: height - p.y, team: 1 }));
                 localBlue.forEach(p => pins.push(p));
@@ -571,8 +570,8 @@
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
                     } else {
-                        if (cap.y - cap.radius < 0) { cap.y = cap.radius; cap.vy *= -0.85; playSound('hit'); }
-                        if (cap.y + cap.radius > height) { cap.y = height - cap.radius; cap.vy *= -0.85; playSound('hit'); }
+                        if (cap.y - cap.radius < 0) { y = cap.radius; cap.vy *= -0.85; playSound('hit'); }
+                        if (cap.y + cap.radius > height) { y = height - cap.radius; cap.vy *= -0.85; playSound('hit'); }
                     }
                 }
 
@@ -602,8 +601,6 @@
             }
         }
 
-        // --- DÜZELTİLEN KOORDİNAT SİMETRİSİ ---
-        // getCanvasTouchPos artık ekrana dokunduğun fiziksel pikseli hatasız şekilde hesaplar.
         function getCanvasTouchPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -615,10 +612,8 @@
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
 
-            // KROKİ GÜNCELLEMESİ: 
-            // Görsel ekranı canvas renderında 180 derece ters çevirdiğimiz için, 
-            // dokunma lokasyonunun koordinatını da doğrudan tersine çeviriyoruz. 
-            // Böylece misafir oyuncu artık tam olarak parmağıyla bastığı nesneyi hatasız kontrol edebilir.
+            // Sorun 1 Çözümü: Kurulum (setup) aşamasında da 180 derece ters dönen kamerayı desteklediğimiz için,
+            // dokunma simetrisini hem kurulumda hem de oyunda misafir oyuncu (Team 2) için aktif hale getirdik.
             if (gameMode === 'online' && myTeamNumber === 2) {
                 x = width - x;
                 y = height - y;
@@ -635,8 +630,6 @@
                     if (!p.isPost) {
                         if (gameMode === 'online' && p.team !== editableTeam) continue;
                         
-                        // getCanvasTouchPos fonksiyonu içerisinde 2. takım için dönüştürmeyi zaten yaptık.
-                        // Bu yüzden burada ekstra bir dönüştürme uygulamadan doğrudan pos.x/pos.y kullanıyoruz!
                         if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
                             selectedPin = p; 
                             dragStartPinPos = { x: p.x, y: p.y }; 
@@ -659,7 +652,6 @@
         canvas.addEventListener('mousemove', (e) => {
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
-                // Doğrudan hatasız koordinatları uyguluyoruz
                 selectedPin.x = pos.x; 
                 selectedPin.y = pos.y;
                 broadcastMyPinMove(selectedPin);
@@ -727,8 +719,9 @@
 
         function drawRetroPlayer(x, y, team) {
             ctx.save(); ctx.translate(x, y);
-            if (team === 2) ctx.rotate(Math.PI);
             
+            // Sorun 2 Çözümü: Misafir kamera dönüşünden bağımsız olarak, 
+            // mavi takımın (Team 1) gövdesi maviye, kırmızı takımın (Team 2) kırmızıya boyanır.
             const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
             const skinColor = '#ffad87';
 
@@ -759,6 +752,8 @@
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
+            // Sorun 1 Çözümü: Misafir oyuncu (myTeamNumber === 2) hem kurulum (setup) hem de oyun (playing) aşamasında,
+            // sahayı kendi kalesi aşağıda, rakip kalesi yukarıda olacak şekilde simetrik olarak ters görmeli.
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
