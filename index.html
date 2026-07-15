@@ -11,6 +11,7 @@
             background: #111; font-family: 'Courier New', Courier, monospace; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100dvh; width: 100vw; color: white; padding: 8px;
+            position: relative;
         }
         #menu {
             position: absolute; background: rgba(20, 30, 20, 0.98); border: 4px solid #4a754a;
@@ -61,14 +62,17 @@
             width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 5px; align-items: center; z-index: 15; pointer-events: none; display: none; margin-bottom: 6px;
         }
         .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 4px; }
-        #score-board { 
+        
+        /* 2. ÇÖZÜM: Skorların takım rengiyle yazılması */
+        #score-board {
             background: rgba(0, 0, 0, 0.85); padding: 5px 8px; border-radius: 4px;
-            font-size: 12px; font-weight: bold; border: 2px solid #fff; text-align: center;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 14px; font-weight: bold; border: 2px solid #fff; text-align: center;
+            display: flex; gap: 6px; justify-content: center; align-items: center;
         }
-        .score-team { min-width: 20px; }
-        #score-p1 { color: #3498db; border-right: 1px solid #555; padding-right: 8px; }
-        #score-p2 { color: #cc0000; padding-left: 8px; }
+        #score-p1 { color: #3498db; } /* Mavi Takım */
+        #score-divider { color: #ffffff; }
+        #score-p2 { color: #e74c3c; } /* Kırmızı Takım */
+
         #turn-indicator, #time-board, #shot-timer {
             background: rgba(0, 0, 0, 0.85); padding: 5px 8px; border-radius: 4px;
             font-size: 12px; font-weight: bold; border: 2px solid #fff; text-align: center;
@@ -77,65 +81,58 @@
         #time-board { color: #3498db; border-color: #3498db; }
         #shot-timer { color: #e74c3c; border-color: #e74c3c; min-width: 55px; display: none; }
         
-        #exit-btn, #start-match-btn {
+        #exit-btn {
             color: white; border: 2px solid #fff; border-radius: 4px;
             font-size: 12px; font-weight: bold; cursor: pointer; pointer-events: auto;
-            padding: 5px 10px; font-family: inherit;
+            padding: 5px 10px; font-family: inherit; background: #c0392b;
         }
-        #exit-btn { background: #c0392b; }
-        #start-match-btn { background: #27ae60; display: none; }
 
-        /* Setup timer styling */
-        #setup-timer-container {
+        /* Oyun Alanı ve Canvas İlişkisi */
+        .canvas-container {
+            position: relative;
+            max-height: 82dvh; max-width: 100%; aspect-ratio: 360 / 620;
+        }
+        canvas { 
+            background: #2e7d32; border: 6px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            width: 100%; height: 100%; display: block;
+        }
+
+        /* 3. ÇÖZÜM: Orta yuvarlaktaki dairesel BAŞLAT / GERİ SAYIM butonu */
+        #start-match-btn {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 50;
-            display: none;
-            text-align: center;
-            pointer-events: auto;
-        }
-
-        #setup-timer-button {
-            width: 120px; height: 120px;
+            width: 84px; height: 84px;
             border-radius: 50%;
-            background: rgba(46, 204, 113, 0.95);
-            border: 4px solid #2ecc71;
+            border: 4px solid #27ae60;
+            background: rgba(39, 174, 96, 0.9);
             color: white;
-            font-size: 48px;
+            font-family: inherit;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            box-shadow: 0 0 30px rgba(46, 204, 113, 0.6);
-            display: flex;
+            z-index: 50;
+            display: none;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+            text-align: center;
+            line-height: 1.2;
         }
-
-        #setup-timer-button:active {
-            transform: scale(0.95);
+        #start-match-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+            background: rgba(30, 132, 73, 0.95);
         }
-
-        #setup-timer-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        #setup-timer-text {
-            position: absolute;
-            top: 20px;
-            font-size: 14px;
-            color: #2ecc71;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        }
-
-        canvas { 
-            background: #2e7d32; border: 6px solid #1b5e20; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            max-height: 82dvh; max-width: 100%; aspect-ratio: 360 / 620; object-fit: contain;
+        #start-match-btn .timer-subtext {
+            font-size: 16px;
+            display: block;
+            margin-top: 2px;
+            color: #f1c40f;
+            text-shadow: 1px 1px 2px black;
         }
     </style>
-    <!-- Socket.IO kütüphanesini yüklerken hata oluşursa sayfanın çökmesini engelliyoruz -->
     <script src="/socket.io/socket.io.js" onerror="console.warn('Sunucu bulunamadı, online mod devre dışı.')"></script>
 </head>
 <body>
@@ -174,25 +171,24 @@
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
             <div id="turn-indicator">Diziliş</div>
+            <!-- 2. ÇÖZÜM: Renkli Skor Tablosu -->
             <div id="score-board">
-                <span id="score-p1" class="score-team">0</span>
-                <span id="score-p2" class="score-team">0</span>
+                <span id="score-p1">0</span>
+                <span id="score-divider">-</span>
+                <span id="score-p2">0</span>
             </div>
             <div id="time-board">90s</div>
             <div id="shot-timer">ŞUT: 3s</div>
-            <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
         </div>
     </div>
 
-    <div id="setup-timer-container">
-        <div id="setup-timer-text">Oyuncuları Yerleştirin</div>
-        <button id="setup-timer-button" onclick="startMatchFromSetup()">15</button>
+    <div class="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+        <!-- 3. ÇÖZÜM: Orta sahada konumlandırılmış yuvarlak Başlat / Zamanlayıcı butonu -->
+        <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
     <script>
-        // DÜZELTME: Socket kütüphanesi yüklendiyse bağlan, yüklenmediyse güvenli şekilde 'null' yapıp devam et
         let socket = null;
         if (typeof io !== 'undefined') {
             try {
@@ -221,7 +217,7 @@
         let shotSecondsLeft = 3;
         let shotTimerInterval = null;
 
-        // Setup phase timer için yeni değişkenler
+        // 3. ÇÖZÜM: Diziliş için 15 saniyelik zamanlayıcı değişkenleri
         let setupSecondsLeft = 15;
         let setupTimerInterval = null;
 
@@ -372,6 +368,9 @@
             });
 
             socket.on("match-go", ({ pins: finalPins }) => {
+                // Diziliş fazı bittiği için diziliş zamanlayıcısını temizle
+                if (setupTimerInterval) clearInterval(setupTimerInterval);
+
                 pins = [
                     {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                     {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
@@ -384,7 +383,6 @@
 
                 currentPhase = 'playing';
                 document.getElementById('start-match-btn').style.display = 'none';
-                document.getElementById('setup-timer-container').style.display = 'none';
                 document.getElementById('shot-timer').style.display = 'block';
                 updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
             });
@@ -404,7 +402,9 @@
                 cap.rotation = state.cap.rotation; 
                 turn = state.turn; 
                 score = state.score;
-                updateScoreBoard();
+                // 2. ÇÖZÜM: Renkli skoru güncelle
+                document.getElementById('score-p1').innerText = score.p1;
+                document.getElementById('score-p2').innerText = score.p2;
                 updateHUDTurn(); resetShotTimer();
             });
         }
@@ -458,42 +458,28 @@
             }, 1000);
         }
 
+        // 3. ÇÖZÜM: Diziliş için 15 saniyelik zamanlayıcı mekanizması
         function startSetupTimer() {
-            if (gameMode !== 'online') return; // Sadece online modda timer gösterilir
-            
+            if (setupTimerInterval) clearInterval(setupTimerInterval);
             setupSecondsLeft = 15;
-            document.getElementById('setup-timer-container').style.display = 'block';
-            document.getElementById('setup-timer-button').innerText = setupSecondsLeft;
-            document.getElementById('setup-timer-button').disabled = false;
-
-            if(setupTimerInterval) clearInterval(setupTimerInterval);
-            setupTimerInterval = setInterval(() => {
-                if (currentPhase === 'setup') {
+            
+            const btn = document.getElementById('start-match-btn');
+            
+            if (gameMode === 'online') {
+                btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
+                
+                setupTimerInterval = setInterval(() => {
                     setupSecondsLeft--;
-                    document.getElementById('setup-timer-button').innerText = setupSecondsLeft;
-                    
                     if (setupSecondsLeft <= 0) {
                         clearInterval(setupTimerInterval);
-                        startMatchFromSetup();
+                        confirmFormationsAndStart(); // Süre bitince otomatik onayla ve başlat
+                    } else {
+                        btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
                     }
-                }
-            }, 1000);
-        }
-
-        function startMatchFromSetup() {
-            if (currentPhase !== 'setup') return;
-            if (gameMode === 'online' && socket) {
-                document.getElementById('setup-timer-button').disabled = true;
-                const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
-                    return { x: p.x, y: p.y };
-                });
-                socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
+                }, 1000);
             } else {
-                currentPhase = 'playing';
-                document.getElementById('start-match-btn').style.display = 'none';
-                document.getElementById('setup-timer-container').style.display = 'none';
-                document.getElementById('shot-timer').style.display = 'block';
-                updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
+                // Lokal oyunlarda süre sınırlaması olmadan düz buton göster
+                btn.innerHTML = "BAŞLAT";
             }
         }
 
@@ -523,7 +509,7 @@
 
         function endMatch() {
             currentPhase = 'ended';
-            clearInterval(timerInterval); clearInterval(shotTimerInterval); clearInterval(setupTimerInterval);
+            clearInterval(timerInterval); clearInterval(shotTimerInterval);
             let resultMessage = "Maç Berabere Bitti!";
             if (score.p1 > score.p2) resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kaybettiniz!" : "Mavi Takım Kazandı! 🎉";
             else if (score.p2 > score.p1) resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kazandınız! 🎉" : "Kırmızı Takım Kazandı! 🎉";
@@ -532,19 +518,18 @@
             exitToMenu();
         }
 
-        function updateScoreBoard() {
-            document.getElementById('score-p1').innerText = score.p1;
-            document.getElementById('score-p2').innerText = score.p2;
-        }
-
         function startSetupPhase() {
             currentPhase = 'setup';
             score = { p1: 0, p2: 0 };
-            updateScoreBoard();
-            document.getElementById('start-match-btn').style.display = 'block';
-            document.getElementById('start-match-btn').style.opacity = '1';
-            document.getElementById('start-match-btn').innerText = "BAŞLAT";
-            document.getElementById('start-match-btn').disabled = false;
+            document.getElementById('score-p1').innerText = "0";
+            document.getElementById('score-p2').innerText = "0";
+            
+            // 3. ÇÖZÜM: Orta sahada butonu görünür yap
+            const startBtn = document.getElementById('start-match-btn');
+            startBtn.style.display = 'flex';
+            startBtn.style.opacity = '1';
+            startBtn.disabled = false;
+            
             document.getElementById('turn-indicator').innerText = "Kadro Ayarla";
             document.getElementById('shot-timer').style.display = 'none';
 
@@ -577,19 +562,31 @@
             red442.forEach(p => pins.push(p));
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-
-            // Online modda setup timer başlat
-            if (gameMode === 'online') {
-                startSetupTimer();
-            } else {
-                document.getElementById('setup-timer-container').style.display = 'none';
-            }
-
+            
+            // Geri sayımı/başlatmayı tetikle
+            startSetupTimer();
             animate();
         }
 
         function confirmFormationsAndStart() {
-            startMatchFromSetup();
+            if (setupTimerInterval) clearInterval(setupTimerInterval);
+
+            if (gameMode === 'online' && socket) {
+                const btn = document.getElementById('start-match-btn');
+                btn.innerHTML = "BEKLE";
+                btn.disabled = true;
+
+                const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
+                    return { x: p.x, y: p.y };
+                });
+
+                socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
+            } else {
+                currentPhase = 'playing';
+                document.getElementById('start-match-btn').style.display = 'none';
+                document.getElementById('shot-timer').style.display = 'block';
+                updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
+            }
         }
 
         function updateHUDTurn() {
@@ -599,76 +596,26 @@
                 else { indicator.innerText = "RAKİPTE"; indicator.style.borderColor = "#e74c3c"; indicator.style.color = "#e74c3c"; }
             } else {
                 indicator.innerText = turn === 1 ? "MAVİ SIRA" : "KIRMIZI SIRA";
-                indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c"; 
-                indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
+                indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c"; indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
             }
         }
 
+        // 1. ÇÖZÜM: Yapay zekanın (AI) vuruş hızı fizik motoruyla tam uyumlu hale getirildi
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
             setTimeout(() => {
-                // AI stratejisi: oyuncuları hesaba katarak daha akıllı bir hamle yap
-                let bestAngle = 0;
-                let bestScore = -Infinity;
-
-                // 36 farklı açı dene (her 10 derece)
-                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 18) {
-                    // Her açıyı farklı kuvvetlerle test et
-                    const strength = 0.5 + Math.random() * 0.4; // 0.5 - 0.9 arası
-                    
-                    // Açı puanla
-                    let score = 0;
-
-                    // Rakip sahasına doğruluk bonus
-                    const targetX = width / 2;
-                    const targetY = goalHeight + 30; // Rakip sahasında bir hedef nokta
-                    const angleToTarget = Math.atan2(targetY - cap.y, targetX - cap.x);
-                    const angleDiff = Math.min(Math.abs(angle - angleToTarget), Math.PI * 2 - Math.abs(angle - angleToTarget));
-                    score += (Math.PI - angleDiff) * 2; // Hedef açısına yakın olana bonus
-
-                    // Oyunculardan kaçınma penaltisi
-                    for (let pin of pins) {
-                        if (pin.team === 2 && !pin.isPost) { // Rakip oyuncuları
-                            const distToPin = Math.hypot(pin.x - cap.x, pin.y - cap.y);
-                            const pinAngle = Math.atan2(pin.y - cap.y, pin.x - cap.x);
-                            const pinAngleDiff = Math.min(Math.abs(angle - pinAngle), Math.PI * 2 - Math.abs(angle - pinAngle));
-                            
-                            // Rakip oyuncusuyla çarpışacaksa penalti
-                            if (distToPin < 60 && pinAngleDiff < Math.PI / 4) {
-                                score -= 5;
-                            }
-                        }
-                    }
-
-                    // Kendi takımına doğru vurduğunda penalti
-                    for (let pin of pins) {
-                        if (pin.team === 1 && !pin.isPost) { // Kendi oyuncuları
-                            const distToPin = Math.hypot(pin.x - cap.x, pin.y - cap.y);
-                            const pinAngle = Math.atan2(pin.y - cap.y, pin.x - cap.x);
-                            const pinAngleDiff = Math.min(Math.abs(angle - pinAngle), Math.PI * 2 - Math.abs(angle - pinAngle));
-                            
-                            if (distToPin < 40 && pinAngleDiff < Math.PI / 6) {
-                                score -= 3;
-                            }
-                        }
-                    }
-
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestAngle = angle;
-                    }
-                }
-
-                // En iyi açıyı kullan, biraz randomlık ekle
-                const randomPullPercent = 0.4 + Math.random() * 0.5;
-                const dragDistanceApplied = MAX_DRAG_DIST * randomPullPercent;
-                const releasePower = dragDistanceApplied * 0.13;
+                const angle = Math.atan2(height - cap.y, width/2 - cap.x);
+                // Fizik motorundaki "SUB_STEPS" ile uyumlu olması için şut gücünü scale ediyoruz
+                const basePower = 1.6; 
+                const randomVariance = 0.5 + Math.random() * 0.7; // Güç varyasyonu
+                const calculatedPower = basePower * randomVariance * 16; // 16 alt adıma (SUB_STEPS) bölüneceği için çarpılıyor
 
                 playSound('kick');
-                cap.vx = Math.cos(bestAngle) * releasePower;
-                cap.vy = Math.sin(bestAngle) * releasePower;
+                // Adım bazlı hızı doğrudan atıyoruz (Substeps bunu adilce dağıtacaktır)
+                cap.vx = Math.cos(angle) * calculatedPower; 
+                cap.vy = Math.sin(angle) * calculatedPower;
                 
                 turn = 1; updateHUDTurn(); resetShotTimer();
             }, 1000);
@@ -695,7 +642,10 @@
                         }
                         
                         playSound('goal'); 
-                        updateScoreBoard();
+                        // 2. ÇÖZÜM: Takım renklerinde skoru güncelle
+                        document.getElementById('score-p1').innerText = score.p1;
+                        document.getElementById('score-p2').innerText = score.p2;
+                        
                         cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
                         broadcastState(); resetShotTimer(); return;
                     } else {
@@ -843,7 +793,7 @@
             document.getElementById('menu').style.display = 'block';
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('online-lobby').style.display = 'none';
-            document.getElementById('setup-timer-container').style.display = 'none';
+            document.getElementById('start-match-btn').style.display = 'none';
             drawFieldLinesOnly(); 
         }
 
