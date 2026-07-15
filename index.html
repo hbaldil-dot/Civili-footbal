@@ -311,14 +311,30 @@
             exitToMenu();
         });
 
+        // --- YENİ: Diziliş Aşamasında Rakibin Yaptığı Değişiklikleri Canlı Yakala ---
+        socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
+            if (currentPhase === 'setup') {
+                // Rakibin takımı hangisiyse, o takımın ilgili indisli oyuncusunu güncelle
+                let count = 0;
+                for (let p of pins) {
+                    if (!p.isPost && p.team === team) {
+                        if (count === index) {
+                            p.x = x;
+                            p.y = y;
+                            break;
+                        }
+                        count++;
+                    }
+                }
+            }
+        });
+
         socket.on("match-go", ({ pins: finalPins }) => {
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            // Sunucudan gelen nihai koordinatları diziye yerleştirirken 
-            // 2. Takım (Misafir) koordinatlarının zaten 180 derece tersine çevrilmiş olarak geldiğinden emin oluyoruz.
             finalPins.forEach(p => pins.push(p));
 
             currentPhase = 'playing';
@@ -341,6 +357,40 @@
                 roomId: currentRoomId,
                 state: { cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation }, turn: turn, score: score }
             });
+        }
+
+        // --- YENİ: Kendi yaptığımız hareketi rakibe anlık bildiren fonksiyon ---
+        function broadcastMyPinMove(pin) {
+            if (gameMode !== 'online' || currentPhase !== 'setup') return;
+            
+            // Hareket eden pin'in kendi takımı içindeki sırasını bulalım
+            let index = -1;
+            let count = 0;
+            for (let p of pins) {
+                if (!p.isPost && p.team === myTeamNumber) {
+                    if (p === pin) { index = count; break; }
+                    count++;
+                }
+            }
+
+            if (index !== -1) {
+                // Eğer Team 2 (misafir) isek, rakibe (Team 1'e) kendi dünyasındaki doğru koordinatı 
+                // gönderebilmek için koordinatları 180 derece tersine çeviriyoruz.
+                let sendX = pin.x;
+                let sendY = pin.y;
+                if (myTeamNumber === 2) {
+                    sendX = width - pin.x;
+                    sendY = height - pin.y;
+                }
+                
+                socket.emit("setup-pin-move", {
+                    roomId: currentRoomId,
+                    team: myTeamNumber,
+                    index: index,
+                    x: sendX,
+                    y: sendY
+                });
+            }
         }
 
         function startMatchTimer() {
@@ -436,9 +486,6 @@
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
 
-                // Kritik Düzeltme: Eğer misafirsek (Team 2), sunucuya göndermeden önce 
-                // koordinatları global dünya sistemine (180 derece) geri çeviriyoruz. 
-                // Böylece sunucu kalecileri doğru yerlerine yerleştirir ve kaleciler çakışmaz!
                 const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
                     if (myTeamNumber === 2) {
                         return { x: width - p.x, y: height - p.y };
@@ -581,6 +628,8 @@
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
                 selectedPin.x = pos.x; selectedPin.y = pos.y;
+                // --- YENİ: Biz sürüklerken karşı tarafa anlık olarak koordinatları gönderiyoruz ---
+                broadcastMyPinMove(selectedPin);
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
                 let dx = pos.x - dragStart.x;
@@ -611,7 +660,12 @@
                         }
                     }
                 }
-                if (!valid) { selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; }
+                if (!valid) { 
+                    selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; 
+                }
+                
+                // --- YENİ: Sürükleme bittiğinde (geçersiz yerleşimde geri dönmüş olsa dahi) son pozisyonu senkronize et ---
+                broadcastMyPinMove(selectedPin);
                 selectedPin = null;
             } 
             
