@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Çivili Futbol - Klasik & Online</title>
     <style>
+        /* Genel seçilememe kuralı */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        
+        /* Klavyenin yazabilmesi için input alanlarını serbest bırakıyoruz */
+        input, select, textarea {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
         
         body {
             background: #111; 
@@ -15,14 +22,12 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            /* Safari arama çubuğuna göre dinamik olarak değişen yükseklik birimi (dvh) */
             height: 100dvh; 
             width: 100vw;
             color: white;
             padding: 8px;
         }
         
-        /* ANA MENÜ */
         #menu {
             position: absolute; background: rgba(20, 30, 20, 0.98); border: 4px solid #4a754a;
             border-radius: 12px; padding: 25px; text-align: center; z-index: 100; width: 90%; max-width: 360px;
@@ -45,7 +50,6 @@
         .btn-ai { background: #e67e22; box-shadow: 0 4px #d35400; }
         .btn-online { background: #8e44ad; box-shadow: 0 4px #6c3483; }
 
-        /* ONLINE LOBİ */
         #online-lobby {
             position: absolute; background: rgba(20, 20, 30, 0.98); border: 4px solid #6c3483;
             border-radius: 12px; padding: 20px; text-align: center; z-index: 110; width: 90%; max-width: 360px;
@@ -69,7 +73,6 @@
             font-weight: bold; cursor: pointer; font-family: inherit;
         }
 
-        /* DİNAMİK HUD / ÜST BAR */
         #top-bar {
             width: 100%; 
             max-width: 360px;
@@ -80,7 +83,7 @@
             z-index: 15; 
             pointer-events: none; 
             display: none;
-            margin-bottom: 6px; /* Canvas ile arasına küçük bir boşluk bırakır */
+            margin-bottom: 6px;
         }
         .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 4px; }
         #score-board, #turn-indicator, #time-board, #shot-timer {
@@ -99,15 +102,14 @@
         #exit-btn { background: #c0392b; }
         #start-match-btn { background: #27ae60; display: none; }
 
-        /* DİNAMİK CANVAS ÖLÇEKLENDİRME */
         canvas { 
             background: #2e7d32; 
             border: 6px solid #1b5e20; 
             border-radius: 8px; 
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            max-height: 82dvh; /* Safari barları açıkken bile dikeyde asla taşmaz */
+            max-height: 82dvh;
             max-width: 100%;
-            aspect-ratio: 360 / 620; /* Oyunun en-boy oranını kusursuz korur */
+            aspect-ratio: 360 / 620;
             object-fit: contain;
         }
     </style>
@@ -115,7 +117,6 @@
 </head>
 <body>
 
-    <!-- MENÜ -->
     <div id="menu">
         <h1>ÇİVİLİ FUTBOL</h1>
         <div class="input-group">
@@ -137,7 +138,6 @@
         </div>
     </div>
 
-    <!-- ONLINE OYUNCU HAVUZU -->
     <div id="online-lobby">
         <h2>ÇEVRİMİÇİ HAVUZ</h2>
         <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
@@ -147,7 +147,6 @@
         <button class="lobby-close-btn" onclick="closeOnlineLobby()">Geri Dön</button>
     </div>
 
-    <!-- ÜST BAR HUD -->
     <div id="top-bar">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
@@ -313,6 +312,8 @@
         });
 
         socket.on("match-go", ({ pins: finalPins }) => {
+            // Başla butonuna basıldığında konumların bozulup toplanmaması için 
+            // kale direkleri hariç tüm oyuncuları doğrudan kurulan yeni konumlarıyla sabit tutuyoruz.
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
@@ -458,7 +459,11 @@
 
             setTimeout(() => {
                 const angle = Math.atan2(height - cap.y, width/2 - cap.x);
-                const power = 10 + Math.random() * 8; 
+                
+                // AI'ın vuruş gücü de oyuncu gibi 7 top boyu limiti ile tamamen dengelendi!
+                // Çekim mesafesi limiti * fırlatma çarpanı (MAX_DRAG_DIST * 0.13)
+                const power = MAX_DRAG_DIST * 0.13 * (0.6 + Math.random() * 0.4); 
+                
                 playSound('kick');
                 cap.vx = Math.cos(angle) * power; cap.vy = Math.sin(angle) * power;
                 turn = 1; updateHUDTurn(); resetShotTimer();
@@ -468,7 +473,9 @@
         function updatePhysics() {
             if(currentPhase !== 'playing') return;
 
-            const SUB_STEPS = 8; 
+            // Hassas Çarpışma Algılaması İçin Sub Steps 16'ya Çıkarıldı. 
+            // Top ne kadar hızlı olursa olsun oyuncuların içinden geçemez.
+            const SUB_STEPS = 16; 
             
             for(let step = 0; step < SUB_STEPS; step++) {
                 cap.x += cap.vx / SUB_STEPS; cap.y += cap.vy / SUB_STEPS;
