@@ -311,16 +311,28 @@
             exitToMenu();
         });
 
-        // --- YENİ: Diziliş Aşamasında Rakibin Yaptığı Değişiklikleri Canlı Yakala ---
+        // --- YENİLENEN SİMETRİK SENKRONİZASYON ALICISI ---
         socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
             if (currentPhase === 'setup') {
-                // Rakibin takımı hangisiyse, o takımın ilgili indisli oyuncusunu güncelle
+                // Rakibin gönderdiği koordinatları, kendi ekran açımıza göre dönüştürmeliyiz.
+                // Eğer biz Team 2 (Misafir) isek, rakip Team 1 (Ev Sahibi) kendi ekranına göre (düz) gönderdi. 
+                // Biz ters ekran olduğumuz için gelen koordinatları tersine çevirmeliyiz: (width-x, height-y).
+                // Eğer biz Team 1 (Ev Sahibi) isek, rakip Team 2 zaten ters koordinat çevirip gönderdiği için 
+                // gelen koordinatı doğrudan kullanabiliriz.
+                let targetX = x;
+                let targetY = y;
+                
+                if (myTeamNumber === 2) {
+                    targetX = width - x;
+                    targetY = height - y;
+                }
+
                 let count = 0;
                 for (let p of pins) {
                     if (!p.isPost && p.team === team) {
                         if (count === index) {
-                            p.x = x;
-                            p.y = y;
+                            p.x = targetX;
+                            p.y = targetY;
                             break;
                         }
                         count++;
@@ -335,7 +347,16 @@
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
-            finalPins.forEach(p => pins.push(p));
+            // Gelen pinleri kendi ekran açımıza göre diziye ekliyoruz
+            finalPins.forEach(p => {
+                let actualX = p.x;
+                let actualY = p.y;
+                if (myTeamNumber === 2) {
+                    actualX = width - p.x;
+                    actualY = height - p.y;
+                }
+                pins.push({ x: actualX, y: actualY, team: p.team });
+            });
 
             currentPhase = 'playing';
             document.getElementById('start-match-btn').style.display = 'none';
@@ -359,11 +380,10 @@
             });
         }
 
-        // --- YENİ: Kendi yaptığımız hareketi rakibe anlık bildiren fonksiyon ---
+        // --- YENİLENEN SİMETRİK SENKRONİZASYON GÖNDERİCİSİ ---
         function broadcastMyPinMove(pin) {
             if (gameMode !== 'online' || currentPhase !== 'setup') return;
             
-            // Hareket eden pin'in kendi takımı içindeki sırasını bulalım
             let index = -1;
             let count = 0;
             for (let p of pins) {
@@ -374,8 +394,9 @@
             }
 
             if (index !== -1) {
-                // Eğer Team 2 (misafir) isek, rakibe (Team 1'e) kendi dünyasındaki doğru koordinatı 
-                // gönderebilmek için koordinatları 180 derece tersine çeviriyoruz.
+                // Sunucuya ve diğer rakibe daima "Ev Sahibi (Team 1) bakış açısına" göre senkronize koordinat gönderiyoruz.
+                // Eğer biz Team 2 (misafir) isek, kendi ekranımızda yaptığımız koordinatı 
+                // 180 derece çevirerek (düzleştirerek) sunucuya/rakibe yollarız.
                 let sendX = pin.x;
                 let sendY = pin.y;
                 if (myTeamNumber === 2) {
@@ -457,6 +478,8 @@
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
             ];
 
+            // Çivilerin varsayılan konumlarını, ekranın alt yarısı bizim kalemiz olacak şekilde tanımlıyoruz.
+            // Mavi takım (Düz Ekran) her zaman sahayı düz, Kırmızı takım (Ters Ekran) ise sahayı ters görür.
             const blue442 = [
                 {x: width * 0.50, y: height * 0.88, team: 1}, {x: width * 0.15, y: height * 0.73, team: 1}, 
                 {x: width * 0.38, y: height * 0.77, team: 1}, {x: width * 0.62, y: height * 0.77, team: 1}, 
@@ -475,7 +498,18 @@
                 {x: width * 0.35, y: height * 0.55, team: 2}  
             ];
             
-            blue442.forEach(p => pins.push(p)); red442.forEach(p => pins.push(p));
+            // Eğer Online oynuyorsak, 2. takım (Misafir) ekranı 180 derece dönmüş göreceği için 
+            // kırmızı çivilerin default koordinatlarını onun ekranına göre düzeltiyoruz (aşağıya çekiyoruz).
+            if (gameMode === 'online' && myTeamNumber === 2) {
+                // Kendi takımımızı (Red) ekranın alt yarısında göreceğiz.
+                const localRed = red442.map(p => ({ x: width - p.x, y: height - p.y, team: 2 }));
+                const localBlue = blue442.map(p => ({ x: width - p.x, y: height - p.y, team: 1 }));
+                localBlue.forEach(p => pins.push(p));
+                localRed.forEach(p => pins.push(p));
+            } else {
+                blue442.forEach(p => pins.push(p)); 
+                red442.forEach(p => pins.push(p));
+            }
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
             animate();
@@ -486,6 +520,7 @@
                 document.getElementById('start-match-btn').innerText = "Bekleniyor..";
                 document.getElementById('start-match-btn').disabled = true;
 
+                // Onaylanan dizilimleri sunucuya daima Team 1'in (Ev Sahibi) düz bakış açısında kaydediyoruz.
                 const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
                     if (myTeamNumber === 2) {
                         return { x: width - p.x, y: height - p.y };
@@ -607,7 +642,14 @@
                     if (!p.isPost) {
                         if (gameMode === 'online' && p.team !== editableTeam) continue;
                         
-                        if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
+                        let touchX = pos.x;
+                        let touchY = pos.y;
+                        if (gameMode === 'online' && myTeamNumber === 2) {
+                            touchX = width - pos.x;
+                            touchY = height - pos.y;
+                        }
+
+                        if (Math.hypot(touchX - p.x, touchY - p.y) < 22) {
                             selectedPin = p; dragStartPinPos = { x: p.x, y: p.y }; break;
                         }
                     }
@@ -627,8 +669,13 @@
         canvas.addEventListener('mousemove', (e) => {
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
-                selectedPin.x = pos.x; selectedPin.y = pos.y;
-                // --- YENİ: Biz sürüklerken karşı tarafa anlık olarak koordinatları gönderiyoruz ---
+                let currentX = pos.x;
+                let currentY = pos.y;
+                if (gameMode === 'online' && myTeamNumber === 2) {
+                    currentX = width - pos.x;
+                    currentY = height - pos.y;
+                }
+                selectedPin.x = currentX; selectedPin.y = currentY;
                 broadcastMyPinMove(selectedPin);
             } 
             else if (currentPhase === 'playing' && isDraggingBall) {
@@ -664,7 +711,6 @@
                     selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; 
                 }
                 
-                // --- YENİ: Sürükleme bittiğinde (geçersiz yerleşimde geri dönmüş olsa dahi) son pozisyonu senkronize et ---
                 broadcastMyPinMove(selectedPin);
                 selectedPin = null;
             } 
@@ -763,7 +809,7 @@
                 ctx.stroke();
             }
 
-            if (currentPhase === 'playing') drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+            if (currentPhase === 'playing' && cap) drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
             
             ctx.restore(); 
         }
