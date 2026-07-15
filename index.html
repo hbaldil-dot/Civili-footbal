@@ -222,7 +222,6 @@
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
-        // AI'ın sanal el hareketini kitlemek ve yönetmek için yeni bayrak
         let isAiThinking = false; 
 
         const minAllowedDistance = 45; 
@@ -591,7 +590,6 @@
             }
         }
 
-        // 🌟 KUSURSUZ ÇÖZÜM: Bilgisayar (AI), tamamen sanal bir 2. Oyuncu olarak fiziksel girdileri simüle ediyor!
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
@@ -600,24 +598,18 @@
             isAiThinking = true;
 
             setTimeout(() => {
-                // 1. ADIM: Mavi kaleye (Aşağıdaki kale: height - goalHeight) doğru açı belirleme
                 const targetX = width / 2;
                 const targetY = height - goalHeight;
                 const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
 
-                // Makul çekme gücü mesafesi
                 const aiPullDistance = 72; 
 
-                // 2. ADIM: 'mousedown' Oyuncu tıkını taklit et
-                // Oyuncu dokunma mesafesi limiti altında topun tam merkezini hedefleyip basıyoruz
                 isDraggingBall = true;
                 dragStart = { x: cap.x, y: cap.y };
                 dragCurrent = { x: cap.x, y: cap.y };
 
-                // 3. ADIM: 'mousemove' ile geriye çekerek nişanı (yeşil çizgiyi) ekrana veriyoruz.
-                // Bu süreç boyunca top hareket etmez, sadece fizik gerilimi oluşur.
                 let stepCount = 0;
-                const totalSteps = 10; // Çizginin pürüzsüz gerilme animasyonu
+                const totalSteps = 10; 
                 const pullInterval = setInterval(() => {
                     stepCount++;
                     const ratio = stepCount / totalSteps;
@@ -630,24 +622,22 @@
                     if (stepCount >= totalSteps) {
                         clearInterval(pullInterval);
 
-                        // 4. ADIM: Nişan alma bittikten sonra 'mouseup' (bırakma) tetikleniyor!
                         setTimeout(() => {
                             isDraggingBall = false;
                             isAiThinking = false;
                             playSound('kick');
 
-                            // Birebir 2 kişilik moddaki fırlatma fiziği çalışıyor
                             cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                             cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
 
                             turn = 1; 
                             updateHUDTurn(); 
                             resetShotTimer();
-                        }, 300); // Nişanı doğrulttuktan sonra 300ms bekleyip şut çekiyor
+                        }, 300); 
                     }
-                }, 30); // 300ms boyunca nişan çizgisi geriye doğru uzuyor
+                }, 30); 
 
-            }, 800); // Sıra bilgisayara geçtikten sonra 800ms "düşünme" payı
+            }, 800); 
         }
 
         function updatePhysics() {
@@ -729,7 +719,7 @@
         let dragStartPinPos = { x: 0, y: 0 };
 
         canvas.addEventListener('mousedown', (e) => {
-            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken tıklamaları kapat
+            if (gameMode === 'ai' && turn === 2) return; 
 
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup') {
@@ -756,7 +746,7 @@
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken hareketleri kapat
+            if (gameMode === 'ai' && turn === 2) return; 
 
             const pos = getCanvasTouchPos(e);
             if (currentPhase === 'setup' && selectedPin) {
@@ -778,7 +768,7 @@
         });
 
         window.addEventListener('mouseup', () => {
-            if (gameMode === 'ai' && turn === 2) return; // Bilgisayar sırasındayken elinizi çekme tetiklemelerini engelle
+            if (gameMode === 'ai' && turn === 2) return; 
 
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
@@ -878,7 +868,7 @@
             }
             
             ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); stroke();
+            ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
             ctx.beginPath(); ctx.arc(width/2, height/2, 45, 0, Math.PI*2); ctx.stroke();
             ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
@@ -899,7 +889,6 @@
                 }
             });
 
-            // Gerek insan gerek bilgisayar sürüklemesi olsun, her iki durumda da ekrandaki vuruş çizgisi tamamen aynı fiziksel kurallarla çizilir
             if (currentPhase === 'playing' && isDraggingBall) {
                 ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.moveTo(cap.x, cap.y);
