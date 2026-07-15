@@ -128,7 +128,7 @@
             <select id="match-duration">
                 <option value="60">1 Dakika (60s)</option>
                 <option value="90" selected>1.5 Dakika (90s)</option>
-                <option value="120">2 Dokika (120s)</option>
+                <option value="120">2 Dakika (120s)</option>
             </select>
         </div>
         <div class="mode-container">
@@ -188,7 +188,7 @@
         let isDraggingBall = false;
         let dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 };
 
-        const minAllowedDistance = 55; 
+        const minAllowedDistance = 45; 
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
         const pBoxX1 = (width - penaltyBoxW) / 2;
@@ -312,8 +312,6 @@
         });
 
         socket.on("match-go", ({ pins: finalPins }) => {
-            // Başla butonuna basıldığında konumların bozulup toplanmaması için 
-            // kale direkleri hariç tüm oyuncuları doğrudan kurulan yeni konumlarıyla sabit tutuyoruz.
             pins = [
                 {x: (width - goalWidth)/2, y: goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: goalHeight, isPost: true},
                 {x: (width - goalWidth)/2, y: height - goalHeight, isPost: true}, {x: (width + goalWidth)/2, y: height - goalHeight, isPost: true}
@@ -458,14 +456,19 @@
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
             setTimeout(() => {
+                // Bilgisayarın vuruş fiziği 2 kişilik oyun fiziğiyle tamamen senkronize edildi!
                 const angle = Math.atan2(height - cap.y, width/2 - cap.x);
                 
-                // AI'ın vuruş gücü de oyuncu gibi 7 top boyu limiti ile tamamen dengelendi!
-                // Çekim mesafesi limiti * fırlatma çarpanı (MAX_DRAG_DIST * 0.13)
-                const power = MAX_DRAG_DIST * 0.13 * (0.6 + Math.random() * 0.4); 
-                
+                // İki kişilik modun aynısı: Maksimum sürükleme mesafesi (MAX_DRAG_DIST) kadar gerilme ve 0.13 fırlatma katsayısı.
+                // AI asla bu sınırdan hızlı vuramayacak ve oyunculardan geçemeyecek.
+                const randomPullPercent = 0.5 + Math.random() * 0.5; // %50 ile %100 arası gerilme payı
+                const dragDistanceApplied = MAX_DRAG_DIST * randomPullPercent;
+                const releasePower = dragDistanceApplied * 0.13; 
+
                 playSound('kick');
-                cap.vx = Math.cos(angle) * power; cap.vy = Math.sin(angle) * power;
+                cap.vx = Math.cos(angle) * releasePower; 
+                cap.vy = Math.sin(angle) * releasePower;
+                
                 turn = 1; updateHUDTurn(); resetShotTimer();
             }, 1000);
         }
@@ -473,8 +476,7 @@
         function updatePhysics() {
             if(currentPhase !== 'playing') return;
 
-            // Hassas Çarpışma Algılaması İçin Sub Steps 16'ya Çıkarıldı. 
-            // Top ne kadar hızlı olursa olsun oyuncuların içinden geçemez.
+            // Hassas ve gerçek zamanlı çarpışma kontrolü için alt adım hesaplaması
             const SUB_STEPS = 16; 
             
             for(let step = 0; step < SUB_STEPS; step++) {
@@ -532,6 +534,7 @@
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
 
+            // Online modda 180 derece kamera dönüşü sağlandığında gelen tıklama koordinatları da 180 derece terslenir
             if (gameMode === 'online' && myTeamNumber === 2) {
                 x = width - x;
                 y = height - y;
@@ -587,12 +590,10 @@
             if (currentPhase === 'setup' && selectedPin) {
                 let valid = true;
 
+                // Oyuncular artık kendi yarı sahasına kilitli değil, TÜM SAHAYA dizilebilir!
+                // Sadece sahayı çevreleyen dış çizgilerin dışına taşamazlar.
                 if (selectedPin.x < 15 || selectedPin.x > width - 15) valid = false;
-                if (selectedPin.team === 1) { 
-                    if (selectedPin.y < height/2 + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
-                } else { 
-                    if (selectedPin.y < goalHeight + 15 || selectedPin.y > height/2 - 15) valid = false;
-                }
+                if (selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
 
                 if (valid) {
                     for (let p of pins) {
@@ -665,6 +666,7 @@
             ctx.clearRect(0, 0, width, height);
 
             ctx.save();
+            // Online Oyunda Misafir Oyuncu (2. Takım) ekranı 180 derece dönmüş görür!
             if (gameMode === 'online' && myTeamNumber === 2) {
                 ctx.translate(width/2, height/2);
                 ctx.rotate(Math.PI);
@@ -678,24 +680,13 @@
             ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
             if (currentPhase === 'setup') {
-                ctx.fillStyle = "rgba(46, 204, 113, 0.12)";
-                ctx.strokeStyle = "rgba(46, 204, 113, 0.35)";
+                ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
+                ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
                 ctx.lineWidth = 2;
                 
-                if (gameMode === 'online') {
-                    if (editableTeam === 1) { 
-                        ctx.fillRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
-                        ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
-                    } else { 
-                        ctx.fillRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
-                        ctx.strokeRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
-                    }
-                } else { 
-                    ctx.fillRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
-                    ctx.strokeRect(10, height/2 + 10, width - 20, height/2 - goalHeight - 20);
-                    ctx.fillRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
-                    ctx.strokeRect(10, goalHeight + 10, width - 20, height/2 - goalHeight - 20);
-                }
+                // Oyuncular artık tüm sahaya dizilebildiği için sınır çizgisi tüm sahayı kapsar
+                ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
+                ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
             }
 
             pins.forEach(pin => {
