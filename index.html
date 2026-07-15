@@ -224,10 +224,6 @@
 
         let isAiThinking = false; 
 
-        // Network throttle için son broadcast zamanı
-        let lastBroadcastTime = 0;
-        const BROADCAST_THROTTLE = 50; // 50ms = ~20fps (network)
-
         const minAllowedDistance = 45; 
         const goalWidth = cap.radius * 2 * 3.2, goalHeight = 12;
         const penaltyBoxW = goalWidth * 2.2, penaltyBoxH = height * 0.15;
@@ -386,7 +382,6 @@
                 updateHUDTurn(); startMatchTimer(); resetShotTimer(); animate();
             });
 
-            // Rakip oyuncunun state güncellemesini al
             socket.on("peerState", (state) => {
                 if (myTeamNumber === 2) {
                     cap.x = width - state.cap.x;
@@ -408,14 +403,8 @@
             });
         }
 
-        // Throttled broadcast - maksimum 20fps network sync
         function broadcastState() {
             if(!socket || gameMode !== 'online' || currentPhase !== 'playing') return;
-            
-            const now = Date.now();
-            if (now - lastBroadcastTime < BROADCAST_THROTTLE) return; // Çok sık broadcast yapma
-            lastBroadcastTime = now;
-
             let sendCap = { ...cap };
             if (myTeamNumber === 2) {
                 sendCap.x = width - cap.x;
@@ -564,17 +553,18 @@
             red442.forEach(p => pins.push(p));
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
-
-            if (gameMode === 'online') {
-                startSetupTimer();
-            }
-
+            
+            startSetupTimer();
             animate();
         }
 
         function confirmFormationsAndStart() {
+            if (setupTimerInterval) clearInterval(setupTimerInterval);
+
             if (gameMode === 'online' && socket) {
-                document.getElementById('start-match-btn').disabled = true;
+                const btn = document.getElementById('start-match-btn');
+                btn.innerHTML = "BEKLE";
+                btn.disabled = true;
 
                 const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
                     return { x: p.x, y: p.y };
@@ -596,14 +586,16 @@
                 else { indicator.innerText = "RAKİPTE"; indicator.style.borderColor = "#e74c3c"; indicator.style.color = "#e74c3c"; }
             } else {
                 indicator.innerText = turn === 1 ? "MAVİ SIRA" : "KIRMIZI SIRA";
-                indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c"; 
-                indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
+                indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c"; indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
             }
         }
 
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+            if (isAiThinking) return;
+
+            isAiThinking = true;
 
             setTimeout(() => {
                 const targetX = width / 2;
@@ -700,7 +692,6 @@
             const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
             if (isMoving) {
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
-                // ✅ FİKS: Throttled broadcast - "dejavu" sorunu çözüldü
                 if(gameMode === 'online' && turn === myTeamNumber) broadcastState(); 
             } else if (gameMode === 'ai' && turn === 2) {
                 runAIMove();
