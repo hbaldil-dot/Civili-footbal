@@ -63,15 +63,14 @@
         }
         .hud-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 4px; }
         
-        /* 2. ÇÖZÜM: Skorların takım rengiyle yazılması */
         #score-board {
             background: rgba(0, 0, 0, 0.85); padding: 5px 8px; border-radius: 4px;
             font-size: 14px; font-weight: bold; border: 2px solid #fff; text-align: center;
             display: flex; gap: 6px; justify-content: center; align-items: center;
         }
-        #score-p1 { color: #3498db; } /* Mavi Takım */
+        #score-p1 { color: #3498db; }
         #score-divider { color: #ffffff; }
-        #score-p2 { color: #e74c3c; } /* Kırmızı Takım */
+        #score-p2 { color: #e74c3c; }
 
         #turn-indicator, #time-board, #shot-timer {
             background: rgba(0, 0, 0, 0.85); padding: 5px 8px; border-radius: 4px;
@@ -87,7 +86,6 @@
             padding: 5px 10px; font-family: inherit; background: #c0392b;
         }
 
-        /* Oyun Alanı ve Canvas İlişkisi */
         .canvas-container {
             position: relative;
             max-height: 82dvh; max-width: 100%; aspect-ratio: 360 / 620;
@@ -97,7 +95,6 @@
             width: 100%; height: 100%; display: block;
         }
 
-        /* 3. ÇÖZÜM: Orta yuvarlaktaki dairesel BAŞLAT / GERİ SAYIM butonu */
         #start-match-btn {
             position: absolute;
             top: 50%; left: 50%;
@@ -171,7 +168,6 @@
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
             <div id="turn-indicator">Diziliş</div>
-            <!-- 2. ÇÖZÜM: Renkli Skor Tablosu -->
             <div id="score-board">
                 <span id="score-p1">0</span>
                 <span id="score-divider">-</span>
@@ -184,7 +180,6 @@
 
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
-        <!-- 3. ÇÖZÜM: Orta sahada konumlandırılmış yuvarlak Başlat / Zamanlayıcı butonu -->
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
@@ -217,7 +212,6 @@
         let shotSecondsLeft = 3;
         let shotTimerInterval = null;
 
-        // 3. ÇÖZÜM: Diziliş için 15 saniyelik zamanlayıcı değişkenleri
         let setupSecondsLeft = 15;
         let setupTimerInterval = null;
 
@@ -368,7 +362,6 @@
             });
 
             socket.on("match-go", ({ pins: finalPins }) => {
-                // Diziliş fazı bittiği için diziliş zamanlayıcısını temizle
                 if (setupTimerInterval) clearInterval(setupTimerInterval);
 
                 pins = [
@@ -402,7 +395,6 @@
                 cap.rotation = state.cap.rotation; 
                 turn = state.turn; 
                 score = state.score;
-                // 2. ÇÖZÜM: Renkli skoru güncelle
                 document.getElementById('score-p1').innerText = score.p1;
                 document.getElementById('score-p2').innerText = score.p2;
                 updateHUDTurn(); resetShotTimer();
@@ -458,7 +450,6 @@
             }, 1000);
         }
 
-        // 3. ÇÖZÜM: Diziliş için 15 saniyelik zamanlayıcı mekanizması
         function startSetupTimer() {
             if (setupTimerInterval) clearInterval(setupTimerInterval);
             setupSecondsLeft = 15;
@@ -472,13 +463,12 @@
                     setupSecondsLeft--;
                     if (setupSecondsLeft <= 0) {
                         clearInterval(setupTimerInterval);
-                        confirmFormationsAndStart(); // Süre bitince otomatik onayla ve başlat
+                        confirmFormationsAndStart();
                     } else {
                         btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
                     }
                 }, 1000);
             } else {
-                // Lokal oyunlarda süre sınırlaması olmadan düz buton göster
                 btn.innerHTML = "BAŞLAT";
             }
         }
@@ -524,7 +514,6 @@
             document.getElementById('score-p1').innerText = "0";
             document.getElementById('score-p2').innerText = "0";
             
-            // 3. ÇÖZÜM: Orta sahada butonu görünür yap
             const startBtn = document.getElementById('start-match-btn');
             startBtn.style.display = 'flex';
             startBtn.style.opacity = '1';
@@ -563,7 +552,6 @@
 
             cap.x = width/2; cap.y = height/2; cap.vx = 0; cap.vy = 0;
             
-            // Geri sayımı/başlatmayı tetikle
             startSetupTimer();
             animate();
         }
@@ -600,22 +588,21 @@
             }
         }
 
-        // 1. ÇÖZÜM: Yapay zekanın (AI) vuruş hızı fizik motoruyla tam uyumlu hale getirildi
+        // 2. ÇÖZÜM: AI vuruşunun max 20 top boyu (~440px mesafe) alacak şekilde ayarlanması
         function runAIMove() {
             if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
             if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
 
             setTimeout(() => {
                 const angle = Math.atan2(height - cap.y, width/2 - cap.x);
-                // Fizik motorundaki "SUB_STEPS" ile uyumlu olması için şut gücünü scale ediyoruz
-                const basePower = 1.6; 
-                const randomVariance = 0.5 + Math.random() * 0.7; // Güç varyasyonu
-                const calculatedPower = basePower * randomVariance * 16; // 16 alt adıma (SUB_STEPS) bölüneceği için çarpılıyor
-
+                
+                // Top Çapı: 2 * cap.radius = 22px. 20 top boyu = 440px mesafe.
+                // Sürtünme katsayısı (0.983) ile 16 alt adımda simüle edilen hızı tam 440px sınırlayacak vuruş gücü:
+                const maxAIPower = 9.8; 
+                
                 playSound('kick');
-                // Adım bazlı hızı doğrudan atıyoruz (Substeps bunu adilce dağıtacaktır)
-                cap.vx = Math.cos(angle) * calculatedPower; 
-                cap.vy = Math.sin(angle) * calculatedPower;
+                cap.vx = Math.cos(angle) * maxAIPower; 
+                cap.vy = Math.sin(angle) * maxAIPower;
                 
                 turn = 1; updateHUDTurn(); resetShotTimer();
             }, 1000);
@@ -635,14 +622,16 @@
                 if (cap.y - cap.radius <= goalHeight || cap.y + cap.radius >= height - goalHeight) {
                     if (cap.x > (width - goalWidth)/2 && cap.x < (width + goalWidth)/2) {
                         
+                        // 1. ÇÖZÜM: Kaleler ve sayı dağılımı mantığı tamamen düzeltildi
                         if (cap.y < height / 2) { 
-                            score.p2++; 
-                        } else { 
+                            // Top Üst Kaleye (Kırmızı Takım'ın kalesi) girdi -> Sayı Mavi Takım'a (P1) yazılır.
                             score.p1++; 
+                        } else { 
+                            // Top Alt Kaleye (Mavi Takım'ın kalesi) girdi -> Sayı Kırmızı Takım'a (P2) yazılır.
+                            score.p2++; 
                         }
                         
                         playSound('goal'); 
-                        // 2. ÇÖZÜM: Takım renklerinde skoru güncelle
                         document.getElementById('score-p1').innerText = score.p1;
                         document.getElementById('score-p2').innerText = score.p2;
                         
