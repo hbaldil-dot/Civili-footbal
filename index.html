@@ -307,29 +307,32 @@
                 animate();
             });
 
-            // === YENİ: RAKİP VURUŞU ===
+            // === HİBRİT: RAKİP VURUŞU (Sadece durum güncellemesi) ===
             socket.on("opponentShot", (shotData) => {
                 if (gameMode === 'online' && currentPhase === 'playing') {
+                    // Rakibin yaptığı vuruşu uygula
                     applyShotPhysics(shotData);
+                    
+                    // Sıra değişimi
                     turn = shotData.player === 1 ? 2 : 1;
                     updateHUDTurn();
                     resetShotTimer();
                 }
             });
 
-            // === YENİ: POZİSYON DÜZELTMESİ ===
+            // === SENKRONİZASYON DÜZELTMESİ (Sadece büyük sapmalarda) ===
             socket.on("correctBallPosition", (ballState) => {
                 if (gameMode === 'online' && currentPhase === 'playing') {
-                    if (Math.hypot(cap.vx, cap.vy) < 0.1) {
-                        const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
-                        if (diff > 20) {
-                            cap.x = ballState.x;
-                            cap.y = ballState.y;
-                            cap.vx = ballState.vx;
-                            cap.vy = ballState.vy;
-                            turn = ballState.turn;
-                            updateHUDTurn();
-                        }
+                    const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
+                    // Sadece 30 pikselden fazla sapma varsa düzelt
+                    if (diff > 30) {
+                        console.log(`🔄 Pozisyon düzeltiliyor: ${diff.toFixed(0)}px`);
+                        cap.x = ballState.x;
+                        cap.y = ballState.y;
+                        cap.vx = ballState.vx;
+                        cap.vy = ballState.vy;
+                        turn = ballState.turn;
+                        updateHUDTurn();
                     }
                 }
             });
@@ -485,9 +488,11 @@
         // VURUŞ FİZİĞİ (ORTAK)
         // ============================================================
         function applyShotPhysics(shotData) {
+            // Önceki hareketi durdur
             cap.vx = 0;
             cap.vy = 0;
             
+            // Vuruş kuvvetini hesapla
             const dx = shotData.startX - shotData.endX;
             const dy = shotData.startY - shotData.endY;
             const force = 0.13;
@@ -496,37 +501,6 @@
             cap.vy = dy * force;
             
             playSound('kick');
-        }
-
-        function broadcastShot(startX, startY, endX, endY) {
-            if (gameMode !== 'online' || !socket || currentPhase !== 'playing') return;
-            
-            const shotData = {
-                player: turn,
-                startX: startX,
-                startY: startY,
-                endX: endX,
-                endY: endY,
-                timestamp: Date.now()
-            };
-            
-            socket.emit('playerShot', { roomId: currentRoomId, shotData: shotData });
-        }
-
-        function broadcastBallSync() {
-            if (gameMode !== 'online' || !socket || currentPhase !== 'playing') return;
-            if (Math.hypot(cap.vx, cap.vy) > 0.1) return;
-            
-            socket.emit('syncBallPosition', {
-                roomId: currentRoomId,
-                ballState: {
-                    x: cap.x,
-                    y: cap.y,
-                    vx: cap.vx,
-                    vy: cap.vy,
-                    turn: turn
-                }
-            });
         }
 
         // ============================================================
@@ -794,11 +768,6 @@
                         cap.vx = 0; 
                         cap.vy = 0;
                         
-                        // Online'da skor senkronizasyonu için periyodik sync
-                        if (gameMode === 'online') {
-                            setTimeout(broadcastBallSync, 100);
-                        }
-                        
                         resetShotTimer(); 
                         return;
                     } else {
@@ -838,9 +807,6 @@
                 cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
             } else if (gameMode === 'ai' && turn === 2) {
                 runAIMove();
-            } else if (gameMode === 'online' && turn === myTeamNumber) {
-                // Sıra bende ve top durdu, periyodik sync yap
-                setTimeout(broadcastBallSync, 500);
             }
         }
 
@@ -957,14 +923,24 @@
                 const endX = dragCurrent.x;
                 const endY = dragCurrent.y;
                 
+                // Topa kuvvet uygula
                 cap.vx = (startX - endX) * 0.13;
                 cap.vy = (startY - endY) * 0.13;
                 
                 // Online'da vuruşu rakibe gönder
-                if (gameMode === 'online') {
-                    broadcastShot(startX, startY, endX, endY);
+                if (gameMode === 'online' && socket) {
+                    const shotData = {
+                        player: turn,
+                        startX: startX,
+                        startY: startY,
+                        endX: endX,
+                        endY: endY,
+                        timestamp: Date.now()
+                    };
+                    socket.emit('playerShot', { roomId: currentRoomId, shotData: shotData });
                 }
                 
+                // Sıra değişimi
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn(); 
                 resetShotTimer(); 
@@ -1013,12 +989,39 @@
         }
 
         // ============================================================
+        // PERİYODİK SENKRONİZASYON (DÜZELTME)
+        // ============================================================
+        let syncInterval = null;
+
+        function startPeriodicSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(() => {
+                if (gameMode === 'online' && currentPhase === 'playing' && socket) {
+                    // Sadece top duruyorken ve sıra bende değilse senkronize et
+                    if (Math.hypot(cap.vx, cap.vy) < 0.1 && turn !== myTeamNumber) {
+                        socket.emit('syncBallPosition', {
+                            roomId: currentRoomId,
+                            ballState: {
+                                x: cap.x,
+                                y: cap.y,
+                                vx: cap.vx,
+                                vy: cap.vy,
+                                turn: turn
+                            }
+                        });
+                    }
+                }
+            }, 3000); // Her 3 saniyede bir
+        }
+
+        // ============================================================
         // ÇIKIŞ VE MENÜ
         // ============================================================
         function exitToMenu() {
             if(timerInterval) clearInterval(timerInterval);
             if(shotTimerInterval) clearInterval(shotTimerInterval);
             if(setupTimerInterval) clearInterval(setupTimerInterval);
+            if(syncInterval) clearInterval(syncInterval);
             if(socket) socket.emit("leave-lobby"); 
             currentPhase = 'menu';
             document.getElementById('menu').style.display = 'block';
@@ -1104,6 +1107,9 @@
         console.log("🎮 Çivili Futbol Başlatıldı!");
         console.log("📱 Modlar: Yerel, AI, Çevrimiçi");
         console.log("🟢 Sunucu durumu:", socket ? "Bağlı" : "Bağlı değil");
+        
+        // Periyodik senkronizasyonu başlat
+        startPeriodicSync();
     </script>
 </body>
 </html>
