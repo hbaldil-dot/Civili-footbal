@@ -100,6 +100,11 @@ io.on('connection', (socket) => {
 
             io.to(roomId).emit('match-go', { pins: combinedPins });
             console.log(`Dizilimler onaylandı, maç başlıyor. Oda: ${roomId}`);
+            
+            // Odayı temizle
+            setTimeout(() => {
+                delete activeRooms[roomId];
+            }, 5000);
         }
     });
 
