@@ -1074,7 +1074,7 @@ startPeriodicSync();
 // POP-UP MENÜ FONKSİYONLARI (game.js SONUNA EKLE)
 // ============================================================
 
-// Renk değişkenleri (varsa zaten tanımlıdır)
+// Renk değişkenleri
 let team1Color = '#3498db';
 let team2Color = '#e74c3c';
 let fieldColor = '#2e7d32';
@@ -1082,32 +1082,51 @@ let fieldColor = '#2e7d32';
 // ===== AYARLAR POP-UP =====
 function openSettingsPopup() {
     const popup = document.getElementById('settings-popup');
-    popup.style.display = 'flex';
-    // Animasyon için
-    popup.style.animation = 'none';
-    setTimeout(() => {
-        popup.style.animation = 'fadeIn 0.3s ease';
-    }, 10);
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
+    }
 }
 
 function closeSettingsPopup() {
-    document.getElementById('settings-popup').style.display = 'none';
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
 }
 
 // ===== AI ZORLUK MENÜSÜ =====
 function openAILevelMenu() {
-    document.getElementById('menu').style.display = 'none';
+    // Ana menüyü gizle
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    
+    // AI menüsünü göster
     const popup = document.getElementById('ai-level-menu');
-    popup.style.display = 'flex';
-    popup.style.animation = 'none';
-    setTimeout(() => {
-        popup.style.animation = 'fadeIn 0.3s ease';
-    }, 10);
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
+    }
 }
 
 function closeAILevelMenu() {
-    document.getElementById('ai-level-menu').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    const popup = document.getElementById('ai-level-menu');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
 }
 
 // ===== ONLINE LOBI =====
@@ -1116,21 +1135,44 @@ function openOnlineLobby() {
         alert("Şu anda bir sunucuya bağlı değilsiniz!");
         return;
     }
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
-    socket.emit("join-lobby", name);
-    document.getElementById('menu').style.display = 'none';
+    
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "Oyuncu";
+    const playerName = name || "Oyuncu_" + Math.floor(Math.random() * 100);
+    
+    socket.emit("join-lobby", playerName);
+    
+    // Ana menüyü gizle
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    
+    // Online lobi pop-up'ını göster
     const popup = document.getElementById('online-lobby');
-    popup.style.display = 'flex';
-    popup.style.animation = 'none';
-    setTimeout(() => {
-        popup.style.animation = 'fadeIn 0.3s ease';
-    }, 10);
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
+    }
 }
 
 function closeOnlineLobby() {
-    if (socket) socket.emit("leave-lobby");
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    if (socket) {
+        socket.emit("leave-lobby");
+    }
+    
+    const popup = document.getElementById('online-lobby');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
 }
 
 // ===== RENK SEÇİMİ =====
@@ -1193,6 +1235,11 @@ function startLocalGame(mode, aiLevelParam) {
         }
         closeAILevelMenu();
     }
+    
+    // Tüm pop-up'ları kapat
+    document.getElementById('settings-popup').style.display = 'none';
+    document.getElementById('ai-level-menu').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'none';
     
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
