@@ -1,9 +1,18 @@
 // ============================================================
+// HATA YAKALAMA - MENÜLERİN ÇALIŞMASI İÇİN
+// ============================================================
+try {
+    console.log('🎮 Oyun başlatılıyor...');
+} catch (e) {
+    console.error('Başlangıç hatası:', e);
+}
+
+// ============================================================
 // SOCKET BAĞLANTISI
 // ============================================================
 let socket = null;
-if (typeof io !== 'undefined') {
-    try {
+try {
+    if (typeof io !== 'undefined') {
         const serverUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? undefined
             : window.location.origin;
@@ -17,9 +26,9 @@ if (typeof io !== 'undefined') {
 
         socket.on('connect', () => console.log('✅ Sunucuya bağlandı!'));
         socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
-    } catch (e) {
-        console.error("❌ Socket bağlantı hatası:", e);
     }
+} catch (e) {
+    console.error("❌ Socket bağlantı hatası:", e);
 }
 
 // ============================================================
