@@ -62,7 +62,7 @@ const goalHeight = 12;
 const penaltyBoxW = goalWidth * 2.2;
 const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
-const MAX_DRAG_DIST = cap.radius * 2 * 14; // 308px - ARTIRILDI
+const MAX_DRAG_DIST = cap.radius * 2 * 6; // 132px - 6 top boyu (ESKİ SİSTEM)
 
 // AI Zorluk Seviyesi (varsayılan)
 let aiLevel = 'orta';
@@ -211,14 +211,13 @@ function draw() {
         }
     });
 
-    // Vuruş yönü oku (YENİ)
+    // Vuruş yönü oku
     if (currentPhase === 'playing' && isDraggingBall) {
         const dx = dragStart.x - dragCurrent.x;
         const dy = dragStart.y - dragCurrent.y;
         const dist = Math.hypot(dx, dy);
         
         if (dist > 10) {
-            // Ana çizgi
             ctx.save();
             ctx.strokeStyle = 'rgba(46, 204, 113, 0.4)';
             ctx.lineWidth = 2;
@@ -235,7 +234,6 @@ function draw() {
             ctx.lineTo(endX, endY);
             ctx.stroke();
             
-            // Ok başı
             ctx.setLineDash([]);
             const arrowSize = 10;
             const angle = Math.atan2(dy, dx);
@@ -396,7 +394,7 @@ function calculateAITarget(params) {
 function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
     const power = params.power * (0.8 + Math.random() * 0.4);
-    const pullDistance = params.pullDistance * (0.8 + Math.random() * 0.4);
+    const pullDistance = Math.min(params.pullDistance * (0.8 + Math.random() * 0.4), MAX_DRAG_DIST);
 
     if (Math.random() < params.fakeChance) {
         executeFakeShot(angle, power);
@@ -413,9 +411,10 @@ function executeAIShot(target, params) {
         const pullInterval = setInterval(() => {
             stepCount++;
             const ratio = stepCount / totalSteps;
+            const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
             dragCurrent = {
-                x: cap.x - Math.cos(angle) * (pullDistance * ratio),
-                y: cap.y - Math.sin(angle) * (pullDistance * ratio)
+                x: cap.x - Math.cos(angle) * currentPull,
+                y: cap.y - Math.sin(angle) * currentPull
             };
 
             if (stepCount >= totalSteps) {
@@ -424,8 +423,9 @@ function executeAIShot(target, params) {
                     isDraggingBall = false;
                     isAiThinking = false;
                     playSound('kick');
-                    cap.vx = (dragStart.x - dragCurrent.x) * 0.35; // GÜNCELLENDİ
-                    cap.vy = (dragStart.y - dragCurrent.y) * 0.35; // GÜNCELLENDİ
+                    // ESKİ GÜÇ SİSTEMİ - 0.13
+                    cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
+                    cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
                     turn = 1;
                     updateHUDTurn();
                     resetShotTimer();
@@ -558,12 +558,11 @@ function setupSocketListeners() {
 
     socket.on("opponentShot", (shotData) => {
         if (gameMode === 'online' && currentPhase === 'playing') {
-            // Fizik uygula
-            cap.vx = (shotData.startX - shotData.endX) * 0.35;
-            cap.vy = (shotData.startY - shotData.endY) * 0.35;
+            // ESKİ GÜÇ SİSTEMİ - 0.13
+            cap.vx = (shotData.startX - shotData.endX) * 0.13;
+            cap.vy = (shotData.startY - shotData.endY) * 0.13;
             playSound('kick');
             
-            // Sırayı değiştir (rakip vurdu, sıra bana geçer)
             turn = myTeamNumber;
             updateHUDTurn();
             resetShotTimer();
@@ -687,7 +686,6 @@ function confirmFormationsAndStart() {
 
         socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
     } else {
-        // Çivileri KİLİTLE (YENİ)
         pins.forEach(pin => {
             pin.locked = true;
         });
@@ -808,7 +806,7 @@ function applyShotPhysics(shotData) {
     cap.vy = 0;
     const dx = shotData.startX - shotData.endX;
     const dy = shotData.startY - shotData.endY;
-    const force = 0.35; // GÜNCELLENDİ
+    const force = 0.13; // ESKİ SİSTEM
     cap.vx = dx * force;
     cap.vy = dy * force;
     playSound('kick');
@@ -882,7 +880,7 @@ function updatePhysics() {
             cap.vx *= -0.85;
             playSound('hit'); }
 
-        // GOL KONTROLÜ - GÜNCELLENDİ
+        // GOL KONTROLÜ - Gol sonrası diğer takım başlar
         if (cap.y - cap.radius <= goalHeight) {
             // Mavi takım (takım 1) gol attı
             if (gameMode === 'online') {
@@ -1023,7 +1021,7 @@ canvas.addEventListener('mousedown', (e) => {
     const pos = getCanvasTouchPos(e);
     if (currentPhase === 'setup') {
         for (let p of pins) {
-            if (p.locked) continue; // Kilitliyse seçme (YENİ)
+            if (p.locked) continue;
             if (!p.isPost) {
                 if (gameMode === 'online' && p.team !== editableTeam) continue;
                 if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
@@ -1042,7 +1040,6 @@ canvas.addEventListener('mousedown', (e) => {
             dragStart = { x: cap.x, y: cap.y };
             dragCurrent = pos;
             
-            // Güç göstergesini göster (YENİ)
             const container = document.getElementById('power-bar-container');
             if (container) {
                 container.style.display = 'block';
@@ -1083,15 +1080,16 @@ canvas.addEventListener('mousemove', (e) => {
         let dy = pos.y - dragStart.y;
         let dist = Math.hypot(dx, dy);
 
+        // MAX_DRAG_DIST sınırı (132px - 6 top boyu)
         if (dist > MAX_DRAG_DIST) {
             dx = (dx / dist) * MAX_DRAG_DIST;
             dy = (dy / dist) * MAX_DRAG_DIST;
+            dist = MAX_DRAG_DIST;
         }
         dragCurrent = { x: dragStart.x + dx, y: dragStart.y + dy };
         
-        // Güç göstergesini güncelle (YENİ)
-        const currentDist = Math.hypot(dragCurrent.x - dragStart.x, dragCurrent.y - dragStart.y);
-        const powerPercent = Math.min(100, (currentDist / MAX_DRAG_DIST) * 100);
+        // Güç göstergesini güncelle
+        const powerPercent = Math.min(100, (dist / MAX_DRAG_DIST) * 100);
         const powerBar = document.getElementById('power-bar');
         const container = document.getElementById('power-bar-container');
         
@@ -1149,8 +1147,9 @@ window.addEventListener('mouseup', () => {
         const endX = dragCurrent.x;
         const endY = dragCurrent.y;
 
-        cap.vx = (startX - endX) * 0.35; // GÜNCELLENDİ
-        cap.vy = (startY - endY) * 0.35; // GÜNCELLENDİ
+        // ESKİ GÜÇ SİSTEMİ - 0.13
+        cap.vx = (startX - endX) * 0.13;
+        cap.vy = (startY - endY) * 0.13;
 
         // Sırayı değiştir
         turn = turn === 1 ? 2 : 1;
@@ -1169,7 +1168,7 @@ window.addEventListener('mouseup', () => {
             socket.emit('playerShot', { roomId: currentRoomId, shotData: shotData });
         }
         
-        // Güç göstergesini gizle (YENİ)
+        // Güç göstergesini gizle
         const container = document.getElementById('power-bar-container');
         if (container) {
             container.style.display = 'none';
