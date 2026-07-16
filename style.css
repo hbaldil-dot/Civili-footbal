@@ -428,6 +428,17 @@ select {
     color: #f1c40f;
     border-color: #f1c40f;
     min-width: 85px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+#turn-indicator:not([style*="color: #2ecc71"]) {
+    animation: none;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 #time-board {
@@ -516,6 +527,26 @@ canvas {
     text-shadow: 1px 1px 2px black;
 }
 
+/* ===== GÜÇ GÖSTERGESİ (YENİ) ===== */
+#power-bar-container {
+    width: 100%;
+    max-width: 360px;
+    height: 8px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+    display: none;
+}
+
+#power-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
+    border-radius: 4px;
+    transition: width 0.05s;
+}
+
 /* ===== MOBİL UYUM ===== */
 @media (max-width: 400px) {
     #menu {
@@ -558,5 +589,9 @@ canvas {
     .popup-close-btn {
         padding: 8px 20px;
         font-size: 12px;
+    }
+    
+    #power-bar-container {
+        height: 6px;
     }
 }
