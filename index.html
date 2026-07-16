@@ -32,7 +32,7 @@
     </div>
 
     <!-- ===== AYARLAR POP-UP ===== -->
-    <div id="settings-popup" style="display: none;">
+    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content">
             <div class="popup-header">
                 <h2>⚙️ AYARLAR</h2>
@@ -92,8 +92,8 @@
         </div>
     </div>
 
-    <!-- ===== AI ZORLUK MENÜSÜ ===== -->
-    <div id="ai-level-menu" style="display: none;">
+    <!-- ===== AI ZORLUK POP-UP ===== -->
+    <div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
         <div class="popup-content">
             <div class="popup-header">
                 <h2>🤖 ZORLUK SEVİYESİ</h2>
@@ -108,8 +108,8 @@
         </div>
     </div>
 
-    <!-- ===== ONLINE LOBI ===== -->
-    <div id="online-lobby" style="display: none;">
+    <!-- ===== ONLINE LOBI POP-UP ===== -->
+    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
             <div class="popup-header">
                 <h2>🌐 ÇEVRİMİÇİ HAVUZ</h2>
