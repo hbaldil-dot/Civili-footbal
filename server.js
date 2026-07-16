@@ -23,13 +23,13 @@ let lobbyPlayers = [];
 let activeRooms = {};
 
 io.on('connection', (socket) => {
-    console.log(`Yeni bağlantı: ${socket.id}`);
+    console.log(`🟢 Yeni bağlantı: ${socket.id}`);
 
     // --- LOBİ ---
     socket.on('join-lobby', (playerName) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         lobbyPlayers.push({ id: socket.id, name: playerName });
-        console.log(`${playerName} lobiye katıldı.`);
+        console.log(`👤 ${playerName} lobiye katıldı. (${lobbyPlayers.length} kişi)`);
         broadcastLobbyUpdate();
     });
 
@@ -40,6 +40,7 @@ io.on('connection', (socket) => {
     socket.on('send-invite', (targetId) => {
         const sender = lobbyPlayers.find(p => p.id === socket.id);
         if (sender) {
+            console.log(`📨 ${sender.name} → ${targetId} davet gönderdi`);
             io.to(targetId).emit('receive-invite', {
                 fromId: socket.id,
                 fromName: sender.name
@@ -53,6 +54,8 @@ io.on('connection', (socket) => {
 
         if (host && guest) {
             const roomId = `room_${hostId}_${socket.id}`;
+            
+            // Lobi'den çıkar
             lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
             broadcastLobbyUpdate();
 
@@ -72,7 +75,7 @@ io.on('connection', (socket) => {
 
                 io.to(hostId).emit('start-online-match', { roomId, team: 1 });
                 io.to(socket.id).emit('start-online-match', { roomId, team: 2 });
-                console.log(`Maç başladı! Oda: ${roomId}`);
+                console.log(`🎮 Maç başladı! Oda: ${roomId} (${host.name} vs ${guest.name})`);
             }
         }
     });
@@ -90,6 +93,7 @@ io.on('connection', (socket) => {
         if (player) {
             player.ready = true;
             player.placedPins = placedPins;
+            console.log(`✅ Takım ${team} hazır (${player.placedPins.length} oyuncu)`);
         }
 
         if (room.players.every(p => p.ready)) {
@@ -99,9 +103,9 @@ io.on('connection', (socket) => {
             ];
 
             io.to(roomId).emit('match-go', { pins: combinedPins });
-            console.log(`Dizilimler onaylandı, maç başlıyor. Oda: ${roomId}`);
+            console.log(`🚀 Maç başlıyor! Oda: ${roomId}`);
             
-            // Odayı temizle
+            // Odayı temizle (5 saniye sonra)
             setTimeout(() => {
                 delete activeRooms[roomId];
             }, 5000);
@@ -111,7 +115,6 @@ io.on('connection', (socket) => {
     // --- OYUN SENKRONİZASYONU ---
     socket.on('playerShot', ({ roomId, shotData }) => {
         socket.to(roomId).emit('opponentShot', shotData);
-        console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
     socket.on('updateState', ({ roomId, state }) => {
@@ -123,7 +126,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log(`Bağlantı koptu: ${socket.id}`);
+        console.log(`🔴 Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
     });
 });
@@ -136,6 +139,7 @@ function removePlayerFromLobby(socketId) {
     const lengthBefore = lobbyPlayers.length;
     lobbyPlayers = lobbyPlayers.filter(p => p.id !== socketId);
     if (lobbyPlayers.length !== lengthBefore) {
+        console.log(`👤 Oyuncu lobiden ayrıldı (${lobbyPlayers.length} kişi kaldı)`);
         broadcastLobbyUpdate();
     }
 }
@@ -149,7 +153,7 @@ function handlePlayerDisconnection(socket) {
 
         if (isPlayerInRoom) {
             socket.to(roomId).emit('opponent-disconnected');
-            console.log(`Oda kapatıldı (${roomId}), oyuncu ayrıldı.`);
+            console.log(`❌ Oda kapatıldı (${roomId}), oyuncu ayrıldı.`);
             delete activeRooms[roomId];
             break;
         }
@@ -158,5 +162,5 @@ function handlePlayerDisconnection(socket) {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
+    console.log(`🚀 Sunucu http://0.0.0.0:${PORT} portunda çalışıyor!`);
 });
