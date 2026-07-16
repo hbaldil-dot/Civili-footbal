@@ -12,49 +12,59 @@
 
     <!-- MENÜ -->
     <div id="menu">
-        <h1>ÇİVİLİ FUTBOL</h1>
+        <h1>⚽ ÇİVİLİ FUTBOL</h1>
+        
         <div class="input-group">
-            <label>OYUNCU İSMİ</label>
+            <label>👤 OYUNCU İSMİ</label>
             <input type="text" id="player-name" value="Oyuncu" maxlength="12">
         </div>
+        
         <div class="input-group">
-            <label>MAÇ SÜRESİ</label>
+            <label>⏱️ MAÇ SÜRESİ</label>
             <select id="match-duration">
                 <option value="60">1 Dakika (60s)</option>
                 <option value="90" selected>1.5 Dakika (90s)</option>
                 <option value="120">2 Dakika (120s)</option>
             </select>
         </div>
+
+        <!-- AI ZORLUK SEÇENEĞİ - DAHA GÖRÜNÜR -->
+        <div class="input-group" id="ai-level-group">
+            <label>🤖 BİLGİSAYAR ZORLUĞU</label>
+            <select id="ai-level">
+                <option value="kolay">🟢 Kolay</option>
+                <option value="orta" selected>🟡 Orta</option>
+                <option value="zor">🟠 Zor</option>
+                <option value="usta">🔴 Usta</option>
+            </select>
+        </div>
+
         <div class="mode-container">
             <button class="main-btn btn-ai" onclick="startLocalGame('ai')">🤖 Bilgisayara Karşı</button>
             <button class="main-btn btn-local" onclick="startLocalGame('local')">👥 2 Oyuncu (Aynı Ekran)</button>
             <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Çevrimiçi Havuzu Gir</button>
         </div>
-        <div class="input-group">
-    <label>BİLGİSAYAR ZORLUĞU</label>
-    <select id="ai-level">
-        <option value="kolay">Kolay</option>
-        <option value="orta" selected>Orta</option>
-        <option value="zor">Zor</option>
-        <option value="usta">Usta</option>
-    </select>
-</div>
+        
+        <!-- AI Zorluk Uyarısı -->
+        <div style="margin-top: 10px; font-size: 10px; color: #888;">
+            💡 Zorluk seviyesi sadece "Bilgisayara Karşı" modunda geçerlidir.
+        </div>
     </div>
 
     <!-- ONLINE LOBI -->
     <div id="online-lobby">
-        <h2>ÇEVRİMİÇİ HAVUZ</h2>
+        <h2>🌐 ÇEVRİMİÇİ HAVUZ</h2>
         <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
         <div class="player-list" id="lobby-list">
             <div style="padding:15px;color:#888;text-align:center;">Havuz güncelleniyor...</div>
         </div>
-        <button class="lobby-close-btn" onclick="closeOnlineLobby()">Geri Dön</button>
+        <button class="lobby-close-btn" onclick="closeOnlineLobby()">🔙 Geri Dön</button>
     </div>
 
     <!-- OYUN EKRANI -->
     <div id="top-bar">
         <div class="hud-row">
-            <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
+            <button id="exit-btn" onclick="exitToMenu()">❌ ÇIKIŞ</button>
             <div id="turn-indicator">Diziliş</div>
             <div id="score-board">
                 <span id="score-p1">0</span>
