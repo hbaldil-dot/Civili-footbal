@@ -64,6 +64,9 @@ const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
 const MAX_DRAG_DIST = cap.radius * 2 * 7;
 
+// AI Zorluk Seviyesi (varsayılan)
+let aiLevel = 'orta';
+
 // ============================================================
 // SES EFEKTLERİ
 // ============================================================
@@ -258,6 +261,196 @@ function getCanvasTouchPos(e) {
     }
 
     return { x, y };
+}
+
+// ============================================================
+// GELİŞMİŞ AI SİSTEMİ (SADELEŞTİRİLMİŞ)
+// ============================================================
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+    if (isAiThinking) return;
+
+    isAiThinking = true;
+
+    // AI zorluk seviyesine göre parametreler
+    let params = getAIParameters();
+
+    // Hedef hesapla
+    const target = calculateAITarget(params);
+
+    // Vuruşu gerçekleştir
+    executeAIShot(target, params);
+}
+
+function getAIParameters() {
+    // Menüden zorluk seviyesini al
+    const levelSelect = document.getElementById('ai-level');
+    if (levelSelect) {
+        aiLevel = levelSelect.value;
+    }
+
+    switch (aiLevel) {
+        case 'kolay':
+            return {
+                accuracy: 0.4,
+                power: 0.06,
+                reactionDelay: 800,
+                pullDistance: 50,
+                fakeChance: 0.02,
+                errorRate: 0.3
+            };
+        case 'zor':
+            return {
+                accuracy: 0.85,
+                power: 0.13,
+                reactionDelay: 400,
+                pullDistance: 80,
+                fakeChance: 0.15,
+                errorRate: 0.05
+            };
+        case 'usta':
+            return {
+                accuracy: 0.95,
+                power: 0.15,
+                reactionDelay: 250,
+                pullDistance: 90,
+                fakeChance: 0.25,
+                errorRate: 0.02
+            };
+        default: // 'orta'
+            return {
+                accuracy: 0.65,
+                power: 0.10,
+                reactionDelay: 600,
+                pullDistance: 65,
+                fakeChance: 0.08,
+                errorRate: 0.12
+            };
+    }
+}
+
+function calculateAITarget(params) {
+    const goalY = height - goalHeight;
+    const goalCenterX = width / 2;
+
+    // 1. Rakip oyuncuları bul
+    const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
+
+    // 2. En iyi hedefi bul (kaleye en yakın açık alan)
+    let bestTarget = { x: goalCenterX, y: goalY };
+    let bestScore = -Infinity;
+
+    // Kaleye yakın 5 farklı noktayı dene
+    for (let i = 0; i < 5; i++) {
+        const offsetX = (Math.random() - 0.5) * 60;
+        const testX = goalCenterX + offsetX;
+        const testY = goalY;
+
+        // Rakip oyunculara uzaklık
+        let minDist = Infinity;
+        enemyPlayers.forEach(p => {
+            const dist = Math.hypot(testX - p.x, testY - p.y);
+            if (dist < minDist) minDist = dist;
+        });
+
+        // Skor: kaleye yakınlık + rakip oyuncudan uzaklık
+        const score = (60 - Math.abs(offsetX)) + minDist * 2;
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestTarget = { x: testX, y: testY };
+        }
+    }
+
+    // Hata payı ekle
+    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
+    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
+
+    return {
+        x: bestTarget.x + errorX,
+        y: bestTarget.y + errorY
+    };
+}
+
+function executeAIShot(target, params) {
+    const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+    const power = params.power * (0.8 + Math.random() * 0.4);
+    const pullDistance = params.pullDistance * (0.8 + Math.random() * 0.4);
+
+    // Fake shot kontrolü
+    if (Math.random() < params.fakeChance) {
+        executeFakeShot(angle, power);
+        return;
+    }
+
+    // Gecikmeli vuruş
+    setTimeout(() => {
+        isDraggingBall = true;
+        dragStart = { x: cap.x, y: cap.y };
+        dragCurrent = { x: cap.x, y: cap.y };
+
+        let stepCount = 0;
+        const totalSteps = 8;
+
+        const pullInterval = setInterval(() => {
+            stepCount++;
+            const ratio = stepCount / totalSteps;
+
+            dragCurrent = {
+                x: cap.x - Math.cos(angle) * (pullDistance * ratio),
+                y: cap.y - Math.sin(angle) * (pullDistance * ratio)
+            };
+
+            if (stepCount >= totalSteps) {
+                clearInterval(pullInterval);
+
+                setTimeout(() => {
+                    isDraggingBall = false;
+                    isAiThinking = false;
+                    playSound('kick');
+
+                    cap.vx = (dragStart.x - dragCurrent.x) * power * 1.5;
+                    cap.vy = (dragStart.y - dragCurrent.y) * power * 1.5;
+
+                    turn = 1;
+                    updateHUDTurn();
+                    resetShotTimer();
+                }, 150);
+            }
+        }, 30);
+    }, params.reactionDelay);
+}
+
+function executeFakeShot(angle, power) {
+    // Fake hareket - önce bir yöne çek
+    const fakeAngle = angle + (Math.random() - 0.5) * 1.5;
+    const fakeDistance = 30;
+
+    // Fake çekme
+    isDraggingBall = true;
+    dragStart = { x: cap.x, y: cap.y };
+    dragCurrent = {
+        x: cap.x - Math.cos(fakeAngle) * fakeDistance,
+        y: cap.y - Math.sin(fakeAngle) * fakeDistance
+    };
+
+    setTimeout(() => {
+        // Gerçek vuruş - farklı açıyla
+        const realAngle = angle + (Math.random() - 0.5) * 0.5;
+        const realPower = power * 1.1;
+
+        isDraggingBall = false;
+        isAiThinking = false;
+        playSound('kick');
+
+        cap.vx = Math.cos(realAngle) * realPower * 60;
+        cap.vy = Math.sin(realAngle) * realPower * 60;
+
+        turn = 1;
+        updateHUDTurn();
+        resetShotTimer();
+    }, 300);
 }
 
 // ============================================================
@@ -699,60 +892,9 @@ function updatePhysics() {
     if (isMoving) {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
+        // AI hareketi burada çağrılır
         runAIMove();
     }
-}
-
-// ============================================================
-// AI MANTIĞI
-// ============================================================
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-    if (isAiThinking) return;
-
-    isAiThinking = true;
-
-    setTimeout(() => {
-        const targetX = width / 2;
-        const targetY = height - goalHeight;
-        const angle = Math.atan2(targetY - cap.y, targetX - cap.x);
-        const aiPullDistance = 72;
-
-        isDraggingBall = true;
-        dragStart = { x: cap.x, y: cap.y };
-        dragCurrent = { x: cap.x, y: cap.y };
-
-        let stepCount = 0;
-        const totalSteps = 10;
-        const pullInterval = setInterval(() => {
-            stepCount++;
-            const ratio = stepCount / totalSteps;
-
-            dragCurrent = {
-                x: cap.x - Math.cos(angle) * (aiPullDistance * ratio),
-                y: cap.y - Math.sin(angle) * (aiPullDistance * ratio)
-            };
-
-            if (stepCount >= totalSteps) {
-                clearInterval(pullInterval);
-
-                setTimeout(() => {
-                    isDraggingBall = false;
-                    isAiThinking = false;
-                    playSound('kick');
-
-                    cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
-                    cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
-
-                    turn = 1;
-                    updateHUDTurn();
-                    resetShotTimer();
-                }, 300);
-            }
-        }, 30);
-
-    }, 800);
 }
 
 // ============================================================
