@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Çivili Futbol - Klasik & Online</title>
+    <title>Çivili Futbol</title>
     <link rel="stylesheet" href="style.css">
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="game.js" defer></script>
@@ -14,20 +14,29 @@
     <div id="menu">
         <h1>⚽ ÇİVİLİ FUTBOL</h1>
         
-        <!-- Oyuncu İsmi -->
         <div class="input-group">
             <label>👤 OYUNCU İSMİ</label>
             <input type="text" id="player-name" value="Oyuncu" maxlength="12">
         </div>
 
-        <!-- Oyun Modları -->
+        <!-- Takım Seçimi -->
+        <div class="input-group">
+            <label>🟦 TAKIMINI SEÇ</label>
+            <div class="team-select-container">
+                <button class="team-select-btn" onclick="openTeamSelect()">
+                    <span id="selected-team-name">Beşiktaş</span>
+                    <span class="team-select-arrow">▼</span>
+                </button>
+                <div class="team-select-dropdown" id="team-select-dropdown"></div>
+            </div>
+        </div>
+
         <div class="mode-container">
             <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 Bilgisayara Karşı</button>
             <button class="main-btn btn-local" onclick="startLocalGame('local')">👥 2 Kişilik Aynı Ekran</button>
             <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Maç</button>
         </div>
 
-        <!-- Ayarlar Butonu -->
         <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
     </div>
 
@@ -38,7 +47,6 @@
                 <h2>⚙️ AYARLAR</h2>
                 <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
             </div>
-            
             <div class="popup-body">
                 <div class="input-group">
                     <label>⏱️ MAÇ SÜRESİ</label>
@@ -49,7 +57,6 @@
                         <option value="180">3 Dakika</option>
                     </select>
                 </div>
-
                 <div class="input-group">
                     <label>🔵 FORMA RENGİ (Mavi Takım)</label>
                     <div class="color-options">
@@ -61,7 +68,6 @@
                         <button class="color-btn" data-team="1" data-color="#e67e22" style="background:#e67e22" onclick="selectColor(1, '#e67e22')">🟠</button>
                     </div>
                 </div>
-
                 <div class="input-group">
                     <label>🔴 FORMA RENGİ (Kırmızı Takım)</label>
                     <div class="color-options">
@@ -73,7 +79,6 @@
                         <button class="color-btn" data-team="2" data-color="#e67e22" style="background:#e67e22" onclick="selectColor(2, '#e67e22')">🟠</button>
                     </div>
                 </div>
-
                 <div class="input-group">
                     <label>🟩 SAHA RENGİ</label>
                     <div class="color-options">
@@ -85,7 +90,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="popup-footer">
                 <button class="popup-close-btn" onclick="closeSettingsPopup()">✓ Tamam</button>
             </div>
@@ -108,7 +112,7 @@
         </div>
     </div>
 
-    <!-- ===== ONLINE LOBI POP-UP ===== -->
+    <!-- ===== ONLINE LOBI ===== -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
             <div class="popup-header">
@@ -127,21 +131,27 @@
     <!-- ===== OYUN EKRANI ===== -->
     <div id="top-bar" style="display: none;">
         <div class="hud-row">
-            <button id="exit-btn" onclick="exitToMenu()">❌ ÇIKIŞ</button>
-            <div id="turn-indicator">Diziliş</div>
-            <div id="score-board">
-                <span id="score-p1">0</span>
-                <span id="score-divider">-</span>
-                <span id="score-p2">0</span>
+            <button id="exit-btn" onclick="exitToMenu()">✕ ÇIKIŞ</button>
+            
+            <!-- ORTA: Skor ve Süre -->
+            <div id="score-center">
+                <div id="score-board">
+                    <span id="score-p1">3</span>
+                    <span id="score-divider">-</span>
+                    <span id="score-p2">2</span>
+                </div>
+                <div id="time-board">70 sn</div>
             </div>
-            <div id="time-board">90s</div>
-            <div id="shot-timer">ŞUT: 3s</div>
+            
+            <!-- SAĞ: Vuruş süresi (silik) -->
+            <div id="shot-timer">Vuruş süresi</div>
         </div>
     </div>
 
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+        <div id="setup-timer" style="display: none;">15</div>
     </div>
 
 </body>
