@@ -936,14 +936,18 @@ function confirmFormationsAndStart() {
     }
 }
 
+// ============================================================
+// MAÇ SÜRESİ
+// ============================================================
+
 function startMatchTimer() {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if (currentPhase === 'playing') {
             matchSecondsLeft--;
-            const timeDisplay = document.getElementById('time-display');
-            if (timeDisplay) {
-                timeDisplay.innerText = matchSecondsLeft + 's';
+            const timeBoard = document.getElementById('time-board');
+            if (timeBoard) {
+                timeBoard.innerText = matchSecondsLeft + 's';
             }
             if (matchSecondsLeft <= 0) endMatch();
         }
@@ -973,31 +977,29 @@ function startSetupTimer() {
     }
 }
 
+// ============================================================
+// VURUŞ SÜRESİ GERİ SAYIMI
+// ============================================================
+
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = 3;
     
-    const shotDisplay = document.getElementById('shot-display');
     const shotTimer = document.getElementById('shot-timer');
     
-    if (shotDisplay) {
-        shotDisplay.innerText = shotSecondsLeft + 's';
-    }
-    
     if (shotTimer) {
+        shotTimer.innerText = `ŞUT: ${shotSecondsLeft}s`;
         shotTimer.classList.remove('warning');
     }
 
     if (gameMode === 'ai' && turn === 2) {
-        const container = document.getElementById('shot-timer-container');
-        if (container) {
-            container.style.display = 'none';
+        if (shotTimer) {
+            shotTimer.style.display = 'none';
         }
         return;
     } else {
-        const container = document.getElementById('shot-timer-container');
-        if (container) {
-            container.style.display = 'block';
+        if (shotTimer) {
+            shotTimer.style.display = 'block';
         }
     }
 
@@ -1005,11 +1007,10 @@ function resetShotTimer() {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
             
-            const shotDisplay = document.getElementById('shot-display');
             const shotTimer = document.getElementById('shot-timer');
             
-            if (shotDisplay) {
-                shotDisplay.innerText = shotSecondsLeft + 's';
+            if (shotTimer) {
+                shotTimer.innerText = `ŞUT: ${shotSecondsLeft}s`;
             }
             
             if (shotSecondsLeft <= 1 && shotTimer) {
@@ -1053,22 +1054,28 @@ function endMatch() {
     }, 500);
 }
 
+// ============================================================
+// SIRA GÖSTERGESİ
+// ============================================================
+
 function updateHUDTurn() {
     const indicator = document.getElementById('turn-indicator');
+    if (!indicator) return;
+    
     if (gameMode === 'online') {
         if (turn === myTeamNumber) {
-            indicator.innerText = "SIRA SİZDE";
+            indicator.innerText = "🔥 SIRA SİZDE";
             indicator.style.borderColor = "#2ecc71";
             indicator.style.color = "#2ecc71";
         } else {
-            indicator.innerText = "RAKİPTE";
+            indicator.innerText = "⏳ RAKİPTE";
             indicator.style.borderColor = "#e74c3c";
             indicator.style.color = "#e74c3c";
         }
     } else {
-        indicator.innerText = turn === 1 ? "MAVİ SIRA" : "KIRMIZI SIRA";
-        indicator.style.borderColor = turn === 1 ? team1Color : team2Color;
-        indicator.style.color = turn === 1 ? team1Color : team2Color;
+        indicator.innerText = turn === 1 ? "🔵 MAVİ SIRA" : "🔴 KIRMIZI SIRA";
+        indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
+        indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
     }
 }
 
