@@ -873,83 +873,102 @@ function updatePhysics() {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
 
-        if (cap.x - cap.radius < 0) { cap.x = cap.radius;
+        // Sol duvar
+        if (cap.x - cap.radius < 0) { 
+            cap.x = cap.radius;
             cap.vx *= -0.85;
-            playSound('hit'); }
-        if (cap.x + cap.radius > width) { cap.x = width - cap.radius;
+            playSound('hit'); 
+        }
+        // Sağ duvar
+        if (cap.x + cap.radius > width) { 
+            cap.x = width - cap.radius;
             cap.vx *= -0.85;
-            playSound('hit'); }
+            playSound('hit'); 
+        }
 
-        // GOL KONTROLÜ - Gol sonrası diğer takım başlar
+        // ÜST KALE KONTROLÜ
         if (cap.y - cap.radius <= goalHeight) {
-            // Mavi takım (takım 1) gol attı
-            if (gameMode === 'online') {
-                if (myTeamNumber === 1) {
-                    score.p1++;
-                    document.getElementById('score-p1').innerText = score.p1;
-                } else {
-                    score.p2++;
-                    document.getElementById('score-p2').innerText = score.p2;
-                }
-            } else {
-                score.p1++;
-                document.getElementById('score-p1').innerText = score.p1;
-            }
-            playSound('goal');
+            // Top kale direkleri arasından geçiyor mu?
+            const goalLeft = (width - goalWidth) / 2;
+            const goalRight = (width + goalWidth) / 2;
             
-            // Gol sonrası diğer takım başlar
-            turn = 2;
-            updateHUDTurn();
-            
-            cap.x = width / 2;
-            cap.y = height / 2;
-            cap.vx = 0;
-            cap.vy = 0;
-            
-            resetShotTimer();
-            return;
-            
-        } else if (cap.y + cap.radius >= height - goalHeight) {
-            // Kırmızı takım (takım 2) gol attı
-            if (gameMode === 'online') {
-                if (myTeamNumber === 2) {
-                    score.p2++;
-                    document.getElementById('score-p2').innerText = score.p2;
+            if (cap.x > goalLeft && cap.x < goalRight) {
+                // GOL! - Mavi takım (takım 1) gol attı
+                if (gameMode === 'online') {
+                    if (myTeamNumber === 1) {
+                        score.p1++;
+                        document.getElementById('score-p1').innerText = score.p1;
+                    } else {
+                        score.p2++;
+                        document.getElementById('score-p2').innerText = score.p2;
+                    }
                 } else {
                     score.p1++;
                     document.getElementById('score-p1').innerText = score.p1;
                 }
+                playSound('goal');
+                
+                // Gol sonrası diğer takım başlar
+                turn = 2;
+                updateHUDTurn();
+                
+                cap.x = width / 2;
+                cap.y = height / 2;
+                cap.vx = 0;
+                cap.vy = 0;
+                
+                resetShotTimer();
+                return;
             } else {
-                score.p2++;
-                document.getElementById('score-p2').innerText = score.p2;
+                // Kale dışı - duvara çarp ve geri dön
+                cap.y = goalHeight + cap.radius;
+                cap.vy *= -0.85;
+                playSound('hit');
             }
-            playSound('goal');
-            
-            // Gol sonrası diğer takım başlar
-            turn = 1;
-            updateHUDTurn();
-            
-            cap.x = width / 2;
-            cap.y = height / 2;
-            cap.vx = 0;
-            cap.vy = 0;
-            
-            resetShotTimer();
-            return;
         }
 
-        // Duvar çarpışmaları
-        if (cap.y - cap.radius < 0) {
-            cap.y = cap.radius;
-            cap.vy *= -0.85;
-            playSound('hit');
-        }
-        if (cap.y + cap.radius > height) {
-            cap.y = height - cap.radius;
-            cap.vy *= -0.85;
-            playSound('hit');
+        // ALT KALE KONTROLÜ
+        if (cap.y + cap.radius >= height - goalHeight) {
+            // Top kale direkleri arasından geçiyor mu?
+            const goalLeft = (width - goalWidth) / 2;
+            const goalRight = (width + goalWidth) / 2;
+            
+            if (cap.x > goalLeft && cap.x < goalRight) {
+                // GOL! - Kırmızı takım (takım 2) gol attı
+                if (gameMode === 'online') {
+                    if (myTeamNumber === 2) {
+                        score.p2++;
+                        document.getElementById('score-p2').innerText = score.p2;
+                    } else {
+                        score.p1++;
+                        document.getElementById('score-p1').innerText = score.p1;
+                    }
+                } else {
+                    score.p2++;
+                    document.getElementById('score-p2').innerText = score.p2;
+                }
+                playSound('goal');
+                
+                // Gol sonrası diğer takım başlar
+                turn = 1;
+                updateHUDTurn();
+                
+                cap.x = width / 2;
+                cap.y = height / 2;
+                cap.vx = 0;
+                cap.vy = 0;
+                
+                resetShotTimer();
+                return;
+            } else {
+                // Kale dışı - duvara çarp ve geri dön
+                cap.y = height - goalHeight - cap.radius;
+                cap.vy *= -0.85;
+                playSound('hit');
+            }
         }
 
+        // Çivilerle çarpışma
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
@@ -975,7 +994,6 @@ function updatePhysics() {
         runAIMove();
     }
 }
-
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
