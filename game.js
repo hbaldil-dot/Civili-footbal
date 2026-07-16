@@ -731,25 +731,74 @@ function endMatch() {
     exitToMenu();
 }
 
+// ============================================================
+// HUD GÜNCELLEME (YENİ LAYOUT)
+// ============================================================
+
 function updateHUDTurn() {
-    const indicator = document.getElementById('turn-indicator');
-    if (gameMode === 'online') {
-        if (turn === myTeamNumber) {
-            indicator.innerText = "SIRA SİZDE";
-            indicator.style.borderColor = "#2ecc71";
-            indicator.style.color = "#2ecc71";
+    // Artık turn göstergesi ayrı değil, sadece shot timer ile gösterilecek
+    // Vuruş süresini güncelle
+    const shotEl = document.getElementById('shot-timer');
+    if (shotEl) {
+        if (gameMode === 'online') {
+            if (turn === myTeamNumber) {
+                shotEl.textContent = '⏱️ SİZDE';
+                shotEl.style.color = 'rgba(46, 204, 113, 0.6)';
+            } else {
+                shotEl.textContent = '⏳ RAKİPTE';
+                shotEl.style.color = 'rgba(231, 76, 60, 0.4)';
+            }
+        } else if (gameMode === 'ai' && turn === 2) {
+            shotEl.textContent = '🤖 AI DÜŞÜNÜYOR';
+            shotEl.style.color = 'rgba(230, 126, 34, 0.5)';
         } else {
-            indicator.innerText = "RAKİPTE";
-            indicator.style.borderColor = "#e74c3c";
-            indicator.style.color = "#e74c3c";
+            shotEl.textContent = turn === 1 ? '🔵 MAVİ' : '🔴 KIRMIZI';
+            shotEl.style.color = turn === 1 ? 'rgba(52, 152, 219, 0.5)' : 'rgba(231, 76, 60, 0.5)';
         }
-    } else {
-        indicator.innerText = turn === 1 ? "MAVİ SIRA" : "KIRMIZI SIRA";
-        indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
-        indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
     }
 }
 
+// resetShotTimer fonksiyonunu güncelle
+function resetShotTimer() {
+    if (shotTimerInterval) clearInterval(shotTimerInterval);
+    shotSecondsLeft = 3;
+    
+    const shotEl = document.getElementById('shot-timer');
+    if (shotEl) {
+        shotEl.style.display = 'block';
+        
+        if (gameMode === 'ai' && turn === 2) {
+            shotEl.textContent = '🤖 AI DÜŞÜNÜYOR';
+            shotEl.style.color = 'rgba(230, 126, 34, 0.5)';
+            return;
+        }
+        
+        shotEl.textContent = `⏱️ ${shotSecondsLeft}s`;
+        shotEl.style.color = 'rgba(255, 255, 255, 0.3)';
+    }
+
+    shotTimerInterval = setInterval(() => {
+        if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
+            shotSecondsLeft--;
+            const el = document.getElementById('shot-timer');
+            if (el) {
+                if (shotSecondsLeft > 0) {
+                    el.textContent = `⏱️ ${shotSecondsLeft}s`;
+                } else {
+                    el.textContent = '⏰ SÜRE DOLDU';
+                    el.style.color = 'rgba(231, 76, 60, 0.6)';
+                }
+            }
+            
+            if (shotSecondsLeft <= 0) {
+                clearInterval(shotTimerInterval);
+                turn = turn === 1 ? 2 : 1;
+                updateHUDTurn();
+                resetShotTimer();
+            }
+        }
+    }, 1000);
+}
 function applyShotPhysics(shotData) {
     cap.vx = 0;
     cap.vy = 0;
