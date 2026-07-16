@@ -693,72 +693,10 @@ function startSetupTimer() {
     }
 }
 
-function resetShotTimer() {
-    if (shotTimerInterval) clearInterval(shotTimerInterval);
-    shotSecondsLeft = 3;
-    document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
-
-    if (gameMode === 'ai' && turn === 2) {
-        document.getElementById('shot-timer').style.display = 'none';
-        return;
-    } else {
-        document.getElementById('shot-timer').style.display = 'block';
-    }
-
-    shotTimerInterval = setInterval(() => {
-        if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
-            shotSecondsLeft--;
-            document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
-            if (shotSecondsLeft <= 0) {
-                clearInterval(shotTimerInterval);
-                turn = turn === 1 ? 2 : 1;
-                updateHUDTurn();
-                resetShotTimer();
-            }
-        }
-    }, 1000);
-}
-
-function endMatch() {
-    currentPhase = 'ended';
-    clearInterval(timerInterval);
-    clearInterval(shotTimerInterval);
-    let resultMessage = "Maç Berabere Bitti!";
-    if (score.p1 > score.p2) resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kaybettiniz!" : "Mavi Takım Kazandı! 🎉";
-    else if (score.p2 > score.p1) resultMessage = gameMode === 'online' && myTeamNumber === 2 ? "Kazandınız! 🎉" : "Kırmızı Takım Kazandı! 🎉";
-
-    alert(`SÜRE DOLDU!\nSkor: ${score.p1} - ${score.p2}\n\n${resultMessage}`);
-    exitToMenu();
-}
-
 // ============================================================
-// HUD GÜNCELLEME (YENİ LAYOUT)
+// VURUŞ SÜRESİ (3sn GERİ SAYIM) - GÜNCELLENMİŞ
 // ============================================================
 
-function updateHUDTurn() {
-    // Artık turn göstergesi ayrı değil, sadece shot timer ile gösterilecek
-    // Vuruş süresini güncelle
-    const shotEl = document.getElementById('shot-timer');
-    if (shotEl) {
-        if (gameMode === 'online') {
-            if (turn === myTeamNumber) {
-                shotEl.textContent = '⏱️ SİZDE';
-                shotEl.style.color = 'rgba(46, 204, 113, 0.6)';
-            } else {
-                shotEl.textContent = '⏳ RAKİPTE';
-                shotEl.style.color = 'rgba(231, 76, 60, 0.4)';
-            }
-        } else if (gameMode === 'ai' && turn === 2) {
-            shotEl.textContent = '🤖 AI DÜŞÜNÜYOR';
-            shotEl.style.color = 'rgba(230, 126, 34, 0.5)';
-        } else {
-            shotEl.textContent = turn === 1 ? '🔵 MAVİ' : '🔴 KIRMIZI';
-            shotEl.style.color = turn === 1 ? 'rgba(52, 152, 219, 0.5)' : 'rgba(231, 76, 60, 0.5)';
-        }
-    }
-}
-
-// resetShotTimer fonksiyonunu güncelle
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = 3;
@@ -766,15 +704,18 @@ function resetShotTimer() {
     const shotEl = document.getElementById('shot-timer');
     if (shotEl) {
         shotEl.style.display = 'block';
+        shotEl.textContent = '3s';
+        shotEl.className = '';
+        shotEl.classList.add('active');
         
         if (gameMode === 'ai' && turn === 2) {
-            shotEl.textContent = '🤖 AI DÜŞÜNÜYOR';
+            shotEl.textContent = '🤖';
+            shotEl.className = '';
             shotEl.style.color = 'rgba(230, 126, 34, 0.5)';
             return;
         }
         
-        shotEl.textContent = `⏱️ ${shotSecondsLeft}s`;
-        shotEl.style.color = 'rgba(255, 255, 255, 0.3)';
+        shotEl.style.color = 'rgba(46, 204, 113, 0.7)';
     }
 
     shotTimerInterval = setInterval(() => {
@@ -783,10 +724,19 @@ function resetShotTimer() {
             const el = document.getElementById('shot-timer');
             if (el) {
                 if (shotSecondsLeft > 0) {
-                    el.textContent = `⏱️ ${shotSecondsLeft}s`;
+                    el.textContent = shotSecondsLeft + 's';
+                    // Renk değişimi
+                    if (shotSecondsLeft === 2) {
+                        el.className = 'warning';
+                        el.style.color = 'rgba(241, 196, 15, 0.7)';
+                    } else if (shotSecondsLeft === 1) {
+                        el.className = 'danger';
+                        el.style.color = 'rgba(231, 76, 60, 0.8)';
+                    }
                 } else {
-                    el.textContent = '⏰ SÜRE DOLDU';
-                    el.style.color = 'rgba(231, 76, 60, 0.6)';
+                    el.textContent = '⏰';
+                    el.className = 'danger';
+                    el.style.color = 'rgba(231, 76, 60, 0.9)';
                 }
             }
             
@@ -798,6 +748,63 @@ function resetShotTimer() {
             }
         }
     }, 1000);
+}
+
+function updateHUDTurn() {
+    const shotEl = document.getElementById('shot-timer');
+    if (!shotEl) return;
+    
+    if (gameMode === 'online') {
+        if (turn === myTeamNumber) {
+            shotEl.textContent = '⏱️';
+            shotEl.className = 'active';
+            shotEl.style.color = 'rgba(46, 204, 113, 0.7)';
+        } else {
+            shotEl.textContent = '⏳';
+            shotEl.className = '';
+            shotEl.style.color = 'rgba(255, 255, 255, 0.2)';
+        }
+    } else if (gameMode === 'ai' && turn === 2) {
+        shotEl.textContent = '🤖';
+        shotEl.className = '';
+        shotEl.style.color = 'rgba(230, 126, 34, 0.5)';
+    } else {
+        shotEl.textContent = turn === 1 ? '🔵' : '🔴';
+        shotEl.className = '';
+        shotEl.style.color = turn === 1 ? 'rgba(52, 152, 219, 0.4)' : 'rgba(231, 76, 60, 0.4)';
+    }
+}
+
+// startSetupPhase içinde vuruş süresini gizle
+function startSetupPhase() {
+    // ... mevcut kod ...
+    
+    const shotEl = document.getElementById('shot-timer');
+    if (shotEl) {
+        shotEl.style.display = 'none';
+    }
+    
+    // ... devam eden kod ...
+}
+
+// confirmFormationsAndStart içinde vuruş süresini göster
+function confirmFormationsAndStart() {
+    // ... mevcut kod ...
+    
+    if (gameMode !== 'online' || !socket) {
+        currentPhase = 'playing';
+        document.getElementById('start-match-btn').style.display = 'none';
+        
+        const shotEl = document.getElementById('shot-timer');
+        if (shotEl) {
+            shotEl.style.display = 'block';
+        }
+        
+        updateHUDTurn();
+        startMatchTimer();
+        resetShotTimer();
+        animate();
+    }
 }
 function applyShotPhysics(shotData) {
     cap.vx = 0;
