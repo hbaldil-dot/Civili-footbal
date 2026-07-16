@@ -447,12 +447,7 @@ function startSetupPhase() {
     document.getElementById('turn-indicator').innerText = "Kadro Ayarla";
     document.getElementById('shot-timer').style.display = 'none';
 
-    // === KADRO YERLEŞTİRME SÜRESİ GÖSTER ===
-    const setupTimer = document.getElementById('setup-timer');
-    if (setupTimer) {
-        setupTimer.style.display = 'block';
-    }
-
+    // SADECE KENDİ TAKIMININ OYUNCULARINI DÜZENLEYEBİLİR
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
 
     pins = [
@@ -500,17 +495,20 @@ function startSetupTimer() {
     const countdownEl = document.getElementById('setup-countdown');
 
     if (gameMode === 'online') {
-        btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
-        if (countdownEl) {
-            countdownEl.innerText = setupSecondsLeft;
-        }
+        // Buton metnini güncelle
+        btn.innerHTML = `BAŞLAT<span class="timer-subtext" id="setup-countdown">${setupSecondsLeft}s</span>`;
 
         setupTimerInterval = setInterval(() => {
             setupSecondsLeft--;
-            if (countdownEl) {
-                countdownEl.innerText = setupSecondsLeft;
+            
+            // Sayaç güncelle
+            const countdown = document.getElementById('setup-countdown');
+            if (countdown) {
+                countdown.innerText = `${setupSecondsLeft}s`;
             }
-            btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
+            
+            // Buton metnini güncelle
+            btn.innerHTML = `BAŞLAT<span class="timer-subtext" id="setup-countdown">${setupSecondsLeft}s</span>`;
 
             if (setupSecondsLeft <= 0) {
                 clearInterval(setupTimerInterval);
@@ -520,7 +518,7 @@ function startSetupTimer() {
     } else {
         btn.innerHTML = "BAŞLAT";
         if (countdownEl) {
-            countdownEl.innerText = "15";
+            countdownEl.innerText = "15s";
         }
     }
 }
@@ -528,17 +526,12 @@ function startSetupTimer() {
 function confirmFormationsAndStart() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
 
-    // Kadro yerleştirme süresini gizle
-    const setupTimer = document.getElementById('setup-timer');
-    if (setupTimer) {
-        setupTimer.style.display = 'none';
-    }
-
     if (gameMode === 'online' && socket) {
         const btn = document.getElementById('start-match-btn');
         btn.innerHTML = "BEKLE";
         btn.disabled = true;
 
+        // SADECE kendi takımının oyuncularını gönder
         const myPlacedPins = pins.filter(p => p.team === myTeamNumber && !p.isPost).map(p => {
             return { x: p.x, y: p.y };
         });
@@ -668,7 +661,6 @@ function exitToMenu() {
     document.getElementById('top-bar').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('start-match-btn').style.display = 'none';
-    document.getElementById('setup-timer').style.display = 'none';
     isAiThinking = false;
     isDraggingBall = false;
     drawFieldLinesOnly();
@@ -730,7 +722,7 @@ function setupSocketListeners() {
         exitToMenu();
     });
 
-    // === KADRO SENKRONİZASYONU ===
+    // === KADRO SENKRONİZASYONU - RAKİBİN OYUNCU HAREKETLERİNİ GÖR ===
     socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
         if (currentPhase === 'setup') {
             let count = 0;
@@ -739,6 +731,7 @@ function setupSocketListeners() {
                     if (count === index) {
                         p.x = x;
                         p.y = y;
+                        console.log(`📦 Rakip oyuncu ${index} taşındı: (${x}, ${y})`);
                         break;
                     }
                     count++;
@@ -749,12 +742,6 @@ function setupSocketListeners() {
 
     socket.on("match-go", ({ pins: finalPins }) => {
         if (setupTimerInterval) clearInterval(setupTimerInterval);
-
-        // Kadro yerleştirme süresini gizle
-        const setupTimer = document.getElementById('setup-timer');
-        if (setupTimer) {
-            setupTimer.style.display = 'none';
-        }
 
         pins = [
             { x: (width - goalWidth) / 2, y: goalHeight, isPost: true },
@@ -780,10 +767,39 @@ function setupSocketListeners() {
     // === RAKİP VURUŞU ===
     socket.on("opponentShot", (shotData) => {
         if (gameMode === 'online' && currentPhase === 'playing') {
+            console.log(`⚽ Rakip vuruşu alındı: ${shotData.player}`);
             applyShotPhysics(shotData);
             turn = shotData.player === 1 ? 2 : 1;
             updateHUDTurn();
             resetShotTimer();
+        }
+    });
+
+    // === PEER STATE (KARŞILIKLI DURUM) ===
+    socket.on("peerState", (state) => {
+        if (gameMode === 'online' && currentPhase === 'playing') {
+            // Skoru güncelle
+            score = state.score;
+            document.getElementById('score-p1').innerText = score.p1;
+            document.getElementById('score-p2').innerText = score.p2;
+            
+            // Top pozisyonunu güncelle (kendi bakış açına göre düzelt)
+            if (myTeamNumber === 2) {
+                cap.x = width - state.cap.x;
+                cap.y = height - state.cap.y;
+                cap.vx = -state.cap.vx;
+                cap.vy = -state.cap.vy;
+            } else {
+                cap.x = state.cap.x;
+                cap.y = state.cap.y;
+                cap.vx = state.cap.vx;
+                cap.vy = state.cap.vy;
+            }
+            cap.rotation = state.cap.rotation || 0;
+            
+            // Turu güncelle
+            turn = state.turn;
+            updateHUDTurn();
         }
     });
 
@@ -969,7 +985,6 @@ function updatePhysics() {
                 cap.vx = 0;
                 cap.vy = 0;
 
-                // Online'da skoru senkronize et
                 if (gameMode === 'online') {
                     broadcastState();
                 }
@@ -1009,8 +1024,8 @@ function updatePhysics() {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
         runAIMove();
-    } else if (gameMode === 'online' && !isMoving && turn !== myTeamNumber) {
-        // Top durdu ve sıra bende değilse senkronize et
+    } else if (gameMode === 'online' && !isMoving) {
+        // Top durduğunda senkronize et
         setTimeout(broadcastState, 100);
     }
 }
@@ -1021,11 +1036,26 @@ function updatePhysics() {
 function broadcastState() {
     if (!socket || gameMode !== 'online' || currentPhase !== 'playing') return;
 
-    // Top pozisyonunu karşı tarafa gönder
+    let sendCap = { ...cap };
+    
+    // Takım 2 ise ters çevirerek gönder
+    if (myTeamNumber === 2) {
+        sendCap.x = width - cap.x;
+        sendCap.y = height - cap.y;
+        sendCap.vx = -cap.vx;
+        sendCap.vy = -cap.vy;
+    }
+
     socket.emit('updateState', {
         roomId: currentRoomId,
         state: {
-            cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation },
+            cap: { 
+                x: sendCap.x, 
+                y: sendCap.y, 
+                vx: sendCap.vx, 
+                vy: sendCap.vy, 
+                rotation: cap.rotation 
+            },
             turn: turn,
             score: score
         }
@@ -1063,7 +1093,9 @@ canvas.addEventListener('mousedown', (e) => {
     if (currentPhase === 'setup') {
         for (let p of pins) {
             if (!p.isPost) {
+                // SADECE KENDİ TAKIMININ OYUNCULARINI SEÇEBİLİR
                 if (gameMode === 'online' && p.team !== editableTeam) continue;
+                
                 if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
                     selectedPin = p;
                     dragStartPinPos = { x: p.x, y: p.y };
@@ -1146,7 +1178,6 @@ window.addEventListener('mouseup', () => {
         cap.vx = (startX - endX) * 0.13;
         cap.vy = (startY - endY) * 0.13;
 
-        // Online'da vuruşu karşı tarafa gönder
         if (gameMode === 'online' && socket) {
             const shotData = {
                 player: turn,
