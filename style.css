@@ -341,3 +341,46 @@ canvas {
     color: #f1c40f;
     text-shadow: 1px 1px 2px black;
 }
+/* ===== AI ZORLUK SEÇENEĞİ - ÖZEL STİL ===== */
+#ai-level-group {
+    background: rgba(46, 204, 113, 0.05);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#ai-level-group label {
+    color: #f1c40f !important;
+    font-size: 12px !important;
+}
+
+#ai-level {
+    background: #1a1a1a;
+    border: 2px solid #f1c40f;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#ai-level option {
+    padding: 8px;
+    background: #1a1a1a;
+}
+
+#ai-level option[value="kolay"] { color: #2ecc71; }
+#ai-level option[value="orta"] { color: #f1c40f; }
+#ai-level option[value="zor"] { color: #e67e22; }
+#ai-level option[value="usta"] { color: #e74c3c; }
+
+/* Mobil uyum */
+@media (max-width: 400px) {
+    #ai-level-group {
+        padding: 8px 10px;
+    }
+    #ai-level {
+        font-size: 13px;
+        padding: 8px;
+    }
+}
