@@ -731,7 +731,7 @@ function startSetupPhase() {
 
     const indicator = document.getElementById('turn-indicator');
     if (indicator) {
-        indicator.innerText = "Kadro Ayarla";
+        indicator.innerText = "🏆 Takım Taktik Ayarla";
         indicator.style.borderColor = "#f1c40f";
         indicator.style.color = "#f1c40f";
     }
