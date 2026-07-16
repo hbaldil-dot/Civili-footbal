@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// Render.com için CORS ve transport ayarları
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -14,23 +13,19 @@ const io = new Server(server, {
     }
 });
 
-// Statik dosyaları doğrudan ana dizinden sunuyoruz
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Çevrimiçi havuzdaki (lobideki) aktif oyuncular listesi
 let lobbyPlayers = [];
-
-// Aktif oyun odaları
 let activeRooms = {};
 
 io.on('connection', (socket) => {
     console.log(`Yeni bağlantı: ${socket.id}`);
 
-    // --- LOBİ İŞLEMLERİ ---
+    // --- LOBİ ---
     socket.on('join-lobby', (playerName) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         lobbyPlayers.push({ id: socket.id, name: playerName });
@@ -82,7 +77,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- DİZİLİŞ SENKRONİZASYONU ---
+    // --- KADRO SENKRONİZASYONU ---
     socket.on('setup-pin-move', ({ roomId, team, index, x, y }) => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
@@ -108,19 +103,20 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- YENİ: VURUŞ BAZLI SENKRONİZASYON ---
+    // --- OYUN SENKRONİZASYONU ---
     socket.on('playerShot', ({ roomId, shotData }) => {
-        // Vuruş verilerini diğer oyuncuya ilet
         socket.to(roomId).emit('opponentShot', shotData);
         console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
-    // --- YENİ: PERİYODİK SENKRONİZASYON (DÜZELTME) ---
+    socket.on('updateState', ({ roomId, state }) => {
+        socket.to(roomId).emit('peerState', state);
+    });
+
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
 
-    // --- BAĞLANTI KOPMASI ---
     socket.on('disconnect', () => {
         console.log(`Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
@@ -155,7 +151,6 @@ function handlePlayerDisconnection(socket) {
     }
 }
 
-// Render.com için PORT ve host ayarı
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
