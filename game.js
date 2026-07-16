@@ -833,4 +833,518 @@ function startSetupTimer() {
             } else {
                 btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
             }
-        }, 
+        }, 1000);
+    } else {
+        btn.innerHTML = "BAŞLAT";
+    }
+}
+
+function resetShotTimer() {
+    if (shotTimerInterval) clearInterval(shotTimerInterval);
+    shotSecondsLeft = 3;
+    
+    const shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) {
+        shotTimer.innerText = 'ŞUT: 3s';
+        shotTimer.classList.remove('warning');
+    }
+
+    if (gameMode === 'ai' && turn === 2) {
+        if (shotTimer) shotTimer.style.display = 'none';
+        return;
+    } else {
+        if (shotTimer) shotTimer.style.display = 'block';
+    }
+
+    shotTimerInterval = setInterval(() => {
+        if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
+            shotSecondsLeft--;
+            
+            const shotTimer = document.getElementById('shot-timer');
+            if (shotTimer) {
+                shotTimer.innerText = `ŞUT: ${shotSecondsLeft}s`;
+            }
+            
+            if (shotSecondsLeft <= 1 && shotTimer) {
+                shotTimer.classList.add('warning');
+            } else if (shotTimer) {
+                shotTimer.classList.remove('warning');
+            }
+            
+            if (shotSecondsLeft <= 0) {
+                clearInterval(shotTimerInterval);
+                if (shotTimer) shotTimer.classList.remove('warning');
+                turn = turn === 1 ? 2 : 1;
+                updateHUDTurn();
+                resetShotTimer();
+            }
+        }
+    }, 1000);
+}
+
+function endMatch() {
+    currentPhase = 'ended';
+    clearInterval(timerInterval);
+    clearInterval(shotTimerInterval);
+    
+    let playerScore = gameMode === 'online' ? (myTeamNumber === 1 ? score.p1 : score.p2) : score.p1;
+    let opponentScore = gameMode === 'online' ? (myTeamNumber === 1 ? score.p2 : score.p1) : score.p2;
+    
+    let resultMessage = "Maç Berabere Bitti!";
+    if (playerScore > opponentScore) {
+        resultMessage = "🎉 KAZANDINIZ! 🎉";
+    } else if (playerScore < opponentScore) {
+        resultMessage = "😔 Kaybettiniz.";
+    }
+    
+    alert(`⏰ SÜRE DOLDU!\n\n📊 Skor: ${playerScore} - ${opponentScore}\n\n${resultMessage}`);
+    
+    setTimeout(() => {
+        exitToMenu();
+    }, 500);
+}
+
+function updateHUDTurn() {
+    const indicator = document.getElementById('turn-indicator');
+    if (!indicator) return;
+    
+    if (gameMode === 'online') {
+        if (turn === myTeamNumber) {
+            indicator.innerText = "🔥 SIRA SİZDE";
+            indicator.style.borderColor = "#2ecc71";
+            indicator.style.color = "#2ecc71";
+        } else {
+            indicator.innerText = "⏳ RAKİPTE";
+            indicator.style.borderColor = "#e74c3c";
+            indicator.style.color = "#e74c3c";
+        }
+    } else {
+        indicator.innerText = turn === 1 ? "🔵 MAVİ SIRA" : "🔴 KIRMIZI SIRA";
+        indicator.style.borderColor = turn === 1 ? team1Color : team2Color;
+        indicator.style.color = turn === 1 ? team1Color : team2Color;
+    }
+}
+
+function applyShotPhysics(shotData) {
+    cap.vx = 0;
+    cap.vy = 0;
+    const dx = shotData.startX - shotData.endX;
+    const dy = shotData.startY - shotData.endY;
+    cap.vx = dx * 0.13;
+    cap.vy = dy * 0.13;
+    playSound('kick');
+}
+
+function broadcastMyPinMove(pin) {
+    if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
+
+    let index = -1;
+    let count = 0;
+    for (let p of pins) {
+        if (!p.isPost && p.team === myTeamNumber) {
+            if (p === pin) { index = count; break; }
+            count++;
+        }
+    }
+
+    if (index !== -1) {
+        socket.emit("setup-pin-move", {
+            roomId: currentRoomId,
+            team: myTeamNumber,
+            index: index,
+            x: pin.x,
+            y: pin.y
+        });
+    }
+}
+
+function exitToMenu() {
+    if (timerInterval) clearInterval(timerInterval);
+    if (shotTimerInterval) clearInterval(shotTimerInterval);
+    if (setupTimerInterval) clearInterval(setupTimerInterval);
+    if (syncInterval) clearInterval(syncInterval);
+    
+    if (socket && gameMode === 'online') {
+        if (currentRoomId) {
+            socket.emit('leave-room', currentRoomId);
+            currentRoomId = null;
+        } else {
+            socket.emit("leave-lobby");
+        }
+    }
+    
+    currentPhase = 'menu';
+    gameMode = 'local';
+    document.getElementById('menu').style.display = 'block';
+    document.getElementById('top-bar').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('start-match-btn').style.display = 'none';
+    isAiThinking = false;
+    isDraggingBall = false;
+    drawFieldLinesOnly();
+}
+
+// ============================================================
+// FİZİK MOTORU
+// ============================================================
+function updatePhysics() {
+    if (currentPhase !== 'playing') return;
+
+    const SUB_STEPS = 16;
+
+    for (let step = 0; step < SUB_STEPS; step++) {
+        cap.x += cap.vx / SUB_STEPS;
+        cap.y += cap.vy / SUB_STEPS;
+
+        if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
+
+        // ÜST KALE KONTROLÜ
+        if (cap.y - cap.radius <= goalHeight) {
+            const goalLeft = (width - goalWidth) / 2;
+            const goalRight = (width + goalWidth) / 2;
+            
+            if (cap.x > goalLeft && cap.x < goalRight) {
+                if (gameMode === 'online') {
+                    if (myTeamNumber === 1) { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
+                    else { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
+                } else {
+                    score.p1++; document.getElementById('score-p1').innerText = score.p1;
+                }
+                
+                triggerGoalAnimation();
+                turn = 2;
+                updateHUDTurn();
+                cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
+                resetShotTimer();
+                return;
+            } else {
+                cap.y = goalHeight + cap.radius;
+                cap.vy *= -0.85;
+                playSound('hit');
+            }
+        }
+
+        // ALT KALE KONTROLÜ
+        if (cap.y + cap.radius >= height - goalHeight) {
+            const goalLeft = (width - goalWidth) / 2;
+            const goalRight = (width + goalWidth) / 2;
+            
+            if (cap.x > goalLeft && cap.x < goalRight) {
+                if (gameMode === 'online') {
+                    if (myTeamNumber === 2) { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
+                    else { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
+                } else {
+                    score.p2++; document.getElementById('score-p2').innerText = score.p2;
+                }
+                
+                triggerGoalAnimation();
+                turn = 1;
+                updateHUDTurn();
+                cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
+                resetShotTimer();
+                return;
+            } else {
+                cap.y = height - goalHeight - cap.radius;
+                cap.vy *= -0.85;
+                playSound('hit');
+            }
+        }
+
+        pins.forEach(pin => {
+            const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
+            const minDist = cap.radius + (pin.isPost ? 4 : 8);
+            if (dist < minDist) {
+                playSound('hit');
+                const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
+                cap.x = pin.x + Math.cos(angle) * minDist;
+                cap.y = pin.y + Math.sin(angle) * minDist;
+                const hitSpeed = Math.hypot(cap.vx, cap.vy);
+                cap.vx = Math.cos(angle) * Math.max(hitSpeed, 1.5) * 0.85;
+                cap.vy = Math.sin(angle) * Math.max(hitSpeed, 1.5) * 0.85;
+            }
+        });
+    }
+
+    cap.vx *= cap.friction;
+    cap.vy *= cap.friction;
+
+    const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
+    if (isMoving) {
+        cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
+    } else if (gameMode === 'ai' && turn === 2) {
+        runAIMove();
+    }
+}
+
+// ============================================================
+// PERİYODİK SENKRONİZASYON
+// ============================================================
+function startPeriodicSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(() => {
+        if (gameMode === 'online' && currentPhase === 'playing' && socket) {
+            const speed = Math.hypot(cap.vx, cap.vy);
+            if (speed < 0.5) {
+                socket.emit('syncBallPosition', {
+                    roomId: currentRoomId,
+                    ballState: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, turn: turn }
+                });
+            }
+        }
+    }, 1500);
+}
+
+// ============================================================
+// ANİMASYON DÖNGÜSÜ
+// ============================================================
+function animate() {
+    if (currentPhase === 'menu') return;
+    updatePhysics();
+    draw();
+    requestAnimationFrame(animate);
+}
+
+// ============================================================
+// OLAY DİNLEYİCİLERİ
+// ============================================================
+let dragStartPinPos = { x: 0, y: 0 };
+
+canvas.addEventListener('mousedown', (e) => {
+    if (gameMode === 'ai' && turn === 2) return;
+
+    const pos = getCanvasTouchPos(e);
+    if (currentPhase === 'setup') {
+        for (let p of pins) {
+            if (p.locked) continue;
+            if (!p.isPost) {
+                if (gameMode === 'online' && p.team !== editableTeam) continue;
+                if (Math.hypot(pos.x - p.x, pos.y - p.y) < 22) {
+                    selectedPin = p;
+                    dragStartPinPos = { x: p.x, y: p.y };
+                    break;
+                }
+            }
+        }
+    } else if (currentPhase === 'playing') {
+        if (gameMode === 'online' && turn !== myTeamNumber) return;
+        if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+
+        if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
+            isDraggingBall = true;
+            dragStart = { x: cap.x, y: cap.y };
+            dragCurrent = pos;
+            const container = document.getElementById('power-bar-container');
+            if (container) container.style.display = 'block';
+        }
+    }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (gameMode === 'ai' && turn === 2) return;
+
+    const pos = getCanvasTouchPos(e);
+    if (currentPhase === 'setup' && selectedPin) {
+        const margin = 15;
+        const topMargin = goalHeight + 15;
+        const bottomMargin = height - goalHeight - 15;
+        
+        let newX = Math.max(margin, Math.min(width - margin, pos.x));
+        let newY = Math.max(topMargin, Math.min(bottomMargin, pos.y));
+        
+        let collision = false;
+        for (let p of pins) {
+            if (p !== selectedPin && !p.isPost && p.team === selectedPin.team) {
+                if (Math.hypot(newX - p.x, newY - p.y) < minAllowedDistance) {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!collision) {
+            selectedPin.x = newX;
+            selectedPin.y = newY;
+            broadcastMyPinMove(selectedPin);
+        }
+    } else if (currentPhase === 'playing' && isDraggingBall) {
+        let dx = pos.x - dragStart.x;
+        let dy = pos.y - dragStart.y;
+        let dist = Math.hypot(dx, dy);
+
+        if (dist > MAX_DRAG_DIST) {
+            dx = (dx / dist) * MAX_DRAG_DIST;
+            dy = (dy / dist) * MAX_DRAG_DIST;
+            dist = MAX_DRAG_DIST;
+        }
+        dragCurrent = { x: dragStart.x + dx, y: dragStart.y + dy };
+        
+        const powerPercent = Math.min(100, (dist / MAX_DRAG_DIST) * 100);
+        const powerBar = document.getElementById('power-bar');
+        if (powerBar) {
+            powerBar.style.width = powerPercent + '%';
+            if (powerPercent < 33) powerBar.style.background = '#2ecc71';
+            else if (powerPercent < 66) powerBar.style.background = '#f1c40f';
+            else powerBar.style.background = '#e74c3c';
+        }
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    if (gameMode === 'ai' && turn === 2) return;
+
+    if (currentPhase === 'setup' && selectedPin) {
+        let valid = true;
+        if (selectedPin.x < 15 || selectedPin.x > width - 15) valid = false;
+        if (selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
+
+        if (valid) {
+            for (let p of pins) {
+                if (p !== selectedPin && (p.isPost || p.team === selectedPin.team)) {
+                    if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!valid) {
+            selectedPin.x = dragStartPinPos.x;
+            selectedPin.y = dragStartPinPos.y;
+        }
+
+        broadcastMyPinMove(selectedPin);
+        selectedPin = null;
+    }
+
+    if (currentPhase === 'playing' && isDraggingBall) {
+        isDraggingBall = false;
+        playSound('kick');
+
+        const startX = dragStart.x;
+        const startY = dragStart.y;
+        const endX = dragCurrent.x;
+        const endY = dragCurrent.y;
+
+        cap.vx = (startX - endX) * 0.13;
+        cap.vy = (startY - endY) * 0.13;
+
+        turn = turn === 1 ? 2 : 1;
+        updateHUDTurn();
+        resetShotTimer();
+
+        if (gameMode === 'online' && socket) {
+            socket.emit('playerShot', {
+                roomId: currentRoomId,
+                shotData: { player: turn, startX, startY, endX, endY, timestamp: Date.now() }
+            });
+        }
+        
+        const container = document.getElementById('power-bar-container');
+        if (container) container.style.display = 'none';
+        const powerBar = document.getElementById('power-bar');
+        if (powerBar) powerBar.style.width = '0%';
+    }
+});
+
+// Touch Events
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) {
+        canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) {
+        canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    if (touch) {
+        window.dispatchEvent(new MouseEvent('mouseup', { clientX: touch.clientX, clientY: touch.clientY }));
+    } else {
+        window.dispatchEvent(new MouseEvent('mouseup'));
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new MouseEvent('mouseup'));
+}, { passive: false });
+
+// ============================================================
+// BAŞLANGIÇ
+// ============================================================
+drawFieldLinesOnly();
+console.log("🎮 Çivili Futbol Başlatıldı!");
+startPeriodicSync();
+
+// ============================================================
+// MENÜ FONKSİYONLARI
+// ============================================================
+function openAILevelMenu() {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('ai-level-menu').style.display = 'flex';
+}
+
+function closeAILevelMenu() {
+    document.getElementById('ai-level-menu').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+}
+
+function openSettingsPopup() {
+    document.getElementById('settings-popup').style.display = 'flex';
+}
+
+function closeSettingsPopup() {
+    document.getElementById('settings-popup').style.display = 'none';
+}
+
+function selectColor(team, color) {
+    if (team === 1) {
+        if (color === team2Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
+        team1Color = color;
+        document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    } else {
+        if (color === team1Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
+        team2Color = color;
+        document.querySelectorAll('.color-btn[data-team="2"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    }
+}
+
+function selectFieldColor(color) {
+    fieldColor = color;
+    document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.field === color);
+    });
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        canvas.style.background = color;
+    }
+}
+
+function startLocalGame(mode, aiLevelParam) {
+    gameMode = mode;
+    if (mode === 'ai' && aiLevelParam) {
+        aiLevel = aiLevelParam;
+        closeAILevelMenu();
+    }
+    document.getElementById('settings-popup').style.display = 'none';
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('top-bar').style.display = 'flex';
+    matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+    const timeBoard = document.getElementById('time-board');
+    if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    startSetupPhase();
+}
