@@ -64,7 +64,10 @@ const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
 const MAX_DRAG_DIST = cap.radius * 2 * 7;
 
-// AI Zorluk Seviyesi (varsayılan)
+// Renk değişkenleri
+let team1Color = '#3498db';
+let team2Color = '#e74c3c';
+let fieldColor = '#2e7d32';
 let aiLevel = 'orta';
 
 // ============================================================
@@ -128,7 +131,7 @@ function drawFieldLinesOnly() {
 function drawRetroPlayer(x, y, team) {
     ctx.save();
     ctx.translate(x, y);
-    const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
+    const bodyColor = (team === 1) ? team1Color : team2Color;
     const skinColor = '#ffad87';
 
     ctx.fillStyle = bodyColor;
@@ -263,305 +266,50 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// AI SİSTEMİ
+// POP-UP MENÜ FONKSİYONLARI
 // ============================================================
-function getAIParameters() {
-    const levelSelect = document.getElementById('ai-level');
-    let level = 'orta';
-    if (levelSelect) {
-        level = levelSelect.value;
-    }
-    
-    console.log('🤖 AI Zorluk:', level);
-
-    switch (level) {
-        case 'kolay':
-            return {
-                accuracy: 0.4,
-                power: 0.06,
-                reactionDelay: 800,
-                pullDistance: 50,
-                fakeChance: 0.02,
-                errorRate: 0.3
-            };
-        case 'zor':
-            return {
-                accuracy: 0.85,
-                power: 0.13,
-                reactionDelay: 400,
-                pullDistance: 80,
-                fakeChance: 0.15,
-                errorRate: 0.05
-            };
-        case 'usta':
-            return {
-                accuracy: 0.95,
-                power: 0.15,
-                reactionDelay: 250,
-                pullDistance: 90,
-                fakeChance: 0.25,
-                errorRate: 0.02
-            };
-        default:
-            return {
-                accuracy: 0.65,
-                power: 0.10,
-                reactionDelay: 600,
-                pullDistance: 65,
-                fakeChance: 0.08,
-                errorRate: 0.12
-            };
+function openSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
     }
 }
 
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-    if (isAiThinking) return;
-
-    isAiThinking = true;
-    const params = getAIParameters();
-    const target = calculateAITarget(params);
-    executeAIShot(target, params);
-}
-
-function calculateAITarget(params) {
-    const goalY = height - goalHeight;
-    const goalCenterX = width / 2;
-    const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
-
-    let bestTarget = { x: goalCenterX, y: goalY };
-    let bestScore = -Infinity;
-
-    for (let i = 0; i < 5; i++) {
-        const offsetX = (Math.random() - 0.5) * 60;
-        const testX = goalCenterX + offsetX;
-        const testY = goalY;
-
-        let minDist = Infinity;
-        enemyPlayers.forEach(p => {
-            const dist = Math.hypot(testX - p.x, testY - p.y);
-            if (dist < minDist) minDist = dist;
-        });
-
-        const score = (60 - Math.abs(offsetX)) + minDist * 2;
-        if (score > bestScore) {
-            bestScore = score;
-            bestTarget = { x: testX, y: testY };
-        }
+function closeSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'none';
     }
-
-    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
-    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
-
-    return {
-        x: bestTarget.x + errorX,
-        y: bestTarget.y + errorY
-    };
 }
 
-function executeAIShot(target, params) {
-    const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    const power = params.power * (0.8 + Math.random() * 0.4);
-    const pullDistance = params.pullDistance * (0.8 + Math.random() * 0.4);
-
-    if (Math.random() < params.fakeChance) {
-        executeFakeShot(angle, power);
-        return;
+function openAILevelMenu() {
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
     }
-
-    setTimeout(() => {
-        isDraggingBall = true;
-        dragStart = { x: cap.x, y: cap.y };
-        dragCurrent = { x: cap.x, y: cap.y };
-
-        let stepCount = 0;
-        const totalSteps = 8;
-        const pullInterval = setInterval(() => {
-            stepCount++;
-            const ratio = stepCount / totalSteps;
-            dragCurrent = {
-                x: cap.x - Math.cos(angle) * (pullDistance * ratio),
-                y: cap.y - Math.sin(angle) * (pullDistance * ratio)
-            };
-
-            if (stepCount >= totalSteps) {
-                clearInterval(pullInterval);
-                setTimeout(() => {
-                    isDraggingBall = false;
-                    isAiThinking = false;
-                    playSound('kick');
-                    cap.vx = (dragStart.x - dragCurrent.x) * power * 1.5;
-                    cap.vy = (dragStart.y - dragCurrent.y) * power * 1.5;
-                    turn = 1;
-                    updateHUDTurn();
-                    resetShotTimer();
-                }, 150);
-            }
-        }, 30);
-    }, params.reactionDelay);
+    const popup = document.getElementById('ai-level-menu');
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
+    }
 }
 
-function executeFakeShot(angle, power) {
-    const fakeAngle = angle + (Math.random() - 0.5) * 1.5;
-    const fakeDistance = 30;
-
-    isDraggingBall = true;
-    dragStart = { x: cap.x, y: cap.y };
-    dragCurrent = {
-        x: cap.x - Math.cos(fakeAngle) * fakeDistance,
-        y: cap.y - Math.sin(fakeAngle) * fakeDistance
-    };
-
-    setTimeout(() => {
-        const realAngle = angle + (Math.random() - 0.5) * 0.5;
-        const realPower = power * 1.1;
-        isDraggingBall = false;
-        isAiThinking = false;
-        playSound('kick');
-        cap.vx = Math.cos(realAngle) * realPower * 60;
-        cap.vy = Math.sin(realAngle) * realPower * 60;
-        turn = 1;
-        updateHUDTurn();
-        resetShotTimer();
-    }, 300);
-}
-
-// ============================================================
-// SOCKET OLAY DİNLEYİCİLERİ
-// ============================================================
-function setupSocketListeners() {
-    if (!socket) return;
-
-    socket.on("update-lobby-players", (players) => {
-        const listContainer = document.getElementById('lobby-list');
-        listContainer.innerHTML = "";
-        let count = 0;
-        players.forEach(p => {
-            if (p.id !== socket.id) {
-                count++;
-                const item = document.createElement('div');
-                item.className = 'player-item';
-                const nameSpan = document.createElement('span');
-                nameSpan.innerHTML = `⚽ ${p.name}`;
-                const btn = document.createElement('button');
-                btn.className = 'status';
-                btn.innerText = 'Davet Et';
-                btn.onclick = () => {
-                    btn.innerText = "Bekleniyor...";
-                    btn.style.background = "#e67e22";
-                    socket.emit("send-invite", p.id);
-                };
-                item.appendChild(nameSpan);
-                item.appendChild(btn);
-                listContainer.appendChild(item);
-            }
-        });
-        if (count === 0) {
-            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş. Diğer telefondan da girin.</div>";
-        }
-    });
-
-    socket.on("receive-invite", (data) => {
-        if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
-            socket.emit("accept-invite", data.fromId);
-        }
-    });
-
-    socket.on("start-online-match", ({ roomId, team }) => {
-        currentRoomId = roomId;
-        myTeamNumber = team;
-        document.getElementById('online-lobby').style.display = 'none';
-        document.getElementById('top-bar').style.display = 'flex';
-        matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
-        document.getElementById('time-board').innerText = matchSecondsLeft + "s";
-        startSetupPhase();
-    });
-
-    socket.on("opponent-disconnected", () => {
-        alert("Rakip oyundan ayrıldı.");
-        exitToMenu();
-    });
-
-    socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
-        if (currentPhase === 'setup') {
-            let count = 0;
-            for (let p of pins) {
-                if (!p.isPost && p.team === team) {
-                    if (count === index) {
-                        p.x = x;
-                        p.y = y;
-                        break;
-                    }
-                    count++;
-                }
-            }
-        }
-    });
-
-    socket.on("match-go", ({ pins: finalPins }) => {
-        if (setupTimerInterval) clearInterval(setupTimerInterval);
-
-        pins = [
-            { x: (width - goalWidth) / 2, y: goalHeight, isPost: true },
-            { x: (width + goalWidth) / 2, y: goalHeight, isPost: true },
-            { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true },
-            { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true }
-        ];
-
-        finalPins.forEach((p, index) => {
-            let assignedTeam = p.team || (index < 11 ? 1 : 2);
-            pins.push({ x: p.x, y: p.y, team: assignedTeam });
-        });
-
-        currentPhase = 'playing';
-        document.getElementById('start-match-btn').style.display = 'none';
-        document.getElementById('shot-timer').style.display = 'block';
-        updateHUDTurn();
-        startMatchTimer();
-        resetShotTimer();
-        animate();
-    });
-
-    socket.on("opponentShot", (shotData) => {
-        if (gameMode === 'online' && currentPhase === 'playing') {
-            applyShotPhysics(shotData);
-            turn = shotData.player === 1 ? 2 : 1;
-            updateHUDTurn();
-            resetShotTimer();
-        }
-    });
-
-    socket.on("correctBallPosition", (ballState) => {
-        if (gameMode === 'online' && currentPhase === 'playing') {
-            const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
-            if (diff > 30) {
-                console.log(`🔄 Pozisyon düzeltiliyor: ${diff.toFixed(0)}px`);
-                cap.x = ballState.x;
-                cap.y = ballState.y;
-                cap.vx = ballState.vx;
-                cap.vy = ballState.vy;
-                turn = ballState.turn;
-                updateHUDTurn();
-            }
-        }
-    });
-}
-
-if (socket) {
-    setupSocketListeners();
-}
-
-// ============================================================
-// OYUN FONKSİYONLARI
-// ============================================================
-function startLocalGame(mode) {
-    gameMode = mode;
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('top-bar').style.display = 'flex';
-    matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
-    document.getElementById('time-board').innerText = matchSecondsLeft + "s";
-    startSetupPhase();
+function closeAILevelMenu() {
+    const popup = document.getElementById('ai-level-menu');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
 }
 
 function openOnlineLobby() {
@@ -569,17 +317,120 @@ function openOnlineLobby() {
         alert("Şu anda bir sunucuya bağlı değilsiniz!");
         return;
     }
-    gameMode = 'online';
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
-    socket.emit("join-lobby", name);
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'block';
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "Oyuncu";
+    const playerName = name || "Oyuncu_" + Math.floor(Math.random() * 100);
+    socket.emit("join-lobby", playerName);
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    const popup = document.getElementById('online-lobby');
+    if (popup) {
+        popup.style.display = 'flex';
+        popup.style.animation = 'none';
+        setTimeout(() => {
+            popup.style.animation = 'fadeIn 0.3s ease';
+        }, 10);
+    }
 }
 
 function closeOnlineLobby() {
-    if (socket) socket.emit("leave-lobby");
+    if (socket) {
+        socket.emit("leave-lobby");
+    }
+    const popup = document.getElementById('online-lobby');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+}
+
+function selectColor(team, color) {
+    if (team === 1) {
+        if (color === team2Color) {
+            alert('⚠️ İki takım aynı renk olamaz!');
+            return;
+        }
+        team1Color = color;
+        document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    } else {
+        if (color === team1Color) {
+            alert('⚠️ İki takım aynı renk olamaz!');
+            return;
+        }
+        team2Color = color;
+        document.querySelectorAll('.color-btn[data-team="2"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    }
+    console.log(`🎨 Takım ${team} rengi: ${color}`);
+}
+
+function selectFieldColor(color) {
+    fieldColor = color;
+    document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.field === color);
+    });
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        canvas.style.background = color;
+        const borderColor = color === '#2e7d32' ? '#1b5e20' : darkenColor(color, 30);
+        canvas.style.borderColor = borderColor;
+    }
+    console.log(`🟩 Saha rengi: ${color}`);
+}
+
+function darkenColor(hex, amount) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    r = Math.max(0, r - amount);
+    g = Math.max(0, g - amount);
+    b = Math.max(0, b - amount);
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function applyColors() {
+    const canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+    canvas.style.background = fieldColor;
+    const borderColor = fieldColor === '#2e7d32' ? '#1b5e20' : darkenColor(fieldColor, 30);
+    canvas.style.borderColor = borderColor;
+}
+
+// ============================================================
+// OYUN FONKSİYONLARI
+// ============================================================
+function startLocalGame(mode, aiLevelParam) {
+    gameMode = mode;
+
+    if (mode === 'ai' && aiLevelParam) {
+        localStorage.setItem('aiLevel', aiLevelParam);
+        const levelSelect = document.getElementById('ai-level');
+        if (levelSelect) {
+            levelSelect.value = aiLevelParam;
+        }
+        closeAILevelMenu();
+    }
+
+    document.getElementById('settings-popup').style.display = 'none';
+    document.getElementById('ai-level-menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('top-bar').style.display = 'flex';
+
+    const durationSelect = document.getElementById('match-duration');
+    matchSecondsLeft = parseInt(durationSelect ? durationSelect.value : 90);
+    document.getElementById('time-board').innerText = matchSecondsLeft + "s";
+
+    applyColors();
+    startSetupPhase();
 }
 
 function startSetupPhase() {
@@ -595,6 +446,12 @@ function startSetupPhase() {
 
     document.getElementById('turn-indicator').innerText = "Kadro Ayarla";
     document.getElementById('shot-timer').style.display = 'none';
+
+    // === KADRO YERLEŞTİRME SÜRESİ GÖSTER ===
+    const setupTimer = document.getElementById('setup-timer');
+    if (setupTimer) {
+        setupTimer.style.display = 'block';
+    }
 
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
 
@@ -635,15 +492,54 @@ function startSetupPhase() {
     animate();
 }
 
+function startSetupTimer() {
+    if (setupTimerInterval) clearInterval(setupTimerInterval);
+    setupSecondsLeft = 15;
+
+    const btn = document.getElementById('start-match-btn');
+    const countdownEl = document.getElementById('setup-countdown');
+
+    if (gameMode === 'online') {
+        btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
+        if (countdownEl) {
+            countdownEl.innerText = setupSecondsLeft;
+        }
+
+        setupTimerInterval = setInterval(() => {
+            setupSecondsLeft--;
+            if (countdownEl) {
+                countdownEl.innerText = setupSecondsLeft;
+            }
+            btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
+
+            if (setupSecondsLeft <= 0) {
+                clearInterval(setupTimerInterval);
+                confirmFormationsAndStart();
+            }
+        }, 1000);
+    } else {
+        btn.innerHTML = "BAŞLAT";
+        if (countdownEl) {
+            countdownEl.innerText = "15";
+        }
+    }
+}
+
 function confirmFormationsAndStart() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
+
+    // Kadro yerleştirme süresini gizle
+    const setupTimer = document.getElementById('setup-timer');
+    if (setupTimer) {
+        setupTimer.style.display = 'none';
+    }
 
     if (gameMode === 'online' && socket) {
         const btn = document.getElementById('start-match-btn');
         btn.innerHTML = "BEKLE";
         btn.disabled = true;
 
-        const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
+        const myPlacedPins = pins.filter(p => p.team === myTeamNumber && !p.isPost).map(p => {
             return { x: p.x, y: p.y };
         });
 
@@ -668,29 +564,6 @@ function startMatchTimer() {
             if (matchSecondsLeft <= 0) endMatch();
         }
     }, 1000);
-}
-
-function startSetupTimer() {
-    if (setupTimerInterval) clearInterval(setupTimerInterval);
-    setupSecondsLeft = 15;
-
-    const btn = document.getElementById('start-match-btn');
-
-    if (gameMode === 'online') {
-        btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
-
-        setupTimerInterval = setInterval(() => {
-            setupSecondsLeft--;
-            if (setupSecondsLeft <= 0) {
-                clearInterval(setupTimerInterval);
-                confirmFormationsAndStart();
-            } else {
-                btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
-            }
-        }, 1000);
-    } else {
-        btn.innerHTML = "BAŞLAT";
-    }
 }
 
 function resetShotTimer() {
@@ -795,9 +668,273 @@ function exitToMenu() {
     document.getElementById('top-bar').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('start-match-btn').style.display = 'none';
+    document.getElementById('setup-timer').style.display = 'none';
     isAiThinking = false;
     isDraggingBall = false;
     drawFieldLinesOnly();
+}
+
+// ============================================================
+// SOCKET OLAY DİNLEYİCİLERİ (ONLINE)
+// ============================================================
+function setupSocketListeners() {
+    if (!socket) return;
+
+    socket.on("update-lobby-players", (players) => {
+        const listContainer = document.getElementById('lobby-list');
+        listContainer.innerHTML = "";
+        let count = 0;
+        players.forEach(p => {
+            if (p.id !== socket.id) {
+                count++;
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                const nameSpan = document.createElement('span');
+                nameSpan.innerHTML = `⚽ ${p.name}`;
+                const btn = document.createElement('button');
+                btn.className = 'status';
+                btn.innerText = 'Davet Et';
+                btn.onclick = () => {
+                    btn.innerText = "Bekleniyor...";
+                    btn.style.background = "#e67e22";
+                    socket.emit("send-invite", p.id);
+                };
+                item.appendChild(nameSpan);
+                item.appendChild(btn);
+                listContainer.appendChild(item);
+            }
+        });
+        if (count === 0) {
+            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş. Diğer telefondan da girin.</div>";
+        }
+    });
+
+    socket.on("receive-invite", (data) => {
+        if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+            socket.emit("accept-invite", data.fromId);
+        }
+    });
+
+    socket.on("start-online-match", ({ roomId, team }) => {
+        currentRoomId = roomId;
+        myTeamNumber = team;
+        document.getElementById('online-lobby').style.display = 'none';
+        document.getElementById('top-bar').style.display = 'flex';
+        matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+        document.getElementById('time-board').innerText = matchSecondsLeft + "s";
+        startSetupPhase();
+    });
+
+    socket.on("opponent-disconnected", () => {
+        alert("Rakip oyundan ayrıldı.");
+        exitToMenu();
+    });
+
+    // === KADRO SENKRONİZASYONU ===
+    socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
+        if (currentPhase === 'setup') {
+            let count = 0;
+            for (let p of pins) {
+                if (!p.isPost && p.team === team) {
+                    if (count === index) {
+                        p.x = x;
+                        p.y = y;
+                        break;
+                    }
+                    count++;
+                }
+            }
+        }
+    });
+
+    socket.on("match-go", ({ pins: finalPins }) => {
+        if (setupTimerInterval) clearInterval(setupTimerInterval);
+
+        // Kadro yerleştirme süresini gizle
+        const setupTimer = document.getElementById('setup-timer');
+        if (setupTimer) {
+            setupTimer.style.display = 'none';
+        }
+
+        pins = [
+            { x: (width - goalWidth) / 2, y: goalHeight, isPost: true },
+            { x: (width + goalWidth) / 2, y: goalHeight, isPost: true },
+            { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true },
+            { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true }
+        ];
+
+        finalPins.forEach((p, index) => {
+            let assignedTeam = p.team || (index < 11 ? 1 : 2);
+            pins.push({ x: p.x, y: p.y, team: assignedTeam });
+        });
+
+        currentPhase = 'playing';
+        document.getElementById('start-match-btn').style.display = 'none';
+        document.getElementById('shot-timer').style.display = 'block';
+        updateHUDTurn();
+        startMatchTimer();
+        resetShotTimer();
+        animate();
+    });
+
+    // === RAKİP VURUŞU ===
+    socket.on("opponentShot", (shotData) => {
+        if (gameMode === 'online' && currentPhase === 'playing') {
+            applyShotPhysics(shotData);
+            turn = shotData.player === 1 ? 2 : 1;
+            updateHUDTurn();
+            resetShotTimer();
+        }
+    });
+
+    // === POZİSYON DÜZELTMESİ ===
+    socket.on("correctBallPosition", (ballState) => {
+        if (gameMode === 'online' && currentPhase === 'playing') {
+            const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
+            if (diff > 30) {
+                console.log(`🔄 Pozisyon düzeltiliyor: ${diff.toFixed(0)}px`);
+                cap.x = ballState.x;
+                cap.y = ballState.y;
+                cap.vx = ballState.vx;
+                cap.vy = ballState.vy;
+                turn = ballState.turn;
+                updateHUDTurn();
+            }
+        }
+    });
+}
+
+if (socket) {
+    setupSocketListeners();
+}
+
+// ============================================================
+// AI SİSTEMİ
+// ============================================================
+function getAIParameters() {
+    const levelSelect = document.getElementById('ai-level');
+    let level = 'orta';
+    if (levelSelect) {
+        level = levelSelect.value;
+    }
+
+    switch (level) {
+        case 'kolay':
+            return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02, errorRate: 0.3 };
+        case 'zor':
+            return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15, errorRate: 0.05 };
+        case 'usta':
+            return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25, errorRate: 0.02 };
+        default:
+            return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08, errorRate: 0.12 };
+    }
+}
+
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+    if (isAiThinking) return;
+
+    isAiThinking = true;
+    const params = getAIParameters();
+    const target = calculateAITarget(params);
+    executeAIShot(target, params);
+}
+
+function calculateAITarget(params) {
+    const goalY = height - goalHeight;
+    const goalCenterX = width / 2;
+    const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
+
+    let bestTarget = { x: goalCenterX, y: goalY };
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < 5; i++) {
+        const offsetX = (Math.random() - 0.5) * 60;
+        const testX = goalCenterX + offsetX;
+        const testY = goalY;
+
+        let minDist = Infinity;
+        enemyPlayers.forEach(p => {
+            const dist = Math.hypot(testX - p.x, testY - p.y);
+            if (dist < minDist) minDist = dist;
+        });
+
+        const score = (60 - Math.abs(offsetX)) + minDist * 2;
+        if (score > bestScore) {
+            bestScore = score;
+            bestTarget = { x: testX, y: testY };
+        }
+    }
+
+    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
+    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
+
+    return { x: bestTarget.x + errorX, y: bestTarget.y + errorY };
+}
+
+function executeAIShot(target, params) {
+    const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+    const power = params.power * (0.8 + Math.random() * 0.4);
+    const pullDistance = params.pullDistance * (0.8 + Math.random() * 0.4);
+
+    if (Math.random() < params.fakeChance) {
+        executeFakeShot(angle, power);
+        return;
+    }
+
+    setTimeout(() => {
+        isDraggingBall = true;
+        dragStart = { x: cap.x, y: cap.y };
+        dragCurrent = { x: cap.x, y: cap.y };
+
+        let stepCount = 0;
+        const totalSteps = 8;
+        const pullInterval = setInterval(() => {
+            stepCount++;
+            const ratio = stepCount / totalSteps;
+            dragCurrent = {
+                x: cap.x - Math.cos(angle) * (pullDistance * ratio),
+                y: cap.y - Math.sin(angle) * (pullDistance * ratio)
+            };
+
+            if (stepCount >= totalSteps) {
+                clearInterval(pullInterval);
+                setTimeout(() => {
+                    isDraggingBall = false;
+                    isAiThinking = false;
+                    playSound('kick');
+                    cap.vx = (dragStart.x - dragCurrent.x) * power * 1.5;
+                    cap.vy = (dragStart.y - dragCurrent.y) * power * 1.5;
+                    turn = 1;
+                    updateHUDTurn();
+                    resetShotTimer();
+                }, 150);
+            }
+        }, 30);
+    }, params.reactionDelay);
+}
+
+function executeFakeShot(angle, power) {
+    const fakeAngle = angle + (Math.random() - 0.5) * 1.5;
+    const fakeDistance = 30;
+
+    isDraggingBall = true;
+    dragStart = { x: cap.x, y: cap.y };
+    dragCurrent = { x: cap.x - Math.cos(fakeAngle) * fakeDistance, y: cap.y - Math.sin(fakeAngle) * fakeDistance };
+
+    setTimeout(() => {
+        const realAngle = angle + (Math.random() - 0.5) * 0.5;
+        const realPower = power * 1.1;
+        isDraggingBall = false;
+        isAiThinking = false;
+        playSound('kick');
+        cap.vx = Math.cos(realAngle) * realPower * 60;
+        cap.vy = Math.sin(realAngle) * realPower * 60;
+        turn = 1;
+        updateHUDTurn();
+        resetShotTimer();
+    }, 300);
 }
 
 // ============================================================
@@ -831,6 +968,11 @@ function updatePhysics() {
                 cap.y = height / 2;
                 cap.vx = 0;
                 cap.vy = 0;
+
+                // Online'da skoru senkronize et
+                if (gameMode === 'online') {
+                    broadcastState();
+                }
 
                 resetShotTimer();
                 return;
@@ -867,30 +1009,36 @@ function updatePhysics() {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
         runAIMove();
+    } else if (gameMode === 'online' && !isMoving && turn !== myTeamNumber) {
+        // Top durdu ve sıra bende değilse senkronize et
+        setTimeout(broadcastState, 100);
     }
 }
 
 // ============================================================
-// PERİYODİK SENKRONİZASYON
+// ONLINE SENKRONİZASYON
 // ============================================================
+function broadcastState() {
+    if (!socket || gameMode !== 'online' || currentPhase !== 'playing') return;
+
+    // Top pozisyonunu karşı tarafa gönder
+    socket.emit('updateState', {
+        roomId: currentRoomId,
+        state: {
+            cap: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, rotation: cap.rotation },
+            turn: turn,
+            score: score
+        }
+    });
+}
+
 function startPeriodicSync() {
     if (syncInterval) clearInterval(syncInterval);
     syncInterval = setInterval(() => {
         if (gameMode === 'online' && currentPhase === 'playing' && socket) {
-            if (Math.hypot(cap.vx, cap.vy) < 0.1 && turn !== myTeamNumber) {
-                socket.emit('syncBallPosition', {
-                    roomId: currentRoomId,
-                    ballState: {
-                        x: cap.x,
-                        y: cap.y,
-                        vx: cap.vx,
-                        vy: cap.vy,
-                        turn: turn
-                    }
-                });
-            }
+            broadcastState();
         }
-    }, 3000);
+    }, 2000);
 }
 
 // ============================================================
@@ -998,6 +1146,7 @@ window.addEventListener('mouseup', () => {
         cap.vx = (startX - endX) * 0.13;
         cap.vy = (startY - endY) * 0.13;
 
+        // Online'da vuruşu karşı tarafa gönder
         if (gameMode === 'online' && socket) {
             const shotData = {
                 player: turn,
@@ -1016,6 +1165,7 @@ window.addEventListener('mouseup', () => {
     }
 });
 
+// Touch olayları
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1070,225 +1220,3 @@ console.log("📐 Device Pixel Ratio:", window.devicePixelRatio);
 console.log("🟢 Sunucu durumu:", socket ? "Bağlı" : "Bağlı değil");
 
 startPeriodicSync();
-// ============================================================
-// BAŞLANGIÇ
-// ============================================================
-drawFieldLinesOnly();
-console.log("🎮 Çivili Futbol Başlatıldı!");
-console.log("📱 Cihaz:", navigator.userAgent);
-console.log("📐 Device Pixel Ratio:", window.devicePixelRatio);
-console.log("🟢 Sunucu durumu:", socket ? "Bağlı" : "Bağlı değil");
-
-startPeriodicSync();
-// ============================================================
-// POP-UP MENÜ FONKSİYONLARI (game.js SONUNA EKLE)
-// ============================================================
-
-// Renk değişkenleri
-let team1Color = '#3498db';
-let team2Color = '#e74c3c';
-let fieldColor = '#2e7d32';
-
-// ===== AYARLAR POP-UP =====
-function openSettingsPopup() {
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'none';
-        setTimeout(() => {
-            popup.style.animation = 'fadeIn 0.3s ease';
-        }, 10);
-    }
-}
-
-function closeSettingsPopup() {
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-}
-
-// ===== AI ZORLUK MENÜSÜ =====
-function openAILevelMenu() {
-    // Ana menüyü gizle
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'none';
-    }
-    
-    // AI menüsünü göster
-    const popup = document.getElementById('ai-level-menu');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'none';
-        setTimeout(() => {
-            popup.style.animation = 'fadeIn 0.3s ease';
-        }, 10);
-    }
-}
-
-function closeAILevelMenu() {
-    const popup = document.getElementById('ai-level-menu');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-}
-
-// ===== ONLINE LOBI =====
-function openOnlineLobby() {
-    if (!socket) {
-        alert("Şu anda bir sunucuya bağlı değilsiniz!");
-        return;
-    }
-    
-    const nameInput = document.getElementById('player-name');
-    const name = nameInput ? nameInput.value.trim() : "Oyuncu";
-    const playerName = name || "Oyuncu_" + Math.floor(Math.random() * 100);
-    
-    socket.emit("join-lobby", playerName);
-    
-    // Ana menüyü gizle
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'none';
-    }
-    
-    // Online lobi pop-up'ını göster
-    const popup = document.getElementById('online-lobby');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'none';
-        setTimeout(() => {
-            popup.style.animation = 'fadeIn 0.3s ease';
-        }, 10);
-    }
-}
-
-function closeOnlineLobby() {
-    if (socket) {
-        socket.emit("leave-lobby");
-    }
-    
-    const popup = document.getElementById('online-lobby');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-}
-
-// ===== RENK SEÇİMİ =====
-function selectColor(team, color) {
-    if (team === 1) {
-        if (color === team2Color) {
-            alert('⚠️ İki takım aynı renk olamaz!');
-            return;
-        }
-        team1Color = color;
-        document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.color === color);
-        });
-    } else {
-        if (color === team1Color) {
-            alert('⚠️ İki takım aynı renk olamaz!');
-            return;
-        }
-        team2Color = color;
-        document.querySelectorAll('.color-btn[data-team="2"]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.color === color);
-        });
-    }
-    console.log(`🎨 Takım ${team} rengi: ${color}`);
-}
-
-function selectFieldColor(color) {
-    fieldColor = color;
-    document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.field === color);
-    });
-    const canvas = document.getElementById('gameCanvas');
-    if (canvas) {
-        canvas.style.background = color;
-        const borderColor = color === '#2e7d32' ? '#1b5e20' : darkenColor(color, 30);
-        canvas.style.borderColor = borderColor;
-    }
-    console.log(`🟩 Saha rengi: ${color}`);
-}
-
-function darkenColor(hex, amount) {
-    let r = parseInt(hex.slice(1,3), 16);
-    let g = parseInt(hex.slice(3,5), 16);
-    let b = parseInt(hex.slice(5,7), 16);
-    r = Math.max(0, r - amount);
-    g = Math.max(0, g - amount);
-    b = Math.max(0, b - amount);
-    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
-}
-
-// ===== startLocalGame (GÜNCELLE) =====
-function startLocalGame(mode, aiLevelParam) {
-    gameMode = mode;
-    
-    if (mode === 'ai' && aiLevelParam) {
-        localStorage.setItem('aiLevel', aiLevelParam);
-        const levelSelect = document.getElementById('ai-level');
-        if (levelSelect) {
-            levelSelect.value = aiLevelParam;
-        }
-        closeAILevelMenu();
-    }
-    
-    // Tüm pop-up'ları kapat
-    document.getElementById('settings-popup').style.display = 'none';
-    document.getElementById('ai-level-menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'none';
-    
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('top-bar').style.display = 'flex';
-    
-    const durationSelect = document.getElementById('match-duration');
-    matchSecondsLeft = parseInt(durationSelect ? durationSelect.value : 90);
-    document.getElementById('time-board').innerText = matchSecondsLeft + "s";
-    
-    applyColors();
-    startSetupPhase();
-}
-
-function applyColors() {
-    const canvas = document.getElementById('gameCanvas');
-    if (!canvas) return;
-    canvas.style.background = fieldColor;
-    const borderColor = fieldColor === '#2e7d32' ? '#1b5e20' : darkenColor(fieldColor, 30);
-    canvas.style.borderColor = borderColor;
-}
-
-// ===== drawRetroPlayer (GÜNCELLE) =====
-function drawRetroPlayer(x, y, team) {
-    ctx.save();
-    ctx.translate(x, y);
-    const bodyColor = (team === 1) ? team1Color : team2Color;
-    const skinColor = '#ffad87';
-
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-14, -4, 5, 4);
-    ctx.fillRect(9, -4, 5, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-14, -8, 4, 4);
-    ctx.fillRect(10, -8, 4, 4);
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-9, -2, 18, 7);
-    ctx.fillRect(-6, 5, 12, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-3, -5, 6, 4);
-    ctx.fillStyle = '#111111';
-    ctx.fillRect(-4, 4, 8, 7);
-    ctx.restore();
-}
