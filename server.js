@@ -5,7 +5,14 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// Render.com için CORS ayarları
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Statik dosyaları ana dizinden sun
 app.use(express.static(__dirname));
@@ -96,6 +103,9 @@ io.on('connection', (socket) => {
 
             io.to(roomId).emit('match-go', { pins: combinedPins });
             console.log(`Dizilimler onaylandı, maç başlıyor. Oda: ${roomId}`);
+            
+            // Odayı temizle (opsiyonel - maçtan sonra)
+            // delete activeRooms[roomId];
         }
     });
 
@@ -139,7 +149,8 @@ function handlePlayerDisconnection(socket) {
     }
 }
 
+// Render.com PORT değişkenini kullan
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} portunda başarıyla çalışıyor!`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Sunucu ${PORT} portunda başarıyla çalışıyor!`);
 });
