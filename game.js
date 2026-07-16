@@ -1246,19 +1246,12 @@ let team2Color = '#e74c3c';
 let fieldColor = '#2e7d32';
 
 // ===== AYARLAR POP-UP =====
-function openSettingsPopup() {
-    const popup = document.getElementById('settings-popup');
-    popup.style.display = 'flex';
-    // Animasyon için
-    popup.style.animation = 'none';
-    setTimeout(() => {
-        popup.style.animation = 'fadeIn 0.3s ease';
-    }, 10);
-}
-
-function closeSettingsPopup() {
-    document.getElementById('settings-popup').style.display = 'none';
-}
+<!-- ===== AYARLAR POP-UP (YENİ) ===== -->
+<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
+    <div class="popup-content">
+        <!-- pop-up içeriği -->
+    </div>
+</div>
 
 // ===== AI ZORLUK MENÜSÜ =====
 function openAILevelMenu() {
