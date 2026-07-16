@@ -838,6 +838,22 @@ function startSetupPhase() {
     document.getElementById('score-p1').innerText = "0";
     document.getElementById('score-p2').innerText = "0";
 
+    // Zaman gösterimlerini ayarla (YENİ)
+    const timeDisplay = document.getElementById('time-display');
+    if (timeDisplay) {
+        timeDisplay.innerText = matchSecondsLeft + 's';
+    }
+    
+    const shotDisplay = document.getElementById('shot-display');
+    if (shotDisplay) {
+        shotDisplay.innerText = '3s';
+    }
+    
+    const shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) {
+        shotTimer.classList.remove('warning');
+    }
+
     const startBtn = document.getElementById('start-match-btn');
     startBtn.style.display = 'flex';
     startBtn.style.opacity = '1';
@@ -845,6 +861,7 @@ function startSetupPhase() {
 
     document.getElementById('turn-indicator').innerText = "Kadro Ayarla";
     document.getElementById('shot-timer').style.display = 'none';
+
 
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
 
