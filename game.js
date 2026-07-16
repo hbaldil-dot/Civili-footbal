@@ -1071,18 +1071,38 @@ console.log("🟢 Sunucu durumu:", socket ? "Bağlı" : "Bağlı değil");
 
 startPeriodicSync();
 // ============================================================
-// YENİ MENÜ FONKSİYONLARI (game.js SONUNA EKLE)
+// POP-UP MENÜ FONKSİYONLARI (game.js SONUNA EKLE)
 // ============================================================
 
-// Renk değişkenleri
+// Renk değişkenleri (varsa zaten tanımlıdır)
 let team1Color = '#3498db';
 let team2Color = '#e74c3c';
 let fieldColor = '#2e7d32';
 
-// AI Zorluk Menüsü
+// ===== AYARLAR POP-UP =====
+function openSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    popup.style.display = 'flex';
+    // Animasyon için
+    popup.style.animation = 'none';
+    setTimeout(() => {
+        popup.style.animation = 'fadeIn 0.3s ease';
+    }, 10);
+}
+
+function closeSettingsPopup() {
+    document.getElementById('settings-popup').style.display = 'none';
+}
+
+// ===== AI ZORLUK MENÜSÜ =====
 function openAILevelMenu() {
     document.getElementById('menu').style.display = 'none';
-    document.getElementById('ai-level-menu').style.display = 'block';
+    const popup = document.getElementById('ai-level-menu');
+    popup.style.display = 'flex';
+    popup.style.animation = 'none';
+    setTimeout(() => {
+        popup.style.animation = 'fadeIn 0.3s ease';
+    }, 10);
 }
 
 function closeAILevelMenu() {
@@ -1090,31 +1110,41 @@ function closeAILevelMenu() {
     document.getElementById('menu').style.display = 'block';
 }
 
-// Ayarlar Toggle
-function toggleSettings() {
-    const panel = document.getElementById('settings-panel');
-    if (panel.style.display === 'none' || panel.style.display === '') {
-        panel.style.display = 'block';
-    } else {
-        panel.style.display = 'none';
+// ===== ONLINE LOBI =====
+function openOnlineLobby() {
+    if (!socket) {
+        alert("Şu anda bir sunucuya bağlı değilsiniz!");
+        return;
     }
+    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+    socket.emit("join-lobby", name);
+    document.getElementById('menu').style.display = 'none';
+    const popup = document.getElementById('online-lobby');
+    popup.style.display = 'flex';
+    popup.style.animation = 'none';
+    setTimeout(() => {
+        popup.style.animation = 'fadeIn 0.3s ease';
+    }, 10);
 }
 
-// Renk Seçimi - Takım 1
+function closeOnlineLobby() {
+    if (socket) socket.emit("leave-lobby");
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+}
+
+// ===== RENK SEÇİMİ =====
 function selectColor(team, color) {
     if (team === 1) {
-        // Takım 1 rengi seçerken takım 2 ile aynı olmasın
         if (color === team2Color) {
             alert('⚠️ İki takım aynı renk olamaz!');
             return;
         }
         team1Color = color;
-        // Aktif göster
         document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.color === color);
         });
     } else {
-        // Takım 2 rengi seçerken takım 1 ile aynı olmasın
         if (color === team1Color) {
             alert('⚠️ İki takım aynı renk olamaz!');
             return;
@@ -1127,87 +1157,66 @@ function selectColor(team, color) {
     console.log(`🎨 Takım ${team} rengi: ${color}`);
 }
 
-// Saha Rengi Seçimi
 function selectFieldColor(color) {
     fieldColor = color;
     document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.field === color);
     });
-    // Canvas arka planını güncelle
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
         canvas.style.background = color;
-        // Kenarlık rengini güncelle
         const borderColor = color === '#2e7d32' ? '#1b5e20' : darkenColor(color, 30);
         canvas.style.borderColor = borderColor;
     }
     console.log(`🟩 Saha rengi: ${color}`);
 }
 
-// Renk karartma yardımcısı
 function darkenColor(hex, amount) {
     let r = parseInt(hex.slice(1,3), 16);
     let g = parseInt(hex.slice(3,5), 16);
     let b = parseInt(hex.slice(5,7), 16);
-    
     r = Math.max(0, r - amount);
     g = Math.max(0, g - amount);
     b = Math.max(0, b - amount);
-    
     return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 }
 
-// startLocalGame fonksiyonunu GÜNCELLE (AI zorluk desteği)
-// Bu fonksiyon zaten varsa, aşağıdaki ile değiştirin
+// ===== startLocalGame (GÜNCELLE) =====
 function startLocalGame(mode, aiLevelParam) {
     gameMode = mode;
     
     if (mode === 'ai' && aiLevelParam) {
-        // AI zorluk seviyesini kaydet
         localStorage.setItem('aiLevel', aiLevelParam);
-        // Select elementini güncelle (eski sistem için)
         const levelSelect = document.getElementById('ai-level');
         if (levelSelect) {
             levelSelect.value = aiLevelParam;
         }
-        // AI Level menüsünü kapat
         closeAILevelMenu();
     }
     
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
     
-    // Ayarlardan süreyi al
     const durationSelect = document.getElementById('match-duration');
     matchSecondsLeft = parseInt(durationSelect ? durationSelect.value : 90);
     document.getElementById('time-board').innerText = matchSecondsLeft + "s";
     
-    // Renkleri uygula
     applyColors();
-    
     startSetupPhase();
 }
 
-// Renkleri uygula
 function applyColors() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
-    
-    // Canvas arka planı
     canvas.style.background = fieldColor;
-    
-    // Kenarlık rengini güncelle
     const borderColor = fieldColor === '#2e7d32' ? '#1b5e20' : darkenColor(fieldColor, 30);
     canvas.style.borderColor = borderColor;
 }
 
-// drawRetroPlayer fonksiyonunu GÜNCELLE (renk desteği)
-// Bu fonksiyon zaten varsa, aşağıdaki ile değiştirin
+// ===== drawRetroPlayer (GÜNCELLE) =====
 function drawRetroPlayer(x, y, team) {
     ctx.save();
     ctx.translate(x, y);
-    
-    // Takım renklerini kullan
     const bodyColor = (team === 1) ? team1Color : team2Color;
     const skinColor = '#ffad87';
 
