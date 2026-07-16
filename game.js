@@ -1554,31 +1554,94 @@ function closeSettingsPopup() {
     }
 }
 
+// ============================================================
+// MENÜ FONKSİYONLARI - BASİT VE SAĞLAM
+// ============================================================
+
 function openAILevelMenu() {
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'none';
-    }
-    
-    const popup = document.getElementById('ai-level-menu');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'none';
-        setTimeout(() => {
-            popup.style.animation = 'fadeIn 0.3s ease';
-        }, 10);
+    console.log('🤖 AI Menüsü açılıyor...');
+    try {
+        const menu = document.getElementById('menu');
+        const popup = document.getElementById('ai-level-menu');
+        if (menu) menu.style.display = 'none';
+        if (popup) {
+            popup.style.display = 'flex';
+            console.log('✅ AI Menüsü açıldı');
+        }
+    } catch (e) {
+        console.error('AI Menü hatası:', e);
     }
 }
 
 function closeAILevelMenu() {
-    const popup = document.getElementById('ai-level-menu');
-    if (popup) {
-        popup.style.display = 'none';
+    console.log('🤖 AI Menüsü kapanıyor...');
+    try {
+        const popup = document.getElementById('ai-level-menu');
+        const menu = document.getElementById('menu');
+        if (popup) popup.style.display = 'none';
+        if (menu) menu.style.display = 'block';
+    } catch (e) {
+        console.error('AI Menü kapatma hatası:', e);
     }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
+}
+
+function openSettingsPopup() {
+    console.log('⚙️ Ayarlar açılıyor...');
+    try {
+        const popup = document.getElementById('settings-popup');
+        if (popup) {
+            popup.style.display = 'flex';
+            console.log('✅ Ayarlar açıldı');
+        }
+    } catch (e) {
+        console.error('Ayarlar hatası:', e);
+    }
+}
+
+function closeSettingsPopup() {
+    console.log('⚙️ Ayarlar kapanıyor...');
+    try {
+        const popup = document.getElementById('settings-popup');
+        if (popup) popup.style.display = 'none';
+    } catch (e) {
+        console.error('Ayarlar kapatma hatası:', e);
+    }
+}
+
+function openOnlineLobby() {
+    console.log('🌐 Online lobi açılıyor...');
+    try {
+        if (!socket) {
+            alert("Şu anda bir sunucuya bağlı değilsiniz!");
+            return;
+        }
+        
+        const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+        socket.emit("join-lobby", name);
+        
+        const menu = document.getElementById('menu');
+        const popup = document.getElementById('online-lobby');
+        if (menu) menu.style.display = 'none';
+        if (popup) {
+            popup.style.display = 'flex';
+            console.log('✅ Online lobi açıldı');
+        }
+    } catch (e) {
+        console.error('Online lobi hatası:', e);
+    }
+}
+
+function closeOnlineLobby() {
+    console.log('🌐 Online lobi kapanıyor...');
+    try {
+        if (socket) socket.emit("leave-lobby");
+        
+        const popup = document.getElementById('online-lobby');
+        const menu = document.getElementById('menu');
+        if (popup) popup.style.display = 'none';
+        if (menu) menu.style.display = 'block';
+    } catch (e) {
+        console.error('Online lobi kapatma hatası:', e);
     }
 }
 
