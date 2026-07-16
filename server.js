@@ -7,23 +7,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Statik dosyaları doğrudan ana dizinden sunuyoruz
+// Statik dosyaları ana dizinden sun
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Çevrimiçi havuzdaki (lobideki) aktif oyuncular listesi
+// Lobi ve oda yönetimi
 let lobbyPlayers = [];
-
-// Aktif oyun odaları
 let activeRooms = {};
 
 io.on('connection', (socket) => {
     console.log(`Yeni bağlantı: ${socket.id}`);
 
-    // --- LOBİ İŞLEMLERİ ---
+    // --- LOBİ ---
     socket.on('join-lobby', (playerName) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         lobbyPlayers.push({ id: socket.id, name: playerName });
@@ -75,10 +73,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- DIZILIS SENKRONIZASYONU ---
+    // --- DİZİLİŞ SENKRONİZASYONU ---
     socket.on('setup-pin-move', ({ roomId, team, index, x, y }) => {
-        // Gelen koordinatları doğrudan (düzlemsel olarak) diğer oyuncuya fırlatıyoruz.
-        // İstemci kendi ekran açısına göre simetri işlemini kendisi yapacak.
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
@@ -89,7 +85,6 @@ io.on('connection', (socket) => {
         const player = room.players.find(p => p.team === team);
         if (player) {
             player.ready = true;
-            // Gelen koordinatlar istemci tarafında zaten düzlemsel olarak düzeltildi (Team 1 bakışına uyarlandı).
             player.placedPins = placedPins;
         }
 
@@ -99,17 +94,17 @@ io.on('connection', (socket) => {
                 ...room.players[1].placedPins
             ];
 
-            // Maçı başlatıyoruz
             io.to(roomId).emit('match-go', { pins: combinedPins });
             console.log(`Dizilimler onaylandı, maç başlıyor. Oda: ${roomId}`);
         }
     });
 
-    // --- OYNANIS SENKRONIZASYONU ---
+    // --- OYUN SENKRONİZASYONU ---
     socket.on('updateState', ({ roomId, state }) => {
         socket.to(roomId).emit('peerState', state);
     });
 
+    // --- BAĞLANTI KOPMASI ---
     socket.on('disconnect', () => {
         console.log(`Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
