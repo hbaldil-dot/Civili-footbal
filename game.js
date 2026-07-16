@@ -90,7 +90,7 @@ function loadGoalImage(imageUrl) {
 }
 
 // Fotoğrafı yükle
-loadGoalImage('B7E87975-C800-461A-BDA0-9BB5FF25786F.webp');
+loadGoalImage('goal.webp');
 
 // ============================================================
 // SES EFEKTLERİ
