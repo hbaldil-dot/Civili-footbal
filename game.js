@@ -918,7 +918,10 @@ function startMatchTimer() {
     timerInterval = setInterval(() => {
         if (currentPhase === 'playing') {
             matchSecondsLeft--;
-            document.getElementById('time-board').innerText = matchSecondsLeft + "s";
+            const timeDisplay = document.getElementById('time-display');
+            if (timeDisplay) {
+                timeDisplay.innerText = matchSecondsLeft + 's';
+            }
             if (matchSecondsLeft <= 0) endMatch();
         }
     }, 1000);
