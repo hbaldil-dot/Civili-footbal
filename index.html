@@ -14,20 +14,17 @@
     <div id="menu">
         <h1>⚽ ÇİVİLİ FUTBOL</h1>
         
-        <!-- Oyuncu İsmi -->
         <div class="input-group">
             <label>👤 OYUNCU İSMİ</label>
             <input type="text" id="player-name" value="Oyuncu" maxlength="12">
         </div>
 
-        <!-- Oyun Modları -->
         <div class="mode-container">
             <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 Bilgisayara Karşı</button>
             <button class="main-btn btn-local" onclick="startLocalGame('local')">👥 2 Kişilik Aynı Ekran</button>
             <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Maç</button>
         </div>
 
-        <!-- Ayarlar Butonu -->
         <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
     </div>
 
@@ -142,6 +139,11 @@
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+    </div>
+
+    <!-- ===== GÜÇ GÖSTERGESİ (YENİ) ===== -->
+    <div id="power-bar-container">
+        <div id="power-bar"></div>
     </div>
 
 </body>
