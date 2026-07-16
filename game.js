@@ -950,21 +950,53 @@ function startSetupTimer() {
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = 3;
-    document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
+    
+    const shotDisplay = document.getElementById('shot-display');
+    const shotTimer = document.getElementById('shot-timer');
+    
+    if (shotDisplay) {
+        shotDisplay.innerText = shotSecondsLeft + 's';
+    }
+    
+    if (shotTimer) {
+        shotTimer.classList.remove('warning');
+    }
 
     if (gameMode === 'ai' && turn === 2) {
-        document.getElementById('shot-timer').style.display = 'none';
+        const container = document.getElementById('shot-timer-container');
+        if (container) {
+            container.style.display = 'none';
+        }
         return;
     } else {
-        document.getElementById('shot-timer').style.display = 'block';
+        const container = document.getElementById('shot-timer-container');
+        if (container) {
+            container.style.display = 'block';
+        }
     }
 
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
-            document.getElementById('shot-timer').innerText = `ŞUT: ${shotSecondsLeft}s`;
+            
+            const shotDisplay = document.getElementById('shot-display');
+            const shotTimer = document.getElementById('shot-timer');
+            
+            if (shotDisplay) {
+                shotDisplay.innerText = shotSecondsLeft + 's';
+            }
+            
+            if (shotSecondsLeft <= 1 && shotTimer) {
+                shotTimer.classList.add('warning');
+            } else if (shotTimer) {
+                shotTimer.classList.remove('warning');
+            }
+            
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
+                if (shotTimer) {
+                    shotTimer.classList.remove('warning');
+                }
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
                 resetShotTimer();
