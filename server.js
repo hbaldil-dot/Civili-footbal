@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- DIZILIS SENKRONIZASYONU ---
+    // --- DİZİLİŞ SENKRONİZASYONU ---
     socket.on('setup-pin-move', ({ roomId, team, index, x, y }) => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
@@ -108,11 +108,19 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- OYNANIS SENKRONIZASYONU ---
-    socket.on('updateState', ({ roomId, state }) => {
-        socket.to(roomId).emit('peerState', state);
+    // --- YENİ: VURUŞ BAZLI SENKRONİZASYON ---
+    socket.on('playerShot', ({ roomId, shotData }) => {
+        // Vuruş verilerini diğer oyuncuya ilet
+        socket.to(roomId).emit('opponentShot', shotData);
+        console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
+    // --- YENİ: PERİYODİK SENKRONİZASYON (DÜZELTME) ---
+    socket.on('syncBallPosition', ({ roomId, ballState }) => {
+        socket.to(roomId).emit('correctBallPosition', ballState);
+    });
+
+    // --- BAĞLANTI KOPMASI ---
     socket.on('disconnect', () => {
         console.log(`Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
