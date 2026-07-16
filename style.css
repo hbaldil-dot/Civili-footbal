@@ -155,7 +155,7 @@ select {
     color: #fff;
 }
 
-/* ===== POP-UP (ORTALI) ===== */
+/* ===== POP-UP ===== */
 #settings-popup,
 #ai-level-menu,
 #online-lobby {
@@ -193,7 +193,6 @@ select {
     overflow: hidden;
 }
 
-/* Pop-up Başlık */
 .popup-header {
     display: flex;
     justify-content: space-between;
@@ -228,7 +227,6 @@ select {
     transform: scale(0.9);
 }
 
-/* Pop-up Gövde */
 .popup-body {
     padding: 20px;
     overflow-y: auto;
@@ -239,7 +237,6 @@ select {
     margin-bottom: 0;
 }
 
-/* Pop-up Alt */
 .popup-footer {
     padding: 12px 20px;
     border-top: 1px solid #333;
@@ -262,6 +259,116 @@ select {
 
 .popup-close-btn:active {
     transform: scale(0.97);
+}
+
+/* ===== TAKIM SEÇİMİ ===== */
+.team-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.team-select-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: #1a1a1a;
+    border: 2px solid #4a754a;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.team-select-btn:hover {
+    border-color: #2ecc71;
+}
+
+.team-select-btn .team-select-arrow {
+    font-size: 12px;
+    color: #888;
+    transition: transform 0.3s ease;
+}
+
+.team-select-btn.active .team-select-arrow {
+    transform: rotate(180deg);
+}
+
+.team-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border: 2px solid #4a754a;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 50;
+    margin-top: 4px;
+}
+
+.team-select-dropdown.show {
+    display: block;
+}
+
+.team-option {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid #222;
+}
+
+.team-option:last-child {
+    border-bottom: none;
+}
+
+.team-option:hover {
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.team-option.selected {
+    background: rgba(46, 204, 113, 0.2);
+}
+
+.team-option .team-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    flex-shrink: 0;
+}
+
+.team-option .team-name {
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.team-option .team-check {
+    margin-left: auto;
+    color: #2ecc71;
+    font-size: 16px;
+}
+
+.team-select-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+
+.team-select-dropdown::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.team-select-dropdown::-webkit-scrollbar-thumb {
+    background: #4a754a;
+    border-radius: 4px;
 }
 
 /* ===== RENK SEÇİMİ ===== */
@@ -365,17 +472,17 @@ select {
     background: #1e8449;
 }
 
-/* ===== OYUN EKRANI ===== */
+/* ============================================================ */
+/* ===== OYUN EKRANI - YENİ LAYOUT ===== */
+/* ============================================================ */
+
 #top-bar {
     width: 100%;
     max-width: 360px;
     display: none;
-    flex-direction: column;
-    gap: 5px;
-    align-items: center;
     z-index: 15;
     pointer-events: none;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .hud-row {
@@ -383,81 +490,98 @@ select {
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ÇIKIŞ BUTONU - SOL */
+#exit-btn {
+    color: rgba(255, 255, 255, 0.6);
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    pointer-events: auto;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+#exit-btn:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* SKOR VE SÜRE - ORTA */
+#score-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+    flex: 1;
 }
 
 #score-board {
-    background: rgba(0, 0, 0, 0.85);
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
-    border: 2px solid #fff;
-    text-align: center;
     display: flex;
-    gap: 6px;
-    justify-content: center;
     align-items: center;
+    gap: 8px;
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    line-height: 1;
 }
 
 #score-p1 {
     color: #3498db;
+    text-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
 }
 
 #score-divider {
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 24px;
 }
 
 #score-p2 {
     color: #e74c3c;
-}
-
-#turn-indicator,
-#time-board,
-#shot-timer {
-    background: rgba(0, 0, 0, 0.85);
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #fff;
-    text-align: center;
-}
-
-#turn-indicator {
-    color: #f1c40f;
-    border-color: #f1c40f;
-    min-width: 85px;
+    text-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
 }
 
 #time-board {
-    color: #3498db;
-    border-color: #3498db;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: -2px;
 }
 
+/* VURUŞ SÜRESİ - SAĞ (SİLİK) */
 #shot-timer {
-    color: #e74c3c;
-    border-color: #e74c3c;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.25);
+    text-align: right;
+    font-weight: 300;
+    letter-spacing: 0.5px;
     min-width: 55px;
+    display: none;
+    padding: 2px 0;
+}
+
+/* OYUN DURUM GÖSTERGESİ (TURN) - HUD'UN ALTINDA */
+#turn-indicator {
     display: none;
 }
 
-#exit-btn {
-    color: white;
-    border: 2px solid #fff;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    pointer-events: auto;
-    padding: 5px 10px;
-    font-family: inherit;
-    background: #c0392b;
-}
+/* ============================================================ */
+/* CANVAS KONTEYNER */
+/* ============================================================ */
 
 .canvas-container {
     position: relative;
-    max-height: 82dvh;
+    max-height: 80dvh;
     max-width: 100%;
     aspect-ratio: 360 / 620;
     touch-action: none;
@@ -477,27 +601,28 @@ canvas {
     touch-action: none;
 }
 
+/* ===== BAŞLAT BUTONU ===== */
 #start-match-btn {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 84px;
-    height: 84px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     border: 4px solid #27ae60;
     background: rgba(39, 174, 96, 0.9);
     color: white;
     font-family: inherit;
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 900;
     cursor: pointer;
     z-index: 50;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(39, 174, 96, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
     text-align: center;
     line-height: 1.2;
@@ -509,11 +634,29 @@ canvas {
 }
 
 #start-match-btn .timer-subtext {
-    font-size: 16px;
+    font-size: 14px;
     display: block;
     margin-top: 2px;
     color: #f1c40f;
-    text-shadow: 1px 1px 2px black;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+}
+
+/* ===== SETUP TIMER (15 saniye geri sayım) ===== */
+#setup-timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(50px + 50%));
+    color: #f1c40f;
+    font-size: 20px;
+    font-weight: 900;
+    display: none;
+    text-shadow: 0 0 30px rgba(241, 196, 15, 0.5);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(241, 196, 15, 0.3);
+    z-index: 40;
 }
 
 /* ===== MOBİL UYUM ===== */
@@ -557,6 +700,24 @@ canvas {
     
     .popup-close-btn {
         padding: 8px 20px;
+        font-size: 12px;
+    }
+
+    #score-board {
+        font-size: 22px;
+    }
+
+    #time-board {
+        font-size: 10px;
+    }
+
+    #start-match-btn {
+        width: 80px;
+        height: 80px;
+        font-size: 14px;
+    }
+
+    #start-match-btn .timer-subtext {
         font-size: 12px;
     }
 }
