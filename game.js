@@ -62,10 +62,35 @@ const goalHeight = 12;
 const penaltyBoxW = goalWidth * 2.2;
 const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
-const MAX_DRAG_DIST = cap.radius * 2 * 6; // 132px - 6 top boyu (ESKİ SİSTEM)
+const MAX_DRAG_DIST = cap.radius * 2 * 6; // 132px - 6 top boyu
 
-// AI Zorluk Seviyesi (varsayılan)
+// AI Zorluk Seviyesi
 let aiLevel = 'orta';
+
+// GOL ANİMASYONU İÇİN
+let goalAnimation = null;
+let goalAnimationStartTime = 0;
+const GOAL_ANIMATION_DURATION = 3000; // 3 saniye
+let goalImage = null;
+
+// ============================================================
+// FOTOĞRAF YÜKLEME
+// ============================================================
+function loadGoalImage(imageUrl) {
+    const img = new Image();
+    img.onload = function() {
+        goalImage = img;
+        console.log('✅ Gol fotoğrafı yüklendi!');
+    };
+    img.onerror = function() {
+        console.warn('⚠️ Fotoğraf yüklenemedi, varsayılan metin kullanılacak.');
+        goalImage = null;
+    };
+    img.src = imageUrl;
+}
+
+// Fotoğrafı yükle
+loadGoalImage('B7E87975-C800-461A-BDA0-9BB5FF25786F.webp');
 
 // ============================================================
 // SES EFEKTLERİ
@@ -108,6 +133,20 @@ function playSound(type) {
 }
 
 // ============================================================
+// GOL ANİMASYONU
+// ============================================================
+function triggerGoalAnimation() {
+    goalAnimation = {
+        scale: 0,
+        alpha: 1,
+        blinkCount: 0,
+        type: goalImage ? 'image' : 'text'
+    };
+    goalAnimationStartTime = Date.now();
+    playSound('goal');
+}
+
+// ============================================================
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
@@ -128,7 +167,7 @@ function drawFieldLinesOnly() {
 function drawRetroPlayer(x, y, team) {
     ctx.save();
     ctx.translate(x, y);
-    const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
+    const bodyColor = (team === 1) ? team1Color : team2Color;
     const skinColor = '#ffad87';
 
     ctx.fillStyle = bodyColor;
@@ -158,7 +197,7 @@ function drawSoccerBall(x, y, r, rotation) {
     ctx.lineWidth = 1.5;
     ctx.strokeStyle = '#000';
     ctx.stroke();
-    ctx.fillStyle = (turn === 1) ? '#3498db' : '#cc0000';
+    ctx.fillStyle = (turn === 1) ? team1Color : team2Color;
     ctx.beginPath();
     for (let i = 0; i < 5; i++) {
         let a = (Math.PI * 2 / 5) * i - Math.PI / 2;
@@ -253,6 +292,183 @@ function draw() {
 
     if (currentPhase === 'playing' && cap) {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+    }
+
+    // ============================================================
+    // GOL ANİMASYONU - 3 KERE YANIP SÖNEN
+    // ============================================================
+    if (goalAnimation) {
+        const elapsed = Date.now() - goalAnimationStartTime;
+        const totalDuration = GOAL_ANIMATION_DURATION;
+        const progress = Math.min(elapsed / totalDuration, 1);
+        
+        const blinkDuration = 0.5;
+        const totalBlinks = 3;
+        
+        let scale = 0;
+        if (progress < 0.15) {
+            scale = (progress / 0.15) * 1.2;
+        } else {
+            scale = 1.2;
+        }
+        
+        let alpha = 1;
+        if (progress < 0.9) {
+            const blinkPhase = progress / blinkDuration;
+            const currentBlink = Math.floor(blinkPhase);
+            const phaseInBlink = blinkPhase - currentBlink;
+            
+            if (currentBlink < totalBlinks * 2) {
+                if (phaseInBlink < 0.5) {
+                    alpha = phaseInBlink * 2;
+                } else {
+                    alpha = 1 - (phaseInBlink - 0.5) * 2;
+                }
+                if (currentBlink >= 2) alpha = alpha * 0.9;
+                if (currentBlink >= 4) alpha = alpha * 0.8;
+            } else {
+                alpha = 0;
+            }
+        } else {
+            alpha = 1 - ((progress - 0.9) / 0.1);
+        }
+        
+        if (alpha < 0.01) alpha = 0;
+        if (scale < 0.01) scale = 0;
+        
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(scale, scale);
+        
+        if (alpha > 0.1) {
+            const gradient = ctx.createRadialGradient(0, 0, 10, 0, 0, 150);
+            gradient.addColorStop(0, `rgba(255, 215, 0, ${alpha * 0.25})`);
+            gradient.addColorStop(0.5, `rgba(255, 200, 0, ${alpha * 0.1})`);
+            gradient.addColorStop(1, `rgba(255, 215, 0, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, 150, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        if (goalAnimation.type === 'image' && goalImage) {
+            const imgSize = 100;
+            
+            if (alpha > 0.1) {
+                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.5})`;
+                ctx.shadowBlur = 50;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(goalImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
+            ctx.globalAlpha = 1;
+            ctx.restore();
+            ctx.shadowBlur = 0;
+            
+            if (alpha > 0.1) {
+                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.9})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, imgSize / 2 + 4, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+                ctx.shadowBlur = 20;
+                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.4})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, imgSize / 2 + 12, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = `bold ${38 * (0.8 + scale * 0.2)}px Arial`;
+                
+                ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.9})`;
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+                ctx.fillText('⚽ GOAL! ⚽', 2, imgSize/2 + 12);
+                
+                ctx.shadowBlur = 0;
+                const textGradient = ctx.createLinearGradient(-50, imgSize/2 + 8, 50, imgSize/2 + 45);
+                textGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
+                textGradient.addColorStop(0.3, `rgba(255, 255, 100, ${alpha})`);
+                textGradient.addColorStop(0.7, `rgba(255, 200, 0, ${alpha})`);
+                textGradient.addColorStop(1, `rgba(255, 165, 0, ${alpha})`);
+                ctx.fillStyle = textGradient;
+                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+                ctx.shadowBlur = 20;
+                ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
+                ctx.shadowBlur = 0;
+            }
+        } else {
+            if (alpha > 0.1) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                ctx.font = `bold ${70 * (0.8 + scale * 0.2)}px Arial`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.8})`;
+                ctx.fillText('GOAL!', 3, 3);
+                
+                const textGradient = ctx.createLinearGradient(-70, -40, 70, 40);
+                textGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
+                textGradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
+                textGradient.addColorStop(1, `rgba(255, 200, 0, ${alpha})`);
+                ctx.fillStyle = textGradient;
+                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.4})`;
+                ctx.shadowBlur = 30;
+                ctx.fillText('GOAL!', 0, 0);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        if (alpha > 0.1) {
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2 + progress * 0.5;
+                const dist = 80 + Math.sin(progress * 6 + i * 1.2) * 20;
+                const starX = Math.cos(angle) * dist;
+                const starY = Math.sin(angle) * dist;
+                const starSize = 5 + Math.sin(progress * 8 + i * 1.8) * 3;
+                
+                ctx.fillStyle = `rgba(255, 215, 0, ${alpha * (0.15 + Math.sin(progress * 10 + i * 1.5) * 0.1)})`;
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                
+                const spikes = 5;
+                const outerRadius = Math.abs(starSize);
+                const innerRadius = outerRadius * 0.4;
+                ctx.moveTo(starX + outerRadius * Math.cos(0), starY + outerRadius * Math.sin(0));
+                for (let j = 1; j < spikes * 2; j++) {
+                    const radius = j % 2 === 0 ? outerRadius : innerRadius;
+                    const theta = (j / (spikes * 2)) * Math.PI * 2;
+                    ctx.lineTo(starX + radius * Math.cos(theta), starY + radius * Math.sin(theta));
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            const blinkFlash = Math.sin(progress * 20) * 0.5 + 0.5;
+            if (blinkFlash > 0.8 && alpha > 0.5) {
+                ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.05 * blinkFlash})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, 200, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        ctx.restore();
+        
+        if (progress >= 1) {
+            goalAnimation = null;
+        }
     }
 
     ctx.restore();
@@ -423,7 +639,6 @@ function executeAIShot(target, params) {
                     isDraggingBall = false;
                     isAiThinking = false;
                     playSound('kick');
-                    // ESKİ GÜÇ SİSTEMİ - 0.13
                     cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
                     cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
                     turn = 1;
@@ -558,11 +773,9 @@ function setupSocketListeners() {
 
     socket.on("opponentShot", (shotData) => {
         if (gameMode === 'online' && currentPhase === 'playing') {
-            // ESKİ GÜÇ SİSTEMİ - 0.13
             cap.vx = (shotData.startX - shotData.endX) * 0.13;
             cap.vy = (shotData.startY - shotData.endY) * 0.13;
             playSound('kick');
-            
             turn = myTeamNumber;
             updateHUDTurn();
             resetShotTimer();
@@ -796,8 +1009,8 @@ function updateHUDTurn() {
         }
     } else {
         indicator.innerText = turn === 1 ? "MAVİ SIRA" : "KIRMIZI SIRA";
-        indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
-        indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
+        indicator.style.borderColor = turn === 1 ? team1Color : team2Color;
+        indicator.style.color = turn === 1 ? team1Color : team2Color;
     }
 }
 
@@ -806,7 +1019,7 @@ function applyShotPhysics(shotData) {
     cap.vy = 0;
     const dx = shotData.startX - shotData.endX;
     const dy = shotData.startY - shotData.endY;
-    const force = 0.13; // ESKİ SİSTEM
+    const force = 0.13;
     cap.vx = dx * force;
     cap.vy = dy * force;
     playSound('kick');
@@ -873,27 +1086,20 @@ function updatePhysics() {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
 
-        // Sol duvar
-        if (cap.x - cap.radius < 0) { 
-            cap.x = cap.radius;
+        if (cap.x - cap.radius < 0) { cap.x = cap.radius;
             cap.vx *= -0.85;
-            playSound('hit'); 
-        }
-        // Sağ duvar
-        if (cap.x + cap.radius > width) { 
-            cap.x = width - cap.radius;
+            playSound('hit'); }
+        if (cap.x + cap.radius > width) { cap.x = width - cap.radius;
             cap.vx *= -0.85;
-            playSound('hit'); 
-        }
+            playSound('hit'); }
 
         // ÜST KALE KONTROLÜ
         if (cap.y - cap.radius <= goalHeight) {
-            // Top kale direkleri arasından geçiyor mu?
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
             
             if (cap.x > goalLeft && cap.x < goalRight) {
-                // GOL! - Mavi takım (takım 1) gol attı
+                // GOL! - Mavi takım
                 if (gameMode === 'online') {
                     if (myTeamNumber === 1) {
                         score.p1++;
@@ -906,9 +1112,8 @@ function updatePhysics() {
                     score.p1++;
                     document.getElementById('score-p1').innerText = score.p1;
                 }
-                playSound('goal');
                 
-                // Gol sonrası diğer takım başlar
+                triggerGoalAnimation();
                 turn = 2;
                 updateHUDTurn();
                 
@@ -920,7 +1125,6 @@ function updatePhysics() {
                 resetShotTimer();
                 return;
             } else {
-                // Kale dışı - duvara çarp ve geri dön
                 cap.y = goalHeight + cap.radius;
                 cap.vy *= -0.85;
                 playSound('hit');
@@ -929,12 +1133,11 @@ function updatePhysics() {
 
         // ALT KALE KONTROLÜ
         if (cap.y + cap.radius >= height - goalHeight) {
-            // Top kale direkleri arasından geçiyor mu?
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
             
             if (cap.x > goalLeft && cap.x < goalRight) {
-                // GOL! - Kırmızı takım (takım 2) gol attı
+                // GOL! - Kırmızı takım
                 if (gameMode === 'online') {
                     if (myTeamNumber === 2) {
                         score.p2++;
@@ -947,9 +1150,8 @@ function updatePhysics() {
                     score.p2++;
                     document.getElementById('score-p2').innerText = score.p2;
                 }
-                playSound('goal');
                 
-                // Gol sonrası diğer takım başlar
+                triggerGoalAnimation();
                 turn = 1;
                 updateHUDTurn();
                 
@@ -961,14 +1163,12 @@ function updatePhysics() {
                 resetShotTimer();
                 return;
             } else {
-                // Kale dışı - duvara çarp ve geri dön
                 cap.y = height - goalHeight - cap.radius;
                 cap.vy *= -0.85;
                 playSound('hit');
             }
         }
 
-        // Çivilerle çarpışma
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
@@ -994,6 +1194,7 @@ function updatePhysics() {
         runAIMove();
     }
 }
+
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
@@ -1098,7 +1299,6 @@ canvas.addEventListener('mousemove', (e) => {
         let dy = pos.y - dragStart.y;
         let dist = Math.hypot(dx, dy);
 
-        // MAX_DRAG_DIST sınırı (132px - 6 top boyu)
         if (dist > MAX_DRAG_DIST) {
             dx = (dx / dist) * MAX_DRAG_DIST;
             dy = (dy / dist) * MAX_DRAG_DIST;
@@ -1106,7 +1306,6 @@ canvas.addEventListener('mousemove', (e) => {
         }
         dragCurrent = { x: dragStart.x + dx, y: dragStart.y + dy };
         
-        // Güç göstergesini güncelle
         const powerPercent = Math.min(100, (dist / MAX_DRAG_DIST) * 100);
         const powerBar = document.getElementById('power-bar');
         const container = document.getElementById('power-bar-container');
@@ -1165,11 +1364,9 @@ window.addEventListener('mouseup', () => {
         const endX = dragCurrent.x;
         const endY = dragCurrent.y;
 
-        // ESKİ GÜÇ SİSTEMİ - 0.13
         cap.vx = (startX - endX) * 0.13;
         cap.vy = (startY - endY) * 0.13;
 
-        // Sırayı değiştir
         turn = turn === 1 ? 2 : 1;
         updateHUDTurn();
         resetShotTimer();
@@ -1186,7 +1383,6 @@ window.addEventListener('mouseup', () => {
             socket.emit('playerShot', { roomId: currentRoomId, shotData: shotData });
         }
         
-        // Güç göstergesini gizle
         const container = document.getElementById('power-bar-container');
         if (container) {
             container.style.display = 'none';
@@ -1298,49 +1494,6 @@ function openAILevelMenu() {
 
 function closeAILevelMenu() {
     const popup = document.getElementById('ai-level-menu');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-}
-
-function openOnlineLobby() {
-    if (!socket) {
-        alert("Şu anda bir sunucuya bağlı değilsiniz!");
-        return;
-    }
-    
-    const nameInput = document.getElementById('player-name');
-    const name = nameInput ? nameInput.value.trim() : "Oyuncu";
-    const playerName = name || "Oyuncu_" + Math.floor(Math.random() * 100);
-    
-    socket.emit("join-lobby", playerName);
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'none';
-    }
-    
-    const popup = document.getElementById('online-lobby');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.animation = 'none';
-        setTimeout(() => {
-            popup.style.animation = 'fadeIn 0.3s ease';
-        }, 10);
-    }
-}
-
-function closeOnlineLobby() {
-    if (socket) {
-        socket.emit("leave-lobby");
-    }
-    
-    const popup = document.getElementById('online-lobby');
     if (popup) {
         popup.style.display = 'none';
     }
