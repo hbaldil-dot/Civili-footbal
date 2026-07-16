@@ -132,15 +132,15 @@
             <div id="time-board">90s</div>
             <div id="shot-timer">ŞUT: 3s</div>
         </div>
-        <!-- KADRO YERLEŞTİRME SÜRESİ GÖSTERGESİ -->
-        <div id="setup-timer" style="display: none; background: rgba(0,0,0,0.85); padding: 5px 15px; border-radius: 4px; border: 2px solid #f1c40f; color: #f1c40f; font-size: 14px; font-weight: bold; text-align: center;">
-            ⏱️ Kadro Yerleştirme: <span id="setup-countdown">15</span>s
-        </div>
     </div>
 
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
-        <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+        <!-- BAŞLAT BUTONU - Sayaç burada gösterilecek -->
+        <button id="start-match-btn" onclick="confirmFormationsAndStart()">
+            BAŞLAT
+            <span class="timer-subtext" id="setup-countdown">15s</span>
+        </button>
     </div>
 
 </body>
