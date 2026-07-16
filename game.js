@@ -716,12 +716,12 @@ function setupSocketListeners() {
         }
     });
 
-    socket.on("start-online-match", ({ roomId, team }) => {
-        currentRoomId = roomId;
-        myTeamNumber = team;
-        document.getElementById('online-lobby').style.display = 'none';
-        document.getElementById('top-bar').style.display = 'flex';
-        matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+socket.on("start-online-match", ({ roomId, team }) => {
+    currentRoomId = roomId;
+    myTeamNumber = team;
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('top-bar').style.display = 'flex';
+    matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
         document.getElementById('time-board').innerText = matchSecondsLeft + "s";
         startSetupPhase();
     });
@@ -810,9 +810,15 @@ function startLocalGame(mode) {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
-    document.getElementById('time-board').innerText = matchSecondsLeft + "s";
+    
+    // Zaman gösterimini ayarla (YENİ)
+   const timeDisplay = document.getElementById('time-display');
+    if (timeDisplay) {
+        timeDisplay.innerText = matchSecondsLeft + 's';
+    }
+    
     startSetupPhase();
-}
+});
 
 function openOnlineLobby() {
     if (!socket) {
