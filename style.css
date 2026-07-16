@@ -48,10 +48,17 @@ body {
 
 h1 {
     color: #2ecc71;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     font-size: 24px;
     text-shadow: 2px 2px black;
     font-weight: bold;
+}
+
+h2 {
+    color: #2ecc71;
+    margin-bottom: 15px;
+    font-size: 20px;
+    text-shadow: 1px 1px black;
 }
 
 .input-group {
@@ -80,48 +87,166 @@ select {
     font-family: inherit;
 }
 
+/* ===== OYUN MOD BUTONLARI ===== */
 .mode-container {
     margin-top: 15px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .main-btn {
     display: block;
     width: 100%;
-    padding: 12px;
-    background: #2e7d32;
+    padding: 14px;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.main-btn:active {
+    transform: scale(0.97);
+}
+
+.btn-ai {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+}
+
+.btn-ai:hover {
+    box-shadow: 0 6px 25px rgba(230, 126, 34, 0.6);
+}
+
+.btn-local {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-local:hover {
+    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.6);
+}
+
+.btn-online {
+    background: linear-gradient(135deg, #8e44ad, #6c3483);
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+}
+
+.btn-online:hover {
+    box-shadow: 0 6px 25px rgba(142, 68, 173, 0.6);
+}
+
+/* ===== AYARLAR ===== */
+.settings-toggle {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #555;
+    border-radius: 8px;
+    color: #aaa;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     font-family: inherit;
-    box-shadow: 0 4px #1b5e20;
+    transition: all 0.3s ease;
+}
+
+.settings-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #777;
+    color: #fff;
+}
+
+#settings-panel {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.color-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.color-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+.color-btn.active {
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* ===== AI ZORLUK MENÜSÜ ===== */
+#ai-level-menu {
+    position: absolute;
+    background: rgba(20, 30, 20, 0.98);
+    border: 4px solid #d35400;
+    border-radius: 12px;
+    padding: 25px;
     text-align: center;
+    z-index: 120;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-.main-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px #1b5e20;
+#ai-level-menu h2 {
+    color: #e67e22;
 }
 
-.btn-local {
-    background: #3498db;
-    box-shadow: 0 4px #2980b9;
+.btn-ai-level {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
 }
 
-.btn-ai {
-    background: #e67e22;
-    box-shadow: 0 4px #d35400;
+.btn-ai-level:active {
+    transform: scale(0.97);
 }
 
-.btn-online {
-    background: #8e44ad;
-    box-shadow: 0 4px #6c3483;
-}
+.btn-ai-level:nth-child(2) { background: #2ecc71; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); }
+.btn-ai-level:nth-child(3) { background: #f1c40f; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4); color: #111; }
+.btn-ai-level:nth-child(4) { background: #e67e22; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); }
+.btn-ai-level:nth-child(5) { background: #e74c3c; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); }
 
 /* ===== ONLINE LOBI ===== */
 #online-lobby {
@@ -136,13 +261,14 @@ select {
     max-width: 360px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
     display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #online-lobby h2 {
     color: #9b59b6;
     margin-bottom: 15px;
-    font-size: 20px;
-    text-shadow: 1px 1px black;
 }
 
 .player-list {
@@ -181,7 +307,7 @@ select {
 
 .lobby-close-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: #c0392b;
     color: white;
     border: none;
@@ -189,6 +315,11 @@ select {
     font-weight: bold;
     cursor: pointer;
     font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.lobby-close-btn:active {
+    transform: scale(0.97);
 }
 
 /* ===== OYUN EKRANI ===== */
@@ -341,46 +472,26 @@ canvas {
     color: #f1c40f;
     text-shadow: 1px 1px 2px black;
 }
-/* ===== AI ZORLUK SEÇENEĞİ - ÖZEL STİL ===== */
-#ai-level-group {
-    background: rgba(46, 204, 113, 0.05);
-    border: 1px solid rgba(46, 204, 113, 0.2);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
 
-#ai-level-group label {
-    color: #f1c40f !important;
-    font-size: 12px !important;
-}
-
-#ai-level {
-    background: #1a1a1a;
-    border: 2px solid #f1c40f;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#ai-level option {
-    padding: 8px;
-    background: #1a1a1a;
-}
-
-#ai-level option[value="kolay"] { color: #2ecc71; }
-#ai-level option[value="orta"] { color: #f1c40f; }
-#ai-level option[value="zor"] { color: #e67e22; }
-#ai-level option[value="usta"] { color: #e74c3c; }
-
-/* Mobil uyum */
+/* ===== MOBİL UYUM ===== */
 @media (max-width: 400px) {
-    #ai-level-group {
-        padding: 8px 10px;
+    #menu, #ai-level-menu, #online-lobby {
+        padding: 15px;
+        width: 95%;
     }
-    #ai-level {
-        font-size: 13px;
-        padding: 8px;
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .main-btn {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .color-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
     }
 }
