@@ -14,20 +14,17 @@
     <div id="menu">
         <h1>⚽ ÇİVİLİ FUTBOL</h1>
         
-        <!-- Oyuncu İsmi -->
         <div class="input-group">
             <label>👤 OYUNCU İSMİ</label>
             <input type="text" id="player-name" value="Oyuncu" maxlength="12">
         </div>
 
-        <!-- Oyun Modları -->
         <div class="mode-container">
             <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 Bilgisayara Karşı</button>
             <button class="main-btn btn-local" onclick="startLocalGame('local')">👥 2 Kişilik Aynı Ekran</button>
             <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Maç</button>
         </div>
 
-        <!-- Ayarlar Butonu -->
         <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
     </div>
 
@@ -38,7 +35,6 @@
                 <h2>⚙️ AYARLAR</h2>
                 <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
             </div>
-            
             <div class="popup-body">
                 <div class="input-group">
                     <label>⏱️ MAÇ SÜRESİ</label>
@@ -85,7 +81,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="popup-footer">
                 <button class="popup-close-btn" onclick="closeSettingsPopup()">✓ Tamam</button>
             </div>
@@ -136,6 +131,10 @@
             </div>
             <div id="time-board">90s</div>
             <div id="shot-timer">ŞUT: 3s</div>
+        </div>
+        <!-- KADRO YERLEŞTİRME SÜRESİ GÖSTERGESİ -->
+        <div id="setup-timer" style="display: none; background: rgba(0,0,0,0.85); padding: 5px 15px; border-radius: 4px; border: 2px solid #f1c40f; color: #f1c40f; font-size: 14px; font-weight: bold; text-align: center;">
+            ⏱️ Kadro Yerleştirme: <span id="setup-countdown">15</span>s
         </div>
     </div>
 
