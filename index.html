@@ -121,25 +121,34 @@
         </div>
     </div>
 
-    <!-- ===== OYUN EKRANI ===== -->
-    <div id="top-bar" style="display: none;">
-        <div class="hud-row">
-            <button id="exit-btn" onclick="exitToMenu()">❌ ÇIKIŞ</button>
-            <div id="turn-indicator">Diziliş</div>
-            <div id="score-board">
-                <span id="score-p1">0</span>
-                <span id="score-divider">-</span>
-                <span id="score-p2">0</span>
-            </div>
-            <div id="time-board">90s</div>
-            <div id="shot-timer">ŞUT: 3s</div>
+   <!-- ===== OYUN EKRANI ===== -->
+<div id="top-bar" style="display: none;">
+    <div class="hud-row">
+        <!-- SOL: ÇIKIŞ BUTONU -->
+        <button id="exit-btn" onclick="exitToMenu()">✕</button>
+        
+        <!-- ORTA: SKOR TABELASI -->
+        <div id="score-board">
+            <span id="score-p1">0</span>
+            <span id="score-divider">-</span>
+            <span id="score-p2">0</span>
+        </div>
+        
+        <!-- SAĞ: MAÇ SÜRESİ -->
+        <div id="time-board">
+            <span id="time-icon">⏱️</span>
+            <span id="time-display">90s</span>
         </div>
     </div>
-
-    <div class="canvas-container">
-        <canvas id="gameCanvas"></canvas>
-        <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+    
+    <!-- VURUŞ SÜRESİ GERİ SAYIMI (SAĞ ÜST KÖŞEDE) -->
+    <div id="shot-timer-container">
+        <div id="shot-timer">
+            <span id="shot-icon">⚡</span>
+            <span id="shot-display">3s</span>
+        </div>
     </div>
+</div>
 
     <!-- ===== GÜÇ GÖSTERGESİ (YENİ) ===== -->
     <div id="power-bar-container">
