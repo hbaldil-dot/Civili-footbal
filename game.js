@@ -180,7 +180,6 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    // Saha çizgileri
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -229,7 +228,7 @@ function draw() {
 }
 
 // ============================================================
-// KOORDİNAT YAKALAMA (Retina & Touch Düzeltmeli)
+// KOORDİNAT YAKALAMA
 // ============================================================
 function getCanvasTouchPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -264,33 +263,18 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// GELİŞMİŞ AI SİSTEMİ (SADELEŞTİRİLMİŞ)
+// AI SİSTEMİ
 // ============================================================
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-    if (isAiThinking) return;
-
-    isAiThinking = true;
-
-    // AI zorluk seviyesine göre parametreler
-    let params = getAIParameters();
-
-    // Hedef hesapla
-    const target = calculateAITarget(params);
-
-    // Vuruşu gerçekleştir
-    executeAIShot(target, params);
-}
-
 function getAIParameters() {
-    // Menüden zorluk seviyesini al
     const levelSelect = document.getElementById('ai-level');
+    let level = 'orta';
     if (levelSelect) {
-        aiLevel = levelSelect.value;
+        level = levelSelect.value;
     }
+    
+    console.log('🤖 AI Zorluk:', level);
 
-    switch (aiLevel) {
+    switch (level) {
         case 'kolay':
             return {
                 accuracy: 0.4,
@@ -318,7 +302,7 @@ function getAIParameters() {
                 fakeChance: 0.25,
                 errorRate: 0.02
             };
-        default: // 'orta'
+        default:
             return {
                 accuracy: 0.65,
                 power: 0.10,
@@ -330,40 +314,43 @@ function getAIParameters() {
     }
 }
 
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
+    if (isAiThinking) return;
+
+    isAiThinking = true;
+    const params = getAIParameters();
+    const target = calculateAITarget(params);
+    executeAIShot(target, params);
+}
+
 function calculateAITarget(params) {
     const goalY = height - goalHeight;
     const goalCenterX = width / 2;
-
-    // 1. Rakip oyuncuları bul
     const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
 
-    // 2. En iyi hedefi bul (kaleye en yakın açık alan)
     let bestTarget = { x: goalCenterX, y: goalY };
     let bestScore = -Infinity;
 
-    // Kaleye yakın 5 farklı noktayı dene
     for (let i = 0; i < 5; i++) {
         const offsetX = (Math.random() - 0.5) * 60;
         const testX = goalCenterX + offsetX;
         const testY = goalY;
 
-        // Rakip oyunculara uzaklık
         let minDist = Infinity;
         enemyPlayers.forEach(p => {
             const dist = Math.hypot(testX - p.x, testY - p.y);
             if (dist < minDist) minDist = dist;
         });
 
-        // Skor: kaleye yakınlık + rakip oyuncudan uzaklık
         const score = (60 - Math.abs(offsetX)) + minDist * 2;
-
         if (score > bestScore) {
             bestScore = score;
             bestTarget = { x: testX, y: testY };
         }
     }
 
-    // Hata payı ekle
     const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
     const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
 
@@ -378,13 +365,11 @@ function executeAIShot(target, params) {
     const power = params.power * (0.8 + Math.random() * 0.4);
     const pullDistance = params.pullDistance * (0.8 + Math.random() * 0.4);
 
-    // Fake shot kontrolü
     if (Math.random() < params.fakeChance) {
         executeFakeShot(angle, power);
         return;
     }
 
-    // Gecikmeli vuruş
     setTimeout(() => {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
@@ -392,11 +377,9 @@ function executeAIShot(target, params) {
 
         let stepCount = 0;
         const totalSteps = 8;
-
         const pullInterval = setInterval(() => {
             stepCount++;
             const ratio = stepCount / totalSteps;
-
             dragCurrent = {
                 x: cap.x - Math.cos(angle) * (pullDistance * ratio),
                 y: cap.y - Math.sin(angle) * (pullDistance * ratio)
@@ -404,15 +387,12 @@ function executeAIShot(target, params) {
 
             if (stepCount >= totalSteps) {
                 clearInterval(pullInterval);
-
                 setTimeout(() => {
                     isDraggingBall = false;
                     isAiThinking = false;
                     playSound('kick');
-
                     cap.vx = (dragStart.x - dragCurrent.x) * power * 1.5;
                     cap.vy = (dragStart.y - dragCurrent.y) * power * 1.5;
-
                     turn = 1;
                     updateHUDTurn();
                     resetShotTimer();
@@ -423,11 +403,9 @@ function executeAIShot(target, params) {
 }
 
 function executeFakeShot(angle, power) {
-    // Fake hareket - önce bir yöne çek
     const fakeAngle = angle + (Math.random() - 0.5) * 1.5;
     const fakeDistance = 30;
 
-    // Fake çekme
     isDraggingBall = true;
     dragStart = { x: cap.x, y: cap.y };
     dragCurrent = {
@@ -436,17 +414,13 @@ function executeFakeShot(angle, power) {
     };
 
     setTimeout(() => {
-        // Gerçek vuruş - farklı açıyla
         const realAngle = angle + (Math.random() - 0.5) * 0.5;
         const realPower = power * 1.1;
-
         isDraggingBall = false;
         isAiThinking = false;
         playSound('kick');
-
         cap.vx = Math.cos(realAngle) * realPower * 60;
         cap.vy = Math.sin(realAngle) * realPower * 60;
-
         turn = 1;
         updateHUDTurn();
         resetShotTimer();
@@ -892,7 +866,6 @@ function updatePhysics() {
     if (isMoving) {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
-        // AI hareketi burada çağrılır
         runAIMove();
     }
 }
@@ -931,7 +904,7 @@ function animate() {
 }
 
 // ============================================================
-// OLAY DİNLEYİCİLERİ (Mouse & Touch)
+// OLAY DİNLEYİCİLERİ
 // ============================================================
 let dragStartPinPos = { x: 0, y: 0 };
 
@@ -1043,7 +1016,6 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// Touch olayları
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     e.stopPropagation();
