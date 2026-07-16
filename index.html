@@ -4,207 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
     <title>Çivili Futbol - Klasik & Online</title>
-    <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            user-select: none; 
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        input, select, textarea { 
-            user-select: text !important; 
-            -webkit-user-select: text !important; 
-        }
-        body {
-            background: #111; 
-            font-family: 'Courier New', Courier, monospace; 
-            overflow: hidden;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            height: 100dvh; 
-            width: 100vw; 
-            color: white; 
-            padding: 8px;
-            position: relative;
-            touch-action: none;
-        }
-        
-        /* Menü stilleri (aynı) */
-        #menu {
-            position: absolute; 
-            background: rgba(20, 30, 20, 0.98); 
-            border: 4px solid #4a754a;
-            border-radius: 12px; 
-            padding: 25px; 
-            text-align: center; 
-            z-index: 100; 
-            width: 90%; 
-            max-width: 360px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-            display: block;
-        }
-        /* ... diğer stiller aynı ... */
-        
-        .canvas-container {
-            position: relative;
-            max-height: 82dvh;
-            max-width: 100%;
-            aspect-ratio: 360 / 620;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        canvas { 
-            background: #2e7d32; 
-            border: 6px solid #1b5e20; 
-            border-radius: 8px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            width: 100%; 
-            height: 100%; 
-            display: block;
-            image-rendering: pixelated;
-            touch-action: none;
-        }
-        
-        /* Diğer stiller aynen devam */
-    </style>
-    <script src="/socket.io/socket.io.js" onerror="console.warn('Sunucu bulunamadı, online mod devre dışı.')"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="game.js" defer></script>
 </head>
 <body>
-    <!-- HTML içeriği aynı -->
-    
-    <script>
-        // ============================================================
-        // TÜM JAVASCRIPT KODU (GÜNCELLENMİŞ)
-        // ============================================================
-        
-        // ... (önceki tüm değişkenler aynı) ...
-        
-        // ============================================================
-        // RETINA VE TOUCH DÜZELTMELERİ
-        // ============================================================
-        
-        function getCanvasTouchPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else if (e.changedTouches) {
-                clientX = e.changedTouches[0].clientX;
-                clientY = e.changedTouches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            
-            // Canvas boyut oranını hesapla (CSS vs gerçek çizim)
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            let x = (clientX - rect.left) * scaleX;
-            let y = (clientY - rect.top) * scaleY;
-            
-            // Sınırları kontrol et
-            x = Math.max(0, Math.min(width, x));
-            y = Math.max(0, Math.min(height, y));
-            
-            // Online modda 2. takım için yansıtma
-            if (gameMode === 'online' && myTeamNumber === 2) {
-                x = width - x;
-                y = height - y;
-            }
-            
-            return { x, y };
-        }
 
-        // ============================================================
-        // TOUCH OLAYLARI (GÜNCELLENMİŞ)
-        // ============================================================
-        
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const touch = e.touches[0];
-            if (touch) {
-                const mouseEvent = new MouseEvent('mousedown', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                canvas.dispatchEvent(mouseEvent);
-            }
-        }, { passive: false });
+    <!-- MENÜ -->
+    <div id="menu">
+        <h1>ÇİVİLİ FUTBOL</h1>
+        <div class="input-group">
+            <label>OYUNCU İSMİ</label>
+            <input type="text" id="player-name" value="Oyuncu" maxlength="12">
+        </div>
+        <div class="input-group">
+            <label>MAÇ SÜRESİ</label>
+            <select id="match-duration">
+                <option value="60">1 Dakika (60s)</option>
+                <option value="90" selected>1.5 Dakika (90s)</option>
+                <option value="120">2 Dakika (120s)</option>
+            </select>
+        </div>
+        <div class="mode-container">
+            <button class="main-btn btn-ai" onclick="startLocalGame('ai')">🤖 Bilgisayara Karşı</button>
+            <button class="main-btn btn-local" onclick="startLocalGame('local')">👥 2 Oyuncu (Aynı Ekran)</button>
+            <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Çevrimiçi Havuzu Gir</button>
+        </div>
+    </div>
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const touch = e.touches[0];
-            if (touch) {
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                canvas.dispatchEvent(mouseEvent);
-            }
-        }, { passive: false });
+    <!-- ONLINE LOBI -->
+    <div id="online-lobby">
+        <h2>ÇEVRİMİÇİ HAVUZ</h2>
+        <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
+        <div class="player-list" id="lobby-list">
+            <div style="padding:15px;color:#888;text-align:center;">Havuz güncelleniyor...</div>
+        </div>
+        <button class="lobby-close-btn" onclick="closeOnlineLobby()">Geri Dön</button>
+    </div>
 
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const touch = e.changedTouches[0];
-            if (touch) {
-                const mouseEvent = new MouseEvent('mouseup', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                window.dispatchEvent(mouseEvent);
-            } else {
-                window.dispatchEvent(new MouseEvent('mouseup'));
-            }
-        }, { passive: false });
+    <!-- OYUN EKRANI -->
+    <div id="top-bar">
+        <div class="hud-row">
+            <button id="exit-btn" onclick="exitToMenu()">ÇIKIŞ</button>
+            <div id="turn-indicator">Diziliş</div>
+            <div id="score-board">
+                <span id="score-p1">0</span>
+                <span id="score-divider">-</span>
+                <span id="score-p2">0</span>
+            </div>
+            <div id="time-board">90s</div>
+            <div id="shot-timer">ŞUT: 3s</div>
+        </div>
+    </div>
 
-        canvas.addEventListener('touchcancel', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            window.dispatchEvent(new MouseEvent('mouseup'));
-        }, { passive: false });
+    <div class="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+        <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+    </div>
 
-        // ============================================================
-        // MOUSE OLAYLARI (Parmak izi önleme için)
-        // ============================================================
-        
-        // Mouse olaylarını da güçlendir
-        canvas.addEventListener('mousedown', (e) => {
-            // ... mevcut kod ...
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            // ... mevcut kod ...
-        });
-
-        window.addEventListener('mouseup', (e) => {
-            // ... mevcut kod ...
-        });
-
-        // ============================================================
-        // BAŞLANGIÇ
-        // ============================================================
-        
-        drawFieldLinesOnly();
-        console.log("🎮 Çivili Futbol Başlatıldı!");
-        console.log("📱 Cihaz:", navigator.userAgent);
-        console.log("📐 Device Pixel Ratio:", window.devicePixelRatio);
-        console.log("🟢 Sunucu durumu:", socket ? "Bağlı" : "Bağlı değil");
-        
-        // Periyodik senkronizasyonu başlat
-        startPeriodicSync();
-    </script>
 </body>
 </html>
