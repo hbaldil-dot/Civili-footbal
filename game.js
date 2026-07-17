@@ -288,6 +288,7 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
+    // OYUNCULARI ÇİZ
     pins.forEach(pin => {
         if (pin.isPost) {
             ctx.fillStyle = '#ffffff';
@@ -297,10 +298,12 @@ function draw() {
         } else {
             let logoFile = 'default.png';
             if (pin.team === 1) {
-                logoFile = selectedTeamLogo;
+                logoFile = selectedTeamLogo || 'default.png';
             } else if (pin.team === 2) {
                 if (gameMode === 'ai') {
-                    logoFile = aiTeamLogo;
+                    logoFile = aiTeamLogo || 'default.png';
+                } else if (gameMode === 'online') {
+                    logoFile = aiTeamLogo || 'default.png';
                 } else {
                     logoFile = 'default.png';
                 }
@@ -562,10 +565,29 @@ function executeFakeShot(angle, power) {
 }
 
 // ============================================================
+// ONLINE - OYUNCU BİLGİLERİ
+// ============================================================
+function getPlayerData() {
+    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+    return {
+        name: name,
+        logo: selectedTeamLogo || 'default.png'
+    };
+}
+
+function updatePlayerName() {
+    if (gameMode === 'online' && socket) {
+        const playerData = getPlayerData();
+        socket.emit("update-player", playerData);
+    }
+}
+
+// ============================================================
 // SOCKET OLAY DİNLEYİCİLERİ
 // ============================================================
 function setupSocketListeners() {
     if (!socket) return;
+    
     socket.on("update-lobby-players", (players) => {
         const listContainer = document.getElementById('lobby-list');
         if (!listContainer) return;
@@ -576,8 +598,18 @@ function setupSocketListeners() {
                 count++;
                 const item = document.createElement('div');
                 item.className = 'player-item';
+                
+                const infoSpan = document.createElement('span');
+                const logoImg = document.createElement('img');
+                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+                logoImg.className = 'lobby-logo';
+                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+                infoSpan.appendChild(logoImg);
+                
                 const nameSpan = document.createElement('span');
-                nameSpan.innerHTML = `⚽ ${p.name}`;
+                nameSpan.textContent = ` ${p.name}`;
+                infoSpan.appendChild(nameSpan);
+                
                 const btn = document.createElement('button');
                 btn.className = 'status';
                 btn.innerText = 'Davet Et';
@@ -586,7 +618,7 @@ function setupSocketListeners() {
                     btn.style.background = "#e67e22";
                     socket.emit("send-invite", p.id);
                 };
-                item.appendChild(nameSpan);
+                item.appendChild(infoSpan);
                 item.appendChild(btn);
                 listContainer.appendChild(item);
             }
@@ -595,14 +627,17 @@ function setupSocketListeners() {
             listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
         }
     });
+    
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
             socket.emit("accept-invite", data.fromId);
         }
     });
-    socket.on("start-online-match", ({ roomId, team }) => {
+    
+    socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
+        aiTeamLogo = opponentLogo || 'default.png';
         document.getElementById('online-lobby').style.display = 'none';
         document.getElementById('top-bar').style.display = 'flex';
         matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
@@ -610,6 +645,7 @@ function setupSocketListeners() {
         if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
         startSetupPhase();
     });
+    
     socket.on("opponent-disconnected", () => { alert("Rakip oyundan ayrıldı."); exitToMenu(); });
     socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
         if (currentPhase === 'setup') {
@@ -689,8 +725,8 @@ function startLocalGame(mode, aiLevelParam) {
 function openOnlineLobby() {
     if (!socket) { alert("Şu anda bir sunucuya bağlı değilsiniz!"); return; }
     gameMode = 'online';
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
-    socket.emit("join-lobby", name);
+    const playerData = getPlayerData();
+    socket.emit("join-lobby", playerData);
     document.getElementById('menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'flex';
 }
@@ -1274,16 +1310,26 @@ function updateSelectedTeamName() {
     if (displayName) displayName.textContent = teamName;
 }
 
+// ============================================================
+// SKORBORD LOGO GÜNCELLEME
+// ============================================================
 function updateScoreLogos() {
     const logoP1 = document.getElementById('score-logo-p1');
     if (logoP1) {
-        logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/default.png';
+        if (gameMode === 'online' && myTeamNumber === 2) {
+            logoP1.src = `takimlar/${aiTeamLogo || 'default.png'}`;
+        } else {
+            logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/default.png';
+        }
         logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
     }
+    
     const logoP2 = document.getElementById('score-logo-p2');
     if (logoP2) {
-        if (gameMode === 'ai' && aiTeamLogo) {
-            logoP2.src = `takimlar/${aiTeamLogo}`;
+        if (gameMode === 'online' && myTeamNumber === 1) {
+            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
+        } else if (gameMode === 'ai') {
+            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
         } else {
             logoP2.src = 'takimlar/default.png';
         }
