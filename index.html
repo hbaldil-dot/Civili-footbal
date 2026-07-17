@@ -49,61 +49,42 @@
 
     <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
 </div>
-    <!-- ===== AYARLAR POP-UP ===== -->
-    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>⚙️ AYARLAR</h2>
-                <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
+   <!-- ===== AYARLAR POP-UP ===== -->
+<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h2>⚙️ AYARLAR</h2>
+            <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
+        </div>
+        <div class="popup-body">
+            <div class="input-group">
+                <label>⏱️ MAÇ SÜRESİ</label>
+                <select id="match-duration">
+                    <option value="60">1 Dakika</option>
+                    <option value="90" selected>1.5 Dakika</option>
+                    <option value="120">2 Dakika</option>
+                    <option value="180">3 Dakika</option>
+                </select>
             </div>
-            <div class="popup-body">
-                <div class="input-group">
-                    <label>⏱️ MAÇ SÜRESİ</label>
-                    <select id="match-duration">
-                        <option value="60">1 Dakika</option>
-                        <option value="90" selected>1.5 Dakika</option>
-                        <option value="120">2 Dakika</option>
-                        <option value="180">3 Dakika</option>
-                    </select>
+            
+            <!-- FORMA RENKLERİ KALDIRILDI -->
+            
+            <div class="input-group">
+                <label>🟩 SAHA RENGİ</label>
+                <div class="color-options">
+                    <button class="color-btn active" data-field="#2e7d32" style="background:#2e7d32" onclick="selectFieldColor('#2e7d32')">🟩</button>
+                    <button class="color-btn" data-field="#1a5276" style="background:#1a5276" onclick="selectFieldColor('#1a5276')">🟦</button>
+                    <button class="color-btn" data-field="#7d6608" style="background:#7d6608" onclick="selectFieldColor('#7d6608')">🟨</button>
+                    <button class="color-btn" data-field="#6c3483" style="background:#6c3483" onclick="selectFieldColor('#6c3483')">🟪</button>
+                    <button class="color-btn" data-field="#1a1a1a" style="background:#1a1a1a; border-color:#555" onclick="selectFieldColor('#1a1a1a')">⬛</button>
                 </div>
-                <div class="input-group">
-                    <label>🔵 FORMA RENGİ (Mavi Takım)</label>
-                    <div class="color-options">
-                        <button class="color-btn active" data-team="1" data-color="#3498db" style="background:#3498db" onclick="selectColor(1, '#3498db')">🔵</button>
-                        <button class="color-btn" data-team="1" data-color="#e74c3c" style="background:#e74c3c" onclick="selectColor(1, '#e74c3c')">🔴</button>
-                        <button class="color-btn" data-team="1" data-color="#2ecc71" style="background:#2ecc71" onclick="selectColor(1, '#2ecc71')">🟢</button>
-                        <button class="color-btn" data-team="1" data-color="#f1c40f" style="background:#f1c40f" onclick="selectColor(1, '#f1c40f')">🟡</button>
-                        <button class="color-btn" data-team="1" data-color="#9b59b6" style="background:#9b59b6" onclick="selectColor(1, '#9b59b6')">🟣</button>
-                        <button class="color-btn" data-team="1" data-color="#e67e22" style="background:#e67e22" onclick="selectColor(1, '#e67e22')">🟠</button>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>🔴 FORMA RENGİ (Kırmızı Takım)</label>
-                    <div class="color-options">
-                        <button class="color-btn active" data-team="2" data-color="#e74c3c" style="background:#e74c3c" onclick="selectColor(2, '#e74c3c')">🔴</button>
-                        <button class="color-btn" data-team="2" data-color="#3498db" style="background:#3498db" onclick="selectColor(2, '#3498db')">🔵</button>
-                        <button class="color-btn" data-team="2" data-color="#2ecc71" style="background:#2ecc71" onclick="selectColor(2, '#2ecc71')">🟢</button>
-                        <button class="color-btn" data-team="2" data-color="#f1c40f" style="background:#f1c40f" onclick="selectColor(2, '#f1c40f')">🟡</button>
-                        <button class="color-btn" data-team="2" data-color="#9b59b6" style="background:#9b59b6" onclick="selectColor(2, '#9b59b6')">🟣</button>
-                        <button class="color-btn" data-team="2" data-color="#e67e22" style="background:#e67e22" onclick="selectColor(2, '#e67e22')">🟠</button>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>🟩 SAHA RENGİ</label>
-                    <div class="color-options">
-                        <button class="color-btn active" data-field="#2e7d32" style="background:#2e7d32" onclick="selectFieldColor('#2e7d32')">🟩</button>
-                        <button class="color-btn" data-field="#1a5276" style="background:#1a5276" onclick="selectFieldColor('#1a5276')">🟦</button>
-                        <button class="color-btn" data-field="#7d6608" style="background:#7d6608" onclick="selectFieldColor('#7d6608')">🟨</button>
-                        <button class="color-btn" data-field="#6c3483" style="background:#6c3483" onclick="selectFieldColor('#6c3483')">🟪</button>
-                        <button class="color-btn" data-field="#1a1a1a" style="background:#1a1a1a; border-color:#555" onclick="selectFieldColor('#1a1a1a')">⬛</button>
-                    </div>
-                </div>
-            </div>
-            <div class="popup-footer">
-                <button class="popup-close-btn" onclick="closeSettingsPopup()">✓ Tamam</button>
             </div>
         </div>
+        <div class="popup-footer">
+            <button class="popup-close-btn" onclick="closeSettingsPopup()">✓ Tamam</button>
+        </div>
     </div>
+</div>
 
     <!-- ===== AI ZORLUK POP-UP ===== -->
     <div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
