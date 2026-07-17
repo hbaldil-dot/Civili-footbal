@@ -1145,3 +1145,75 @@ canvas {
         height: 22px;
     }
 }
+/* ============================================================
+   2 KİŞİLİK TAKIM SEÇ POP-UP
+   ============================================================ */
+
+#local-team-select {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: 20px;
+}
+
+#local-team-select .popup-content {
+    max-width: 420px;
+    max-height: 90vh;
+}
+
+.player-team-select {
+    margin-bottom: 4px;
+}
+
+.player-team-select h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.player-team-select .team-logo-options {
+    max-height: 100px;
+    padding: 6px;
+    gap: 6px;
+}
+
+.player-team-select .team-logo-btn {
+    width: 42px;
+    height: 42px;
+    border-width: 2px;
+}
+
+.player-team-select .team-logo-btn.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+    transform: scale(1.1);
+}
+
+.player-team-select .team-logo-btn.active-p1 {
+    border-color: #3498db;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+}
+
+.player-team-select .team-logo-btn.active-p2 {
+    border-color: #e74c3c;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+}
+
+/* Mobil uyum */
+@media (max-width: 400px) {
+    .player-team-select .team-logo-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .player-team-select .team-logo-options {
+        max-height: 80px;
+    }
+}
