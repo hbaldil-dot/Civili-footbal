@@ -222,6 +222,7 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
+    // SAHA ÇİZGİLERİ
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -234,6 +235,7 @@ function draw() {
     ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
+    // SETUP ALANI
     if (currentPhase === 'setup') {
         ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
         ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
@@ -242,17 +244,25 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
+    // ============================================================
+    // OYUNCULARI ÇİZ - (DEĞİŞEN KISIM BURASI)
+    // ============================================================
     pins.forEach(pin => {
         if (pin.isPost) {
+            // KALE DİREKLERİ
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
             ctx.fill();
         } else {
-            drawRetroPlayer(pin.x, pin.y, pin.team);
+            // OYUNCU ÇİZİMİ - LOGO VEYA RETRO
+            // Takım 1 ise seçili logo, Takım 2 ise default logo
+            const logoFile = (pin.team === 1) ? selectedTeamLogo : 'default.png';
+            drawPlayerWithLogo(pin.x, pin.y, pin.team, logoFile);
         }
     });
 
+    // VURUŞ YÖNÜ OKU
     if (currentPhase === 'playing' && isDraggingBall) {
         const dx = dragStart.x - dragCurrent.x;
         const dy = dragStart.y - dragCurrent.y;
@@ -292,6 +302,7 @@ function draw() {
         }
     }
 
+    // TOPU ÇİZ
     if (currentPhase === 'playing' && cap) {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
@@ -386,7 +397,6 @@ function draw() {
 
     ctx.restore();
 }
-
 // ============================================================
 // KOORDİNAT YAKALAMA
 // ============================================================
