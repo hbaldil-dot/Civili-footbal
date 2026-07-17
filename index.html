@@ -21,21 +21,19 @@
             <!-- BAŞLIK -->
             <div class="menu-title">
                 <img src="butonlar/logo-alani.webp" alt="ÇİVİLİ FUTBOL" class="title-img" 
-                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('title-fallback').style.display='block'">
-                <div id="title-fallback" style="display:none; color:#2ecc71; font-size:28px; font-weight:bold; letter-spacing:4px;">ÇİVİLİ FUTBOL</div>
+                     onerror="this.onerror=null; this.style.display='none'">
             </div>
 
             <!-- İSMİNİ GİR -->
             <div class="input-group">
                 <img src="butonlar/ismini-gir.webp" alt="İSMİNİ GİR" class="label-img" 
-                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('label-fallback').style.display='block'">
-                <div id="label-fallback" style="display:none; color:#aaa; font-size:13px; letter-spacing:3px; text-align:center;">İSMİNİ GİR:</div>
+                     onerror="this.onerror=null; this.style.display='none'">
                 <div class="input-line">
                     <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
                 </div>
             </div>
 
-            <!-- TAKIM SEÇ -->
+            <!-- TAKIM SEÇ BUTONU - DÜZELTİLDİ -->
             <button class="menu-btn-img" onclick="toggleTeamSelect()">
                 <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" 
                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -50,21 +48,19 @@
                 </div>
             </div>
 
-            <!-- BİLGİSAYARA KARŞI -->
+            <!-- OYUN MODLARI -->
             <button class="menu-btn-img" onclick="openAILevelMenu()">
                 <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" 
                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
                 <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">BİLGİSAYARA KARŞI</span>
             </button>
 
-            <!-- 2 KİŞİLİK -->
             <button class="menu-btn-img" onclick="openLocalTeamSelect()">
                 <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" 
                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
                 <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">2 KİŞİLİK AYNI EKRAN</span>
             </button>
 
-            <!-- ONLINE MAÇ -->
             <button class="menu-btn-img" onclick="openOnlineLobby()">
                 <img src="butonlar/online-mac.webp" alt="ONLINE MAÇ" 
                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
