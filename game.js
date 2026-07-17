@@ -22,31 +22,17 @@ if (typeof io !== 'undefined') {
     }
 }
 
-// ============================================================
-// TAKIM LOGO DEĞİŞKENLERİ
-// ============================================================
-let selectedTeamLogo = 'default.png';
-let aiTeamLogo = 'default.png'; // AI için ayrı logo
-let isTeamSelectOpen = false;
-let loadedLogos = {};
-
-const teamLogos = [
-    { file: 'default.png', name: '⚽ Varsayılan' },
-    { file: 'fb.png', name: '⚽ Fenerbahçe' },
-    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
-    { file: 'bjk.png', name: '⚽ Beşiktaş' },
-    { file: 'ts.png', name: '⚽ Trabzonspor' },
-    { file: 'bs.png', name: '⚽ Başakşehir' },
-    { file: 'gfk.png', name: '⚽ Giresunspor' },
-    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
-    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
-    { file: 'hatay.png', name: '⚽ Hatayspor' },
-    { file: 'adana.png', name: '⚽ Adana Demirspor' },
-    { file: 'antalya.png', name: '⚽ Antalyaspor' },
-    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
-    { file: 'samsun.png', name: '⚽ Samsunspor' }
-];
-
+<div id="score-board">
+    <div class="team-score">
+        <img id="score-logo-p1" src="takimlar/default.png" alt="Takım 1" class="score-logo">
+        <span id="score-p1">0</span>
+    </div>
+    <span id="score-divider">-</span>
+    <div class="team-score">
+        <span id="score-p2">0</span>
+        <img id="score-logo-p2" src="takimlar/default.png" alt="Takım 2" class="score-logo">
+    </div>
+</div>
 // ============================================================
 // OYUN DEĞİŞKENLERİ
 // ============================================================
