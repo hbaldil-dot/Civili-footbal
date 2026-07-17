@@ -18,55 +18,64 @@
         <!-- MENÜ İÇERİĞİ -->
         <div class="menu-content">
             
-            <!-- BAŞLIK - LOGO ALANI -->
+            <!-- BAŞLIK -->
             <div class="menu-title">
-                <img src="butonlar/logo-alani.webp" alt="ÇİVİLİ FUTBOL" class="title-img" onerror="this.style.display='none'">
+                <img src="butonlar/logo-alani.webp" alt="ÇİVİLİ FUTBOL" class="title-img" 
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('title-fallback').style.display='block'">
+                <div id="title-fallback" style="display:none; color:#2ecc71; font-size:28px; font-weight:bold; letter-spacing:4px;">ÇİVİLİ FUTBOL</div>
             </div>
 
             <!-- İSMİNİ GİR -->
             <div class="input-group">
-                <img src="butonlar/ismini-gir.webp" alt="İSMİNİ GİR" class="label-img" onerror="this.style.display='none'">
+                <img src="butonlar/ismini-gir.webp" alt="İSMİNİ GİR" class="label-img" 
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('label-fallback').style.display='block'">
+                <div id="label-fallback" style="display:none; color:#aaa; font-size:13px; letter-spacing:3px; text-align:center;">İSMİNİ GİR:</div>
                 <div class="input-line">
                     <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
                 </div>
             </div>
 
-            <!-- TAKIM SEÇ BUTONU -->
+            <!-- TAKIM SEÇ -->
             <button class="menu-btn-img" onclick="toggleTeamSelect()">
-                <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none;">TAKIM SEÇ</span>
+                <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" 
+                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">TAKIM SEÇ</span>
             </button>
 
             <!-- TAKIM LOGO SEÇİM ALANI -->
             <div class="team-logo-container" id="team-logo-container" style="display: none;">
-                <div class="team-logo-options" id="team-logo-options">
-                    <!-- Logolar JavaScript ile eklenecek -->
-                </div>
+                <div class="team-logo-options" id="team-logo-options"></div>
                 <div style="text-align:center; margin-top:6px; font-size:11px; color:#888;">
                     Seçili: <span id="selected-team-name-display" style="color:#2ecc71;">Varsayılan</span>
                 </div>
             </div>
 
-            <!-- OYUN MODLARI -->
+            <!-- BİLGİSAYARA KARŞI -->
             <button class="menu-btn-img" onclick="openAILevelMenu()">
-                <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none;">BİLGİSAYARA KARŞI</span>
+                <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" 
+                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">BİLGİSAYARA KARŞI</span>
             </button>
 
+            <!-- 2 KİŞİLİK -->
             <button class="menu-btn-img" onclick="openLocalTeamSelect()">
-                <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none;">2 KİŞİLİK AYNI EKRAN</span>
+                <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" 
+                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">2 KİŞİLİK AYNI EKRAN</span>
             </button>
 
+            <!-- ONLINE MAÇ -->
             <button class="menu-btn-img" onclick="openOnlineLobby()">
-                <img src="butonlar/online-mac.webp" alt="ONLINE MAÇ" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none;">ONLINE MAÇ</span>
+                <img src="butonlar/online-mac.webp" alt="ONLINE MAÇ" 
+                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(74,117,74,0.3); border-radius:8px; color:white; font-size:14px; letter-spacing:3px; font-weight:bold; font-family:'Courier New',monospace;">ONLINE MAÇ</span>
             </button>
 
             <!-- AYARLAR -->
             <button class="menu-btn-img settings-btn" onclick="openSettingsPopup()">
-                <img src="butonlar/ayarlar.webp" alt="AYARLAR" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none;">AYARLAR</span>
+                <img src="butonlar/ayarlar.webp" alt="AYARLAR" 
+                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span style="display:none; padding:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(85,85,85,0.3); border-radius:8px; color:#888; font-size:12px; letter-spacing:4px; font-weight:bold; font-family:'Courier New',monospace;">AYARLAR</span>
             </button>
             
         </div>
@@ -156,10 +165,7 @@
                     <div class="team-logo-options" id="local-player2-logos"></div>
                 </div>
                 <div style="margin-top: 12px; text-align: center; font-size: 12px; color: #888;">
-                    Seçili: 
-                    <span id="local-p1-name" style="color: #3498db; font-weight: bold;">Seçilmedi</span> 
-                    <span style="color: #555;">vs</span> 
-                    <span id="local-p2-name" style="color: #e74c3c; font-weight: bold;">Seçilmedi</span>
+                    Seçili: <span id="local-p1-name" style="color: #3498db; font-weight: bold;">Seçilmedi</span> vs <span id="local-p2-name" style="color: #e74c3c; font-weight: bold;">Seçilmedi</span>
                 </div>
             </div>
             <div class="popup-footer">
