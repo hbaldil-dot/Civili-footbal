@@ -850,3 +850,236 @@ canvas {
         padding: 3px;
     }
 }
+/* ============================================================
+   TAKIM SEÇ BUTONU - style.css SONUNA EKLE
+   ============================================================ */
+
+/* Takım Seç Butonu */
+.team-select-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(46, 204, 113, 0.15);
+    border: 2px solid #2ecc71;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.team-select-btn:hover {
+    background: rgba(46, 204, 113, 0.25);
+    border-color: #27ae60;
+    transform: scale(1.01);
+}
+
+.team-select-btn:active {
+    transform: scale(0.97);
+}
+
+.team-select-btn .team-select-icon {
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.team-select-btn #team-select-text {
+    flex: 1;
+    text-align: left;
+}
+
+.team-select-btn #selected-team-name-display {
+    color: #2ecc71;
+    font-weight: bold;
+    margin: 0 8px;
+    padding: 2px 12px;
+    background: rgba(46, 204, 113, 0.15);
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.team-select-btn .team-select-arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    color: #2ecc71;
+}
+
+.team-select-btn .team-select-arrow.open {
+    transform: rotate(180deg);
+}
+
+/* Logo Konteyner (Açılır Kapanır) */
+.team-logo-container {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    animation: slideDown 0.3s ease;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 200px;
+    }
+}
+
+/* Logo gösterim alanı - menü üstü */
+#team-logo-display {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    border: 4px solid #2ecc71;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
+    transition: all 0.3s ease;
+}
+
+#team-logo-display:hover {
+    box-shadow: 0 0 50px rgba(46, 204, 113, 0.4);
+    transform: scale(1.05);
+}
+
+#selected-team-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Logo seçim butonları */
+.team-logo-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 4px;
+}
+
+.team-logo-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.team-logo-btn:hover {
+    transform: scale(1.1);
+    border-color: #666;
+    z-index: 2;
+}
+
+.team-logo-btn.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+    transform: scale(1.1);
+    z-index: 2;
+}
+
+.team-logo-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar */
+.team-logo-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-thumb {
+    background: #2ecc71;
+    border-radius: 4px;
+}
+
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 400px) {
+    #team-logo-display {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .team-logo-btn {
+        width: 40px;
+        height: 40px;
+        border-width: 2px;
+    }
+    
+    .team-select-btn {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    .team-select-btn #selected-team-name-display {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+    
+    .team-logo-container {
+        max-height: 150px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 360px) {
+    #team-logo-display {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .team-logo-btn {
+        width: 34px;
+        height: 34px;
+        border-width: 2px;
+    }
+    
+    .team-select-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    
+    .team-select-btn #selected-team-name-display {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+    
+    .team-logo-container {
+        max-height: 120px;
+        padding: 6px;
+    }
+}
