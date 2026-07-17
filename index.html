@@ -137,31 +137,28 @@
         </div>
     </div>
 
-    <!-- ===== OYUN EKRANI ===== -->
-    <div id="top-bar" style="display: none;">
-        <div class="hud-row">
-            <button id="exit-btn" onclick="exitToMenu()">✕</button>
-            <div id="score-board">
+<!-- ===== OYUN EKRANI ===== -->
+<div id="top-bar" style="display: none;">
+    <div class="hud-row">
+        <button id="exit-btn" onclick="exitToMenu()">✕</button>
+        <div id="score-board">
+            <div class="team-score">
+                <img id="score-logo-p1" src="takimlar/default.png" alt="Takım 1" class="score-logo">
                 <span id="score-p1">0</span>
-                <span id="score-divider">-</span>
-                <span id="score-p2">0</span>
             </div>
-            <div id="time-board">90s</div>
+            <span id="score-divider">-</span>
+            <div class="team-score">
+                <span id="score-p2">0</span>
+                <img id="score-logo-p2" src="takimlar/default.png" alt="Takım 2" class="score-logo">
+            </div>
         </div>
-        <div class="hud-row-second">
-            <div id="turn-indicator">Diziliş</div>
-            <div id="shot-timer">ŞUT: 3s</div>
-        </div>
+        <div id="time-board">90s</div>
     </div>
-
-    <div class="canvas-container">
-        <canvas id="gameCanvas"></canvas>
-        <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
+    <div class="hud-row-second">
+        <div id="turn-indicator">Diziliş</div>
+        <div id="shot-timer">ŞUT: 3s</div>
     </div>
-
-    <div id="power-bar-container">
-        <div id="power-bar"></div>
-    </div>
+</div>
 
 </body>
 </html>
