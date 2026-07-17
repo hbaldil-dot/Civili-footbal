@@ -22,17 +22,6 @@ if (typeof io !== 'undefined') {
     }
 }
 
-<div id="score-board">
-    <div class="team-score">
-        <img id="score-logo-p1" src="takimlar/default.png" alt="Takım 1" class="score-logo">
-        <span id="score-p1">0</span>
-    </div>
-    <span id="score-divider">-</span>
-    <div class="team-score">
-        <span id="score-p2">0</span>
-        <img id="score-logo-p2" src="takimlar/default.png" alt="Takım 2" class="score-logo">
-    </div>
-</div>
 // ============================================================
 // OYUN DEĞİŞKENLERİ
 // ============================================================
