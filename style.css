@@ -1225,33 +1225,28 @@ canvas {
     position: absolute;
     border: 4px solid #4a754a;
     border-radius: 12px;
-    padding: 0;
+    padding: 25px;
     text-align: center;
     z-index: 100;
     width: 90%;
     max-width: 360px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     display: block;
-    overflow: hidden;
     background-image: url('8E7FCB17-13DA-4495-9156-C69FA0732021.png');
     background-size: cover;
     background-position: center;
+    /* Menü içeriğinin okunabilir olması için karartma */
+    background-color: rgba(0, 0, 0, 0.5);
     background-blend-mode: overlay;
-    background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Menü içeriği için overlay katmanı */
-.menu-overlay {
-    padding: 25px;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border-radius: 8px;
-    width: 100%;
-    height: 100%;
+/* Menü içindeki tüm yazıların okunabilir olması için */
+#menu * {
+    position: relative;
+    z-index: 2;
 }
 
-/* Menü başlığı - daha belirgin */
+/* Başlık - daha belirgin */
 #menu h1 {
     color: #2ecc71;
     margin-bottom: 20px;
@@ -1281,44 +1276,16 @@ canvas {
 #menu .settings-toggle {
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid #555;
-    backdrop-filter: blur(2px);
 }
 
 /* Logo gösterim alanı - daha belirgin */
 #team-logo-display {
     border-color: #2ecc71;
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.3), inset 0 0 30px rgba(46, 204, 113, 0.1);
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
     background: rgba(0, 0, 0, 0.6);
 }
 
 /* Takım seç butonu - daha belirgin */
 .team-select-btn {
     background: rgba(46, 204, 113, 0.2);
-    backdrop-filter: blur(2px);
-}
-
-/* Mobil uyum */
-@media (max-width: 400px) {
-    #menu {
-        padding: 0;
-        width: 95%;
-    }
-    
-    .menu-overlay {
-        padding: 18px;
-    }
-    
-    #menu h1 {
-        font-size: 22px;
-    }
-}
-
-@media (max-width: 360px) {
-    .menu-overlay {
-        padding: 14px;
-    }
-    
-    #menu h1 {
-        font-size: 18px;
-    }
 }
