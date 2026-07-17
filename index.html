@@ -18,25 +18,24 @@
         <!-- MENÜ İÇERİĞİ -->
         <div class="menu-content">
             
-            <!-- BAŞLIK -->
+            <!-- BAŞLIK - LOGO ALANI -->
             <div class="menu-title">
-                <div class="title-line">CİVİLİ</div>
-                <div class="title-line">FUTBOL</div>
-                <div class="subtitle-line">SENİN</div>
-                <div class="subtitle-line">SENİN</div>
-                <div class="subtitle-line">KURALLARIN</div>
+                <img src="butonlar/logo-alani.webp" alt="ÇİVİLİ FUTBOL" class="title-img" onerror="this.style.display='none'">
             </div>
 
             <!-- İSMİNİ GİR -->
             <div class="input-group">
-                <label>İSMİNİ GİR:</label>
+                <img src="butonlar/ismini-gir.webp" alt="İSMİNİ GİR" class="label-img" onerror="this.style.display='none'">
                 <div class="input-line">
                     <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
                 </div>
             </div>
 
             <!-- TAKIM SEÇ BUTONU -->
-            <button class="menu-btn" onclick="toggleTeamSelect()">TAKIM SEC</button>
+            <button class="menu-btn-img" onclick="toggleTeamSelect()">
+                <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none;">TAKIM SEÇ</span>
+            </button>
 
             <!-- TAKIM LOGO SEÇİM ALANI -->
             <div class="team-logo-container" id="team-logo-container" style="display: none;">
@@ -49,12 +48,26 @@
             </div>
 
             <!-- OYUN MODLARI -->
-            <button class="menu-btn" onclick="openAILevelMenu()">BİLGİSAYARA KARŞI</button>
-            <button class="menu-btn" onclick="openLocalTeamSelect()">2 KİŞİLİK AYNI EKRAN</button>
-            <button class="menu-btn" onclick="openOnlineLobby()">ONLINE MAÇ</button>
+            <button class="menu-btn-img" onclick="openAILevelMenu()">
+                <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none;">BİLGİSAYARA KARŞI</span>
+            </button>
+
+            <button class="menu-btn-img" onclick="openLocalTeamSelect()">
+                <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none;">2 KİŞİLİK AYNI EKRAN</span>
+            </button>
+
+            <button class="menu-btn-img" onclick="openOnlineLobby()">
+                <img src="butonlar/online-mac.webp" alt="ONLINE MAÇ" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none;">ONLINE MAÇ</span>
+            </button>
 
             <!-- AYARLAR -->
-            <button class="menu-btn settings-btn" onclick="openSettingsPopup()">AYARLAR</button>
+            <button class="menu-btn-img settings-btn" onclick="openSettingsPopup()">
+                <img src="butonlar/ayarlar.webp" alt="AYARLAR" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none;">AYARLAR</span>
+            </button>
             
         </div>
     </div>
