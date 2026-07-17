@@ -378,6 +378,7 @@ pins.forEach(pin => {
     }
 
 // GOL ANİMASYONU
+// GOL ANİMASYONU
 if (goalAnimation) {
     const elapsed = Date.now() - goalAnimationStartTime;
     const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
@@ -414,20 +415,21 @@ if (goalAnimation) {
     if (alpha < 0.01) alpha = 0;
     if (scale < 0.01) scale = 0;
     
-    ctx.save();
+    // === YENİ: Online'da misafir oyuncu için 180 derece dönüş ===
+    // Ana ctx.save() zaten draw() başında yapılmış, onu kullanıyoruz
     
-    // === YENİ: Online'da misafir oyuncu için 180 derece dönüşü geri al ===
+    // Önce saha dönüşünü geri al (misafir oyuncu için)
     if (gameMode === 'online' && myTeamNumber === 2) {
-        // Misafir oyuncu için saha dönüşünü geri al
+        ctx.save();
         ctx.translate(width / 2, height / 2);
-        ctx.rotate(Math.PI); // 180 derece döndür (saha dönüşünü geri al)
+        ctx.rotate(Math.PI);
         ctx.translate(-width / 2, -height / 2);
     }
     
+    // Animasyonu çiz
+    ctx.save();
     ctx.translate(width / 2, height / 2);
     ctx.scale(scale, scale);
-    
-    // ... animasyonun devamı (değişmiyor) ...
     
     if (alpha > 0.1 && goalAnimation.type === 'image' && goalImage) {
         const imgSize = 100;
@@ -467,9 +469,70 @@ if (goalAnimation) {
             ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
             ctx.shadowBlur = 0;
         }
+    } else if (alpha > 0.1) {
+        // Fotoğraf yoksa metin göster
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${70 * (0.8 + scale * 0.2)}px Arial`;
+        
+        ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.8})`;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+        ctx.fillText('⚽ GOAL! ⚽', 3, 3);
+        
+        ctx.shadowBlur = 0;
+        const textGradient = ctx.createLinearGradient(-70, -40, 70, 40);
+        textGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
+        textGradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
+        textGradient.addColorStop(1, `rgba(255, 200, 0, ${alpha})`);
+        ctx.fillStyle = textGradient;
+        ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+        ctx.shadowBlur = 30;
+        ctx.fillText('⚽ GOAL! ⚽', 0, 0);
+        ctx.shadowBlur = 0;
+    }
+    
+    // Işıltı efektleri
+    if (alpha > 0.1) {
+        for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2 + progress * 0.5;
+            const dist = 80 + Math.sin(progress * 6 + i * 1.2) * 20;
+            const starX = Math.cos(angle) * dist;
+            const starY = Math.sin(angle) * dist;
+            const starSize = 5 + Math.sin(progress * 8 + i * 1.8) * 3;
+            
+            ctx.fillStyle = `rgba(255, 215, 0, ${alpha * (0.15 + Math.sin(progress * 10 + i * 1.5) * 0.1)})`;
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            
+            const spikes = 5;
+            const outerRadius = Math.abs(starSize);
+            const innerRadius = outerRadius * 0.4;
+            ctx.moveTo(starX + outerRadius * Math.cos(0), starY + outerRadius * Math.sin(0));
+            for (let j = 1; j < spikes * 2; j++) {
+                const radius = j % 2 === 0 ? outerRadius : innerRadius;
+                const theta = (j / (spikes * 2)) * Math.PI * 2;
+                ctx.lineTo(starX + radius * Math.cos(theta), starY + radius * Math.sin(theta));
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        const blinkFlash = Math.sin(progress * 20) * 0.5 + 0.5;
+        if (blinkFlash > 0.8 && alpha > 0.5) {
+            ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.05 * blinkFlash})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, 200, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
     
     ctx.restore();
+    
+    // Misafir oyuncu için ekstra save'i geri al
+    if (gameMode === 'online' && myTeamNumber === 2) {
+        ctx.restore();
+    }
     
     if (progress >= 1) {
         goalAnimation = null;
