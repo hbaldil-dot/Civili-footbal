@@ -1045,3 +1045,315 @@ canvas {
         border-width: 1px;
     }
 }
+/* ============================================================
+   RESİM MENÜ STİLLERİ
+   ============================================================ */
+
+#menu {
+    position: absolute;
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    text-align: center;
+    z-index: 100;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    display: block;
+    overflow: hidden;
+    background: transparent;
+}
+
+/* Arka plan */
+.menu-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.3) saturate(0.6);
+    z-index: 0;
+}
+
+/* Menü içeriği */
+.menu-content {
+    position: relative;
+    z-index: 1;
+    padding: 25px 20px 20px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border: 2px solid rgba(74, 117, 74, 0.3);
+    border-radius: 16px;
+}
+
+/* ===== BAŞLIK RESİMLERİ ===== */
+.menu-title {
+    margin-bottom: 15px;
+}
+
+.title-img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    image-rendering: pixelated;
+}
+
+.subtitle-img {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    display: block;
+    margin: 4px auto 0 auto;
+    image-rendering: pixelated;
+}
+
+/* ===== İSMİNİ GİR RESİM ===== */
+.label-img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto 4px auto;
+    image-rendering: pixelated;
+}
+
+.input-group {
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.input-line {
+    border-bottom: 2px solid rgba(74, 117, 74, 0.4);
+    padding: 4px 8px;
+    margin: 0 auto;
+    max-width: 280px;
+    transition: border-color 0.3s ease;
+}
+
+.input-line:focus-within {
+    border-color: #2ecc71;
+}
+
+#menu input {
+    width: 100%;
+    padding: 6px 4px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 15px;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+#menu input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== RESİM BUTONLAR ===== */
+.menu-btn-img {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.menu-btn-img:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.menu-btn-img:active {
+    transform: scale(0.96);
+}
+
+.menu-btn-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    image-rendering: pixelated;
+}
+
+.menu-btn-img:last-child {
+    margin-bottom: 0;
+}
+
+.settings-btn {
+    margin-top: 4px;
+}
+
+.settings-btn img {
+    opacity: 0.6;
+}
+
+.settings-btn:hover img {
+    opacity: 1;
+}
+
+/* ===== TAKIM LOGO SEÇİM ALANI ===== */
+.team-logo-container {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    animation: slideDown 0.3s ease;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.team-logo-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2px;
+}
+
+.team-logo-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+.team-logo-btn:hover {
+    transform: scale(1.1);
+    border-color: #666;
+}
+
+.team-logo-btn.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+    transform: scale(1.1);
+}
+
+.team-logo-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.team-logo-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-thumb {
+    background: #2ecc71;
+    border-radius: 4px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 180px;
+    }
+}
+
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 400px) {
+    .menu-content {
+        padding: 18px 14px 14px 14px;
+    }
+    
+    .title-img {
+        max-width: 220px;
+    }
+    
+    .subtitle-img {
+        max-width: 200px;
+    }
+    
+    .label-img {
+        max-width: 160px;
+    }
+    
+    .input-line {
+        max-width: 220px;
+    }
+    
+    #menu input {
+        font-size: 13px;
+    }
+    
+    .menu-btn-img {
+        margin-bottom: 6px;
+    }
+    
+    .team-logo-btn {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+@media (max-width: 360px) {
+    .menu-content {
+        padding: 14px 10px 10px 10px;
+    }
+    
+    .title-img {
+        max-width: 180px;
+    }
+    
+    .subtitle-img {
+        max-width: 160px;
+    }
+    
+    .label-img {
+        max-width: 130px;
+    }
+    
+    .input-line {
+        max-width: 180px;
+    }
+    
+    #menu input {
+        font-size: 12px;
+    }
+    
+    .menu-btn-img {
+        margin-bottom: 4px;
+    }
+    
+    .team-logo-btn {
+        width: 34px;
+        height: 34px;
+    }
+}
