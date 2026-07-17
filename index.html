@@ -17,45 +17,43 @@
         
         <!-- MENÜ İÇERİĞİ -->
         <div class="menu-content">
+            
             <!-- BAŞLIK -->
             <div class="menu-title">
-                <div class="menu-title-icon">🏆</div>
-                <h1>ÇİVİLİ FUTBOL</h1>
+                <h1>⚽ ÇİVİLİ FUTBOL</h1>
                 <div class="menu-subtitle">SENİN KURALLARIN</div>
             </div>
 
             <!-- OYUNCU İSMİ -->
             <div class="input-group">
-                <label>👤 İSMİNİ GİR:</label>
+                <label>İSMİNİ GİR:</label>
                 <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
             </div>
 
             <!-- TAKIM SEÇ BUTONU -->
-            <div class="input-group">
-                <button class="team-select-btn" onclick="toggleTeamSelect()">
-                    <span class="team-select-icon">🏆</span>
-                    <span id="team-select-text">TAKIM SEÇ</span>
-                    <span id="selected-team-name-display">Varsayılan</span>
-                    <span class="team-select-arrow">▼</span>
-                </button>
-            </div>
+            <button class="menu-btn team-btn" onclick="toggleTeamSelect()">
+                <span>TAKIM SEÇ</span>
+                <span class="arrow">▼</span>
+            </button>
 
             <!-- TAKIM LOGO SEÇİM ALANI (BAŞLANGIÇTA GİZLİ) -->
             <div class="team-logo-container" id="team-logo-container" style="display: none;">
                 <div class="team-logo-options" id="team-logo-options">
                     <!-- Logolar JavaScript ile eklenecek -->
                 </div>
+                <div style="text-align:center; margin-top:6px; font-size:11px; color:#888;">
+                    Seçili: <span id="selected-team-name-display" style="color:#2ecc71;">Varsayılan</span>
+                </div>
             </div>
 
             <!-- OYUN MODLARI -->
-            <div class="mode-container">
-                <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 BİLGİSAYARA KARŞI</button>
-                <button class="main-btn btn-local" onclick="openLocalTeamSelect()">👥 2 KİŞİLİK AYNI EKRAN</button>
-                <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 ONLINE MAÇ</button>
-            </div>
+            <button class="menu-btn game-btn" onclick="openAILevelMenu()">BİLGİSAYARA KARŞI</button>
+            <button class="menu-btn game-btn" onclick="openLocalTeamSelect()">2 KİŞİLİK AYNI EKRAN</button>
+            <button class="menu-btn game-btn" onclick="openOnlineLobby()">ONLINE MAÇ</button>
 
             <!-- AYARLAR -->
-            <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ AYARLAR</button>
+            <button class="menu-btn settings-btn" onclick="openSettingsPopup()">AYARLAR</button>
+            
         </div>
     </div>
 
@@ -101,10 +99,10 @@
                 <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
             </div>
             <div class="popup-body">
-                <button class="main-btn btn-ai-level" onclick="startLocalGame('ai', 'kolay')">🟢 Kolay</button>
-                <button class="main-btn btn-ai-level" onclick="startLocalGame('ai', 'orta')">🟡 Orta</button>
-                <button class="main-btn btn-ai-level" onclick="startLocalGame('ai', 'zor')">🟠 Zor</button>
-                <button class="main-btn btn-ai-level" onclick="startLocalGame('ai', 'usta')">🔴 Usta</button>
+                <button class="menu-btn game-btn" onclick="startLocalGame('ai', 'kolay')">🟢 Kolay</button>
+                <button class="menu-btn game-btn" onclick="startLocalGame('ai', 'orta')">🟡 Orta</button>
+                <button class="menu-btn game-btn" onclick="startLocalGame('ai', 'zor')">🟠 Zor</button>
+                <button class="menu-btn game-btn" onclick="startLocalGame('ai', 'usta')">🔴 Usta</button>
             </div>
         </div>
     </div>
