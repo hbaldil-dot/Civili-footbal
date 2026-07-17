@@ -377,94 +377,103 @@ pins.forEach(pin => {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
 
-    if (goalAnimation) {
-        const elapsed = Date.now() - goalAnimationStartTime;
-        const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
+// GOL ANİMASYONU
+if (goalAnimation) {
+    const elapsed = Date.now() - goalAnimationStartTime;
+    const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
+    
+    let scale = 0;
+    if (progress < 0.15) {
+        scale = (progress / 0.15) * 1.2;
+    } else {
+        scale = 1.2;
+    }
+    
+    let alpha = 1;
+    if (progress < 0.9) {
+        const blinkDuration = 0.5;
+        const blinkPhase = progress / blinkDuration;
+        const currentBlink = Math.floor(blinkPhase);
+        const phaseInBlink = blinkPhase - currentBlink;
         
-        let scale = 0;
-        if (progress < 0.15) {
-            scale = (progress / 0.15) * 1.2;
-        } else {
-            scale = 1.2;
-        }
-        
-        let alpha = 1;
-        if (progress < 0.9) {
-            const blinkDuration = 0.5;
-            const blinkPhase = progress / blinkDuration;
-            const currentBlink = Math.floor(blinkPhase);
-            const phaseInBlink = blinkPhase - currentBlink;
-            
-            if (currentBlink < 6) {
-                if (phaseInBlink < 0.5) {
-                    alpha = phaseInBlink * 2;
-                } else {
-                    alpha = 1 - (phaseInBlink - 0.5) * 2;
-                }
-                if (currentBlink >= 2) alpha = alpha * 0.9;
-                if (currentBlink >= 4) alpha = alpha * 0.8;
+        if (currentBlink < 6) {
+            if (phaseInBlink < 0.5) {
+                alpha = phaseInBlink * 2;
             } else {
-                alpha = 0;
+                alpha = 1 - (phaseInBlink - 0.5) * 2;
             }
+            if (currentBlink >= 2) alpha = alpha * 0.9;
+            if (currentBlink >= 4) alpha = alpha * 0.8;
         } else {
-            alpha = 1 - ((progress - 0.9) / 0.1);
+            alpha = 0;
         }
-        
-        if (alpha < 0.01) alpha = 0;
-        if (scale < 0.01) scale = 0;
+    } else {
+        alpha = 1 - ((progress - 0.9) / 0.1);
+    }
+    
+    if (alpha < 0.01) alpha = 0;
+    if (scale < 0.01) scale = 0;
+    
+    ctx.save();
+    
+    // === YENİ: Online'da misafir oyuncu için 180 derece dönüşü geri al ===
+    if (gameMode === 'online' && myTeamNumber === 2) {
+        // Misafir oyuncu için saha dönüşünü geri al
+        ctx.translate(width / 2, height / 2);
+        ctx.rotate(Math.PI); // 180 derece döndür (saha dönüşünü geri al)
+        ctx.translate(-width / 2, -height / 2);
+    }
+    
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(scale, scale);
+    
+    // ... animasyonun devamı (değişmiyor) ...
+    
+    if (alpha > 0.1 && goalAnimation.type === 'image' && goalImage) {
+        const imgSize = 100;
+        ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.5})`;
+        ctx.shadowBlur = 50;
         
         ctx.save();
-        ctx.translate(width / 2, height / 2);
-        ctx.scale(scale, scale);
-        
-        if (alpha > 0.1 && goalAnimation.type === 'image' && goalImage) {
-            const imgSize = 100;
-            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.5})`;
-            ctx.shadowBlur = 50;
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.clip();
-            ctx.globalAlpha = alpha;
-            ctx.drawImage(goalImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
-            ctx.globalAlpha = 1;
-            ctx.restore();
-            ctx.shadowBlur = 0;
-            
-            if (alpha > 0.1) {
-                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.9})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(0, 0, imgSize / 2 + 4, 0, Math.PI * 2);
-                ctx.stroke();
-                
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.font = `bold 38px Arial`;
-                ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.9})`;
-                ctx.shadowBlur = 15;
-                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
-                ctx.fillText('⚽ GOAL! ⚽', 2, imgSize/2 + 12);
-                
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
-                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
-                ctx.shadowBlur = 20;
-                ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
-                ctx.shadowBlur = 0;
-            }
-        }
-        
+        ctx.beginPath();
+        ctx.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(goalImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
+        ctx.globalAlpha = 1;
         ctx.restore();
+        ctx.shadowBlur = 0;
         
-        if (progress >= 1) {
-            goalAnimation = null;
+        if (alpha > 0.1) {
+            ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.9})`;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(0, 0, imgSize / 2 + 4, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = `bold 38px Arial`;
+            ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.9})`;
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+            ctx.fillText('⚽ GOAL! ⚽', 2, imgSize/2 + 12);
+            
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+            ctx.shadowBlur = 20;
+            ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
+            ctx.shadowBlur = 0;
         }
     }
-
+    
     ctx.restore();
+    
+    if (progress >= 1) {
+        goalAnimation = null;
+    }
 }
 
 // ============================================================
