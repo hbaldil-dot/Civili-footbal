@@ -297,6 +297,7 @@ function draw() {
 
     // OYUNCULARI ÇİZ
 // draw() fonksiyonu içinde, pins.forEach kısmı:
+// draw() fonksiyonu içinde, pins.forEach kısmını güncelle:
 pins.forEach(pin => {
     if (pin.isPost) {
         ctx.fillStyle = '#ffffff';
@@ -306,9 +307,10 @@ pins.forEach(pin => {
     } else {
         let logoFile = 'default.png';
         if (pin.team === 1) {
-            // Takım 1: Oyuncunun seçtiği logo veya online'da rakip
-            if (gameMode === 'online' && myTeamNumber === 2) {
-                // Ben takım 2 isem, takım 1 rakiptir
+            // Takım 1: Oyuncu 1'in seçtiği logo
+            if (gameMode === 'local' && localPlayer1Logo) {
+                logoFile = localPlayer1Logo;
+            } else if (gameMode === 'online' && myTeamNumber === 2) {
                 logoFile = aiTeamLogo || 'default.png';
             } else {
                 logoFile = selectedTeamLogo || 'default.png';
@@ -316,12 +318,12 @@ pins.forEach(pin => {
         } else if (pin.team === 2) {
             if (gameMode === 'ai') {
                 logoFile = aiTeamLogo || 'default.png';
+            } else if (gameMode === 'local' && localPlayer2Logo) {
+                logoFile = localPlayer2Logo;
             } else if (gameMode === 'online') {
                 if (myTeamNumber === 1) {
-                    // Ben takım 1 isem, takım 2 rakiptir
                     logoFile = aiTeamLogo || 'default.png';
                 } else {
-                    // Ben takım 2 isem, takım 2 benim takımım
                     logoFile = selectedTeamLogo || 'default.png';
                 }
             } else {
