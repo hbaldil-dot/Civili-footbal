@@ -21,7 +21,30 @@ if (typeof io !== 'undefined') {
         console.error("❌ Socket bağlantı hatası:", e);
     }
 }
+// ============================================================
+// TAKIM LOGO DEĞİŞKENLERİ - BAŞLANGIÇTA TANIMLA
+// ============================================================
+let selectedTeamLogo = 'default.png';
+let isTeamSelectOpen = false;
+let loadedLogos = {};
 
+// Logo listesi
+const teamLogos = [
+    { file: 'default.png', name: '⚽ Varsayılan' },
+    { file: 'fb.png', name: '⚽ Fenerbahçe' },
+    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
+    { file: 'bjk.png', name: '⚽ Beşiktaş' },
+    { file: 'ts.png', name: '⚽ Trabzonspor' },
+    { file: 'bs.png', name: '⚽ Başakşehir' },
+    { file: 'gfk.png', name: '⚽ Giresunspor' },
+    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
+    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
+    { file: 'hatay.png', name: '⚽ Hatayspor' },
+    { file: 'adana.png', name: '⚽ Adana Demirspor' },
+    { file: 'antalya.png', name: '⚽ Antalyaspor' },
+    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
+    { file: 'samsun.png', name: '⚽ Samsunspor' }
+];
 // ============================================================
 // OYUN DEĞİŞKENLERİ
 // ============================================================
@@ -248,19 +271,16 @@ function draw() {
     // OYUNCULARI ÇİZ - (DEĞİŞEN KISIM BURASI)
     // ============================================================
     pins.forEach(pin => {
-        if (pin.isPost) {
-            // KALE DİREKLERİ
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // OYUNCU ÇİZİMİ - LOGO VEYA RETRO
-            // Takım 1 ise seçili logo, Takım 2 ise default logo
-            const logoFile = (pin.team === 1) ? selectedTeamLogo : 'default.png';
-            drawPlayerWithLogo(pin.x, pin.y, pin.team, logoFile);
-        }
-    });
+    if (pin.isPost) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        const logoFile = (pin.team === 1) ? selectedTeamLogo : 'default.png';
+        drawPlayerWithLogo(pin.x, pin.y, pin.team, logoFile);
+    }
+});
 
     // VURUŞ YÖNÜ OKU
     if (currentPhase === 'playing' && isDraggingBall) {
@@ -405,15 +425,12 @@ function drawPlayerWithLogo(x, y, team, logoFile) {
     ctx.save();
     ctx.translate(x, y);
     
-    // Takım rengine göre arka plan
     const teamColor = (team === 1) ? team1Color : team2Color;
     
-    // Logo varsa göster
     if (logoFile && loadedLogos[logoFile]) {
         const img = loadedLogos[logoFile];
-        const size = 28; // Oyuncu boyutu
+        const size = 28;
         
-        // Arka plan daire (forma rengi)
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 8;
         ctx.fillStyle = teamColor;
@@ -422,26 +439,20 @@ function drawPlayerWithLogo(x, y, team, logoFile) {
         ctx.fill();
         ctx.shadowBlur = 0;
         
-        // Logo (daire içinde)
         ctx.save();
         ctx.beginPath();
         ctx.arc(0, 0, size - 4, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
-        
-        // Logoyu çiz
         ctx.drawImage(img, -size + 4, -size + 4, size * 2 - 8, size * 2 - 8);
         ctx.restore();
         
-        // Çerçeve
         ctx.strokeStyle = 'rgba(255,255,255,0.6)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
         ctx.stroke();
-        
     } else {
-        // Logo yoksa eski oyuncu çizimi
         drawRetroPlayer(x, y, team);
     }
     
@@ -1350,6 +1361,7 @@ startPeriodicSync();
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
+
 function openAILevelMenu() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
@@ -1366,22 +1378,6 @@ function openSettingsPopup() {
 
 function closeSettingsPopup() {
     document.getElementById('settings-popup').style.display = 'none';
-}
-
-function selectColor(team, color) {
-    if (team === 1) {
-        if (color === team2Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
-        team1Color = color;
-        document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.color === color);
-        });
-    } else {
-        if (color === team1Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
-        team2Color = color;
-        document.querySelectorAll('.color-btn[data-team="2"]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.color === color);
-        });
-    }
 }
 
 function selectFieldColor(color) {
@@ -1803,3 +1799,143 @@ function drawRetroPlayer(x, y, team) {
 
 // draw() fonksiyonundaki oyuncu çizim kısmını güncelle
 // (pins.forEach içindeki drawRetroPlayer yerine drawPlayerWithLogo kullan)
+// ============================================================
+// TAKIM LOGO FONKSİYONLARI - DOSYANIN SONUNA EKLE
+// ============================================================
+
+function toggleTeamSelect() {
+    const container = document.getElementById('team-logo-container');
+    const arrow = document.querySelector('.team-select-arrow');
+    if (!container) return;
+    
+    isTeamSelectOpen = !isTeamSelectOpen;
+    
+    if (isTeamSelectOpen) {
+        container.style.display = 'block';
+        if (arrow) arrow.classList.add('open');
+        if (document.getElementById('team-logo-options').children.length === 0) {
+            loadTeamLogos();
+        }
+    } else {
+        container.style.display = 'none';
+        if (arrow) arrow.classList.remove('open');
+    }
+}
+
+function loadTeamLogos() {
+    const container = document.getElementById('team-logo-options');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    teamLogos.forEach((logo) => {
+        const btn = document.createElement('button');
+        btn.className = 'team-logo-btn';
+        btn.title = logo.name;
+        if (logo.file === selectedTeamLogo) {
+            btn.classList.add('active');
+        }
+        
+        const img = document.createElement('img');
+        img.src = `takimlar/${logo.file}`;
+        img.alt = logo.name;
+        img.onerror = function() {
+            this.src = 'takimlar/default.png';
+        };
+        
+        btn.appendChild(img);
+        btn.onclick = function() {
+            selectTeamLogo(logo.file);
+        };
+        
+        container.appendChild(btn);
+    });
+    
+    updateTeamLogoDisplay();
+    console.log('🏆 Logolar yüklendi, toplam:', teamLogos.length);
+}
+
+function selectTeamLogo(logoFile) {
+    selectedTeamLogo = logoFile;
+    
+    document.querySelectorAll('.team-logo-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const img = btn.querySelector('img');
+        if (img && img.src.includes(logoFile)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+    updateScoreLogos();
+    
+    loadTeamLogoImage(logoFile);
+    
+    setTimeout(() => {
+        if (isTeamSelectOpen) {
+            toggleTeamSelect();
+        }
+    }, 500);
+}
+
+function updateTeamLogoDisplay() {
+    const displayImg = document.getElementById('selected-team-logo');
+    if (displayImg) {
+        displayImg.src = `takimlar/${selectedTeamLogo}`;
+        displayImg.onerror = function() {
+            this.src = 'takimlar/default.png';
+        };
+    }
+}
+
+function updateSelectedTeamName() {
+    const logo = teamLogos.find(l => l.file === selectedTeamLogo);
+    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
+    
+    const displayName = document.getElementById('selected-team-name-display');
+    if (displayName) {
+        displayName.textContent = teamName;
+    }
+}
+
+function updateScoreLogos() {
+    const logoP1 = document.getElementById('score-logo-p1');
+    if (logoP1) {
+        logoP1.src = `takimlar/${selectedTeamLogo}`;
+        logoP1.onerror = function() {
+            this.src = 'takimlar/default.png';
+        };
+    }
+}
+
+function loadTeamLogoImage(logoFile) {
+    return new Promise((resolve) => {
+        if (loadedLogos[logoFile]) {
+            resolve(loadedLogos[logoFile]);
+            return;
+        }
+        
+        const img = new Image();
+        img.onload = function() {
+            loadedLogos[logoFile] = img;
+            resolve(img);
+        };
+        img.onerror = function() {
+            if (logoFile !== 'default.png') {
+                loadTeamLogoImage('default.png').then(resolve);
+            } else {
+                resolve(null);
+            }
+        };
+        img.src = `takimlar/${logoFile}`;
+    });
+}
+
+// Sayfa yüklendiğinde
+document.addEventListener('DOMContentLoaded', function() {
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    loadTeamLogoImage('default.png');
+});
