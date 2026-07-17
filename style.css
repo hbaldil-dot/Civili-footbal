@@ -706,3 +706,147 @@ canvas {
         height: 6px;
     }
 }
+/* ============================================================
+   TAKIM LOGOSU STİLLERİ - (style.css SONUNA EKLE)
+   ============================================================ */
+
+/* Logo gösterim alanı - menü üstü */
+#team-logo-display {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    border: 4px solid #2ecc71;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
+    transition: all 0.3s ease;
+}
+
+#team-logo-display:hover {
+    box-shadow: 0 0 50px rgba(46, 204, 113, 0.4);
+    transform: scale(1.05);
+}
+
+#selected-team-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Logo seçim butonları */
+.team-logo-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.team-logo-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.team-logo-btn:hover {
+    transform: scale(1.1);
+    border-color: #666;
+    z-index: 2;
+}
+
+.team-logo-btn.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+    transform: scale(1.1);
+    z-index: 2;
+}
+
+.team-logo-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Logo seçim alanı scrollbar */
+.team-logo-options::-webkit-scrollbar {
+    width: 4px;
+}
+
+.team-logo-options::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.team-logo-options::-webkit-scrollbar-thumb {
+    background: #2ecc71;
+    border-radius: 4px;
+}
+
+/* Seçili takım ismi */
+#selected-team-name {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+/* ============================================================
+   MOBİL UYUM - LOGO
+   ============================================================ */
+
+@media (max-width: 400px) {
+    #team-logo-display {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .team-logo-btn {
+        width: 40px;
+        height: 40px;
+        border-width: 2px;
+    }
+    
+    .team-logo-options {
+        max-height: 120px;
+        padding: 4px;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 360px) {
+    #team-logo-display {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .team-logo-btn {
+        width: 34px;
+        height: 34px;
+        border-width: 2px;
+    }
+    
+    .team-logo-options {
+        max-height: 100px;
+        gap: 4px;
+        padding: 3px;
+    }
+}
