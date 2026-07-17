@@ -1289,3 +1289,393 @@ canvas {
 .team-select-btn {
     background: rgba(46, 204, 113, 0.2);
 }
+/* ============================================================
+   YENİ MENÜ TASARIMI - ÇİVİLİ FUTBOL TEMASI
+   ============================================================ */
+
+#menu {
+    position: absolute;
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    text-align: center;
+    z-index: 100;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    display: block;
+    overflow: hidden;
+    background: transparent;
+}
+
+/* Arka plan */
+.menu-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.4) saturate(0.8);
+    z-index: 0;
+}
+
+/* Menü içeriği */
+.menu-content {
+    position: relative;
+    z-index: 1;
+    padding: 25px 20px 20px 20px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 3px solid rgba(74, 117, 74, 0.6);
+    border-radius: 16px;
+}
+
+/* ===== BAŞLIK ===== */
+.menu-title {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 2px dashed rgba(46, 204, 113, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.menu-title-icon {
+    font-size: 32px;
+    margin-bottom: 2px;
+}
+
+.menu-title h1 {
+    color: #2ecc71;
+    font-size: 26px;
+    font-weight: bold;
+    text-shadow: 0 0 20px rgba(46, 204, 113, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
+    letter-spacing: 3px;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+}
+
+.menu-subtitle {
+    color: #f1c40f;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    margin-top: 2px;
+    font-weight: bold;
+}
+
+/* ===== INPUT ALANLARI ===== */
+#menu .input-group {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+#menu .input-group label {
+    font-size: 11px;
+    color: #aaa;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 3px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+#menu input,
+#menu select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 2px solid rgba(74, 117, 74, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+#menu input:focus,
+#menu select:focus {
+    border-color: #2ecc71;
+    outline: none;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+}
+
+/* ===== TAKIM SEÇ BUTONU ===== */
+.team-select-btn {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(46, 204, 113, 0.15);
+    border: 2px solid rgba(46, 204, 113, 0.4);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.team-select-btn:hover {
+    background: rgba(46, 204, 113, 0.25);
+    border-color: #2ecc71;
+}
+
+.team-select-btn .team-select-icon {
+    font-size: 16px;
+    margin-right: 6px;
+}
+
+.team-select-btn #team-select-text {
+    flex: 1;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.team-select-btn #selected-team-name-display {
+    color: #2ecc71;
+    font-weight: bold;
+    margin: 0 6px;
+    padding: 2px 10px;
+    background: rgba(46, 204, 113, 0.15);
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+.team-select-btn .team-select-arrow {
+    font-size: 11px;
+    transition: transform 0.3s ease;
+    color: #2ecc71;
+}
+
+.team-select-btn .team-select-arrow.open {
+    transform: rotate(180deg);
+}
+
+/* ===== OYUN MOD BUTONLARI ===== */
+.mode-container {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.main-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.main-btn:active {
+    transform: scale(0.97);
+}
+
+.btn-ai {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+}
+
+.btn-ai:hover {
+    box-shadow: 0 4px 25px rgba(230, 126, 34, 0.5);
+    transform: scale(1.01);
+}
+
+.btn-local {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-local:hover {
+    box-shadow: 0 4px 25px rgba(52, 152, 219, 0.5);
+    transform: scale(1.01);
+}
+
+.btn-online {
+    background: linear-gradient(135deg, #8e44ad, #6c3483);
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+}
+
+.btn-online:hover {
+    box-shadow: 0 4px 25px rgba(142, 68, 173, 0.5);
+    transform: scale(1.01);
+}
+
+/* ===== AYARLAR BUTONU ===== */
+.settings-toggle {
+    width: 100%;
+    padding: 10px;
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(85, 85, 85, 0.5);
+    border-radius: 8px;
+    color: #888;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+}
+
+.settings-toggle:active {
+    transform: scale(0.97);
+}
+
+.settings-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #777;
+    color: #fff;
+}
+
+/* ===== LOGO SEÇİM ALANI (AÇILIR) ===== */
+.team-logo-container {
+    margin-top: 6px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    animation: slideDown 0.3s ease;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.team-logo-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2px;
+}
+
+.team-logo-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+.team-logo-btn:hover {
+    transform: scale(1.1);
+    border-color: #666;
+}
+
+.team-logo-btn.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+    transform: scale(1.1);
+}
+
+.team-logo-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ===== SCROLLBAR ===== */
+.team-logo-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.team-logo-container::-webkit-scrollbar-thumb {
+    background: #2ecc71;
+    border-radius: 4px;
+}
+
+/* ===== ANİMASYON ===== */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 180px;
+    }
+}
+
+/* ============================================================
+   MOBİL UYUM - YENİ MENÜ
+   ============================================================ */
+
+@media (max-width: 400px) {
+    .menu-content {
+        padding: 18px 14px 14px 14px;
+    }
+    
+    .menu-title h1 {
+        font-size: 20px;
+        letter-spacing: 2px;
+    }
+    
+    .menu-title-icon {
+        font-size: 26px;
+    }
+    
+    .main-btn {
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+    
+    .team-select-btn {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .team-logo-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 360px) {
+    .menu-content {
+        padding: 14px 10px 10px 10px;
+    }
+    
+    .menu-title h1 {
+        font-size: 17px;
+        letter-spacing: 1px;
+    }
+    
+    .menu-subtitle {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+    
+    .main-btn {
+        font-size: 11px;
+        padding: 8px 10px;
+    }
+}
