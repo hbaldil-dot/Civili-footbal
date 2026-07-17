@@ -21,7 +21,38 @@ if (typeof io !== 'undefined') {
         console.error("❌ Socket bağlantı hatası:", e);
     }
 }
+// ============================================================
+// TAKIM LOGO DEĞİŞKENLERİ
+// ============================================================
+let selectedTeamLogo = '';
+let aiTeamLogo = '';
+let isTeamSelectOpen = false;
+let loadedLogos = {};
 
+const teamLogos = [
+    { file: 'fb.png', name: '⚽ Fenerbahçe' },
+    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
+    { file: 'bjk.png', name: '⚽ Beşiktaş' },
+    { file: 'ts.png', name: '⚽ Trabzonspor' },
+    { file: 'bs.png', name: '⚽ Başakşehir' },
+    { file: 'gfk.png', name: '⚽ Giresunspor' },
+    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
+    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
+    { file: 'hatay.png', name: '⚽ Hatayspor' },
+    { file: 'adana.png', name: '⚽ Adana Demirspor' },
+    { file: 'antalya.png', name: '⚽ Antalyaspor' },
+    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
+    { file: 'samsun.png', name: '⚽ Samsunspor' }
+];
+
+// Rastgele takım seç
+function selectRandomTeam() {
+    const randomIndex = Math.floor(Math.random() * teamLogos.length);
+    const selected = teamLogos[randomIndex];
+    selectedTeamLogo = selected.file;
+    console.log('🏆 Rastgele takım seçildi:', selected.name);
+    return selected;
+}
 // ============================================================
 // OYUN DEĞİŞKENLERİ
 // ============================================================
