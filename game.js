@@ -398,6 +398,57 @@ function draw() {
     ctx.restore();
 }
 // ============================================================
+// OYUNCU ÇİZİM FONKSİYONU - LOGO VERSİYONU
+// ============================================================
+
+function drawPlayerWithLogo(x, y, team, logoFile) {
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // Takım rengine göre arka plan
+    const teamColor = (team === 1) ? team1Color : team2Color;
+    
+    // Logo varsa göster
+    if (logoFile && loadedLogos[logoFile]) {
+        const img = loadedLogos[logoFile];
+        const size = 28; // Oyuncu boyutu
+        
+        // Arka plan daire (forma rengi)
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = teamColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Logo (daire içinde)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 4, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        
+        // Logoyu çiz
+        ctx.drawImage(img, -size + 4, -size + 4, size * 2 - 8, size * 2 - 8);
+        ctx.restore();
+        
+        // Çerçeve
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
+        ctx.stroke();
+        
+    } else {
+        // Logo yoksa eski oyuncu çizimi
+        drawRetroPlayer(x, y, team);
+    }
+    
+    ctx.restore();
+}
+
+// ============================================================
 // KOORDİNAT YAKALAMA
 // ============================================================
 function getCanvasTouchPos(e) {
