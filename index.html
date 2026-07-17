@@ -11,81 +11,47 @@
 <body>
 
     <!-- ===== ANA MENÜ ===== -->
-<div id="menu">
-    <!-- TAKIM LOGOSU GÖSTERİM ALANI -->
-    <div id="team-logo-display">
-        <img id="selected-team-logo" src="takimlar/default.png" alt="Takım Logosu">
-    </div>
-    
-    <h1>⚽ ÇİVİLİ FUTBOL</h1>
-    
-    <div class="input-group">
-        <label>👤 OYUNCU İSMİ</label>
-        <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
-    </div>
-
-    <!-- TAKIM SEÇ BUTONU -->
-    <div class="input-group">
-        <button class="team-select-btn" onclick="toggleTeamSelect()">
-            <span class="team-select-icon">🏆</span>
-            <span id="team-select-text">Takım Seç</span>
-            <span id="selected-team-name-display">Varsayılan</span>
-            <span class="team-select-arrow">▼</span>
-        </button>
-    </div>
-
-    <!-- TAKIM LOGO SEÇİM ALANI (BAŞLANGIÇTA GİZLİ) -->
-    <div class="team-logo-container" id="team-logo-container" style="display: none;">
-        <div class="team-logo-options" id="team-logo-options">
-            <!-- Logolar JavaScript ile eklenecek -->
+<div id="menu" style="background-image: url('8E7FCB17-13DA-4495-9156-C69FA0732021.png'); background-size: cover; background-position: center; background-blend-mode: overlay;">
+    <!-- ARKA PLAN KARARTMASI İÇİN İÇ KATMAN -->
+    <div class="menu-overlay">
+        <!-- TAKIM LOGOSU GÖSTERİM ALANI -->
+        <div id="team-logo-display">
+            <img id="selected-team-logo" src="takimlar/default.png" alt="Takım Logosu">
         </div>
-    </div>
-
-    <div class="mode-container">
-        <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 Bilgisayara Karşı</button>
-        <button class="main-btn btn-local" onclick="openLocalTeamSelect()">👥 2 Kişilik Aynı Ekran</button>
-        <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Maç</button>
-    </div>
-
-    <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
-</div>
-   <!-- ===== AYARLAR POP-UP ===== -->
-<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-    <div class="popup-content">
-        <div class="popup-header">
-            <h2>⚙️ AYARLAR</h2>
-            <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
+        
+        <h1>⚽ ÇİVİLİ FUTBOL</h1>
+        
+        <div class="input-group">
+            <label>👤 OYUNCU İSMİ</label>
+            <input type="text" id="player-name" value="Oyuncu" maxlength="12" onchange="updatePlayerName()">
         </div>
-        <div class="popup-body">
-            <div class="input-group">
-                <label>⏱️ MAÇ SÜRESİ</label>
-                <select id="match-duration">
-                    <option value="60">1 Dakika</option>
-                    <option value="90" selected>1.5 Dakika</option>
-                    <option value="120">2 Dakika</option>
-                    <option value="180">3 Dakika</option>
-                </select>
-            </div>
-            
-            <!-- FORMA RENKLERİ KALDIRILDI -->
-            
-            <div class="input-group">
-                <label>🟩 SAHA RENGİ</label>
-                <div class="color-options">
-                    <button class="color-btn active" data-field="#2e7d32" style="background:#2e7d32" onclick="selectFieldColor('#2e7d32')">🟩</button>
-                    <button class="color-btn" data-field="#1a5276" style="background:#1a5276" onclick="selectFieldColor('#1a5276')">🟦</button>
-                    <button class="color-btn" data-field="#7d6608" style="background:#7d6608" onclick="selectFieldColor('#7d6608')">🟨</button>
-                    <button class="color-btn" data-field="#6c3483" style="background:#6c3483" onclick="selectFieldColor('#6c3483')">🟪</button>
-                    <button class="color-btn" data-field="#1a1a1a" style="background:#1a1a1a; border-color:#555" onclick="selectFieldColor('#1a1a1a')">⬛</button>
-                </div>
+
+        <!-- TAKIM SEÇ BUTONU -->
+        <div class="input-group">
+            <button class="team-select-btn" onclick="toggleTeamSelect()">
+                <span class="team-select-icon">🏆</span>
+                <span id="team-select-text">Takım Seç</span>
+                <span id="selected-team-name-display">Varsayılan</span>
+                <span class="team-select-arrow">▼</span>
+            </button>
+        </div>
+
+        <!-- TAKIM LOGO SEÇİM ALANI (BAŞLANGIÇTA GİZLİ) -->
+        <div class="team-logo-container" id="team-logo-container" style="display: none;">
+            <div class="team-logo-options" id="team-logo-options">
+                <!-- Logolar JavaScript ile eklenecek -->
             </div>
         </div>
-        <div class="popup-footer">
-            <button class="popup-close-btn" onclick="closeSettingsPopup()">✓ Tamam</button>
+
+        <div class="mode-container">
+            <button class="main-btn btn-ai" onclick="openAILevelMenu()">🤖 Bilgisayara Karşı</button>
+            <button class="main-btn btn-local" onclick="openLocalTeamSelect()">👥 2 Kişilik Aynı Ekran</button>
+            <button class="main-btn btn-online" onclick="openOnlineLobby()">🌐 Online Maç</button>
         </div>
+
+        <button class="settings-toggle" onclick="openSettingsPopup()">⚙️ Ayarlar</button>
     </div>
 </div>
-
     <!-- ===== AI ZORLUK POP-UP ===== -->
     <div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
         <div class="popup-content">
