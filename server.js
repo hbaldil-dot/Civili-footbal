@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// Render.com için CORS ve transport ayarları
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -14,28 +13,38 @@ const io = new Server(server, {
     }
 });
 
-// Statik dosyaları doğrudan ana dizinden sunuyoruz
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Çevrimiçi havuzdaki (lobideki) aktif oyuncular listesi
 let lobbyPlayers = [];
-
-// Aktif oyun odaları
 let activeRooms = {};
 
 io.on('connection', (socket) => {
     console.log(`Yeni bağlantı: ${socket.id}`);
 
     // --- LOBİ İŞLEMLERİ ---
-    socket.on('join-lobby', (playerName) => {
+    socket.on('join-lobby', (playerData) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        lobbyPlayers.push({ id: socket.id, name: playerName });
-        console.log(`${playerName} lobiye katıldı.`);
+        lobbyPlayers.push({ 
+            id: socket.id, 
+            name: playerData.name,
+            logo: playerData.logo || 'default.png'
+        });
+        console.log(`${playerData.name} lobiye katıldı. Logo: ${playerData.logo}`);
         broadcastLobbyUpdate();
+    });
+
+    // Oyuncu bilgilerini güncelle
+    socket.on('update-player', (playerData) => {
+        const player = lobbyPlayers.find(p => p.id === socket.id);
+        if (player) {
+            player.name = playerData.name;
+            player.logo = playerData.logo || 'default.png';
+            broadcastLobbyUpdate();
+        }
     });
 
     socket.on('leave-lobby', () => {
@@ -47,7 +56,8 @@ io.on('connection', (socket) => {
         if (sender) {
             io.to(targetId).emit('receive-invite', {
                 fromId: socket.id,
-                fromName: sender.name
+                fromName: sender.name,
+                fromLogo: sender.logo || 'default.png'
             });
         }
     });
@@ -70,13 +80,23 @@ io.on('connection', (socket) => {
 
                 activeRooms[roomId] = {
                     players: [
-                        { id: hostId, name: host.name, team: 1, ready: false, placedPins: [] },
-                        { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [] }
+                        { id: hostId, name: host.name, team: 1, ready: false, placedPins: [], logo: host.logo || 'default.png' },
+                        { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [], logo: guest.logo || 'default.png' }
                     ]
                 };
 
-                io.to(hostId).emit('start-online-match', { roomId, team: 1 });
-                io.to(socket.id).emit('start-online-match', { roomId, team: 2 });
+                io.to(hostId).emit('start-online-match', { 
+                    roomId, 
+                    team: 1,
+                    opponentLogo: guest.logo || 'default.png'
+                });
+                
+                io.to(socket.id).emit('start-online-match', { 
+                    roomId, 
+                    team: 2,
+                    opponentLogo: host.logo || 'default.png'
+                });
+                
                 console.log(`Maç başladı! Oda: ${roomId}`);
             }
         }
@@ -108,14 +128,13 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- YENİ: VURUŞ BAZLI SENKRONİZASYON ---
+    // --- VURUŞ BAZLI SENKRONİZASYON ---
     socket.on('playerShot', ({ roomId, shotData }) => {
-        // Vuruş verilerini diğer oyuncuya ilet
         socket.to(roomId).emit('opponentShot', shotData);
         console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
-    // --- YENİ: PERİYODİK SENKRONİZASYON (DÜZELTME) ---
+    // --- PERİYODİK SENKRONİZASYON ---
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
@@ -155,7 +174,6 @@ function handlePlayerDisconnection(socket) {
     }
 }
 
-// Render.com için PORT ve host ayarı
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
