@@ -1353,9 +1353,9 @@ function startLocalGame(mode, aiLevelParam) {
 // ============================================================
 
 let selectedTeamLogo = 'default.png';
+let isTeamSelectOpen = false;
 
 // Logo listesi - takimlar klasöründeki dosyalar
-// Dosya adı: GÖRÜNEN İSİM (Türkiye Süper Lig takımları)
 const teamLogos = [
     { file: 'default.png', name: '⚽ Varsayılan' },
     { file: 'fb.png', name: '⚽ Fenerbahçe' },
@@ -1363,7 +1363,6 @@ const teamLogos = [
     { file: 'bjk.png', name: '⚽ Beşiktaş' },
     { file: 'ts.png', name: '⚽ Trabzonspor' },
     { file: 'bs.png', name: '⚽ Başakşehir' },
-    { file: 'bsk.png', name: '⚽ Beşiktaş (eski logo)' },
     { file: 'gfk.png', name: '⚽ Giresunspor' },
     { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
     { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
@@ -1373,6 +1372,28 @@ const teamLogos = [
     { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
     { file: 'samsun.png', name: '⚽ Samsunspor' }
 ];
+
+// Takım seç butonunu aç/kapat
+function toggleTeamSelect() {
+    const container = document.getElementById('team-logo-container');
+    const arrow = document.querySelector('.team-select-arrow');
+    
+    if (!container) return;
+    
+    isTeamSelectOpen = !isTeamSelectOpen;
+    
+    if (isTeamSelectOpen) {
+        container.style.display = 'block';
+        if (arrow) arrow.classList.add('open');
+        // Logoları yükle (eğer yüklenmemişse)
+        if (document.getElementById('team-logo-options').children.length === 0) {
+            loadTeamLogos();
+        }
+    } else {
+        container.style.display = 'none';
+        if (arrow) arrow.classList.remove('open');
+    }
+}
 
 // Logo seçim butonlarını oluştur
 function loadTeamLogos() {
@@ -1426,11 +1447,19 @@ function selectTeamLogo(logoFile) {
     });
     
     updateTeamLogoDisplay();
+    updateSelectedTeamName();
     
-    // Seçilen takım adını bul
+    // Seçili takım adını bul
     const logo = teamLogos.find(l => l.file === logoFile);
     const teamName = logo ? logo.name : 'Takım';
     console.log('🏆 Takım logosu seçildi:', teamName);
+    
+    // Seçim yapıldıktan sonra otomatik kapat
+    setTimeout(() => {
+        if (isTeamSelectOpen) {
+            toggleTeamSelect();
+        }
+    }, 500);
 }
 
 // Logo gösterim alanını güncelle
@@ -1444,12 +1473,30 @@ function updateTeamLogoDisplay() {
     }
 }
 
-// Sayfa yüklendiğinde logoları yükle
+// Seçili takım ismini güncelle
+function updateSelectedTeamName() {
+    const logo = teamLogos.find(l => l.file === selectedTeamLogo);
+    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
+    
+    const displayName = document.getElementById('selected-team-name-display');
+    if (displayName) {
+        displayName.textContent = teamName;
+    }
+}
+
+// Sayfa yüklendiğinde
 document.addEventListener('DOMContentLoaded', function() {
-    loadTeamLogos();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
 });
 
 // Menü açıldığında logoları yenile
 function refreshTeamLogos() {
-    loadTeamLogos();
+    const container = document.getElementById('team-logo-options');
+    if (container) {
+        container.innerHTML = '';
+    }
+    if (isTeamSelectOpen) {
+        loadTeamLogos();
+    }
 }
