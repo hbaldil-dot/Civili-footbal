@@ -44,6 +44,12 @@ body {
     max-width: 360px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     display: block;
+    /* ARKA PLAN RESMİ EKLENDİ */
+    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 h1 {
@@ -193,7 +199,6 @@ select {
     overflow: hidden;
 }
 
-/* Pop-up Başlık */
 .popup-header {
     display: flex;
     justify-content: space-between;
@@ -228,7 +233,6 @@ select {
     transform: scale(0.9);
 }
 
-/* Pop-up Gövde */
 .popup-body {
     padding: 20px;
     overflow-y: auto;
@@ -239,7 +243,6 @@ select {
     margin-bottom: 0;
 }
 
-/* Pop-up Alt */
 .popup-footer {
     padding: 12px 20px;
     border-top: 1px solid #333;
@@ -366,14 +369,6 @@ select {
 }
 
 /* ===== OYUN EKRANI ===== */
-/* ============================================================
-   ÜST MENÜ - GÜNCELLENMİŞ
-   ============================================================ */
-
-/* ============================================================
-   OYUN EKRANI
-   ============================================================ */
-
 #top-bar {
     width: 100%;
     max-width: 360px;
@@ -397,7 +392,6 @@ select {
     pointer-events: none;
 }
 
-/* YENİ - İKİNCİ SATIR */
 .hud-row-second {
     display: flex;
     width: 100%;
@@ -407,7 +401,6 @@ select {
     pointer-events: none;
 }
 
-/* ===== SOL: ÇIKIŞ BUTONU ===== */
 #exit-btn {
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.6);
@@ -436,7 +429,6 @@ select {
     background: rgba(192, 57, 43, 1);
 }
 
-/* ===== ORTA: SKOR TABELASI ===== */
 #score-board {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(8px);
@@ -457,6 +449,21 @@ select {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
+.team-score {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.score-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+}
+
 #score-p1 {
     color: #3498db;
     font-size: 20px;
@@ -474,7 +481,6 @@ select {
     min-width: 20px;
 }
 
-/* ===== SAĞ: MAÇ SÜRESİ ===== */
 #time-board {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(8px);
@@ -492,7 +498,6 @@ select {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* ===== SIRA GÖSTERGESİ (ORTADA) ===== */
 #turn-indicator {
     background: rgba(0, 0, 0, 0.85);
     padding: 4px 16px;
@@ -513,7 +518,6 @@ select {
     animation: none;
 }
 
-/* ===== VURUŞ SÜRESİ (SIRA İLE AYNI HİZADA) ===== */
 #shot-timer {
     background: rgba(231, 76, 60, 0.9);
     backdrop-filter: blur(8px);
@@ -541,10 +545,6 @@ select {
     animation: pulseWarning 0.5s ease-in-out infinite;
 }
 
-/* ============================================================
-   CANVAS VE BUTON
-   ============================================================ */
-
 .canvas-container {
     position: relative;
     max-height: 82dvh;
@@ -565,7 +565,6 @@ canvas {
     touch-action: none;
 }
 
-/* ===== BAŞLAT BUTONU - ORTA SAHA ===== */
 #start-match-btn {
     position: absolute;
     top: 50%;
@@ -605,40 +604,6 @@ canvas {
     text-shadow: 1px 1px 2px black;
 }
 
-/* ============================================================
-   ANİMASYONLAR
-   ============================================================ */
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.03); opacity: 0.9; }
-}
-
-@keyframes pulseShot {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.9; }
-}
-
-@keyframes pulseWarning {
-    0%, 100% { transform: scale(1); background: rgba(192, 57, 43, 0.95); }
-    50% { transform: scale(1.1); background: rgba(255, 0, 0, 0.95); }
-}
-
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 400px) {
-    #exit-btn { width: 30px; height: 30px; font-size: 14px; }
-    #score-board { font-size: 15px; padding: 4px 10px; min-width: 60px; }
-    #score-p1, #score-p2 { font-size: 17px; }
-    #time-board { font-size: 13px; padding: 4px 8px; min-width: 50px; }
-    #turn-indicator { font-size: 12px; padding: 3px 12px; min-width: 90px; }
-    #shot-timer { font-size: 12px; padding: 3px 8px; min-width: 55px; }
-    #start-match-btn { width: 70px; height: 70px; font-size: 11px; }
-}
-
-/* ===== GÜÇ GÖSTERGESİ (YENİ) ===== */
 #power-bar-container {
     width: 100%;
     max-width: 360px;
@@ -658,59 +623,25 @@ canvas {
     transition: width 0.05s;
 }
 
-/* ===== MOBİL UYUM ===== */
-@media (max-width: 400px) {
-    #menu {
-        padding: 18px;
-        width: 95%;
-    }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    .main-btn {
-        font-size: 14px;
-        padding: 12px;
-    }
-
-    .popup-content {
-        max-width: 95%;
-        max-height: 85vh;
-    }
-
-    .popup-header {
-        padding: 12px 16px;
-    }
-
-    .popup-header h2 {
-        font-size: 16px;
-    }
-
-    .popup-body {
-        padding: 14px;
-    }
-
-    .color-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-    }
-    
-    .popup-close-btn {
-        padding: 8px 20px;
-        font-size: 12px;
-    }
-    
-    #power-bar-container {
-        height: 6px;
-    }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.03); opacity: 0.9; }
 }
+
+@keyframes pulseShot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes pulseWarning {
+    0%, 100% { transform: scale(1); background: rgba(192, 57, 43, 0.95); }
+    50% { transform: scale(1.1); background: rgba(255, 0, 0, 0.95); }
+}
+
 /* ============================================================
-   TAKIM LOGOSU STİLLERİ - (style.css SONUNA EKLE)
+   TAKIM LOGOSU STİLLERİ
    ============================================================ */
 
-/* Logo gösterim alanı - menü üstü */
 #team-logo-display {
     width: 80px;
     height: 80px;
@@ -738,7 +669,6 @@ canvas {
     border-radius: 50%;
 }
 
-/* Logo seçim butonları */
 .team-logo-options {
     display: flex;
     gap: 8px;
@@ -788,7 +718,6 @@ canvas {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* Logo seçim alanı scrollbar */
 .team-logo-options::-webkit-scrollbar {
     width: 4px;
 }
@@ -803,58 +732,10 @@ canvas {
     border-radius: 4px;
 }
 
-/* Seçili takım ismi */
-#selected-team-name {
-    color: #2ecc71;
-    font-weight: bold;
-}
-
 /* ============================================================
-   MOBİL UYUM - LOGO
+   TAKIM SEÇ BUTONU
    ============================================================ */
 
-@media (max-width: 400px) {
-    #team-logo-display {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .team-logo-btn {
-        width: 40px;
-        height: 40px;
-        border-width: 2px;
-    }
-    
-    .team-logo-options {
-        max-height: 120px;
-        padding: 4px;
-        gap: 6px;
-    }
-}
-
-@media (max-width: 360px) {
-    #team-logo-display {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .team-logo-btn {
-        width: 34px;
-        height: 34px;
-        border-width: 2px;
-    }
-    
-    .team-logo-options {
-        max-height: 100px;
-        gap: 4px;
-        padding: 3px;
-    }
-}
-/* ============================================================
-   TAKIM SEÇ BUTONU - style.css SONUNA EKLE
-   ============================================================ */
-
-/* Takım Seç Butonu */
 .team-select-btn {
     width: 100%;
     padding: 12px 16px;
@@ -912,7 +793,6 @@ canvas {
     transform: rotate(180deg);
 }
 
-/* Logo Konteyner (Açılır Kapanır) */
 .team-logo-container {
     margin-top: 8px;
     padding: 10px;
@@ -937,191 +817,6 @@ canvas {
     }
 }
 
-/* Logo gösterim alanı - menü üstü */
-#team-logo-display {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 10px auto;
-    border-radius: 50%;
-    border: 4px solid #2ecc71;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
-    transition: all 0.3s ease;
-}
-
-#team-logo-display:hover {
-    box-shadow: 0 0 50px rgba(46, 204, 113, 0.4);
-    transform: scale(1.05);
-}
-
-#selected-team-logo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-/* Logo seçim butonları */
-.team-logo-options {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 4px;
-}
-
-.team-logo-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 3px solid #444;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px;
-    flex-shrink: 0;
-    position: relative;
-}
-
-.team-logo-btn:hover {
-    transform: scale(1.1);
-    border-color: #666;
-    z-index: 2;
-}
-
-.team-logo-btn.active {
-    border-color: #2ecc71;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
-    transform: scale(1.1);
-    z-index: 2;
-}
-
-.team-logo-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Scrollbar */
-.team-logo-container::-webkit-scrollbar {
-    width: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-thumb {
-    background: #2ecc71;
-    border-radius: 4px;
-}
-
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 400px) {
-    #team-logo-display {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .team-logo-btn {
-        width: 40px;
-        height: 40px;
-        border-width: 2px;
-    }
-    
-    .team-select-btn {
-        font-size: 13px;
-        padding: 10px 12px;
-    }
-    
-    .team-select-btn #selected-team-name-display {
-        font-size: 11px;
-        padding: 2px 8px;
-    }
-    
-    .team-logo-container {
-        max-height: 150px;
-        padding: 8px;
-    }
-}
-
-@media (max-width: 360px) {
-    #team-logo-display {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .team-logo-btn {
-        width: 34px;
-        height: 34px;
-        border-width: 2px;
-    }
-    
-    .team-select-btn {
-        font-size: 12px;
-        padding: 8px 10px;
-    }
-    
-    .team-select-btn #selected-team-name-display {
-        font-size: 10px;
-        padding: 2px 6px;
-    }
-    
-    .team-logo-container {
-        max-height: 120px;
-        padding: 6px;
-    }
-}
-/* ============================================================
-   SKOR TABELASI - LOGO STİLLERİ (style.css SONUNA EKLE)
-   ============================================================ */
-
-.team-score {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.score-logo {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-}
-
-/* ============================================================
-   MOBİL UYUM - SKOR LOGO
-   ============================================================ */
-
-@media (max-width: 400px) {
-    .score-logo {
-        width: 18px;
-        height: 18px;
-    }
-}
-
-@media (max-width: 360px) {
-    .score-logo {
-        width: 16px;
-        height: 16px;
-        border-width: 1px;
-    }
-}
-
-/* ===== ONLINE LOBI - LOGO STİLLERİ ===== */
 .lobby-logo {
     width: 28px;
     height: 28px;
@@ -1139,12 +834,6 @@ canvas {
     gap: 6px;
 }
 
-@media (max-width: 400px) {
-    .lobby-logo {
-        width: 22px;
-        height: 22px;
-    }
-}
 /* ============================================================
    2 KİŞİLİK TAKIM SEÇ POP-UP
    ============================================================ */
@@ -1207,8 +896,107 @@ canvas {
     box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
 }
 
-/* Mobil uyum */
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
 @media (max-width: 400px) {
+    #menu {
+        padding: 18px;
+        width: 95%;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .main-btn {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .popup-content {
+        max-width: 95%;
+        max-height: 85vh;
+    }
+
+    .popup-header {
+        padding: 12px 16px;
+    }
+
+    .popup-header h2 {
+        font-size: 16px;
+    }
+
+    .popup-body {
+        padding: 14px;
+    }
+
+    .color-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+    
+    .popup-close-btn {
+        padding: 8px 20px;
+        font-size: 12px;
+    }
+    
+    #power-bar-container {
+        height: 6px;
+    }
+    
+    #exit-btn { width: 30px; height: 30px; font-size: 14px; }
+    #score-board { font-size: 15px; padding: 4px 10px; min-width: 60px; }
+    #score-p1, #score-p2 { font-size: 17px; }
+    #time-board { font-size: 13px; padding: 4px 8px; min-width: 50px; }
+    #turn-indicator { font-size: 12px; padding: 3px 12px; min-width: 90px; }
+    #shot-timer { font-size: 12px; padding: 3px 8px; min-width: 55px; }
+    #start-match-btn { width: 70px; height: 70px; font-size: 11px; }
+    
+    #team-logo-display {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .team-logo-btn {
+        width: 40px;
+        height: 40px;
+        border-width: 2px;
+    }
+    
+    .team-logo-options {
+        max-height: 120px;
+        padding: 4px;
+        gap: 6px;
+    }
+    
+    .team-select-btn {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    .team-select-btn #selected-team-name-display {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+    
+    .team-logo-container {
+        max-height: 150px;
+        padding: 8px;
+    }
+    
+    .score-logo {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .lobby-logo {
+        width: 22px;
+        height: 22px;
+    }
+    
     .player-team-select .team-logo-btn {
         width: 36px;
         height: 36px;
@@ -1217,797 +1005,43 @@ canvas {
         max-height: 80px;
     }
 }
-/* ============================================================
-   MENÜ ARKA PLANI - FON RESMİ
-   ============================================================ */
-
-#menu {
-    position: absolute;
-    border: 4px solid #4a754a;
-    border-radius: 12px;
-    padding: 25px;
-    text-align: center;
-    z-index: 100;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    display: block;
-    background-image: url('8E7FCB17-13DA-4495-9156-C69FA0732021.png');
-    background-size: cover;
-    background-position: center;
-    /* Menü içeriğinin okunabilir olması için karartma */
-    background-color: rgba(0, 0, 0, 0.5);
-    background-blend-mode: overlay;
-}
-
-/* Menü içindeki tüm yazıların okunabilir olması için */
-#menu * {
-    position: relative;
-    z-index: 2;
-}
-
-/* Başlık - daha belirgin */
-#menu h1 {
-    color: #2ecc71;
-    margin-bottom: 20px;
-    font-size: 26px;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 20px rgba(46, 204, 113, 0.3);
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-/* Input alanları - daha okunaklı */
-#menu .input-group label {
-    color: #2ecc71;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-}
-
-#menu input,
-#menu select {
-    background: rgba(26, 26, 26, 0.85);
-    border: 2px solid #4a754a;
-}
-
-/* Butonlar - daha belirgin */
-#menu .main-btn {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-
-#menu .settings-toggle {
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid #555;
-}
-
-/* Logo gösterim alanı - daha belirgin */
-#team-logo-display {
-    border-color: #2ecc71;
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
-    background: rgba(0, 0, 0, 0.6);
-}
-
-/* Takım seç butonu - daha belirgin */
-.team-select-btn {
-    background: rgba(46, 204, 113, 0.2);
-}
-/* ============================================================
-   YENİ MENÜ TASARIMI - ÇİVİLİ FUTBOL TEMASI
-   ============================================================ */
-
-#menu {
-    position: absolute;
-    border: none;
-    border-radius: 16px;
-    padding: 0;
-    text-align: center;
-    z-index: 100;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
-    display: block;
-    overflow: hidden;
-    background: transparent;
-}
-
-/* Arka plan */
-.menu-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.4) saturate(0.8);
-    z-index: 0;
-}
-
-/* Menü içeriği */
-.menu-content {
-    position: relative;
-    z-index: 1;
-    padding: 25px 20px 20px 20px;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border: 3px solid rgba(74, 117, 74, 0.6);
-    border-radius: 16px;
-}
-
-/* ===== BAŞLIK ===== */
-.menu-title {
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 2px dashed rgba(46, 204, 113, 0.3);
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.menu-title-icon {
-    font-size: 32px;
-    margin-bottom: 2px;
-}
-
-.menu-title h1 {
-    color: #2ecc71;
-    font-size: 26px;
-    font-weight: bold;
-    text-shadow: 0 0 20px rgba(46, 204, 113, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
-    letter-spacing: 3px;
-    margin: 0;
-    font-family: 'Courier New', monospace;
-}
-
-.menu-subtitle {
-    color: #f1c40f;
-    font-size: 12px;
-    letter-spacing: 4px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-    margin-top: 2px;
-    font-weight: bold;
-}
-
-/* ===== INPUT ALANLARI ===== */
-#menu .input-group {
-    margin-bottom: 10px;
-    text-align: left;
-}
-
-#menu .input-group label {
-    font-size: 11px;
-    color: #aaa;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 3px;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-#menu input,
-#menu select {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 2px solid rgba(74, 117, 74, 0.5);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 14px;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
-
-#menu input:focus,
-#menu select:focus {
-    border-color: #2ecc71;
-    outline: none;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
-}
-
-/* ===== TAKIM SEÇ BUTONU ===== */
-.team-select-btn {
-    width: 100%;
-    padding: 10px 14px;
-    background: rgba(46, 204, 113, 0.15);
-    border: 2px solid rgba(46, 204, 113, 0.4);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.3s ease;
-}
-
-.team-select-btn:hover {
-    background: rgba(46, 204, 113, 0.25);
-    border-color: #2ecc71;
-}
-
-.team-select-btn .team-select-icon {
-    font-size: 16px;
-    margin-right: 6px;
-}
-
-.team-select-btn #team-select-text {
-    flex: 1;
-    text-align: left;
-    font-size: 12px;
-    letter-spacing: 1px;
-}
-
-.team-select-btn #selected-team-name-display {
-    color: #2ecc71;
-    font-weight: bold;
-    margin: 0 6px;
-    padding: 2px 10px;
-    background: rgba(46, 204, 113, 0.15);
-    border-radius: 10px;
-    font-size: 11px;
-}
-
-.team-select-btn .team-select-arrow {
-    font-size: 11px;
-    transition: transform 0.3s ease;
-    color: #2ecc71;
-}
-
-.team-select-btn .team-select-arrow.open {
-    transform: rotate(180deg);
-}
-
-/* ===== OYUN MOD BUTONLARI ===== */
-.mode-container {
-    margin-top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.main-btn {
-    display: block;
-    width: 100%;
-    padding: 12px 14px;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: center;
-    transition: all 0.3s ease;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.main-btn:active {
-    transform: scale(0.97);
-}
-
-.btn-ai {
-    background: linear-gradient(135deg, #e67e22, #d35400);
-    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-.btn-ai:hover {
-    box-shadow: 0 4px 25px rgba(230, 126, 34, 0.5);
-    transform: scale(1.01);
-}
-
-.btn-local {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-}
-
-.btn-local:hover {
-    box-shadow: 0 4px 25px rgba(52, 152, 219, 0.5);
-    transform: scale(1.01);
-}
-
-.btn-online {
-    background: linear-gradient(135deg, #8e44ad, #6c3483);
-    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
-}
-
-.btn-online:hover {
-    box-shadow: 0 4px 25px rgba(142, 68, 173, 0.5);
-    transform: scale(1.01);
-}
-
-/* ===== AYARLAR BUTONU ===== */
-.settings-toggle {
-    width: 100%;
-    padding: 10px;
-    margin-top: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(85, 85, 85, 0.5);
-    border-radius: 8px;
-    color: #888;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s ease;
-    letter-spacing: 2px;
-}
-
-.settings-toggle:active {
-    transform: scale(0.97);
-}
-
-.settings-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #777;
-    color: #fff;
-}
-
-/* ===== LOGO SEÇİM ALANI (AÇILIR) ===== */
-.team-logo-container {
-    margin-top: 6px;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(46, 204, 113, 0.2);
-    animation: slideDown 0.3s ease;
-    max-height: 180px;
-    overflow-y: auto;
-}
-
-.team-logo-options {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 2px;
-}
-
-.team-logo-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 3px solid #444;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px;
-    flex-shrink: 0;
-}
-
-.team-logo-btn:hover {
-    transform: scale(1.1);
-    border-color: #666;
-}
-
-.team-logo-btn.active {
-    border-color: #2ecc71;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
-    transform: scale(1.1);
-}
-
-.team-logo-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== SCROLLBAR ===== */
-.team-logo-container::-webkit-scrollbar {
-    width: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-thumb {
-    background: #2ecc71;
-    border-radius: 4px;
-}
-
-/* ===== ANİMASYON ===== */
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 180px;
-    }
-}
-
-/* ============================================================
-   MOBİL UYUM - YENİ MENÜ
-   ============================================================ */
-
-@media (max-width: 400px) {
-    .menu-content {
-        padding: 18px 14px 14px 14px;
-    }
-    
-    .menu-title h1 {
-        font-size: 20px;
-        letter-spacing: 2px;
-    }
-    
-    .menu-title-icon {
-        font-size: 26px;
-    }
-    
-    .main-btn {
-        font-size: 12px;
-        padding: 10px 12px;
-    }
-    
-    .team-select-btn {
-        font-size: 12px;
-        padding: 8px 12px;
-    }
-    
-    .team-logo-btn {
-        width: 36px;
-        height: 36px;
-    }
-}
 
 @media (max-width: 360px) {
-    .menu-content {
-        padding: 14px 10px 10px 10px;
-    }
-    
-    .menu-title h1 {
-        font-size: 17px;
-        letter-spacing: 1px;
-    }
-    
-    .menu-subtitle {
-        font-size: 10px;
-        letter-spacing: 2px;
-    }
-    
-    .main-btn {
-        font-size: 11px;
-        padding: 8px 10px;
-    }
-}
-/* ============================================================
-   RETRO ARKADA MENÜ TASARIMI
-   ============================================================ */
-
-#menu {
-    position: absolute;
-    border: none;
-    border-radius: 16px;
-    padding: 0;
-    text-align: center;
-    z-index: 100;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
-    display: block;
-    overflow: hidden;
-    background: transparent;
-}
-
-/* Arka plan */
-.menu-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.35) saturate(0.7);
-    z-index: 0;
-}
-
-/* Menü içeriği */
-.menu-content {
-    position: relative;
-    z-index: 1;
-    padding: 25px 20px 20px 20px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 3px solid rgba(74, 117, 74, 0.5);
-    border-radius: 16px;
-}
-
-/* ===== BAŞLIK ===== */
-.menu-title {
-    margin-bottom: 20px;
-    padding: 8px;
-}
-
-.menu-title h1 {
-    color: #2ecc71;
-    font-size: 26px;
-    font-weight: bold;
-    text-shadow: 0 0 30px rgba(46, 204, 113, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
-    letter-spacing: 3px;
-    margin: 0;
-    font-family: 'Courier New', monospace;
-}
-
-.menu-subtitle {
-    color: #f1c40f;
-    font-size: 13px;
-    letter-spacing: 4px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-    margin-top: 4px;
-    font-weight: bold;
-}
-
-/* ===== INPUT ===== */
-#menu .input-group {
-    margin-bottom: 10px;
-    text-align: left;
-}
-
-#menu .input-group label {
-    font-size: 11px;
-    color: #aaa;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 3px;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-#menu input {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 2px solid rgba(74, 117, 74, 0.5);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 14px;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
-
-#menu input:focus {
-    border-color: #2ecc71;
-    outline: none;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
-}
-
-/* ===== MENÜ BUTONLARI (HEPSİ AYNI TARZ) ===== */
-.menu-btn {
-    display: block;
-    width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    color: white;
-    border: 2px solid rgba(74, 117, 74, 0.4);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    text-align: center;
-    transition: all 0.3s ease;
-    letter-spacing: 2px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.menu-btn:hover {
-    transform: scale(1.02);
-    border-color: rgba(46, 204, 113, 0.6);
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.1);
-}
-
-.menu-btn:active {
-    transform: scale(0.97);
-}
-
-/* Takım seç butonu (özel) */
-.team-btn {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0;
-    border-color: rgba(46, 204, 113, 0.3);
-}
-
-.team-btn .arrow {
-    font-size: 12px;
-    color: #2ecc71;
-    transition: transform 0.3s ease;
-}
-
-.team-btn .arrow.open {
-    transform: rotate(180deg);
-}
-
-/* Oyun mod butonları - renkli */
-.game-btn {
-    border-color: rgba(74, 117, 74, 0.3);
-}
-
-.game-btn:hover {
-    border-color: #2ecc71;
-    background: rgba(46, 204, 113, 0.1);
-}
-
-/* Ayarlar butonu - farklı */
-.settings-btn {
-    margin-bottom: 0;
-    border-color: rgba(85, 85, 85, 0.4);
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: #888;
-}
-
-.settings-btn:hover {
-    border-color: #888;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== TAKIM LOGO SEÇİM ALANI (AÇILIR) ===== */
-.team-logo-container {
-    margin-top: 6px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(46, 204, 113, 0.2);
-    animation: slideDown 0.3s ease;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.team-logo-options {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 2px;
-}
-
-.team-logo-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 3px solid #444;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 2px;
-    flex-shrink: 0;
-}
-
-.team-logo-btn:hover {
-    transform: scale(1.1);
-    border-color: #666;
-}
-
-.team-logo-btn.active {
-    border-color: #2ecc71;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
-    transform: scale(1.1);
-}
-
-.team-logo-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* Scrollbar */
-.team-logo-container::-webkit-scrollbar {
-    width: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-thumb {
-    background: #2ecc71;
-    border-radius: 4px;
-}
-
-/* ===== ANİMASYON ===== */
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 200px;
-    }
-}
-
-/* ===== POP-UP İÇİNDEKİ BUTONLAR ===== */
-.popup-body .menu-btn {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: rgba(74, 117, 74, 0.3);
-    margin-bottom: 8px;
-}
-
-.popup-body .menu-btn:hover {
-    background: rgba(46, 204, 113, 0.1);
-    border-color: #2ecc71;
-}
-
-.popup-body .menu-btn:last-child {
-    margin-bottom: 0;
-}
-
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 400px) {
-    .menu-content {
-        padding: 18px 14px 14px 14px;
-    }
-    
-    .menu-title h1 {
-        font-size: 20px;
-        letter-spacing: 2px;
-    }
-    
-    .menu-subtitle {
-        font-size: 11px;
-        letter-spacing: 3px;
-    }
-    
-    .menu-btn {
-        font-size: 12px;
-        padding: 10px 14px;
-        letter-spacing: 1px;
-    }
-    
-    .team-logo-btn {
-        width: 38px;
-        height: 38px;
-    }
-}
-
-@media (max-width: 360px) {
-    .menu-content {
-        padding: 14px 10px 10px 10px;
-    }
-    
-    .menu-title h1 {
-        font-size: 17px;
-        letter-spacing: 1px;
-    }
-    
-    .menu-subtitle {
-        font-size: 10px;
-        letter-spacing: 2px;
-    }
-    
-    .menu-btn {
-        font-size: 11px;
-        padding: 8px 12px;
-        letter-spacing: 1px;
+    #team-logo-display {
+        width: 50px;
+        height: 50px;
     }
     
     .team-logo-btn {
         width: 34px;
         height: 34px;
+        border-width: 2px;
+    }
+    
+    .team-logo-options {
+        max-height: 100px;
+        gap: 4px;
+        padding: 3px;
+    }
+    
+    .team-select-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    
+    .team-select-btn #selected-team-name-display {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+    
+    .team-logo-container {
+        max-height: 120px;
+        padding: 6px;
+    }
+    
+    .score-logo {
+        width: 16px;
+        height: 16px;
+        border-width: 1px;
     }
 }
