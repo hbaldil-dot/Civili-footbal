@@ -1166,11 +1166,28 @@ canvas.addEventListener('touchcancel', (e) => {
 }, { passive: false });
 
 // ============================================================
-// BAŞLANGIÇ
+// BAŞLANGIÇ - GÜNCELLENDİ
 // ============================================================
 drawFieldLinesOnly();
 console.log("🎮 Çivili Futbol Başlatıldı!");
 startPeriodicSync();
+
+// Sayfa yüklendiğinde rastgele takım seç
+document.addEventListener('DOMContentLoaded', function() {
+    // Rastgele takım seç
+    const selected = selectRandomTeam();
+    
+    // Seçili takım ismini güncelle
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    
+    // Logoyu yükle
+    loadTeamLogoImage(selectedTeamLogo);
+    
+    // AI için rastgele takım seç
+    selectRandomAITeam();
+});
 
 // ============================================================
 // MENÜ FONKSİYONLARI
@@ -1231,6 +1248,8 @@ function loadTeamLogos() {
     const container = document.getElementById('team-logo-options');
     if (!container) return;
     container.innerHTML = '';
+    
+    // Tüm takımları göster (default yok)
     teamLogos.forEach((logo) => {
         const btn = document.createElement('button');
         btn.className = 'team-logo-btn';
@@ -1239,7 +1258,10 @@ function loadTeamLogos() {
         const img = document.createElement('img');
         img.src = `takimlar/${logo.file}`;
         img.alt = logo.name;
-        img.onerror = function() { this.src = 'takimlar/default.png'; };
+        img.onerror = function() { 
+            // Hata durumunda varsayılan göster
+            this.src = 'takimlar/default.png'; 
+        };
         btn.appendChild(img);
         btn.onclick = function() { selectTeamLogo(logo.file); };
         container.appendChild(btn);
@@ -1277,25 +1299,75 @@ function updateSelectedTeamName() {
     if (displayName) displayName.textContent = teamName;
 }
 
+// ============================================================
+// SKORBORD LOGO GÜNCELLEME
+// ============================================================
+
 function updateScoreLogos() {
+    // Sol logo - Oyuncunun takımı
     const logoP1 = document.getElementById('score-logo-p1');
     if (logoP1) {
-        logoP1.src = `takimlar/${selectedTeamLogo}`;
-        logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
+        if (selectedTeamLogo) {
+            logoP1.src = `takimlar/${selectedTeamLogo}`;
+        } else {
+            // Henüz seçilmediyse varsayılan
+            logoP1.src = 'takimlar/default.png';
+        }
+        logoP1.onerror = function() { 
+            this.src = 'takimlar/default.png'; 
+        };
     }
+    
+    // Sağ logo - AI veya rakip takımı
+    const logoP2 = document.getElementById('score-logo-p2');
+    if (logoP2) {
+        if (gameMode === 'ai' && aiTeamLogo) {
+            logoP2.src = `takimlar/${aiTeamLogo}`;
+        } else if (gameMode === 'online') {
+            // Online'da rakip default göster
+            logoP2.src = 'takimlar/default.png';
+        } else {
+            // Local'de kırmızı takım default
+            logoP2.src = 'takimlar/default.png';
+        }
+        logoP2.onerror = function() { 
+            this.src = 'takimlar/default.png'; 
+        };
+    }
+    
+    console.log('🏆 Skor logoları güncellendi - P1:', selectedTeamLogo, 'P2:', aiTeamLogo);
 }
 
-function loadTeamLogoImage(logoFile) {
-    return new Promise((resolve) => {
-        if (loadedLogos[logoFile]) { resolve(loadedLogos[logoFile]); return; }
-        const img = new Image();
-        img.onload = function() { loadedLogos[logoFile] = img; resolve(img); };
-        img.onerror = function() {
-            if (logoFile !== 'default.png') loadTeamLogoImage('default.png').then(resolve);
-            else resolve(null);
-        };
-        img.src = `takimlar/${logoFile}`;
+// AI seçildiğinde skor logosunu güncelle
+function selectRandomAITeam() {
+    const playerLogo = selectedTeamLogo;
+    const availableLogos = teamLogos.filter(l => l.file !== playerLogo);
+    const randomIndex = Math.floor(Math.random() * availableLogos.length);
+    const selected = availableLogos[randomIndex];
+    aiTeamLogo = selected.file;
+    console.log('🤖 AI Takımı seçti:', selected.name);
+    
+    loadTeamLogoImage(aiTeamLogo);
+    updateScoreLogos();
+}
+
+// Oyuncu logo seçtiğinde skor logosunu güncelle
+function selectTeamLogo(logoFile) {
+    selectedTeamLogo = logoFile;
+    document.querySelectorAll('.team-logo-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const img = btn.querySelector('img');
+        if (img && img.src.includes(logoFile)) btn.classList.add('active');
     });
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+    updateScoreLogos();
+    loadTeamLogoImage(logoFile);
+    
+    // AI için yeni takım seç (aynı olmasın)
+    selectRandomAITeam();
+    
+    setTimeout(() => { if (isTeamSelectOpen) toggleTeamSelect(); }, 500);
 }
 
 // Sayfa yüklendiğinde
