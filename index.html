@@ -154,3 +154,41 @@
 
 </body>
 </html>
+<!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+<div id="local-team-select" style="display: none;" onclick="if(event.target===this) closeLocalTeamSelect()">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h2>👥 TAKIM SEÇİMİ</h2>
+            <button class="popup-close" onclick="closeLocalTeamSelect()">✕</button>
+        </div>
+        <div class="popup-body">
+            <!-- PLAYER 1 -->
+            <div class="player-team-select">
+                <h3 style="color: #3498db; margin-bottom: 8px;">🔵 Oyuncu 1</h3>
+                <div class="team-logo-options" id="local-player1-logos">
+                    <!-- Logolar JavaScript ile eklenecek -->
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid #333; margin: 12px 0;"></div>
+            
+            <!-- PLAYER 2 -->
+            <div class="player-team-select">
+                <h3 style="color: #e74c3c; margin-bottom: 8px;">🔴 Oyuncu 2</h3>
+                <div class="team-logo-options" id="local-player2-logos">
+                    <!-- Logolar JavaScript ile eklenecek -->
+                </div>
+            </div>
+            
+            <div style="margin-top: 12px; text-align: center; font-size: 12px; color: #888;">
+                Seçili takımlar: 
+                <span id="local-p1-name" style="color: #3498db; font-weight: bold;">Seçilmedi</span> 
+                <span style="color: #555;">vs</span> 
+                <span id="local-p2-name" style="color: #e74c3c; font-weight: bold;">Seçilmedi</span>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="popup-close-btn" onclick="startLocalGameWithTeams()">✓ MAÇA BAŞLA</button>
+        </div>
+    </div>
+</div>
