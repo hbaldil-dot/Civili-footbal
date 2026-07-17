@@ -1083,3 +1083,40 @@ canvas {
         padding: 6px;
     }
 }
+/* ============================================================
+   SKOR TABELASI - LOGO STİLLERİ (style.css SONUNA EKLE)
+   ============================================================ */
+
+.team-score {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.score-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   MOBİL UYUM - SKOR LOGO
+   ============================================================ */
+
+@media (max-width: 400px) {
+    .score-logo {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 360px) {
+    .score-logo {
+        width: 16px;
+        height: 16px;
+        border-width: 1px;
+    }
+}
