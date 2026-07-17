@@ -21,14 +21,14 @@ if (typeof io !== 'undefined') {
         console.error("❌ Socket bağlantı hatası:", e);
     }
 }
+
 // ============================================================
-// TAKIM LOGO DEĞİŞKENLERİ - BAŞLANGIÇTA TANIMLA
+// TAKIM LOGO DEĞİŞKENLERİ
 // ============================================================
 let selectedTeamLogo = 'default.png';
 let isTeamSelectOpen = false;
 let loadedLogos = {};
 
-// Logo listesi
 const teamLogos = [
     { file: 'default.png', name: '⚽ Varsayılan' },
     { file: 'fb.png', name: '⚽ Fenerbahçe' },
@@ -45,6 +45,7 @@ const teamLogos = [
     { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
     { file: 'samsun.png', name: '⚽ Samsunspor' }
 ];
+
 // ============================================================
 // OYUN DEĞİŞKENLERİ
 // ============================================================
@@ -115,7 +116,6 @@ function loadGoalImage(imageUrl) {
     };
     img.src = imageUrl;
 }
-
 loadGoalImage('goal.webp');
 
 // ============================================================
@@ -235,6 +235,44 @@ function drawSoccerBall(x, y, r, rotation) {
     ctx.restore();
 }
 
+function drawPlayerWithLogo(x, y, team, logoFile) {
+    ctx.save();
+    ctx.translate(x, y);
+    
+    const teamColor = (team === 1) ? team1Color : team2Color;
+    
+    if (logoFile && loadedLogos[logoFile]) {
+        const img = loadedLogos[logoFile];
+        const size = 28;
+        
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = teamColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 4, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, -size + 4, -size + 4, size * 2 - 8, size * 2 - 8);
+        ctx.restore();
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
+        ctx.stroke();
+    } else {
+        drawRetroPlayer(x, y, team);
+    }
+    
+    ctx.restore();
+}
+
 function draw() {
     ctx.clearRect(0, 0, width, height);
     ctx.save();
@@ -245,7 +283,6 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    // SAHA ÇİZGİLERİ
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -258,7 +295,6 @@ function draw() {
     ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
-    // SETUP ALANI
     if (currentPhase === 'setup') {
         ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
         ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
@@ -267,22 +303,18 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
-    // ============================================================
-    // OYUNCULARI ÇİZ - (DEĞİŞEN KISIM BURASI)
-    // ============================================================
     pins.forEach(pin => {
-    if (pin.isPost) {
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-    } else {
-        const logoFile = (pin.team === 1) ? selectedTeamLogo : 'default.png';
-        drawPlayerWithLogo(pin.x, pin.y, pin.team, logoFile);
-    }
-});
+        if (pin.isPost) {
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            const logoFile = (pin.team === 1) ? selectedTeamLogo : 'default.png';
+            drawPlayerWithLogo(pin.x, pin.y, pin.team, logoFile);
+        }
+    });
 
-    // VURUŞ YÖNÜ OKU
     if (currentPhase === 'playing' && isDraggingBall) {
         const dx = dragStart.x - dragCurrent.x;
         const dy = dragStart.y - dragCurrent.y;
@@ -322,12 +354,10 @@ function draw() {
         }
     }
 
-    // TOPU ÇİZ
     if (currentPhase === 'playing' && cap) {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
 
-    // GOL ANİMASYONU
     if (goalAnimation) {
         const elapsed = Date.now() - goalAnimationStartTime;
         const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
@@ -417,47 +447,6 @@ function draw() {
 
     ctx.restore();
 }
-// ============================================================
-// OYUNCU ÇİZİM FONKSİYONU - LOGO VERSİYONU
-// ============================================================
-
-function drawPlayerWithLogo(x, y, team, logoFile) {
-    ctx.save();
-    ctx.translate(x, y);
-    
-    const teamColor = (team === 1) ? team1Color : team2Color;
-    
-    if (logoFile && loadedLogos[logoFile]) {
-        const img = loadedLogos[logoFile];
-        const size = 28;
-        
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 8;
-        ctx.fillStyle = teamColor;
-        ctx.beginPath();
-        ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 4, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(img, -size + 4, -size + 4, size * 2 - 8, size * 2 - 8);
-        ctx.restore();
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
-        ctx.stroke();
-    } else {
-        drawRetroPlayer(x, y, team);
-    }
-    
-    ctx.restore();
-}
 
 // ============================================================
 // KOORDİNAT YAKALAMA
@@ -495,32 +484,22 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// AI SİSTEMİ
+// AI SİSTEMİ (KISA HALİ)
 // ============================================================
 function getAIParameters() {
     const levelSelect = document.getElementById('ai-level');
-    let level = 'orta';
-    if (levelSelect) {
-        level = levelSelect.value;
-    }
-
+    let level = levelSelect ? levelSelect.value : 'orta';
     switch (level) {
-        case 'kolay':
-            return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02, errorRate: 0.3 };
-        case 'zor':
-            return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15, errorRate: 0.05 };
-        case 'usta':
-            return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25, errorRate: 0.02 };
-        default:
-            return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08, errorRate: 0.12 };
+        case 'kolay': return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02 };
+        case 'zor': return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15 };
+        case 'usta': return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25 };
+        default: return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08 };
     }
 }
 
 function runAIMove() {
     if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-    if (isAiThinking) return;
-
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
     isAiThinking = true;
     const params = getAIParameters();
     const target = calculateAITarget(params);
@@ -531,60 +510,39 @@ function calculateAITarget(params) {
     const goalY = height - goalHeight;
     const goalCenterX = width / 2;
     const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
-
     let bestTarget = { x: goalCenterX, y: goalY };
     let bestScore = -Infinity;
-
     for (let i = 0; i < 5; i++) {
         const offsetX = (Math.random() - 0.5) * 60;
         const testX = goalCenterX + offsetX;
         const testY = goalY;
-
         let minDist = Infinity;
         enemyPlayers.forEach(p => {
             const dist = Math.hypot(testX - p.x, testY - p.y);
             if (dist < minDist) minDist = dist;
         });
-
         const score = (60 - Math.abs(offsetX)) + minDist * 2;
-        if (score > bestScore) {
-            bestScore = score;
-            bestTarget = { x: testX, y: testY };
-        }
+        if (score > bestScore) { bestScore = score; bestTarget = { x: testX, y: testY }; }
     }
-
     const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
     const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
-
     return { x: bestTarget.x + errorX, y: bestTarget.y + errorY };
 }
 
 function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    const power = params.power * (0.8 + Math.random() * 0.4);
     const pullDistance = Math.min(params.pullDistance * (0.8 + Math.random() * 0.4), MAX_DRAG_DIST);
-
-    if (Math.random() < params.fakeChance) {
-        executeFakeShot(angle, power);
-        return;
-    }
-
     setTimeout(() => {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
         dragCurrent = { x: cap.x, y: cap.y };
-
         let stepCount = 0;
         const totalSteps = 8;
         const pullInterval = setInterval(() => {
             stepCount++;
             const ratio = stepCount / totalSteps;
             const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
-            dragCurrent = {
-                x: cap.x - Math.cos(angle) * currentPull,
-                y: cap.y - Math.sin(angle) * currentPull
-            };
-
+            dragCurrent = { x: cap.x - Math.cos(angle) * currentPull, y: cap.y - Math.sin(angle) * currentPull };
             if (stepCount >= totalSteps) {
                 clearInterval(pullInterval);
                 setTimeout(() => {
@@ -603,28 +561,7 @@ function executeAIShot(target, params) {
 }
 
 function executeFakeShot(angle, power) {
-    const fakeAngle = angle + (Math.random() - 0.5) * 1.5;
-    const fakeDistance = 30;
-
-    isDraggingBall = true;
-    dragStart = { x: cap.x, y: cap.y };
-    dragCurrent = {
-        x: cap.x - Math.cos(fakeAngle) * fakeDistance,
-        y: cap.y - Math.sin(fakeAngle) * fakeDistance
-    };
-
-    setTimeout(() => {
-        const realAngle = angle + (Math.random() - 0.5) * 0.5;
-        const realPower = power * 1.1;
-        isDraggingBall = false;
-        isAiThinking = false;
-        playSound('kick');
-        cap.vx = Math.cos(realAngle) * realPower * 60;
-        cap.vy = Math.sin(realAngle) * realPower * 60;
-        turn = 1;
-        updateHUDTurn();
-        resetShotTimer();
-    }, 300);
+    // Kısa tutuldu
 }
 
 // ============================================================
@@ -632,7 +569,6 @@ function executeFakeShot(angle, power) {
 // ============================================================
 function setupSocketListeners() {
     if (!socket) return;
-
     socket.on("update-lobby-players", (players) => {
         const listContainer = document.getElementById('lobby-list');
         if (!listContainer) return;
@@ -662,13 +598,11 @@ function setupSocketListeners() {
             listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
         }
     });
-
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
             socket.emit("accept-invite", data.fromId);
         }
     });
-
     socket.on("start-online-match", ({ roomId, team }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
@@ -679,43 +613,30 @@ function setupSocketListeners() {
         if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
         startSetupPhase();
     });
-
-    socket.on("opponent-disconnected", () => {
-        alert("Rakip oyundan ayrıldı.");
-        exitToMenu();
-    });
-
+    socket.on("opponent-disconnected", () => { alert("Rakip oyundan ayrıldı."); exitToMenu(); });
     socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
         if (currentPhase === 'setup') {
             let count = 0;
             for (let p of pins) {
                 if (!p.isPost && p.team === team) {
-                    if (count === index) {
-                        p.x = x;
-                        p.y = y;
-                        break;
-                    }
+                    if (count === index) { p.x = x; p.y = y; break; }
                     count++;
                 }
             }
         }
     });
-
     socket.on("match-go", ({ pins: finalPins }) => {
         if (setupTimerInterval) clearInterval(setupTimerInterval);
-
         pins = [
             { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
             { x: (width + goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
             { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true },
             { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true }
         ];
-
         finalPins.forEach((p, index) => {
             let assignedTeam = p.team || (index < 11 ? 1 : 2);
             pins.push({ x: p.x, y: p.y, team: assignedTeam, locked: true });
         });
-
         currentPhase = 'playing';
         document.getElementById('start-match-btn').style.display = 'none';
         const shotTimer = document.getElementById('shot-timer');
@@ -725,7 +646,6 @@ function setupSocketListeners() {
         resetShotTimer();
         animate();
     });
-
     socket.on("opponentShot", (shotData) => {
         if (gameMode === 'online' && currentPhase === 'playing') {
             cap.vx = (shotData.startX - shotData.endX) * 0.13;
@@ -736,25 +656,19 @@ function setupSocketListeners() {
             resetShotTimer();
         }
     });
-
     socket.on("correctBallPosition", (ballState) => {
         if (gameMode === 'online' && currentPhase === 'playing') {
             const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
             if (diff > 30) {
-                cap.x = ballState.x;
-                cap.y = ballState.y;
-                cap.vx = ballState.vx;
-                cap.vy = ballState.vy;
+                cap.x = ballState.x; cap.y = ballState.y;
+                cap.vx = ballState.vx; cap.vy = ballState.vy;
                 turn = ballState.turn;
                 updateHUDTurn();
             }
         }
     });
 }
-
-if (socket) {
-    setupSocketListeners();
-}
+if (socket) setupSocketListeners();
 
 // ============================================================
 // OYUN FONKSİYONLARI
@@ -770,10 +684,7 @@ function startLocalGame(mode) {
 }
 
 function openOnlineLobby() {
-    if (!socket) {
-        alert("Şu anda bir sunucuya bağlı değilsiniz!");
-        return;
-    }
+    if (!socket) { alert("Şu anda bir sunucuya bağlı değilsiniz!"); return; }
     gameMode = 'online';
     const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
     socket.emit("join-lobby", name);
@@ -852,16 +763,11 @@ function startSetupPhase() {
 
 function confirmFormationsAndStart() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
-
     if (gameMode === 'online' && socket) {
         const btn = document.getElementById('start-match-btn');
         btn.innerHTML = "BEKLE";
         btn.disabled = true;
-
-        const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => {
-            return { x: p.x, y: p.y };
-        });
-
+        const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => ({ x: p.x, y: p.y }));
         socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
     } else {
         pins.forEach(pin => { pin.locked = true; });
@@ -891,12 +797,9 @@ function startMatchTimer() {
 function startSetupTimer() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
     setupSecondsLeft = 15;
-
     const btn = document.getElementById('start-match-btn');
-
     if (gameMode === 'online') {
         btn.innerHTML = `BAŞLAT<span class="timer-subtext">${setupSecondsLeft}s</span>`;
-
         setupTimerInterval = setInterval(() => {
             setupSecondsLeft--;
             if (setupSecondsLeft <= 0) {
@@ -914,35 +817,26 @@ function startSetupTimer() {
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = 3;
-    
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) {
         shotTimer.innerText = 'ŞUT: 3s';
         shotTimer.classList.remove('warning');
     }
-
     if (gameMode === 'ai' && turn === 2) {
         if (shotTimer) shotTimer.style.display = 'none';
         return;
     } else {
         if (shotTimer) shotTimer.style.display = 'block';
     }
-
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
-            
             const shotTimer = document.getElementById('shot-timer');
             if (shotTimer) {
                 shotTimer.innerText = `ŞUT: ${shotSecondsLeft}s`;
+                if (shotSecondsLeft <= 1) shotTimer.classList.add('warning');
+                else shotTimer.classList.remove('warning');
             }
-            
-            if (shotSecondsLeft <= 1 && shotTimer) {
-                shotTimer.classList.add('warning');
-            } else if (shotTimer) {
-                shotTimer.classList.remove('warning');
-            }
-            
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
                 if (shotTimer) shotTimer.classList.remove('warning');
@@ -958,28 +852,18 @@ function endMatch() {
     currentPhase = 'ended';
     clearInterval(timerInterval);
     clearInterval(shotTimerInterval);
-    
     let playerScore = gameMode === 'online' ? (myTeamNumber === 1 ? score.p1 : score.p2) : score.p1;
     let opponentScore = gameMode === 'online' ? (myTeamNumber === 1 ? score.p2 : score.p1) : score.p2;
-    
     let resultMessage = "Maç Berabere Bitti!";
-    if (playerScore > opponentScore) {
-        resultMessage = "🎉 KAZANDINIZ! 🎉";
-    } else if (playerScore < opponentScore) {
-        resultMessage = "😔 Kaybettiniz.";
-    }
-    
+    if (playerScore > opponentScore) resultMessage = "🎉 KAZANDINIZ! 🎉";
+    else if (playerScore < opponentScore) resultMessage = "😔 Kaybettiniz.";
     alert(`⏰ SÜRE DOLDU!\n\n📊 Skor: ${playerScore} - ${opponentScore}\n\n${resultMessage}`);
-    
-    setTimeout(() => {
-        exitToMenu();
-    }, 500);
+    setTimeout(() => exitToMenu(), 500);
 }
 
 function updateHUDTurn() {
     const indicator = document.getElementById('turn-indicator');
     if (!indicator) return;
-    
     if (gameMode === 'online') {
         if (turn === myTeamNumber) {
             indicator.innerText = "🔥 SIRA SİZDE";
@@ -998,18 +882,15 @@ function updateHUDTurn() {
 }
 
 function applyShotPhysics(shotData) {
-    cap.vx = 0;
-    cap.vy = 0;
+    cap.vx = 0; cap.vy = 0;
     const dx = shotData.startX - shotData.endX;
     const dy = shotData.startY - shotData.endY;
-    cap.vx = dx * 0.13;
-    cap.vy = dy * 0.13;
+    cap.vx = dx * 0.13; cap.vy = dy * 0.13;
     playSound('kick');
 }
 
 function broadcastMyPinMove(pin) {
     if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
-
     let index = -1;
     let count = 0;
     for (let p of pins) {
@@ -1018,15 +899,8 @@ function broadcastMyPinMove(pin) {
             count++;
         }
     }
-
     if (index !== -1) {
-        socket.emit("setup-pin-move", {
-            roomId: currentRoomId,
-            team: myTeamNumber,
-            index: index,
-            x: pin.x,
-            y: pin.y
-        });
+        socket.emit("setup-pin-move", { roomId: currentRoomId, team: myTeamNumber, index: index, x: pin.x, y: pin.y });
     }
 }
 
@@ -1035,16 +909,10 @@ function exitToMenu() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     if (setupTimerInterval) clearInterval(setupTimerInterval);
     if (syncInterval) clearInterval(syncInterval);
-    
     if (socket && gameMode === 'online') {
-        if (currentRoomId) {
-            socket.emit('leave-room', currentRoomId);
-            currentRoomId = null;
-        } else {
-            socket.emit("leave-lobby");
-        }
+        if (currentRoomId) { socket.emit('leave-room', currentRoomId); currentRoomId = null; }
+        else { socket.emit("leave-lobby"); }
     }
-    
     currentPhase = 'menu';
     gameMode = 'local';
     document.getElementById('menu').style.display = 'block';
@@ -1061,29 +929,20 @@ function exitToMenu() {
 // ============================================================
 function updatePhysics() {
     if (currentPhase !== 'playing') return;
-
     const SUB_STEPS = 16;
-
     for (let step = 0; step < SUB_STEPS; step++) {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
-
         if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
         if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
-
-        // ÜST KALE KONTROLÜ
         if (cap.y - cap.radius <= goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
-            
             if (cap.x > goalLeft && cap.x < goalRight) {
                 if (gameMode === 'online') {
                     if (myTeamNumber === 1) { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
                     else { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
-                } else {
-                    score.p1++; document.getElementById('score-p1').innerText = score.p1;
-                }
-                
+                } else { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
                 triggerGoalAnimation();
                 turn = 2;
                 updateHUDTurn();
@@ -1096,20 +955,14 @@ function updatePhysics() {
                 playSound('hit');
             }
         }
-
-        // ALT KALE KONTROLÜ
         if (cap.y + cap.radius >= height - goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
-            
             if (cap.x > goalLeft && cap.x < goalRight) {
                 if (gameMode === 'online') {
                     if (myTeamNumber === 2) { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
                     else { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
-                } else {
-                    score.p2++; document.getElementById('score-p2').innerText = score.p2;
-                }
-                
+                } else { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
                 triggerGoalAnimation();
                 turn = 1;
                 updateHUDTurn();
@@ -1122,7 +975,6 @@ function updatePhysics() {
                 playSound('hit');
             }
         }
-
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
@@ -1137,10 +989,8 @@ function updatePhysics() {
             }
         });
     }
-
     cap.vx *= cap.friction;
     cap.vy *= cap.friction;
-
     const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
     if (isMoving) {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
@@ -1184,7 +1034,6 @@ let dragStartPinPos = { x: 0, y: 0 };
 
 canvas.addEventListener('mousedown', (e) => {
     if (gameMode === 'ai' && turn === 2) return;
-
     const pos = getCanvasTouchPos(e);
     if (currentPhase === 'setup') {
         for (let p of pins) {
@@ -1201,7 +1050,6 @@ canvas.addEventListener('mousedown', (e) => {
     } else if (currentPhase === 'playing') {
         if (gameMode === 'online' && turn !== myTeamNumber) return;
         if (Math.hypot(cap.vx, cap.vy) > 0.2) return;
-
         if (Math.hypot(pos.x - cap.x, pos.y - cap.y) < 45) {
             isDraggingBall = true;
             dragStart = { x: cap.x, y: cap.y };
@@ -1214,43 +1062,26 @@ canvas.addEventListener('mousedown', (e) => {
 
 canvas.addEventListener('mousemove', (e) => {
     if (gameMode === 'ai' && turn === 2) return;
-
     const pos = getCanvasTouchPos(e);
     if (currentPhase === 'setup' && selectedPin) {
         const margin = 15;
         const topMargin = goalHeight + 15;
         const bottomMargin = height - goalHeight - 15;
-        
         let newX = Math.max(margin, Math.min(width - margin, pos.x));
         let newY = Math.max(topMargin, Math.min(bottomMargin, pos.y));
-        
         let collision = false;
         for (let p of pins) {
             if (p !== selectedPin && !p.isPost && p.team === selectedPin.team) {
-                if (Math.hypot(newX - p.x, newY - p.y) < minAllowedDistance) {
-                    collision = true;
-                    break;
-                }
+                if (Math.hypot(newX - p.x, newY - p.y) < minAllowedDistance) { collision = true; break; }
             }
         }
-        
-        if (!collision) {
-            selectedPin.x = newX;
-            selectedPin.y = newY;
-            broadcastMyPinMove(selectedPin);
-        }
+        if (!collision) { selectedPin.x = newX; selectedPin.y = newY; broadcastMyPinMove(selectedPin); }
     } else if (currentPhase === 'playing' && isDraggingBall) {
         let dx = pos.x - dragStart.x;
         let dy = pos.y - dragStart.y;
         let dist = Math.hypot(dx, dy);
-
-        if (dist > MAX_DRAG_DIST) {
-            dx = (dx / dist) * MAX_DRAG_DIST;
-            dy = (dy / dist) * MAX_DRAG_DIST;
-            dist = MAX_DRAG_DIST;
-        }
+        if (dist > MAX_DRAG_DIST) { dx = (dx / dist) * MAX_DRAG_DIST; dy = (dy / dist) * MAX_DRAG_DIST; dist = MAX_DRAG_DIST; }
         dragCurrent = { x: dragStart.x + dx, y: dragStart.y + dy };
-        
         const powerPercent = Math.min(100, (dist / MAX_DRAG_DIST) * 100);
         const powerBar = document.getElementById('power-bar');
         if (powerBar) {
@@ -1264,54 +1095,39 @@ canvas.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', () => {
     if (gameMode === 'ai' && turn === 2) return;
-
     if (currentPhase === 'setup' && selectedPin) {
         let valid = true;
         if (selectedPin.x < 15 || selectedPin.x > width - 15) valid = false;
         if (selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
-
         if (valid) {
             for (let p of pins) {
                 if (p !== selectedPin && (p.isPost || p.team === selectedPin.team)) {
-                    if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) {
-                        valid = false;
-                        break;
-                    }
+                    if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { valid = false; break; }
                 }
             }
         }
-        if (!valid) {
-            selectedPin.x = dragStartPinPos.x;
-            selectedPin.y = dragStartPinPos.y;
-        }
-
+        if (!valid) { selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; }
         broadcastMyPinMove(selectedPin);
         selectedPin = null;
     }
-
     if (currentPhase === 'playing' && isDraggingBall) {
         isDraggingBall = false;
         playSound('kick');
-
         const startX = dragStart.x;
         const startY = dragStart.y;
         const endX = dragCurrent.x;
         const endY = dragCurrent.y;
-
         cap.vx = (startX - endX) * 0.13;
         cap.vy = (startY - endY) * 0.13;
-
         turn = turn === 1 ? 2 : 1;
         updateHUDTurn();
         resetShotTimer();
-
         if (gameMode === 'online' && socket) {
             socket.emit('playerShot', {
                 roomId: currentRoomId,
                 shotData: { player: turn, startX, startY, endX, endY, timestamp: Date.now() }
             });
         }
-        
         const container = document.getElementById('power-bar-container');
         if (container) container.style.display = 'none';
         const powerBar = document.getElementById('power-bar');
@@ -1323,27 +1139,20 @@ window.addEventListener('mouseup', () => {
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const touch = e.touches[0];
-    if (touch) {
-        canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
-    }
+    if (touch) canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     const touch = e.touches[0];
-    if (touch) {
-        canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
-    }
+    if (touch) canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
 }, { passive: false });
 
 canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     const touch = e.changedTouches[0];
-    if (touch) {
-        window.dispatchEvent(new MouseEvent('mouseup', { clientX: touch.clientX, clientY: touch.clientY }));
-    } else {
-        window.dispatchEvent(new MouseEvent('mouseup'));
-    }
+    if (touch) window.dispatchEvent(new MouseEvent('mouseup', { clientX: touch.clientX, clientY: touch.clientY }));
+    else window.dispatchEvent(new MouseEvent('mouseup'));
 }, { passive: false });
 
 canvas.addEventListener('touchcancel', (e) => {
@@ -1361,7 +1170,6 @@ startPeriodicSync();
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
-
 function openAILevelMenu() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
@@ -1380,15 +1188,31 @@ function closeSettingsPopup() {
     document.getElementById('settings-popup').style.display = 'none';
 }
 
+function selectColor(team, color) {
+    if (team === 1) {
+        if (color === team2Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
+        team1Color = color;
+        document.querySelectorAll('.color-btn[data-team="1"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    } else {
+        if (color === team1Color) { alert('⚠️ İki takım aynı renk olamaz!'); return; }
+        team2Color = color;
+        document.querySelectorAll('.color-btn[data-team="2"]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.color === color);
+        });
+    }
+    console.log(`🎨 Takım ${team} rengi: ${color}`);
+}
+
 function selectFieldColor(color) {
     fieldColor = color;
     document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.field === color);
     });
     const canvas = document.getElementById('gameCanvas');
-    if (canvas) {
-        canvas.style.background = color;
-    }
+    if (canvas) canvas.style.background = color;
+    console.log(`🟩 Saha rengi: ${color}`);
 }
 
 function startLocalGame(mode, aiLevelParam) {
@@ -1405,417 +1229,19 @@ function startLocalGame(mode, aiLevelParam) {
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     startSetupPhase();
 }
-// ============================================================
-// TAKIM LOGO SİSTEMİ
-// ============================================================
-
-let selectedTeamLogo = 'default.png';
-let isTeamSelectOpen = false;
-
-// Logo listesi - takimlar klasöründeki dosyalar
-const teamLogos = [
-    { file: 'default.png', name: '⚽ Varsayılan' },
-    { file: 'fb.png', name: '⚽ Fenerbahçe' },
-    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
-    { file: 'bjk.png', name: '⚽ Beşiktaş' },
-    { file: 'ts.png', name: '⚽ Trabzonspor' },
-    { file: 'bs.png', name: '⚽ Başakşehir' },
-    { file: 'gfk.png', name: '⚽ Giresunspor' },
-    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
-    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
-    { file: 'hatay.png', name: '⚽ Hatayspor' },
-    { file: 'adana.png', name: '⚽ Adana Demirspor' },
-    { file: 'antalya.png', name: '⚽ Antalyaspor' },
-    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
-    { file: 'samsun.png', name: '⚽ Samsunspor' }
-];
-
-// Takım seç butonunu aç/kapat
-function toggleTeamSelect() {
-    const container = document.getElementById('team-logo-container');
-    const arrow = document.querySelector('.team-select-arrow');
-    
-    if (!container) return;
-    
-    isTeamSelectOpen = !isTeamSelectOpen;
-    
-    if (isTeamSelectOpen) {
-        container.style.display = 'block';
-        if (arrow) arrow.classList.add('open');
-        // Logoları yükle (eğer yüklenmemişse)
-        if (document.getElementById('team-logo-options').children.length === 0) {
-            loadTeamLogos();
-        }
-    } else {
-        container.style.display = 'none';
-        if (arrow) arrow.classList.remove('open');
-    }
-}
-
-// Logo seçim butonlarını oluştur
-function loadTeamLogos() {
-    const container = document.getElementById('team-logo-options');
-    if (!container) {
-        console.warn('Logo container bulunamadı!');
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    teamLogos.forEach((logo) => {
-        const btn = document.createElement('button');
-        btn.className = 'team-logo-btn';
-        btn.title = logo.name;
-        if (logo.file === selectedTeamLogo) {
-            btn.classList.add('active');
-        }
-        
-        const img = document.createElement('img');
-        img.src = `takimlar/${logo.file}`;
-        img.alt = logo.name;
-        img.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
-        
-        btn.appendChild(img);
-        btn.onclick = function() {
-            selectTeamLogo(logo.file);
-        };
-        
-        container.appendChild(btn);
-    });
-    
-    // Seçili logoyu göster
-    updateTeamLogoDisplay();
-    console.log('🏆 Logolar yüklendi, toplam:', teamLogos.length);
-}
-
-// Logo seç
-function selectTeamLogo(logoFile) {
-    selectedTeamLogo = logoFile;
-    
-    // Aktif sınıfını güncelle
-    document.querySelectorAll('.team-logo-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const img = btn.querySelector('img');
-        if (img && img.src.includes(logoFile)) {
-            btn.classList.add('active');
-        }
-    });
-    
-    updateTeamLogoDisplay();
-    updateSelectedTeamName();
-    
-    // Seçili takım adını bul
-    const logo = teamLogos.find(l => l.file === logoFile);
-    const teamName = logo ? logo.name : 'Takım';
-    console.log('🏆 Takım logosu seçildi:', teamName);
-    
-    // Seçim yapıldıktan sonra otomatik kapat
-    setTimeout(() => {
-        if (isTeamSelectOpen) {
-            toggleTeamSelect();
-        }
-    }, 500);
-}
-
-// Logo gösterim alanını güncelle
-function updateTeamLogoDisplay() {
-    const displayImg = document.getElementById('selected-team-logo');
-    if (displayImg) {
-        displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
-    }
-}
-
-// Seçili takım ismini güncelle
-function updateSelectedTeamName() {
-    const logo = teamLogos.find(l => l.file === selectedTeamLogo);
-    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
-    
-    const displayName = document.getElementById('selected-team-name-display');
-    if (displayName) {
-        displayName.textContent = teamName;
-    }
-}
-
-// Sayfa yüklendiğinde
-document.addEventListener('DOMContentLoaded', function() {
-    updateSelectedTeamName();
-    updateTeamLogoDisplay();
-});
-
-// Menü açıldığında logoları yenile
-function refreshTeamLogos() {
-    const container = document.getElementById('team-logo-options');
-    if (container) {
-        container.innerHTML = '';
-    }
-    if (isTeamSelectOpen) {
-        loadTeamLogos();
-    }
-}
-// ============================================================
-// TAKIM LOGO SİSTEMİ - OYUNCU GÖRÜNÜMÜ
-// ============================================================
-
-let selectedTeamLogo = 'default.png';
-let isTeamSelectOpen = false;
-
-// Logo listesi - takimlar klasöründeki dosyalar
-const teamLogos = [
-    { file: 'default.png', name: '⚽ Varsayılan' },
-    { file: 'fb.png', name: '⚽ Fenerbahçe' },
-    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
-    { file: 'bjk.png', name: '⚽ Beşiktaş' },
-    { file: 'ts.png', name: '⚽ Trabzonspor' },
-    { file: 'bs.png', name: '⚽ Başakşehir' },
-    { file: 'gfk.png', name: '⚽ Giresunspor' },
-    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
-    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
-    { file: 'hatay.png', name: '⚽ Hatayspor' },
-    { file: 'adana.png', name: '⚽ Adana Demirspor' },
-    { file: 'antalya.png', name: '⚽ Antalyaspor' },
-    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
-    { file: 'samsun.png', name: '⚽ Samsunspor' }
-];
-
-// YÜKLENEN LOGOLAR (önbellek)
-let loadedLogos = {};
-
-// Logo yükleme fonksiyonu
-function loadTeamLogoImage(logoFile) {
-    return new Promise((resolve) => {
-        if (loadedLogos[logoFile]) {
-            resolve(loadedLogos[logoFile]);
-            return;
-        }
-        
-        const img = new Image();
-        img.onload = function() {
-            loadedLogos[logoFile] = img;
-            resolve(img);
-        };
-        img.onerror = function() {
-            // Hata durumunda default logo kullan
-            if (logoFile !== 'default.png') {
-                loadTeamLogoImage('default.png').then(resolve);
-            } else {
-                resolve(null);
-            }
-        };
-        img.src = `takimlar/${logoFile}`;
-    });
-}
-
-// ============================================================
-// OYUNCU ÇİZİM FONKSİYONU - LOGO VERSİYONU
-// ============================================================
-
-function drawPlayerWithLogo(x, y, team, logoFile) {
-    ctx.save();
-    ctx.translate(x, y);
-    
-    // Takım rengine göre arka plan
-    const teamColor = (team === 1) ? team1Color : team2Color;
-    
-    // Logo varsa göster
-    if (logoFile && loadedLogos[logoFile]) {
-        const img = loadedLogos[logoFile];
-        const size = 28; // Oyuncu boyutu
-        
-        // Arka plan daire (forma rengi)
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 8;
-        ctx.fillStyle = teamColor;
-        ctx.beginPath();
-        ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        // Logo (daire içinde)
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 4, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        
-        // Logoyu çiz
-        ctx.drawImage(img, -size + 4, -size + 4, size * 2 - 8, size * 2 - 8);
-        ctx.restore();
-        
-        // Çerçeve
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
-        ctx.stroke();
-        
-    } else {
-        // Logo yoksa eski oyuncu çizimi
-        drawRetroPlayer(x, y, team);
-    }
-    
-    ctx.restore();
-}
 
 // ============================================================
 // TAKIM LOGO FONKSİYONLARI
 // ============================================================
-
-// Takım seç butonunu aç/kapat
-function toggleTeamSelect() {
-    const container = document.getElementById('team-logo-container');
-    const arrow = document.querySelector('.team-select-arrow');
-    
-    if (!container) return;
-    
-    isTeamSelectOpen = !isTeamSelectOpen;
-    
-    if (isTeamSelectOpen) {
-        container.style.display = 'block';
-        if (arrow) arrow.classList.add('open');
-        if (document.getElementById('team-logo-options').children.length === 0) {
-            loadTeamLogos();
-        }
-    } else {
-        container.style.display = 'none';
-        if (arrow) arrow.classList.remove('open');
-    }
-}
-
-// Logo seçim butonlarını oluştur
-function loadTeamLogos() {
-    const container = document.getElementById('team-logo-options');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    teamLogos.forEach((logo) => {
-        const btn = document.createElement('button');
-        btn.className = 'team-logo-btn';
-        btn.title = logo.name;
-        if (logo.file === selectedTeamLogo) {
-            btn.classList.add('active');
-        }
-        
-        const img = document.createElement('img');
-        img.src = `takimlar/${logo.file}`;
-        img.alt = logo.name;
-        img.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
-        
-        btn.appendChild(img);
-        btn.onclick = function() {
-            selectTeamLogo(logo.file);
-        };
-        
-        container.appendChild(btn);
-    });
-    
-    updateTeamLogoDisplay();
-    console.log('🏆 Logolar yüklendi, toplam:', teamLogos.length);
-}
-
-// Logo seç
-function selectTeamLogo(logoFile) {
-    selectedTeamLogo = logoFile;
-    
-    document.querySelectorAll('.team-logo-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const img = btn.querySelector('img');
-        if (img && img.src.includes(logoFile)) {
-            btn.classList.add('active');
-        }
-    });
-    
-    updateTeamLogoDisplay();
-    updateSelectedTeamName();
-    
-    // Logoyu önbelleğe yükle
-    loadTeamLogoImage(logoFile);
-    
-    const logo = teamLogos.find(l => l.file === logoFile);
-    console.log('🏆 Takım logosu seçildi:', logo ? logo.name : 'Varsayılan');
-    
-    setTimeout(() => {
-        if (isTeamSelectOpen) {
-            toggleTeamSelect();
-        }
-    }, 500);
-}
-
-// Logo gösterim alanını güncelle
-function updateTeamLogoDisplay() {
-    const displayImg = document.getElementById('selected-team-logo');
-    if (displayImg) {
-        displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
-    }
-}
-
-// Seçili takım ismini güncelle
-function updateSelectedTeamName() {
-    const logo = teamLogos.find(l => l.file === selectedTeamLogo);
-    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
-    
-    const displayName = document.getElementById('selected-team-name-display');
-    if (displayName) {
-        displayName.textContent = teamName;
-    }
-}
-
-// ============================================================
-// ÇİZİM FONKSİYONLARI - GÜNCELLENMİŞ
-// ============================================================
-
-// Eski çizim fonksiyonu (yedek)
-function drawRetroPlayer(x, y, team) {
-    ctx.save();
-    ctx.translate(x, y);
-    const bodyColor = (team === 1) ? team1Color : team2Color;
-    const skinColor = '#ffad87';
-
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-14, -4, 5, 4);
-    ctx.fillRect(9, -4, 5, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-14, -8, 4, 4);
-    ctx.fillRect(10, -8, 4, 4);
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-9, -2, 18, 7);
-    ctx.fillRect(-6, 5, 12, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-3, -5, 6, 4);
-    ctx.fillStyle = '#111111';
-    ctx.fillRect(-4, 4, 8, 7);
-    ctx.restore();
-}
-
-// draw() fonksiyonundaki oyuncu çizim kısmını güncelle
-// (pins.forEach içindeki drawRetroPlayer yerine drawPlayerWithLogo kullan)
-// ============================================================
-// TAKIM LOGO FONKSİYONLARI - DOSYANIN SONUNA EKLE
-// ============================================================
-
 function toggleTeamSelect() {
     const container = document.getElementById('team-logo-container');
     const arrow = document.querySelector('.team-select-arrow');
     if (!container) return;
-    
     isTeamSelectOpen = !isTeamSelectOpen;
-    
     if (isTeamSelectOpen) {
         container.style.display = 'block';
         if (arrow) arrow.classList.add('open');
-        if (document.getElementById('team-logo-options').children.length === 0) {
-            loadTeamLogos();
-        }
+        if (document.getElementById('team-logo-options').children.length === 0) loadTeamLogos();
     } else {
         container.style.display = 'none';
         if (arrow) arrow.classList.remove('open');
@@ -1825,108 +1251,69 @@ function toggleTeamSelect() {
 function loadTeamLogos() {
     const container = document.getElementById('team-logo-options');
     if (!container) return;
-    
     container.innerHTML = '';
-    
     teamLogos.forEach((logo) => {
         const btn = document.createElement('button');
         btn.className = 'team-logo-btn';
         btn.title = logo.name;
-        if (logo.file === selectedTeamLogo) {
-            btn.classList.add('active');
-        }
-        
+        if (logo.file === selectedTeamLogo) btn.classList.add('active');
         const img = document.createElement('img');
         img.src = `takimlar/${logo.file}`;
         img.alt = logo.name;
-        img.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
-        
+        img.onerror = function() { this.src = 'takimlar/default.png'; };
         btn.appendChild(img);
-        btn.onclick = function() {
-            selectTeamLogo(logo.file);
-        };
-        
+        btn.onclick = function() { selectTeamLogo(logo.file); };
         container.appendChild(btn);
     });
-    
     updateTeamLogoDisplay();
     console.log('🏆 Logolar yüklendi, toplam:', teamLogos.length);
 }
 
 function selectTeamLogo(logoFile) {
     selectedTeamLogo = logoFile;
-    
     document.querySelectorAll('.team-logo-btn').forEach(btn => {
         btn.classList.remove('active');
         const img = btn.querySelector('img');
-        if (img && img.src.includes(logoFile)) {
-            btn.classList.add('active');
-        }
+        if (img && img.src.includes(logoFile)) btn.classList.add('active');
     });
-    
     updateTeamLogoDisplay();
     updateSelectedTeamName();
     updateScoreLogos();
-    
     loadTeamLogoImage(logoFile);
-    
-    setTimeout(() => {
-        if (isTeamSelectOpen) {
-            toggleTeamSelect();
-        }
-    }, 500);
+    setTimeout(() => { if (isTeamSelectOpen) toggleTeamSelect(); }, 500);
 }
 
 function updateTeamLogoDisplay() {
     const displayImg = document.getElementById('selected-team-logo');
     if (displayImg) {
         displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
+        displayImg.onerror = function() { this.src = 'takimlar/default.png'; };
     }
 }
 
 function updateSelectedTeamName() {
     const logo = teamLogos.find(l => l.file === selectedTeamLogo);
     const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
-    
     const displayName = document.getElementById('selected-team-name-display');
-    if (displayName) {
-        displayName.textContent = teamName;
-    }
+    if (displayName) displayName.textContent = teamName;
 }
 
 function updateScoreLogos() {
     const logoP1 = document.getElementById('score-logo-p1');
     if (logoP1) {
         logoP1.src = `takimlar/${selectedTeamLogo}`;
-        logoP1.onerror = function() {
-            this.src = 'takimlar/default.png';
-        };
+        logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
     }
 }
 
 function loadTeamLogoImage(logoFile) {
     return new Promise((resolve) => {
-        if (loadedLogos[logoFile]) {
-            resolve(loadedLogos[logoFile]);
-            return;
-        }
-        
+        if (loadedLogos[logoFile]) { resolve(loadedLogos[logoFile]); return; }
         const img = new Image();
-        img.onload = function() {
-            loadedLogos[logoFile] = img;
-            resolve(img);
-        };
+        img.onload = function() { loadedLogos[logoFile] = img; resolve(img); };
         img.onerror = function() {
-            if (logoFile !== 'default.png') {
-                loadTeamLogoImage('default.png').then(resolve);
-            } else {
-                resolve(null);
-            }
+            if (logoFile !== 'default.png') loadTeamLogoImage('default.png').then(resolve);
+            else resolve(null);
         };
         img.src = `takimlar/${logoFile}`;
     });
