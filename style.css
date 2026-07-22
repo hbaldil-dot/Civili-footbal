@@ -944,3 +944,18 @@ canvas.canvas-active {
         max-width: 35px;
     }
 }
+/* TÜM ARKA PLANLARI KALDIR */
+#menu,
+#menu *,
+.menu-btn,
+.menu-btn *,
+.logo-area,
+.logo-area *,
+.input-group,
+.input-group *,
+.input-wrapper,
+.input-wrapper * {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
