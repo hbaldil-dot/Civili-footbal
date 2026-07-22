@@ -50,7 +50,7 @@ body::before {
 }
 
 /* ============================================================
-   MENÜ - TAMAMEN ŞEFFAF, KUTU YOK
+   MENÜ - TAMAMEN ŞEFFAF, KUTU YOK, AŞAĞIDA
    ============================================================ */
 
 #menu {
@@ -67,9 +67,9 @@ body::before {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    top: 50%;
+    bottom: 3vh;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
 }
 
 /* TÜM MENÜ İÇERİKLERİ ŞEFFAF */
@@ -94,7 +94,7 @@ body::before {
     opacity: 0.95;
 }
 
-/* ===== İSMİNİ GİR ===== */
+/* ===== İSMİNİ GİR - ÇALIŞIYOR ===== */
 .input-group {
     margin-bottom: 1.2vh;
     text-align: center;
@@ -116,6 +116,7 @@ body::before {
     min-width: 0;
     display: block;
     opacity: 0.9;
+    pointer-events: none;
 }
 
 .input-wrapper input {
@@ -126,7 +127,7 @@ body::before {
     height: 100%;
     background: transparent !important;
     border: none !important;
-    color: transparent;
+    color: #333 !important;
     font-size: clamp(12px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
@@ -134,8 +135,10 @@ body::before {
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
-    display: none !important;
-    visibility: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
 }
 
 .input-logo {
@@ -145,6 +148,8 @@ body::before {
     display: block;
     opacity: 0.9;
     flex-shrink: 0;
+    pointer-events: none;
+    margin-left: auto;
 }
 
 /* ===== MENÜ BUTONLARI - ŞEFFAF ===== */
@@ -677,6 +682,7 @@ canvas.canvas-active {
     #menu {
         padding: 2vh 2vw 2vh 2vw;
         max-width: 340px;
+        bottom: 2vh;
     }
     
     .logo-area {
@@ -717,6 +723,7 @@ canvas.canvas-active {
     #menu {
         padding: 1.5vh 2vw 1.5vh 2vw;
         max-width: 300px;
+        bottom: 1.5vh;
     }
     
     .logo-area {
@@ -753,5 +760,33 @@ canvas.canvas-active {
         padding: 6px;
     }
 }
-/* KARE KUTULARI KALDIR */
-#menu, #menu *, .menu-btn, .menu-btn *, div { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
+
+/* ============================================================
+   TÜM KUTULARI KALDIR (EN SON)
+   ============================================================ */
+
+#menu,
+#menu *,
+.menu-btn,
+.menu-btn *,
+.logo-area,
+.logo-area *,
+.input-group,
+.input-group *,
+.input-wrapper,
+.input-wrapper * {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Sadece input'un kendisi görünür olsun */
+.input-wrapper input {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    color: #333 !important;
+    background: transparent !important;
+}
