@@ -23,6 +23,32 @@ if (typeof io !== 'undefined') {
 }
 
 // ============================================================
+// SAHA GÖSTER/GİZLE FONKSİYONLARI (YENİ)
+// ============================================================
+
+function showField() {
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        canvas.style.background = fieldColor || '#2e7d32';
+        canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
+        canvas.style.borderRadius = '8px';
+        canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
+        canvas.classList.add('canvas-active');
+    }
+}
+
+function hideField() {
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        canvas.style.background = 'transparent';
+        canvas.style.border = 'none';
+        canvas.style.borderRadius = '0';
+        canvas.style.boxShadow = 'none';
+        canvas.classList.remove('canvas-active');
+    }
+}
+
+// ============================================================
 // TAKIM LOGO DEĞİŞKENLERİ
 // ============================================================
 let selectedTeamLogo = '';
@@ -823,6 +849,10 @@ function startLocalGame(mode, aiLevelParam) {
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
+    // SAHAYI GÖSTER (OYUN BAŞLARKEN)
+    showField();
+    
     startSetupPhase();
 }
 
@@ -1066,6 +1096,10 @@ function exitToMenu() {
     document.getElementById('start-match-btn').style.display = 'none';
     isAiThinking = false;
     isDraggingBall = false;
+    
+    // SAHAYI GİZLE (MENÜYE DÖNÜNCE)
+    hideField();
+    
     drawFieldLinesOnly();
 }
 
@@ -1352,16 +1386,13 @@ function selectFieldColor(color) {
 // ============================================================
 function toggleTeamSelect() {
     const container = document.getElementById('team-logo-container');
-    const arrow = document.querySelector('.team-select-arrow');
     if (!container) return;
     isTeamSelectOpen = !isTeamSelectOpen;
     if (isTeamSelectOpen) {
         container.style.display = 'block';
-        if (arrow) arrow.classList.add('open');
         if (document.getElementById('team-logo-options').children.length === 0) loadTeamLogos();
     } else {
         container.style.display = 'none';
-        if (arrow) arrow.classList.remove('open');
     }
 }
 
@@ -1473,7 +1504,6 @@ function loadTeamLogoImage(logoFile) {
 // 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
 // ============================================================
 
-// 2 kişilik takım seç pop-up'ını aç
 function openLocalTeamSelect() {
     console.log('👥 2 Kişilik takım seç açılıyor...');
     const popup = document.getElementById('local-team-select');
@@ -1493,12 +1523,10 @@ function openLocalTeamSelect() {
     loadLocalTeamLogos();
 }
 
-// 2 kişilik takım seç pop-up'ını kapat
 function closeLocalTeamSelect() {
     document.getElementById('local-team-select').style.display = 'none';
 }
 
-// 2 kişilik logo seçimlerini yükle
 function loadLocalTeamLogos() {
     const container1 = document.getElementById('local-player1-logos');
     const container2 = document.getElementById('local-player2-logos');
@@ -1540,7 +1568,6 @@ function loadLocalTeamLogos() {
     });
 }
 
-// 2 kişilik takım seç
 function selectLocalTeam(player, logoFile) {
     console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
     
@@ -1584,7 +1611,6 @@ function selectLocalTeam(player, logoFile) {
     }
 }
 
-// 2 kişilik maç başlat
 function startLocalGameWithTeams() {
     console.log('🚀 2 Kişilik maç başlatılıyor...');
     
@@ -1613,6 +1639,9 @@ function startLocalGameWithTeams() {
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
+    // SAHAYI GÖSTER
+    showField();
+    
     setTimeout(() => {
         updateScoreLogos();
     }, 100);
@@ -1628,4 +1657,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateScoreLogos();
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
+    
+    // Menüde saha gizli olsun
+    hideField();
 });
