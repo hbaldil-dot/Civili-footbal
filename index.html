@@ -13,22 +13,14 @@
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
 
-        <!-- LOGO ALANI -->
-        <div class="logo-area">
-            <img src="butonlar/logo-alani.webp" alt="Çivili Futbol" class="logo-image">
+        <!-- İSMİNİ GİR -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
+                <input type="text" id="player-name" value="Oyuncu" maxlength="12">
+                <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
+            </div>
         </div>
-
-        <!-- İSMİNİ GİR + LOGO -->
-<div class="input-group">
-    <div class="input-wrapper">
-        <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
-        <input type="text" id="player-name" value="Oyuncu" maxlength="12">
-        <div class="logo-container">
-            <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
-            <img id="selected-team-logo-display" src="takimlar/default.png" alt="Takım Logosu" class="team-logo-overlay">
-        </div>
-    </div>
-</div>
 
         <!-- TAKIM SEÇ BUTONU -->
         <button class="menu-btn" onclick="toggleTeamSelect()">
