@@ -226,7 +226,13 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
+    // Canvas'ı temizle ve arka planı şeffaf yap
     ctx.clearRect(0, 0, width, height);
+    
+    // Menüdeyken arka planı şeffaf bırak (sadece çizgiler çizilir)
+    // Not: Bu fonksiyon sadece menüde çağrılır, arka plan boyanmaz
+    
+    // Sadece saha çizgilerini çiz
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
