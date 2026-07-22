@@ -29,8 +29,25 @@ body {
     padding: 8px;
     position: relative;
     touch-action: none;
+    /* ARKA PLAN RESMİ */
+    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
+/* Arka plan üzerine karartma katmanı */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+    pointer-events: none;
+}
 /* ============================================================
    ANA MENÜ - YENİ TASARIM
    ============================================================ */
