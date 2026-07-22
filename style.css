@@ -14,7 +14,6 @@ textarea {
     user-select: text !important;
     -webkit-user-select: text !important;
 }
-
 body {
     background: #0a0a0a;
     font-family: 'Courier New', Courier, monospace;
@@ -29,7 +28,7 @@ body {
     padding: 8px;
     position: relative;
     touch-action: none;
-    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-image: url('61EE758F-D67F-494F-A96A-B3C139B274D8.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -43,7 +42,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.3);
     z-index: 0;
     pointer-events: none;
 }
