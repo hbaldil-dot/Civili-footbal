@@ -29,14 +29,12 @@ body {
     padding: 8px;
     position: relative;
     touch-action: none;
-    /* ARKA PLAN RESMİ */
-    background-image: url('C7754ED7-8F2F-4D65-A650-BB6AACD281B8.webp');
+    background-image: url('61EE758F-D67F-494F-A96A-B3C139B274D8.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
-/* Arka plan karartma */
 body::before {
     content: '';
     position: fixed;
@@ -44,7 +42,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
     z-index: 0;
     pointer-events: none;
 }
@@ -57,30 +55,32 @@ body::before {
     position: absolute;
     border: none;
     border-radius: 0;
-    padding: 20px 20px 16px 20px;
+    padding: 5vh 4vw 3vh 4vw;
     text-align: center;
     z-index: 100;
-    width: 90%;
-    max-width: 380px;
+    width: 92%;
+    max-width: 400px;
     box-shadow: none;
     display: block;
     background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* ===== BAŞLIK ===== */
 .menu-title {
-    margin-bottom: 12px;
-    padding-bottom: 6px;
+    margin-bottom: 1.5vh;
 }
 
 .menu-title h1 {
     color: #ffffff;
-    font-size: 34px;
+    font-size: clamp(28px, 5.5vw, 48px);
     font-weight: 900;
     text-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);
-    letter-spacing: 6px;
+    letter-spacing: 4px;
     margin: 0;
     font-family: 'Courier New', monospace;
     line-height: 1.1;
@@ -89,11 +89,11 @@ body::before {
 .menu-subtitle {
     display: flex;
     justify-content: center;
-    gap: 6px;
-    margin-top: 2px;
+    gap: 4px;
+    margin-top: 0.5vh;
     color: rgba(255, 215, 0, 0.5);
-    font-size: 11px;
-    letter-spacing: 5px;
+    font-size: clamp(9px, 1.6vw, 14px);
+    letter-spacing: 4px;
     font-weight: bold;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
@@ -104,7 +104,7 @@ body::before {
 
 /* ===== İSMİNİ GİR ===== */
 .input-group {
-    margin-bottom: 10px;
+    margin-bottom: 1.2vh;
     text-align: center;
 }
 
@@ -112,6 +112,7 @@ body::before {
     position: relative;
     display: inline-block;
     width: 100%;
+    max-width: 320px;
 }
 
 .input-icon {
@@ -129,7 +130,7 @@ body::before {
     background: transparent;
     border: none;
     color: #333;
-    font-size: 16px;
+    font-size: clamp(13px, 2.2vw, 18px);
     font-family: 'Courier New', monospace;
     outline: none;
     text-align: center;
@@ -138,11 +139,12 @@ body::before {
     letter-spacing: 2px;
 }
 
-/* ===== MENÜ BUTONLARI (Görsel) ===== */
+/* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
     display: block;
     width: 100%;
-    margin-bottom: 6px;
+    max-width: 320px;
+    margin: 0 auto 0.6vh auto;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -171,15 +173,15 @@ body::before {
 
 /* AYARLAR butonu özel */
 .settings-btn {
-    margin-top: 2px;
+    margin-top: 0.5vh;
 }
 
 .settings-btn .menu-btn-img {
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .settings-btn:hover .menu-btn-img {
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 /* ============================================================
@@ -187,15 +189,15 @@ body::before {
    ============================================================ */
 
 .team-logo-container {
-    margin-top: 2px;
-    margin-bottom: 8px;
+    margin: 0.5vh auto 1vh auto;
     padding: 8px;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 10px;
     border: 1px solid rgba(46, 204, 113, 0.15);
     animation: slideDown 0.3s ease;
-    max-height: 160px;
+    max-height: 140px;
     overflow-y: auto;
+    max-width: 320px;
 }
 
 .team-logo-options {
@@ -207,8 +209,8 @@ body::before {
 }
 
 .team-logo-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
@@ -247,7 +249,7 @@ body::before {
     to {
         opacity: 1;
         transform: translateY(0);
-        max-height: 160px;
+        max-height: 140px;
     }
 }
 
@@ -261,6 +263,17 @@ body::before {
 .team-logo-container::-webkit-scrollbar-thumb {
     background: rgba(46, 204, 113, 0.15);
     border-radius: 4px;
+}
+
+.team-logo-container .selected-text {
+    text-align: center;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #888;
+}
+
+.team-logo-container .selected-text span {
+    color: #2ecc71;
 }
 
 /* ============================================================
@@ -750,62 +763,83 @@ canvas.canvas-active {
 
 @media (max-width: 420px) {
     #menu {
-        padding: 14px 14px 10px 14px;
+        padding: 3vh 3vw 2vh 3vw;
         max-width: 340px;
     }
     
     .menu-title h1 {
-        font-size: 28px;
-        letter-spacing: 4px;
+        font-size: clamp(24px, 5vw, 32px);
+        letter-spacing: 3px;
     }
     
     .menu-subtitle {
-        font-size: 10px;
-        letter-spacing: 4px;
-        gap: 4px;
+        font-size: clamp(8px, 1.4vw, 11px);
+        letter-spacing: 3px;
+        gap: 3px;
     }
     
     .menu-btn {
-        margin-bottom: 4px;
+        max-width: 280px;
+        margin-bottom: 0.4vh;
+    }
+    
+    .input-wrapper {
+        max-width: 280px;
     }
     
     .input-wrapper input {
-        font-size: 14px;
+        font-size: clamp(12px, 2vw, 15px);
     }
     
     .team-logo-btn {
-        width: 30px;
-        height: 30px;
+        width: 28px;
+        height: 28px;
+    }
+    
+    .team-logo-container {
+        max-width: 280px;
+        max-height: 120px;
     }
 }
 
 @media (max-width: 360px) {
     #menu {
-        padding: 10px 10px 8px 10px;
+        padding: 2vh 2vw 1.5vh 2vw;
         max-width: 300px;
     }
     
     .menu-title h1 {
-        font-size: 22px;
-        letter-spacing: 3px;
+        font-size: clamp(20px, 4.5vw, 26px);
+        letter-spacing: 2px;
     }
     
     .menu-subtitle {
-        font-size: 8px;
-        letter-spacing: 3px;
+        font-size: clamp(7px, 1.2vw, 9px);
+        letter-spacing: 2px;
         gap: 2px;
     }
     
     .menu-btn {
-        margin-bottom: 3px;
+        max-width: 240px;
+        margin-bottom: 0.3vh;
+    }
+    
+    .input-wrapper {
+        max-width: 240px;
     }
     
     .input-wrapper input {
-        font-size: 12px;
+        font-size: clamp(10px, 1.8vw, 13px);
     }
     
     .team-logo-btn {
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
+    }
+    
+    .team-logo-container {
+        max-width: 240px;
+        max-height: 100px;
+        padding: 6px;
     }
 }
