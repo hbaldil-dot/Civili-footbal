@@ -940,7 +940,10 @@ canvas.canvas-active {
         max-width: 35px;
     }
 }
-/* TÜM ARKA PLANLARI KALDIR */
+/* ============================================================
+   TÜM ARKA PLANLARI KALDIR (EN SONA EKLE)
+   ============================================================ */
+
 #menu,
 #menu *,
 .menu-btn,
@@ -954,4 +957,17 @@ canvas.canvas-active {
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
+}
+
+/* Body karartması - sadece arka plan için */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+    pointer-events: none;
 }
