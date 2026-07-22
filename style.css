@@ -749,3 +749,5 @@ canvas.canvas-active {
         padding: 6px;
     }
 }
+/* KARE KUTULARI KALDIR */
+#menu, #menu *, .menu-btn, .menu-btn *, div { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
