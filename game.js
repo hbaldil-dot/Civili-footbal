@@ -226,18 +226,9 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
+    // Menüde saha çizgileri gösterilmez
+    // Sadece canvas temizlenir
     ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = "rgba(255,255,255,0.35)";
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(0, height / 2);
-    ctx.lineTo(width, height / 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(width / 2, height / 2, 45, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
-    ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 }
 
 function drawSoccerBall(x, y, r, rotation) {
