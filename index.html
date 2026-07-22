@@ -10,12 +10,15 @@
 </head>
 <body>
 
+    <!-- ===== ARKA PLAN ===== -->
+    <!-- Arka plan body'de CSS ile ayarlanacak -->
+
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
 
         <!-- BAŞLIK -->
         <div class="menu-title">
-            <h1>ÇİVİLİ FUTBOL</h1>
+            <h1>ÇİVİLİ<br>FUTBOL</h1>
             <div class="menu-subtitle">
                 <span>SENİN</span>
                 <span>SENİN</span>
@@ -23,16 +26,18 @@
             </div>
         </div>
 
-        <!-- OYUNCU İSMİ -->
+        <!-- İSMİNİ GİR -->
         <div class="input-group">
-            <label>İSMİNİ GİR:</label>
-            <div class="input-line">
+            <div class="input-wrapper">
+                <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
                 <input type="text" id="player-name" value="Oyuncu" maxlength="12">
             </div>
         </div>
 
         <!-- TAKIM SEÇ BUTONU -->
-        <button class="menu-btn" onclick="toggleTeamSelect()">TAKIM SEÇ</button>
+        <button class="menu-btn" onclick="toggleTeamSelect()">
+            <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+        </button>
 
         <!-- TAKIM LOGO SEÇİM ALANI -->
         <div class="team-logo-container" id="team-logo-container" style="display: none;">
@@ -43,12 +48,22 @@
         </div>
 
         <!-- OYUN MODLARI -->
-        <button class="menu-btn" onclick="openAILevelMenu()">BİLGİSAYARA KARŞI</button>
-        <button class="menu-btn" onclick="openLocalTeamSelect()">2 KİŞİLİK AYNI EKRAN</button>
-        <button class="menu-btn" onclick="openOnlineLobby()">ONLINE MAÇ</button>
+        <button class="menu-btn" onclick="openAILevelMenu()">
+            <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openLocalTeamSelect()">
+            <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openOnlineLobby()">
+            <img src="butonlar/online-mac.webp" alt="ONLINE MAÇ" class="menu-btn-img">
+        </button>
 
         <!-- AYARLAR -->
-        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">AYARLAR</button>
+        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
+            <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
+        </button>
 
     </div>
 
