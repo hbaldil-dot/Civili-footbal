@@ -79,7 +79,7 @@ body::before {
     -webkit-backdrop-filter: none !important;
 }
 
-/* ===== İSMİNİ GİR ===== */
+/* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
     margin-bottom: 1.2vh;
     text-align: center;
@@ -92,16 +92,54 @@ body::before {
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
-    gap: 6px;
+    gap: 4px;
     background: transparent !important;
+    flex-direction: row;
 }
 
+/* Logo solda */
+.logo-container {
+    position: relative;
+    width: 30%;
+    max-width: 65px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 0;
+}
+
+.input-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+}
+
+.team-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: auto;
+    border-radius: 50%;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+    pointer-events: none;
+    z-index: 5;
+    display: block !important;
+}
+
+/* İsim girişi sağda */
 .input-icon {
     flex: 1;
     min-width: 0;
     display: block;
     opacity: 0.9;
     pointer-events: none;
+    order: 1;
 }
 
 .input-wrapper input {
@@ -125,17 +163,6 @@ body::before {
     pointer-events: auto !important;
     z-index: 10 !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-}
-
-.input-logo {
-    width: 25%;
-    max-width: 55px;
-    height: auto;
-    display: block;
-    opacity: 0.9;
-    flex-shrink: 0;
-    pointer-events: none;
-    margin-left: auto;
 }
 
 /* ===== MENÜ BUTONLARI ===== */
@@ -662,7 +689,7 @@ canvas.canvas-active {
     }
     .input-wrapper { max-width: 280px; gap: 4px; }
     .input-wrapper input { font-size: clamp(10px, 1.8vw, 14px); width: 60%; }
-    .input-logo { max-width: 45px; }
+    .logo-container { max-width: 50px; }
     .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
     .team-logo-btn { width: 28px; height: 28px; }
     .team-logo-container { max-width: 280px; max-height: 120px; }
@@ -676,7 +703,7 @@ canvas.canvas-active {
     }
     .input-wrapper { max-width: 240px; gap: 3px; }
     .input-wrapper input { font-size: clamp(9px, 1.5vw, 12px); width: 55%; }
-    .input-logo { max-width: 35px; }
+    .logo-container { max-width: 40px; }
     .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
     .team-logo-btn { width: 24px; height: 24px; }
     .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
