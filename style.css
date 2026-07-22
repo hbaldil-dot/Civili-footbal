@@ -736,3 +736,91 @@ canvas.canvas-active {
     background: transparent !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
+/* ============================================================
+   LOGO SAĞA VE KÜÇÜK (EN SONA EKLE)
+   ============================================================ */
+
+/* Logo container - sağda ve küçük */
+.logo-container {
+    position: relative;
+    width: 20%;
+    max-width: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 2;
+    margin-left: auto;
+}
+
+/* Logo arka plan resmi */
+.input-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+}
+
+/* Takım logosu - logo alanının ortasında */
+.team-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55%;
+    height: auto;
+    border-radius: 50%;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+    z-index: 5;
+    display: block !important;
+}
+
+/* İsim girişi solda */
+.input-icon {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    opacity: 0.9;
+    pointer-events: none;
+    order: 0;
+}
+
+/* Input alanı */
+.input-wrapper input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 70%;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: clamp(12px, 2vw, 16px);
+    font-family: 'Courier New', monospace;
+    outline: none;
+    text-align: center;
+    padding: 0 5px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Input wrapper */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    gap: 4px;
+    background: transparent !important;
+    flex-direction: row;
+}
