@@ -755,3 +755,9 @@ canvas.canvas-active {
 }
 /* KARE KUTULARI KALDIR */
 #menu, #menu *, .menu-btn, .menu-btn *, div { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
+/* MENÜYÜ AŞAĞI AL - EN SONA EKLE */
+#menu {
+    top: auto !important;
+    bottom: 5vh !important;
+    transform: translateX(-50%) !important;
+}
