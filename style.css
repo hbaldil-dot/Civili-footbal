@@ -108,6 +108,7 @@ body::before {
     max-width: 320px;
     margin: 0 auto;
     gap: 6px;
+    background: transparent !important;
 }
 
 .input-icon {
@@ -125,7 +126,7 @@ body::before {
     height: 100%;
     background: transparent !important;
     border: none !important;
-    color: #333;
+    color: transparent;
     font-size: clamp(12px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
@@ -133,6 +134,8 @@ body::before {
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .input-logo {
@@ -176,6 +179,7 @@ body::before {
 /* AYARLAR butonu */
 .settings-btn {
     margin-top: 0.5vh;
+    background: transparent !important;
 }
 
 .settings-btn .menu-btn-img {
