@@ -755,7 +755,7 @@ canvas.canvas-active {
 
 /* Logo arka plan resmi */
 .input-logo {
-    width: 100%;
+    width: 110%;
     height: auto;
     display: block;
     opacity: 0.9;
@@ -764,8 +764,8 @@ canvas.canvas-active {
 /* Takım logosu - logo alanının ortasında */
 .team-logo-overlay {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 70%;
+    left: 70%;
     transform: translate(-50%, -50%);
     width: 55%;
     height: auto;
