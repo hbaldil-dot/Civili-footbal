@@ -755,7 +755,7 @@ canvas.canvas-active {
 
 /* Logo arka plan resmi */
 .input-logo {
-    width: 110%;
+    width: 140%;
     height: auto;
     display: block;
     opacity: 0.9;
@@ -767,7 +767,7 @@ canvas.canvas-active {
     top: 55%;
     left: 55%;
     transform: translate(-50%, -50%);
-    width: 75%;
+    width: 90%;
     height: auto;
     border-radius: 50%;
     object-fit: contain;
