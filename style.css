@@ -732,3 +732,38 @@ canvas.canvas-active {
 .logo-area {
     display: none !important;
 }
+/* ============================================================
+   LOGO ALANI İÇİNDE TAKIM LOGOSU (EN SONA EKLE)
+   ============================================================ */
+
+/* Logo alanını saran container */
+.logo-container {
+    position: relative;
+    width: 25%;
+    max-width: 55px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Takım logosu - logo alanının ortasında */
+.team-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55%;
+    height: auto;
+    border-radius: 50%;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Büyük logo alanını gizle */
+.logo-area {
+    display: none !important;
+}
