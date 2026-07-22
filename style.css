@@ -761,3 +761,27 @@ canvas.canvas-active {
     bottom: 5vh !important;
     transform: translateX(-50%) !important;
 }
+/* İSİM GİRİŞİNİN ÇALIŞMASI İÇİN */
+.input-wrapper input {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative !important;
+    background: transparent !important;
+    border: none !important;
+    color: #333 !important;
+    font-size: clamp(12px, 2vw, 16px) !important;
+    font-family: 'Courier New', monospace !important;
+    outline: none !important;
+    text-align: center !important;
+    padding: 0 5px !important;
+    font-weight: bold !important;
+    letter-spacing: 2px !important;
+    width: 65% !important;
+    height: 100% !important;
+}
+
+/* Input'un üzerindeki görsellerin tıklamayı engellemesini önle */
+.input-icon,
+.input-logo {
+    pointer-events: none !important;
+}
