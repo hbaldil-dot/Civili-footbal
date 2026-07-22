@@ -844,3 +844,23 @@ canvas.canvas-active {
         padding: 6px;
     }
 }
+/* ============================================================
+   LOGO ALANI (SONA EKLENEK KOD)
+   ============================================================ */
+
+.logo-area {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 1.5vh auto;
+}
+
+.logo-image {
+    width: 100%;
+    display: block;
+    opacity: 0.95;
+}
+
+/* Menü başlıkları gizlendi */
+.menu-title {
+    display: none;
+}
