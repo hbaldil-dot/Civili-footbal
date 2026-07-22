@@ -14,6 +14,7 @@ textarea {
     user-select: text !important;
     -webkit-user-select: text !important;
 }
+
 body {
     background: #0a0a0a;
     font-family: 'Courier New', Courier, monospace;
@@ -28,13 +29,14 @@ body {
     padding: 8px;
     position: relative;
     touch-action: none;
-    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-image: url('61EE758F-D67F-494F-A96A-B3C139B274D8.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
 
+/* SADECE ARKA PLAN KARARTMASI - KUTU YOK */
 body::before {
     content: '';
     position: fixed;
@@ -48,55 +50,48 @@ body::before {
 }
 
 /* ============================================================
-   ANA MENÜ - GÖRSEL BUTONLAR
+   MENÜ - TAMAMEN ŞEFFAF, KUTU YOK
    ============================================================ */
 
 #menu {
     position: absolute;
-    border: none;
-    border-radius: 0;
+    border: none !important;
+    border-radius: 0 !important;
     padding: 2vh 2vw 2vh 2vw;
     text-align: center;
     z-index: 100;
     width: 92%;
     max-width: 400px;
-    box-shadow: none;
+    box-shadow: none !important;
     display: block;
     background: transparent !important;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-/* ===== BAŞLIK ===== */
-.menu-title {
-    margin-bottom: 1.5vh;
+/* TÜM MENÜ İÇERİKLERİ ŞEFFAF */
+#menu * {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
-.menu-title h1 {
-    color: #ffffff;
-    font-size: clamp(28px, 5.5vw, 48px);
-    font-weight: 900;
-    text-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);
-    letter-spacing: 4px;
-    margin: 0;
-    font-family: 'Courier New', monospace;
-    line-height: 1.1;
+/* ===== LOGO ALANI ===== */
+.logo-area {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 1.5vh auto;
 }
 
-.menu-subtitle {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin-top: 0.5vh;
-    color: rgba(255, 215, 0, 0.5);
-    font-size: clamp(9px, 1.6vw, 14px);
-    letter-spacing: 4px;
-    font-weight: bold;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.menu-subtitle span {
-    padding: 0 2px;
+.logo-image {
+    width: 100%;
+    display: block;
+    opacity: 0.95;
 }
 
 /* ===== İSMİNİ GİR ===== */
@@ -107,13 +102,17 @@ body::before {
 
 .input-wrapper {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
     max-width: 320px;
+    margin: 0 auto;
+    gap: 6px;
 }
 
 .input-icon {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     display: block;
     opacity: 0.9;
 }
@@ -122,35 +121,41 @@ body::before {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 65%;
     height: 100%;
-    background: transparent;
-    border: none;
+    background: transparent !important;
+    border: none !important;
     color: #333;
-    font-size: clamp(13px, 2.2vw, 18px);
+    font-size: clamp(12px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
     text-align: center;
-    padding: 0 10px;
+    padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
 }
 
-/* ===== MENÜ BUTONLARI ===== */
+.input-logo {
+    width: 25%;
+    max-width: 55px;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+/* ===== MENÜ BUTONLARI - ŞEFFAF ===== */
 .menu-btn {
     display: block;
     width: 100%;
     max-width: 320px;
     margin: 0 auto 0.6vh auto;
-    background: transparent;
-    border: none;
+    background: transparent !important;
+    border: none !important;
     cursor: pointer;
     padding: 0;
     transition: transform 0.2s ease;
-}
-
-.menu-btn:last-child {
-    margin-bottom: 0;
+    box-shadow: none !important;
 }
 
 .menu-btn:active {
@@ -168,7 +173,7 @@ body::before {
     opacity: 1;
 }
 
-/* AYARLAR butonu özel */
+/* AYARLAR butonu */
 .settings-btn {
     margin-top: 0.5vh;
 }
@@ -188,9 +193,9 @@ body::before {
 .team-logo-container {
     margin: 0.5vh auto 1vh auto;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5) !important;
     border-radius: 10px;
-    border: 1px solid rgba(46, 204, 113, 0.15);
+    border: 1px solid rgba(46, 204, 113, 0.1) !important;
     animation: slideDown 0.3s ease;
     max-height: 140px;
     overflow-y: auto;
@@ -411,100 +416,6 @@ body::before {
 .color-btn.active {
     border-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.06);
-}
-
-/* ============================================================
-   ONLINE LOBI
-   ============================================================ */
-
-.player-list {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    text-align: left;
-}
-
-.player-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.player-item:last-child {
-    border-bottom: none;
-}
-
-.player-item .status {
-    font-size: 10px;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-weight: bold;
-    background: rgba(39, 174, 96, 0.08);
-    color: rgba(255, 255, 255, 0.3);
-    cursor: pointer;
-    border: 1px solid rgba(39, 174, 96, 0.04);
-    font-family: inherit;
-    letter-spacing: 2px;
-    transition: all 0.3s ease;
-}
-
-.player-item .status:hover {
-    background: rgba(39, 174, 96, 0.12);
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.lobby-logo {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(0, 0, 0, 0.3);
-    vertical-align: middle;
-    margin-right: 6px;
-}
-
-.player-item span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 12px;
-}
-
-/* ============================================================
-   2 KİŞİLİK TAKIM SEÇ
-   ============================================================ */
-
-.player-team-select h3 {
-    font-size: 13px;
-    margin-bottom: 4px;
-    letter-spacing: 4px;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.2);
-}
-
-.player-team-select .team-logo-options {
-    max-height: 100px;
-    padding: 4px;
-    gap: 4px;
-}
-
-.player-team-select .team-logo-btn {
-    width: 34px;
-    height: 34px;
-}
-
-.player-team-select .team-logo-btn.active-p1 {
-    border-color: rgba(52, 152, 219, 0.2);
-}
-
-.player-team-select .team-logo-btn.active-p2 {
-    border-color: rgba(231, 76, 60, 0.2);
 }
 
 /* ============================================================
@@ -760,32 +671,31 @@ canvas.canvas-active {
 
 @media (max-width: 420px) {
     #menu {
-        padding: 3vh 3vw 2vh 3vw;
+        padding: 2vh 2vw 2vh 2vw;
         max-width: 340px;
     }
     
-    .menu-title h1 {
-        font-size: clamp(24px, 5vw, 32px);
-        letter-spacing: 3px;
+    .logo-area {
+        max-width: 280px;
     }
     
-    .menu-subtitle {
-        font-size: clamp(8px, 1.4vw, 11px);
-        letter-spacing: 3px;
-        gap: 3px;
+    .input-wrapper {
+        max-width: 280px;
+        gap: 4px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(10px, 1.8vw, 14px);
+        width: 60%;
+    }
+    
+    .input-logo {
+        max-width: 45px;
     }
     
     .menu-btn {
         max-width: 280px;
         margin-bottom: 0.4vh;
-    }
-    
-    .input-wrapper {
-        max-width: 280px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(12px, 2vw, 15px);
     }
     
     .team-logo-btn {
@@ -801,32 +711,31 @@ canvas.canvas-active {
 
 @media (max-width: 360px) {
     #menu {
-        padding: 2vh 2vw 1.5vh 2vw;
+        padding: 1.5vh 2vw 1.5vh 2vw;
         max-width: 300px;
     }
     
-    .menu-title h1 {
-        font-size: clamp(20px, 4.5vw, 26px);
-        letter-spacing: 2px;
+    .logo-area {
+        max-width: 240px;
     }
     
-    .menu-subtitle {
-        font-size: clamp(7px, 1.2vw, 9px);
-        letter-spacing: 2px;
-        gap: 2px;
+    .input-wrapper {
+        max-width: 240px;
+        gap: 3px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(9px, 1.5vw, 12px);
+        width: 55%;
+    }
+    
+    .input-logo {
+        max-width: 35px;
     }
     
     .menu-btn {
         max-width: 240px;
         margin-bottom: 0.3vh;
-    }
-    
-    .input-wrapper {
-        max-width: 240px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(10px, 1.8vw, 13px);
     }
     
     .team-logo-btn {
@@ -839,135 +748,4 @@ canvas.canvas-active {
         max-height: 100px;
         padding: 6px;
     }
-}
-/* ============================================================
-   LOGO ALANI (SONA EKLENEK KOD)
-   ============================================================ */
-
-.logo-area {
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto 1.5vh auto;
-}
-
-.logo-image {
-    width: 100%;
-    display: block;
-    opacity: 0.95;
-}
-
-/* Menü başlıkları gizlendi */
-.menu-title {
-    display: none;
-}
-/* ============================================================
-   İSİM GİRİŞİ + LOGO YAN YANA
-   ============================================================ */
-
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-    gap: 6px;
-}
-
-.input-icon {
-    flex: 1;
-    min-width: 0;
-    display: block;
-    opacity: 0.9;
-}
-
-.input-wrapper input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 70%;
-    height: 100%;
-    background: transparent;
-    border: none;
-    color: #333;
-    font-size: clamp(12px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
-    outline: none;
-    text-align: center;
-    padding: 0 5px;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.input-logo {
-    width: 25%;
-    max-width: 60px;
-    height: auto;
-    display: block;
-    opacity: 0.9;
-    flex-shrink: 0;
-}
-
-/* Mobil uyum */
-@media (max-width: 420px) {
-    .input-wrapper {
-        max-width: 280px;
-        gap: 4px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(10px, 1.8vw, 14px);
-        width: 65%;
-    }
-    
-    .input-logo {
-        max-width: 45px;
-    }
-}
-
-@media (max-width: 360px) {
-    .input-wrapper {
-        max-width: 240px;
-        gap: 3px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(9px, 1.5vw, 12px);
-        width: 60%;
-    }
-    
-    .input-logo {
-        max-width: 35px;
-    }
-}
-/* ============================================================
-   TÜM ARKA PLANLARI KALDIR (EN SONA EKLE)
-   ============================================================ */
-
-#menu,
-#menu *,
-.menu-btn,
-.menu-btn *,
-.logo-area,
-.logo-area *,
-.input-group,
-.input-group *,
-.input-wrapper,
-.input-wrapper * {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-}
-
-/* Body karartması - sadece arka plan için */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 0;
-    pointer-events: none;
 }
