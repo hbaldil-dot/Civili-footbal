@@ -1411,21 +1411,60 @@ function selectTeamLogo(logoFile) {
     setTimeout(() => { if (isTeamSelectOpen) toggleTeamSelect(); }, 500);
 }
 
+// ============================================================
+// SEÇİLEN TAKIM LOGOSUNU GÖSTER
+// ============================================================
+
 function updateTeamLogoDisplay() {
-    const displayImg = document.getElementById('selected-team-logo');
+    const displayImg = document.getElementById('selected-team-logo-display');
     if (displayImg) {
-        displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() { this.src = 'takimlar/default.png'; };
+        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
+            displayImg.src = `takimlar/${selectedTeamLogo}`;
+            displayImg.style.display = 'block';
+            displayImg.style.opacity = '1';
+        } else {
+            displayImg.src = 'takimlar/default.png';
+            displayImg.style.display = 'block';
+            displayImg.style.opacity = '0.3';
+        }
+        displayImg.onerror = function() {
+            this.src = 'takimlar/default.png';
+            this.style.opacity = '0.3';
+        };
+        console.log('🔄 Takım logosu güncellendi:', selectedTeamLogo || 'default');
     }
 }
 
-function updateSelectedTeamName() {
-    const logo = teamLogos.find(l => l.file === selectedTeamLogo);
-    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
-    const displayName = document.getElementById('selected-team-name-display');
-    if (displayName) displayName.textContent = teamName;
+// selectTeamLogo fonksiyonunu güncelle
+function selectTeamLogo(logoFile) {
+    selectedTeamLogo = logoFile;
+    document.querySelectorAll('.team-logo-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const img = btn.querySelector('img');
+        if (img && img.src && img.src.includes(logoFile)) {
+            btn.classList.add('active');
+        }
+    });
+    updateTeamLogoDisplay();  // Logo alanındaki görseli güncelle
+    updateSelectedTeamName();
+    updateScoreLogos();
+    loadTeamLogoImage(logoFile);
+    selectRandomAITeam();
+    setTimeout(() => { 
+        if (isTeamSelectOpen) toggleTeamSelect(); 
+    }, 500);
 }
 
+// Sayfa yüklendiğinde logo göster
+document.addEventListener('DOMContentLoaded', function() {
+    selectRandomTeam();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();  // Logo alanını güncelle
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    hideField();
+});
 // ============================================================
 // SKORBORD LOGO GÜNCELLEME
 // ============================================================
