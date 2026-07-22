@@ -703,16 +703,26 @@ body::before {
     touch-action: none;
 }
 
+//* ===== CANVAS - MENÜDE ŞEFFAF, OYUNDA GÖRÜNÜR ===== */
 canvas {
-    background: #1a3a1a;
-    border: 4px solid rgba(27, 94, 32, 0.4);
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     width: 100%;
     height: 100%;
     display: block;
     image-rendering: pixelated;
     touch-action: none;
+    transition: all 0.3s ease;
+}
+
+/* Oyun başlayınca JavaScript ile eklenecek stiller */
+.canvas-active {
+    background: #2e7d32 !important;
+    border: 4px solid rgba(27, 94, 32, 0.4) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
 #start-match-btn {
