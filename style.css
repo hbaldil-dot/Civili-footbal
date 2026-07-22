@@ -764,10 +764,10 @@ canvas.canvas-active {
 /* Takım logosu - logo alanının ortasında */
 .team-logo-overlay {
     position: absolute;
-    top: 70%;
-    left: 70%;
+    top: 55%;
+    left: 55%;
     transform: translate(-50%, -50%);
-    width: 55%;
+    width: 75%;
     height: auto;
     border-radius: 50%;
     object-fit: contain;
