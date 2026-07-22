@@ -226,13 +226,7 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
-    // Canvas'ı temizle ve arka planı şeffaf yap
     ctx.clearRect(0, 0, width, height);
-    
-    // Menüdeyken arka planı şeffaf bırak (sadece çizgiler çizilir)
-    // Not: Bu fonksiyon sadece menüde çağrılır, arka plan boyanmaz
-    
-    // Sadece saha çizgilerini çiz
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -312,7 +306,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
 function draw() {
     ctx.clearRect(0, 0, width, height);
     
-    // === SAHA ARKA PLANINI ÇİZ (AYARLARDAKİ RENKLE) ===
+    // SAHA ARKA PLANI
     ctx.fillStyle = fieldColor || '#2e7d32';
     ctx.fillRect(0, 0, width, height);
     
@@ -324,7 +318,6 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    // === SAHA ÇİZGİLERİ ===
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -337,7 +330,6 @@ function draw() {
     ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
-    // === KADRO AYARLAMA AŞAMASINDAKİ ÇERÇEVE ===
     if (currentPhase === 'setup') {
         ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
         ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
@@ -346,7 +338,6 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
-    // === OYUNCULARI ÇİZ ===
     pins.forEach(pin => {
         if (pin.isPost) {
             ctx.fillStyle = '#ffffff';
@@ -382,206 +373,6 @@ function draw() {
         }
     });
 
-    // === VURUŞ ÇİZGİSİ ===
-    if (currentPhase === 'playing' && isDraggingBall) {
-        const dx = dragStart.x - dragCurrent.x;
-        const dy = dragStart.y - dragCurrent.y;
-        const dist = Math.hypot(dx, dy);
-        
-        if (dist > 10) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(46, 204, 113, 0.4)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 6]);
-            ctx.beginPath();
-            ctx.moveTo(cap.x, cap.y);
-            
-            const normX = dx / dist;
-            const normY = dy / dist;
-            const len = Math.min(dist * 1.2, MAX_DRAG_DIST);
-            const endX = cap.x + normX * len;
-            const endY = cap.y + normY * len;
-            
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-            
-            ctx.setLineDash([]);
-            const arrowSize = 10;
-            const angle = Math.atan2(dy, dx);
-            
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
-            ctx.beginPath();
-            ctx.moveTo(endX, endY);
-            ctx.lineTo(endX - Math.cos(angle - 0.5) * arrowSize, 
-                       endY - Math.sin(angle - 0.5) * arrowSize);
-            ctx.lineTo(endX - Math.cos(angle + 0.5) * arrowSize, 
-                       endY - Math.sin(angle + 0.5) * arrowSize);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-    }
-
-    // === TOP ===
-    if (currentPhase === 'playing' && cap) {
-        drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
-    }
-
-    // === GOL ANİMASYONU ===
-    if (goalAnimation) {
-        const elapsed = Date.now() - goalAnimationStartTime;
-        const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
-        
-        let scale = 0;
-        if (progress < 0.15) {
-            scale = (progress / 0.15) * 1.2;
-        } else {
-            scale = 1.2;
-        }
-        
-        let alpha = 1;
-        if (progress < 0.9) {
-            const blinkDuration = 0.5;
-            const blinkPhase = progress / blinkDuration;
-            const currentBlink = Math.floor(blinkPhase);
-            const phaseInBlink = blinkPhase - currentBlink;
-            
-            if (currentBlink < 6) {
-                if (phaseInBlink < 0.5) {
-                    alpha = phaseInBlink * 2;
-                } else {
-                    alpha = 1 - (phaseInBlink - 0.5) * 2;
-                }
-                if (currentBlink >= 2) alpha = alpha * 0.9;
-                if (currentBlink >= 4) alpha = alpha * 0.8;
-            } else {
-                alpha = 0;
-            }
-        } else {
-            alpha = 1 - ((progress - 0.9) / 0.1);
-        }
-        
-        if (alpha < 0.01) alpha = 0;
-        if (scale < 0.01) scale = 0;
-        
-        if (gameMode === 'online' && myTeamNumber === 2) {
-            ctx.save();
-            ctx.translate(width / 2, height / 2);
-            ctx.rotate(Math.PI);
-            ctx.translate(-width / 2, -height / 2);
-        }
-        
-        ctx.save();
-        ctx.translate(width / 2, height / 2);
-        ctx.scale(scale, scale);
-        
-        if (alpha > 0.1 && goalAnimation.type === 'image' && goalImage) {
-            const imgSize = 100;
-            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.5})`;
-            ctx.shadowBlur = 50;
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.clip();
-            ctx.globalAlpha = alpha;
-            ctx.drawImage(goalImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
-            ctx.globalAlpha = 1;
-            ctx.restore();
-            ctx.shadowBlur = 0;
-            
-            if (alpha > 0.1) {
-                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.9})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(0, 0, imgSize / 2 + 4, 0, Math.PI * 2);
-                ctx.stroke();
-                
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.font = `bold 38px Arial`;
-                ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.9})`;
-                ctx.shadowBlur = 15;
-                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
-                ctx.fillText('⚽ GOAL! ⚽', 2, imgSize/2 + 12);
-                
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
-                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
-                ctx.shadowBlur = 20;
-                ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
-                ctx.shadowBlur = 0;
-            }
-        } else if (alpha > 0.1) {
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = `bold ${70 * (0.8 + scale * 0.2)}px Arial`;
-            
-            ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.8})`;
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
-            ctx.fillText('⚽ GOAL! ⚽', 3, 3);
-            
-            ctx.shadowBlur = 0;
-            const textGradient = ctx.createLinearGradient(-70, -40, 70, 40);
-            textGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
-            textGradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
-            textGradient.addColorStop(1, `rgba(255, 200, 0, ${alpha})`);
-            ctx.fillStyle = textGradient;
-            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
-            ctx.shadowBlur = 30;
-            ctx.fillText('⚽ GOAL! ⚽', 0, 0);
-            ctx.shadowBlur = 0;
-        }
-        
-        if (alpha > 0.1) {
-            for (let i = 0; i < 16; i++) {
-                const angle = (i / 16) * Math.PI * 2 + progress * 0.5;
-                const dist = 80 + Math.sin(progress * 6 + i * 1.2) * 20;
-                const starX = Math.cos(angle) * dist;
-                const starY = Math.sin(angle) * dist;
-                const starSize = 5 + Math.sin(progress * 8 + i * 1.8) * 3;
-                
-                ctx.fillStyle = `rgba(255, 215, 0, ${alpha * (0.15 + Math.sin(progress * 10 + i * 1.5) * 0.1)})`;
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                
-                const spikes = 5;
-                const outerRadius = Math.abs(starSize);
-                const innerRadius = outerRadius * 0.4;
-                ctx.moveTo(starX + outerRadius * Math.cos(0), starY + outerRadius * Math.sin(0));
-                for (let j = 1; j < spikes * 2; j++) {
-                    const radius = j % 2 === 0 ? outerRadius : innerRadius;
-                    const theta = (j / (spikes * 2)) * Math.PI * 2;
-                    ctx.lineTo(starX + radius * Math.cos(theta), starY + radius * Math.sin(theta));
-                }
-                ctx.closePath();
-                ctx.fill();
-            }
-            
-            const blinkFlash = Math.sin(progress * 20) * 0.5 + 0.5;
-            if (blinkFlash > 0.8 && alpha > 0.5) {
-                ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.05 * blinkFlash})`;
-                ctx.beginPath();
-                ctx.arc(0, 0, 200, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-        
-        ctx.restore();
-        
-        if (gameMode === 'online' && myTeamNumber === 2) {
-            ctx.restore();
-        }
-        
-        if (progress >= 1) {
-            goalAnimation = null;
-        }
-    }
-
-    ctx.restore();
-}
     if (currentPhase === 'playing' && isDraggingBall) {
         const dx = dragStart.x - dragCurrent.x;
         const dy = dragStart.y - dragCurrent.y;
@@ -887,10 +678,6 @@ function executeAIShot(target, params) {
     }, params.reactionDelay);
 }
 
-function executeFakeShot(angle, power) {
-    // Kısa tutuldu
-}
-
 // ============================================================
 // ONLINE - OYUNCU BİLGİLERİ
 // ============================================================
@@ -900,13 +687,6 @@ function getPlayerData() {
         name: name,
         logo: selectedTeamLogo || 'default.png'
     };
-}
-
-function updatePlayerName() {
-    if (gameMode === 'online' && socket) {
-        const playerData = getPlayerData();
-        socket.emit("update-player", playerData);
-    }
 }
 
 // ============================================================
