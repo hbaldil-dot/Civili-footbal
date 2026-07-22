@@ -23,7 +23,7 @@ if (typeof io !== 'undefined') {
 }
 
 // ============================================================
-// SAHA GÖSTER/GİZLE FONKSİYONLARI (YENİ)
+// SAHA GÖSTER/GİZLE FONKSİYONLARI
 // ============================================================
 
 function showField() {
@@ -34,6 +34,7 @@ function showField() {
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
         canvas.classList.add('canvas-active');
+        console.log('✅ Saha gösteriliyor, renk:', fieldColor);
     }
 }
 
@@ -45,6 +46,7 @@ function hideField() {
         canvas.style.borderRadius = '0';
         canvas.style.boxShadow = 'none';
         canvas.classList.remove('canvas-active');
+        console.log('✅ Saha gizlendi');
     }
 }
 
@@ -56,7 +58,6 @@ let aiTeamLogo = '';
 let isTeamSelectOpen = false;
 let loadedLogos = {};
 
-// 2 KİŞİLİK DEĞİŞKENLER
 let localPlayer1Logo = '';
 let localPlayer2Logo = '';
 let localP1Selected = false;
@@ -78,7 +79,6 @@ const teamLogos = [
     { file: 'samsun.png', name: '⚽ Samsunspor' }
 ];
 
-// Rastgele takım seç (oyuncu için)
 function selectRandomTeam() {
     const randomIndex = Math.floor(Math.random() * teamLogos.length);
     const selected = teamLogos[randomIndex];
@@ -87,7 +87,6 @@ function selectRandomTeam() {
     return selected;
 }
 
-// AI için rastgele takım seç
 function selectRandomAITeam() {
     const availableLogos = teamLogos.filter(l => l.file !== selectedTeamLogo);
     if (availableLogos.length === 0) {
@@ -147,7 +146,6 @@ const MAX_DRAG_DIST = cap.radius * 2 * 6;
 let aiLevel = 'orta';
 let fieldColor = '#2e7d32';
 
-// GOL ANİMASYONU
 let goalAnimation = null;
 let goalAnimationStartTime = 0;
 const GOAL_ANIMATION_DURATION = 3000;
@@ -335,7 +333,6 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
-    // OYUNCULARI ÇİZ
     pins.forEach(pin => {
         if (pin.isPost) {
             ctx.fillStyle = '#ffffff';
@@ -451,7 +448,6 @@ function draw() {
         if (alpha < 0.01) alpha = 0;
         if (scale < 0.01) scale = 0;
         
-        // Online'da misafir oyuncu için 180 derece dönüş
         if (gameMode === 'online' && myTeamNumber === 2) {
             ctx.save();
             ctx.translate(width / 2, height / 2);
@@ -523,7 +519,6 @@ function draw() {
             ctx.shadowBlur = 0;
         }
         
-        // Işıltı efektleri
         if (alpha > 0.1) {
             for (let i = 0; i < 16; i++) {
                 const angle = (i / 16) * Math.PI * 2 + progress * 0.5;
@@ -850,9 +845,7 @@ function startLocalGame(mode, aiLevelParam) {
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
-    // SAHAYI GÖSTER (OYUN BAŞLARKEN)
     showField();
-    
     startSetupPhase();
 }
 
@@ -872,6 +865,7 @@ function closeOnlineLobby() {
 }
 
 function startSetupPhase() {
+    showField();
     currentPhase = 'setup';
     score = { p1: 0, p2: 0 };
     document.getElementById('score-p1').innerText = "0";
@@ -1097,9 +1091,7 @@ function exitToMenu() {
     isAiThinking = false;
     isDraggingBall = false;
     
-    // SAHAYI GİZLE (MENÜYE DÖNÜNCE)
     hideField();
-    
     drawFieldLinesOnly();
 }
 
@@ -1377,8 +1369,10 @@ function selectFieldColor(color) {
         btn.classList.toggle('active', btn.dataset.field === color);
     });
     const canvas = document.getElementById('gameCanvas');
-    if (canvas) canvas.style.background = color;
-    console.log(`🟩 Saha rengi: ${color}`);
+    if (canvas && currentPhase !== 'menu') {
+        canvas.style.background = color;
+    }
+    console.log(`🟩 Saha rengi seçildi: ${color}`);
 }
 
 // ============================================================
@@ -1540,7 +1534,6 @@ function loadLocalTeamLogos() {
     container2.innerHTML = '';
     
     teamLogos.forEach((logo) => {
-        // Player 1 logosu
         const btn1 = document.createElement('button');
         btn1.className = 'team-logo-btn';
         btn1.title = logo.name;
@@ -1553,7 +1546,6 @@ function loadLocalTeamLogos() {
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
         
-        // Player 2 logosu
         const btn2 = document.createElement('button');
         btn2.className = 'team-logo-btn';
         btn2.title = logo.name;
@@ -1639,7 +1631,6 @@ function startLocalGameWithTeams() {
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
-    // SAHAYI GÖSTER
     showField();
     
     setTimeout(() => {
@@ -1649,7 +1640,7 @@ function startLocalGameWithTeams() {
     startSetupPhase();
 }
 
-// Sayfa yüklendiğinde rastgele takım seç
+// Sayfa yüklendiğinde
 document.addEventListener('DOMContentLoaded', function() {
     selectRandomTeam();
     updateSelectedTeamName();
@@ -1657,7 +1648,5 @@ document.addEventListener('DOMContentLoaded', function() {
     updateScoreLogos();
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
-    
-    // Menüde saha gizli olsun
     hideField();
 });
