@@ -736,3 +736,83 @@ canvas.canvas-active {
     background: transparent !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
+/* ============================================================
+   İSİM GİRİŞİ + LOGO YAN YANA
+   ============================================================ */
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    gap: 6px;
+}
+
+.input-icon {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    opacity: 0.9;
+}
+
+.input-wrapper input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 70%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: #333;
+    font-size: clamp(12px, 2vw, 16px);
+    font-family: 'Courier New', monospace;
+    outline: none;
+    text-align: center;
+    padding: 0 5px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.input-logo {
+    width: 25%;
+    max-width: 60px;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+/* Mobil uyum */
+@media (max-width: 420px) {
+    .input-wrapper {
+        max-width: 280px;
+        gap: 4px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(10px, 1.8vw, 14px);
+        width: 65%;
+    }
+    
+    .input-logo {
+        max-width: 45px;
+    }
+}
+
+@media (max-width: 360px) {
+    .input-wrapper {
+        max-width: 240px;
+        gap: 3px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(9px, 1.5vw, 12px);
+        width: 60%;
+    }
+    
+    .input-logo {
+        max-width: 35px;
+    }
+}
