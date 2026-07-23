@@ -92,22 +92,35 @@
         </div>
     </div>
 
-    <!-- ===== AI ZORLUK POP-UP ===== -->
-    <div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>ZORLUK SEVİYESİ</h2>
-                <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
-            </div>
-            <div class="popup-body">
-                <button class="menu-btn" onclick="startLocalGame('ai', 'kolay')">Kolay</button>
-                <button class="menu-btn" onclick="startLocalGame('ai', 'orta')">Orta</button>
-                <button class="menu-btn" onclick="startLocalGame('ai', 'zor')">Zor</button>
-                <button class="menu-btn" onclick="startLocalGame('ai', 'usta')">Usta</button>
-            </div>
+   <!-- ===== AI ZORLUK POP-UP ===== -->
+<div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h2>ZORLUK SEÇİMİ</h2>
+            <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
+        </div>
+        <div class="popup-body">
+            <!-- TEK BÜYÜK GÖRSEL -->
+            <img src="butonlar/zorluk-secimi.webp" alt="Zorluk Seçimi" style="width:100%; display:block; cursor:pointer;" onclick="startLocalGame('ai', 'kolay')">
+            
+            <!-- VEYA BUTONLARI AYRI AYRI KULLANMAK İSTERSENİZ -->
+            <!--
+            <button class="menu-btn" onclick="startLocalGame('ai', 'kolay')">
+                <img src="butonlar/zorluk-kolay.webp" alt="Kolay" class="menu-btn-img">
+            </button>
+            <button class="menu-btn" onclick="startLocalGame('ai', 'orta')">
+                <img src="butonlar/zorluk-orta.webp" alt="Orta" class="menu-btn-img">
+            </button>
+            <button class="menu-btn" onclick="startLocalGame('ai', 'zor')">
+                <img src="butonlar/zorluk-zor.webp" alt="Zor" class="menu-btn-img">
+            </button>
+            <button class="menu-btn" onclick="startLocalGame('ai', 'usta')">
+                <img src="butonlar/zorluk-usta.webp" alt="Usta" class="menu-btn-img">
+            </button>
+            -->
         </div>
     </div>
-
+</div>
     <!-- ===== ONLINE LOBI POP-UP ===== -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
