@@ -835,12 +835,15 @@ important;
     -webkit-backdrop-filter: blur(4px);
 }
 /* ============================================================
-   AYARLAR POP-UP ARKA FONU (EN SONA EKLE)
+   AYARLAR POP-UP ARKA FONU - TAM EKRAN (EN SONA EKLE)
    ============================================================ */
 
 #settings-popup .popup-content {
     background-image: url('menu/ayarlar/arkafon.webp') !important;
-    background-size: cover !important;
+    background-size: 100% 100% !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-}
+    border: none !important;
+    box-shadow: none !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
