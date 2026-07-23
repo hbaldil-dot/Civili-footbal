@@ -29,18 +29,22 @@ if (typeof io !== 'undefined') {
 function showField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
-        canvas.style.background = fieldColor || '#2e7d32';
+        canvas.style.backgroundImage = "url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp')";
+        canvas.style.backgroundSize = "cover";
+        canvas.style.backgroundPosition = "center";
+        canvas.style.backgroundRepeat = "no-repeat";
         canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
         canvas.classList.add('canvas-active');
-        console.log('✅ Saha gösteriliyor, renk:', fieldColor);
+        console.log('✅ Saha gösteriliyor, arka plan resmi kullanılıyor');
     }
 }
 
 function hideField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
+        canvas.style.backgroundImage = 'none';
         canvas.style.background = 'transparent';
         canvas.style.border = 'none';
         canvas.style.borderRadius = '0';
@@ -144,12 +148,28 @@ const pBoxX1 = (width - penaltyBoxW) / 2;
 const MAX_DRAG_DIST = cap.radius * 2 * 6;
 
 let aiLevel = 'orta';
-let fieldColor = '#2e7d32';
 
 let goalAnimation = null;
 let goalAnimationStartTime = 0;
 const GOAL_ANIMATION_DURATION = 3000;
 let goalImage = null;
+
+// SAHA RESMİ
+let fieldImage = null;
+
+function loadFieldImage() {
+    const img = new Image();
+    img.onload = function() {
+        fieldImage = img;
+        console.log('✅ Saha resmi yüklendi!');
+    };
+    img.onerror = function() {
+        console.warn('⚠️ Saha resmi yüklenemedi');
+        fieldImage = null;
+    };
+    img.src = 'C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp';
+}
+loadFieldImage();
 
 // ============================================================
 // FOTOĞRAF YÜKLEME
@@ -226,7 +246,6 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
-    // MENÜDEYKEN SAHA ÇİZGİLERİNİ GÖSTERME
     ctx.clearRect(0, 0, width, height);
 }
 
@@ -296,9 +315,14 @@ function drawPlayerWithLogo(x, y, logoFile) {
 function draw() {
     ctx.clearRect(0, 0, width, height);
     
-    // SAHA ARKA PLANI
-    ctx.fillStyle = fieldColor || '#2e7d32';
-    ctx.fillRect(0, 0, width, height);
+    // SAHA ARKA PLANI - RESİM KULLAN
+    if (fieldImage) {
+        ctx.drawImage(fieldImage, 0, 0, width, height);
+    } else {
+        // Yedek: eğer resim yüklenmediyse yeşil arka plan
+        ctx.fillStyle = '#2e7d32';
+        ctx.fillRect(0, 0, width, height);
+    }
     
     ctx.save();
 
@@ -308,8 +332,9 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    ctx.strokeStyle = "rgba(255,255,255,0.35)";
-    ctx.lineWidth = 2.5;
+    // SAHA ÇİZGİLERİ - Yarı saydam yapıldı
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, height / 2);
     ctx.lineTo(width, height / 2);
@@ -321,9 +346,9 @@ function draw() {
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
     if (currentPhase === 'setup') {
-        ctx.fillStyle = "rgba(46, 204, 113, 0.08)";
-        ctx.strokeStyle = "rgba(46, 204, 113, 0.25)";
-        ctx.lineWidth = 2;
+        ctx.fillStyle = "rgba(46, 204, 113, 0.05)";
+        ctx.strokeStyle = "rgba(46, 204, 113, 0.15)";
+        ctx.lineWidth = 1.5;
         ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
@@ -1348,15 +1373,10 @@ function selectColor(team, color) {
 }
 
 function selectFieldColor(color) {
-    fieldColor = color;
-    document.querySelectorAll('.color-btn[data-field]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.field === color);
-    });
-    const canvas = document.getElementById('gameCanvas');
-    if (canvas && currentPhase !== 'menu') {
-        canvas.style.background = color;
-    }
-    console.log(`🟩 Saha rengi seçildi: ${color}`);
+    // Saha rengi seçimi artık geçersiz - resim kullanılıyor
+    console.log('🟩 Saha rengi seçimi devre dışı - resim kullanılıyor');
+    // Uyarı mesajı göster
+    alert('Saha rengi seçimi devre dışı! Artık özel saha resmi kullanılıyor.');
 }
 
 // ============================================================
@@ -1673,25 +1693,24 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
     hideField();
+    loadFieldImage();
 });
+
 // ============================================================
 // ZORLUK SEÇİMİ
 // ============================================================
 function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
     
-    // Pop-up'ı kapat
     const menu = document.getElementById('ai-level-menu');
     if (menu) {
         menu.style.display = 'none';
     }
     
-    // Ana menüyü göster
     const mainMenu = document.getElementById('menu');
     if (mainMenu) {
         mainMenu.style.display = 'block';
     }
     
-    // Oyunu başlat
     startLocalGame('ai', level);
 }
