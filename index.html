@@ -62,41 +62,34 @@
 <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
     <div class="popup-content settings-popup">
         <div class="settings-container">
-            
-            <!-- ARKA FON -->
             <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
             
-            <!-- STADYUM BUTONU -->
-            <button class="settings-btn" onclick="alert('🏟️ Stadyum seçimi açılıyor...')" style="position:absolute; top:26%; left:50%; transform:translateX(-50%); width:65%; padding:0; border:none; background:transparent; cursor:pointer; z-index:10;">
+            <!-- STADYUM -->
+            <div style="position:absolute; top:22%; left:50%; transform:translateX(-50%); width:70%; cursor:pointer;" onclick="alert('🏟️ Stadyum seçimi açılıyor...')">
                 <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" style="width:100%; display:block; pointer-events:none;">
-            </button>
+            </div>
             
-            <!-- MAÇ SÜRESİ BUTONU -->
-            <button class="settings-btn" onclick="cycleDuration()" style="position:absolute; top:41%; left:50%; transform:translateX(-50%); width:65%; padding:0; border:none; background:transparent; cursor:pointer; z-index:10;">
+            <!-- MAÇ SÜRESİ -->
+            <div style="position:absolute; top:38%; left:50%; transform:translateX(-50%); width:70%; cursor:pointer;" onclick="cycleDuration()">
                 <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" style="width:100%; display:block; pointer-events:none;">
-                <span id="durationDisplay" style="position:absolute; right:8%; top:50%; transform:translateY(-50%); color:#fff; font-size:16px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
-                    90s
-                </span>
-            </button>
+                <span id="durationDisplay" style="position:absolute; right:8%; top:50%; transform:translateY(-50%); color:#fff; font-size:16px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">90s</span>
+            </div>
             
-            <!-- VURUŞ SÜRESİ BUTONU -->
-            <button class="settings-btn" onclick="cycleShotDuration()" style="position:absolute; top:56%; left:50%; transform:translateX(-50%); width:65%; padding:0; border:none; background:transparent; cursor:pointer; z-index:10;">
+            <!-- VURUŞ SÜRESİ -->
+            <div style="position:absolute; top:54%; left:50%; transform:translateX(-50%); width:70%; cursor:pointer;" onclick="cycleShotDuration()">
                 <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" style="width:100%; display:block; pointer-events:none;">
-                <span id="shotDurationDisplay" style="position:absolute; right:8%; top:50%; transform:translateY(-50%); color:#fff; font-size:16px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
-                    3s
-                </span>
-            </button>
+                <span id="shotDurationDisplay" style="position:absolute; right:8%; top:50%; transform:translateY(-50%); color:#fff; font-size:16px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">3s</span>
+            </div>
             
-            <!-- SES AÇ/KAPA BUTONU -->
-            <button class="settings-btn" onclick="toggleSound()" style="position:absolute; top:71%; left:50%; transform:translateX(-50%); width:65%; padding:0; border:none; background:transparent; cursor:pointer; z-index:10;">
-                <img id="soundBtnImg" src="menu/ayarlar/ses.webp" alt="Ses Aç/Kapa" style="width:100%; display:block; pointer-events:none;">
-            </button>
+            <!-- SES -->
+            <div style="position:absolute; top:70%; left:50%; transform:translateX(-50%); width:70%; cursor:pointer;" onclick="toggleSound()">
+                <img id="soundBtnImg" src="menu/ayarlar/ses.webp" alt="Ses" style="width:100%; display:block; pointer-events:none;">
+            </div>
             
-            <!-- GERİ BUTONU -->
-            <button class="settings-btn" onclick="closeSettingsPopup()" style="position:absolute; bottom:4%; left:50%; transform:translateX(-50%); width:30%; padding:0; border:none; background:transparent; cursor:pointer; z-index:10;">
+            <!-- GERİ -->
+            <div style="position:absolute; bottom:4%; left:50%; transform:translateX(-50%); width:35%; cursor:pointer;" onclick="closeSettingsPopup()">
                 <img src="menu/ayarlar/ana menu.webp" alt="Geri" style="width:100%; display:block; pointer-events:none;">
-            </button>
-            
+            </div>
         </div>
     </div>
 </div>
