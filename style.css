@@ -766,3 +766,15 @@ important;
     width: 70% !important;
     text-align: center !important;
 }
+/* ============================================================
+   İSİM TAŞMASINI DÜZELT (EN SONA EKLE)
+   ============================================================ */
+
+.input-wrapper input {
+    font-size: clamp(14px, 3vw, 20px) !important;
+    letter-spacing: 2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 65% !important;
+}
