@@ -911,3 +911,57 @@ canvas.canvas-active {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
+/* ============================================================
+   ZORLUK SEÇİMİ GÖRSELİNİ TAM BOYUT YAP (EN SONA EKLE)
+   ============================================================ */
+
+/* Pop-up içeriğini yeniden düzenle */
+#ai-level-menu .popup-content {
+    max-width: 380px;
+    padding: 0;
+    overflow: hidden;
+}
+
+#ai-level-menu .popup-header {
+    padding: 12px 16px;
+}
+
+#ai-level-menu .popup-header h2 {
+    font-size: 16px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 3px;
+}
+
+/* Pop-up gövdesinde padding'i kaldır */
+#ai-level-menu .popup-body {
+    padding: 0 !important;
+    position: relative;
+}
+
+/* Zorluk seçimi görseli - tam kaplasın */
+#ai-level-menu img[usemap] {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    border-radius: 0 !important;
+}
+
+/* Image map alanları */
+map area {
+    cursor: pointer;
+}
+
+/* Pop-up başlık ve kapatma butonu */
+#ai-level-menu .popup-close {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+#ai-level-menu .popup-close:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
