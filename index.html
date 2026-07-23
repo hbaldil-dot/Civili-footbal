@@ -59,78 +59,70 @@
     </div>
 
     <!-- ===== AYARLAR POP-UP ===== -->
-<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-    <div class="popup-content settings-popup">
-        
-        <!-- AYARLAR ANA GÖRSEL -->
-        <div class="settings-container">
-            <img src="menu/ayarlar/arkafon.webp" alt="arkafon" class="settings-bg">
-            
-            <!-- STADYUM BUTONU -->
-            <button class="settings-btn" onclick="alert('🏟️ Stadyum seçimi açılıyor...')" style="top: 35%;">
-                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum">
-            </button>
-            
-            <!-- MAÇ SÜRESİ BUTONU -->
-            <div class="settings-btn-wrapper" style="position:absolute; top:48%; left:50%; transform:translateX(-50%); width:75%;">
-                <button class="settings-btn" onclick="cycleDuration(-1)" style="position:relative; width:100%; padding:0; border:none; background:transparent; cursor:pointer;">
-                    <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" style="width:100%; display:block; pointer-events:none;">
+    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
+        <div class="popup-content settings-popup">
+            <div class="settings-container">
+                <img src="menu/ayarlar/arkafon.webp" alt="arkafon" class="settings-bg">
+                
+                <button class="settings-btn" onclick="alert('🏟️ Stadyum seçimi açılıyor...')" style="top: 35%;">
+                    <img src="menu/ayarlar/stadyum.webp" alt="Stadyum">
                 </button>
-                <!-- MAÇ SÜRESİ GÖSTERGESİ - SAĞDA -->
-                <span id="durationDisplay" style="position:absolute; right:17%; top:50%; transform:translateY(-50%); color:#fff; font-size:17px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
-                    90s
-                </span>
-            </div>
-            
-            <!-- VURUŞ SÜRESİ BUTONU -->
-            <div class="settings-btn-wrapper" style="position:absolute; top:63%; left:50%; transform:translateX(-50%); width:75%;">
-                <button class="settings-btn" onclick="cycleShotDuration(-1)" style="position:relative; width:100%; padding:0; border:none; background:transparent; cursor:pointer;">
-                    <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" style="width:100%; display:block; pointer-events:none;">
+                
+                <div class="settings-btn-wrapper" style="position:absolute; top:48%; left:50%; transform:translateX(-50%); width:75%;">
+                    <button class="settings-btn" onclick="cycleDuration()" style="position:relative; width:100%; padding:0; border:none; background:transparent; cursor:pointer;">
+                        <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" style="width:100%; display:block; pointer-events:none;">
+                    </button>
+                    <span id="durationDisplay" style="position:absolute; right:17%; top:50%; transform:translateY(-50%); color:#fff; font-size:17px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
+                        90s
+                    </span>
+                </div>
+                
+                <div class="settings-btn-wrapper" style="position:absolute; top:63%; left:50%; transform:translateX(-50%); width:75%;">
+                    <button class="settings-btn" onclick="cycleShotDuration()" style="position:relative; width:100%; padding:0; border:none; background:transparent; cursor:pointer;">
+                        <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" style="width:100%; display:block; pointer-events:none;">
+                    </button>
+                    <span id="shotDurationDisplay" style="position:absolute; right:18%; top:61%; transform:translateY(-50%); color:#fff; font-size:18px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
+                        3s
+                    </span>
+                </div>
+                
+                <button class="settings-btn" onclick="toggleSound()" style="top: 75%;">
+                    <img id="soundBtnImg" src="menu/ayarlar/ses.webp" alt="Ses Aç/Kapa">
                 </button>
-                <!-- VURUŞ SÜRESİ GÖSTERGESİ - SAĞDA -->
-                <span id="shotDurationDisplay" style="position:absolute; right:18%; top:61%; transform:translateY(-50%); color:#fff; font-size:18px; font-weight:bold; font-family:'Arial',sans-serif; text-shadow:0 2px 8px rgba(0,0,0,0.8); pointer-events:none;">
-                    3s
-                </span>
+                
+                <button class="settings-back" onclick="closeSettingsPopup()">
+                    <img src="menu/ayarlar/ana menu.webp" alt="Geri">
+                </button>
             </div>
-            
-            <!-- SES AÇ/KAPA BUTONU -->
-            <button class="settings-btn" onclick="toggleSound()" style="top: 75%;">
-                <img id="soundBtnImg" src="menu/ayarlar/ses.webp" alt="Ses Aç/Kapa">
-            </button>
-            
-            <!-- GERİ BUTONU -->
-            <button class="settings-back" onclick="closeSettingsPopup()">
-                <img src="menu/ayarlar/ana menu.webp" alt="Geri">
-            </button>
-        </div>
-        
-    </div>
-</div>
-  <!-- ===== AI ZORLUK POP-UP ===== -->
-<div id="ai-level-menu" style="display: none;">
-    <div class="popup-content difficulty-popup">
-        <div class="difficulty-container">
-            <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
-            
-            <button class="difficulty-btn" onclick="selectDifficulty('kolay')" style="top: 36%;">
-                <img src="menu/zorluk/kolay.webp" alt="Kolay">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('orta')" style="top: 49%;">
-                <img src="menu/zorluk/orta.webp" alt="Orta">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('zor')" style="top: 62%;">
-                <img src="menu/zorluk/zor.webp" alt="Zor">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('usta')" style="top: 75%;">
-                <img src="menu/zorluk/usta.webp" alt="Usta">
-            </button>
-            
-            <button class="difficulty-back" onclick="closeAILevelMenu()">
-                <img src="menu/zorluk/ana menu.webp" alt="Geri">
-            </button>
         </div>
     </div>
-</div>
+
+    <!-- ===== AI ZORLUK POP-UP ===== -->
+    <div id="ai-level-menu" style="display: none;">
+        <div class="popup-content difficulty-popup">
+            <div class="difficulty-container">
+                <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
+                
+                <button class="difficulty-btn" onclick="selectDifficulty('kolay')" style="top: 36%;">
+                    <img src="menu/zorluk/kolay.webp" alt="Kolay">
+                </button>
+                <button class="difficulty-btn" onclick="selectDifficulty('orta')" style="top: 49%;">
+                    <img src="menu/zorluk/orta.webp" alt="Orta">
+                </button>
+                <button class="difficulty-btn" onclick="selectDifficulty('zor')" style="top: 62%;">
+                    <img src="menu/zorluk/zor.webp" alt="Zor">
+                </button>
+                <button class="difficulty-btn" onclick="selectDifficulty('usta')" style="top: 75%;">
+                    <img src="menu/zorluk/usta.webp" alt="Usta">
+                </button>
+                
+                <button class="difficulty-back" onclick="closeAILevelMenu()">
+                    <img src="menu/zorluk/ana menu.webp" alt="Geri">
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== ONLINE LOBI POP-UP ===== -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
