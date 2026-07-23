@@ -145,16 +145,16 @@ body::before {
 .input-wrapper input {
     position: absolute;
     top: 0;
-    left: 60%;
+    left: 70%;
     width: 65%;
     height: 100%;
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
-    font-size: clamp(14px, 2vw, 16px);
+    font-size: clamp(16px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
-    text-align: left;
+    text-align: center;
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
