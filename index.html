@@ -93,20 +93,21 @@
     </div>
 
    <!-- ===== AI ZORLUK POP-UP ===== -->
-<div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
+<div id="ai-level-menu" style="display: none;">
     <div class="popup-content">
         <div class="popup-header">
             <h2>ZORLUK SEÇİMİ</h2>
             <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
         </div>
         <div class="popup-body">
-            <img src="menu/zorluk-secimi.webp" alt="Zorluk Seçimi" usemap="#zorlukHaritasi" style="width:100%; display:block;">
+            <!-- TEK GÖRSEL - Image Map ile -->
+            <img src="butonlar/zorluk-secimi.webp" alt="Zorluk Seçimi" usemap="#zorlukHaritasi" style="width:100%; display:block; border-radius:8px;">
             
             <map name="zorlukHaritasi">
-                <area shape="rect" coords="0,0,100,50" onclick="startLocalGame('ai', 'kolay')" title="Kolay">
-                <area shape="rect" coords="0,50,100,100" onclick="startLocalGame('ai', 'orta')" title="Orta">
-                <area shape="rect" coords="0,100,100,150" onclick="startLocalGame('ai', 'zor')" title="Zor">
-                <area shape="rect" coords="0,150,100,200" onclick="startLocalGame('ai', 'usta')" title="Usta">
+                <area shape="rect" coords="0,0,400,80" onclick="selectDifficulty('kolay')" title="Kolay">
+                <area shape="rect" coords="0,80,400,160" onclick="selectDifficulty('orta')" title="Orta">
+                <area shape="rect" coords="0,160,400,240" onclick="selectDifficulty('zor')" title="Zor">
+                <area shape="rect" coords="0,240,400,320" onclick="selectDifficulty('usta')" title="Usta">
             </map>
         </div>
     </div>
