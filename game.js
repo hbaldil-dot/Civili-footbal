@@ -23,8 +23,9 @@ if (typeof io !== 'undefined') {
 }
 
 // ============================================================
-// SAHA GÖSTER/GİZLE
+// SAHA GÖSTER/GİZLE FONKSİYONLARI
 // ============================================================
+
 function showField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
@@ -33,6 +34,7 @@ function showField() {
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
         canvas.classList.add('canvas-active');
+        console.log('✅ Saha gösteriliyor, renk:', fieldColor);
     }
 }
 
@@ -44,41 +46,44 @@ function hideField() {
         canvas.style.borderRadius = '0';
         canvas.style.boxShadow = 'none';
         canvas.classList.remove('canvas-active');
+        console.log('✅ Saha gizlendi');
     }
 }
 
 // ============================================================
-// TAKIM LOGOLARI
+// TAKIM LOGO DEĞİŞKENLERİ
 // ============================================================
 let selectedTeamLogo = '';
 let aiTeamLogo = '';
 let isTeamSelectOpen = false;
 let loadedLogos = {};
+
 let localPlayer1Logo = '';
 let localPlayer2Logo = '';
 let localP1Selected = false;
 let localP2Selected = false;
 
 const teamLogos = [
-    { file: 'fb.png', name: 'Fenerbahçe' },
-    { file: 'galatasaray.png', name: 'Galatasaray' },
-    { file: 'bjk.png', name: 'Beşiktaş' },
-    { file: 'ts.png', name: 'Trabzonspor' },
-    { file: 'bs.png', name: 'Başakşehir' },
-    { file: 'gfk.png', name: 'Giresunspor' },
-    { file: 'kaspasa.png', name: 'Kasımpaşa' },
-    { file: 'karagumruk.png', name: 'Fatih Karagümrük' },
-    { file: 'hatay.png', name: 'Hatayspor' },
-    { file: 'adana.png', name: 'Adana Demirspor' },
-    { file: 'antalya.png', name: 'Antalyaspor' },
-    { file: 'agucu.png', name: 'Ağrı 1970 Spor' },
-    { file: 'samsun.png', name: 'Samsunspor' }
+    { file: 'fb.png', name: '⚽ Fenerbahçe' },
+    { file: 'galatasaray.png', name: '⚽ Galatasaray' },
+    { file: 'bjk.png', name: '⚽ Beşiktaş' },
+    { file: 'ts.png', name: '⚽ Trabzonspor' },
+    { file: 'bs.png', name: '⚽ Başakşehir' },
+    { file: 'gfk.png', name: '⚽ Giresunspor' },
+    { file: 'kaspasa.png', name: '⚽ Kasımpaşa' },
+    { file: 'karagumruk.png', name: '⚽ Fatih Karagümrük' },
+    { file: 'hatay.png', name: '⚽ Hatayspor' },
+    { file: 'adana.png', name: '⚽ Adana Demirspor' },
+    { file: 'antalya.png', name: '⚽ Antalyaspor' },
+    { file: 'agucu.png', name: '⚽ Ağrı 1970 Spor' },
+    { file: 'samsun.png', name: '⚽ Samsunspor' }
 ];
 
 function selectRandomTeam() {
     const randomIndex = Math.floor(Math.random() * teamLogos.length);
     const selected = teamLogos[randomIndex];
     selectedTeamLogo = selected.file;
+    console.log('🏆 Rastgele takım seçildi:', selected.name);
     return selected;
 }
 
@@ -88,8 +93,10 @@ function selectRandomAITeam() {
         aiTeamLogo = teamLogos[0].file;
     } else {
         const randomIndex = Math.floor(Math.random() * availableLogos.length);
-        aiTeamLogo = availableLogos[randomIndex].file;
+        const selected = availableLogos[randomIndex];
+        aiTeamLogo = selected.file;
     }
+    console.log('🤖 AI Takımı seçti:', aiTeamLogo);
     loadTeamLogoImage(aiTeamLogo);
     updateScoreLogos();
 }
@@ -139,6 +146,28 @@ const MAX_DRAG_DIST = cap.radius * 2 * 6;
 let aiLevel = 'orta';
 let fieldColor = '#2e7d32';
 
+let goalAnimation = null;
+let goalAnimationStartTime = 0;
+const GOAL_ANIMATION_DURATION = 3000;
+let goalImage = null;
+
+// ============================================================
+// FOTOĞRAF YÜKLEME
+// ============================================================
+function loadGoalImage(imageUrl) {
+    const img = new Image();
+    img.onload = function() {
+        goalImage = img;
+        console.log('✅ Gol fotoğrafı yüklendi!');
+    };
+    img.onerror = function() {
+        console.warn('⚠️ Fotoğraf yüklenemedi');
+        goalImage = null;
+    };
+    img.src = imageUrl;
+}
+loadGoalImage('goal.webp');
+
 // ============================================================
 // SES EFEKTLERİ
 // ============================================================
@@ -180,9 +209,24 @@ function playSound(type) {
 }
 
 // ============================================================
+// GOL ANİMASYONU
+// ============================================================
+function triggerGoalAnimation() {
+    goalAnimation = {
+        scale: 0,
+        alpha: 1,
+        blinkCount: 0,
+        type: goalImage ? 'image' : 'text'
+    };
+    goalAnimationStartTime = Date.now();
+    playSound('goal');
+}
+
+// ============================================================
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
+    // MENÜDEYKEN SAHA ÇİZGİLERİNİ GÖSTERME
     ctx.clearRect(0, 0, width, height);
 }
 
@@ -212,52 +256,50 @@ function drawSoccerBall(x, y, r, rotation) {
 function drawPlayerWithLogo(x, y, logoFile) {
     ctx.save();
     ctx.translate(x, y);
-    const size = cap.radius * 1.6;
-    
-    const gradient = ctx.createRadialGradient(-3, -3, 2, 0, 0, size);
-    gradient.addColorStop(0, 'rgba(255,255,255,0.15)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0.02)');
-    
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(0, 0, size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
     
     if (logoFile && loadedLogos[logoFile]) {
         const img = loadedLogos[logoFile];
+        const size = cap.radius * 1.4;
+        
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
         ctx.save();
         ctx.beginPath();
-        ctx.arc(0, 0, size - 3, 0, Math.PI * 2);
+        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(img, -size + 3, -size + 3, size * 2 - 6, size * 2 - 6);
+        ctx.drawImage(img, -size + 2, -size + 2, size * 2 - 4, size * 2 - 4);
         ctx.restore();
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 2;
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
+        ctx.arc(0, 0, size - 1, 0, Math.PI * 2);
         ctx.stroke();
     } else {
-        ctx.fillStyle = '#444';
+        const size = cap.radius * 1.2;
+        ctx.fillStyle = '#666';
         ctx.beginPath();
-        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.font = '16px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('⚽', 0, 2);
     }
+    
     ctx.restore();
 }
 
 function draw() {
     ctx.clearRect(0, 0, width, height);
+    
+    // SAHA ARKA PLANI
     ctx.fillStyle = fieldColor || '#2e7d32';
     ctx.fillRect(0, 0, width, height);
+    
     ctx.save();
 
     if (gameMode === 'online' && myTeamNumber === 2) {
@@ -325,6 +367,7 @@ function draw() {
         const dx = dragStart.x - dragCurrent.x;
         const dy = dragStart.y - dragCurrent.y;
         const dist = Math.hypot(dx, dy);
+        
         if (dist > 10) {
             ctx.save();
             ctx.strokeStyle = 'rgba(46, 204, 113, 0.4)';
@@ -332,16 +375,20 @@ function draw() {
             ctx.setLineDash([6, 6]);
             ctx.beginPath();
             ctx.moveTo(cap.x, cap.y);
+            
             const normX = dx / dist;
             const normY = dy / dist;
             const len = Math.min(dist * 1.2, MAX_DRAG_DIST);
             const endX = cap.x + normX * len;
             const endY = cap.y + normY * len;
+            
             ctx.lineTo(endX, endY);
             ctx.stroke();
+            
             ctx.setLineDash([]);
             const arrowSize = 10;
             const angle = Math.atan2(dy, dx);
+            
             ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
             ctx.beginPath();
             ctx.moveTo(endX, endY);
@@ -357,6 +404,159 @@ function draw() {
 
     if (currentPhase === 'playing' && cap) {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+    }
+
+    // GOL ANİMASYONU
+    if (goalAnimation) {
+        const elapsed = Date.now() - goalAnimationStartTime;
+        const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
+        
+        let scale = 0;
+        if (progress < 0.15) {
+            scale = (progress / 0.15) * 1.2;
+        } else {
+            scale = 1.2;
+        }
+        
+        let alpha = 1;
+        if (progress < 0.9) {
+            const blinkDuration = 0.5;
+            const blinkPhase = progress / blinkDuration;
+            const currentBlink = Math.floor(blinkPhase);
+            const phaseInBlink = blinkPhase - currentBlink;
+            
+            if (currentBlink < 6) {
+                if (phaseInBlink < 0.5) {
+                    alpha = phaseInBlink * 2;
+                } else {
+                    alpha = 1 - (phaseInBlink - 0.5) * 2;
+                }
+                if (currentBlink >= 2) alpha = alpha * 0.9;
+                if (currentBlink >= 4) alpha = alpha * 0.8;
+            } else {
+                alpha = 0;
+            }
+        } else {
+            alpha = 1 - ((progress - 0.9) / 0.1);
+        }
+        
+        if (alpha < 0.01) alpha = 0;
+        if (scale < 0.01) scale = 0;
+        
+        if (gameMode === 'online' && myTeamNumber === 2) {
+            ctx.save();
+            ctx.translate(width / 2, height / 2);
+            ctx.rotate(Math.PI);
+            ctx.translate(-width / 2, -height / 2);
+        }
+        
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(scale, scale);
+        
+        if (alpha > 0.1 && goalAnimation.type === 'image' && goalImage) {
+            const imgSize = 100;
+            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.5})`;
+            ctx.shadowBlur = 50;
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(goalImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
+            ctx.globalAlpha = 1;
+            ctx.restore();
+            ctx.shadowBlur = 0;
+            
+            if (alpha > 0.1) {
+                ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.9})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, imgSize / 2 + 4, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = `bold 38px Arial`;
+                ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.9})`;
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+                ctx.fillText('⚽ GOAL! ⚽', 2, imgSize/2 + 12);
+                
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+                ctx.shadowBlur = 20;
+                ctx.fillText('⚽ GOAL! ⚽', 0, imgSize/2 + 12);
+                ctx.shadowBlur = 0;
+            }
+        } else if (alpha > 0.1) {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `bold ${70 * (0.8 + scale * 0.2)}px Arial`;
+            
+            ctx.shadowColor = `rgba(0, 0, 0, ${alpha * 0.8})`;
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
+            ctx.fillText('⚽ GOAL! ⚽', 3, 3);
+            
+            ctx.shadowBlur = 0;
+            const textGradient = ctx.createLinearGradient(-70, -40, 70, 40);
+            textGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
+            textGradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
+            textGradient.addColorStop(1, `rgba(255, 200, 0, ${alpha})`);
+            ctx.fillStyle = textGradient;
+            ctx.shadowColor = `rgba(255, 215, 0, ${alpha * 0.3})`;
+            ctx.shadowBlur = 30;
+            ctx.fillText('⚽ GOAL! ⚽', 0, 0);
+            ctx.shadowBlur = 0;
+        }
+        
+        if (alpha > 0.1) {
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2 + progress * 0.5;
+                const dist = 80 + Math.sin(progress * 6 + i * 1.2) * 20;
+                const starX = Math.cos(angle) * dist;
+                const starY = Math.sin(angle) * dist;
+                const starSize = 5 + Math.sin(progress * 8 + i * 1.8) * 3;
+                
+                ctx.fillStyle = `rgba(255, 215, 0, ${alpha * (0.15 + Math.sin(progress * 10 + i * 1.5) * 0.1)})`;
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                
+                const spikes = 5;
+                const outerRadius = Math.abs(starSize);
+                const innerRadius = outerRadius * 0.4;
+                ctx.moveTo(starX + outerRadius * Math.cos(0), starY + outerRadius * Math.sin(0));
+                for (let j = 1; j < spikes * 2; j++) {
+                    const radius = j % 2 === 0 ? outerRadius : innerRadius;
+                    const theta = (j / (spikes * 2)) * Math.PI * 2;
+                    ctx.lineTo(starX + radius * Math.cos(theta), starY + radius * Math.sin(theta));
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            const blinkFlash = Math.sin(progress * 20) * 0.5 + 0.5;
+            if (blinkFlash > 0.8 && alpha > 0.5) {
+                ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.05 * blinkFlash})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, 200, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        ctx.restore();
+        
+        if (gameMode === 'online' && myTeamNumber === 2) {
+            ctx.restore();
+        }
+        
+        if (progress >= 1) {
+            goalAnimation = null;
+        }
     }
 
     ctx.restore();
@@ -469,7 +669,7 @@ function executeAIShot(target, params) {
 }
 
 // ============================================================
-// ONLINE SOCKET
+// ONLINE - OYUNCU BİLGİLERİ
 // ============================================================
 function getPlayerData() {
     const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
@@ -479,8 +679,12 @@ function getPlayerData() {
     };
 }
 
+// ============================================================
+// SOCKET OLAY DİNLEYİCİLERİ
+// ============================================================
 function setupSocketListeners() {
     if (!socket) return;
+    
     socket.on("update-lobby-players", (players) => {
         const listContainer = document.getElementById('lobby-list');
         if (!listContainer) return;
@@ -491,15 +695,18 @@ function setupSocketListeners() {
                 count++;
                 const item = document.createElement('div');
                 item.className = 'player-item';
+                
                 const infoSpan = document.createElement('span');
                 const logoImg = document.createElement('img');
                 logoImg.src = `takimlar/${p.logo || 'default.png'}`;
                 logoImg.className = 'lobby-logo';
                 logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
                 infoSpan.appendChild(logoImg);
+                
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = ` ${p.name}`;
                 infoSpan.appendChild(nameSpan);
+                
                 const btn = document.createElement('button');
                 btn.className = 'status';
                 btn.innerText = 'Davet Et';
@@ -517,24 +724,34 @@ function setupSocketListeners() {
             listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
         }
     });
+    
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
             socket.emit("accept-invite", data.fromId);
         }
     });
+    
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
         aiTeamLogo = opponentLogo || 'default.png';
+        console.log('🟢 Online rakip logosu:', aiTeamLogo);
+        
         loadTeamLogoImage(aiTeamLogo);
+        
         document.getElementById('online-lobby').style.display = 'none';
         document.getElementById('top-bar').style.display = 'flex';
         matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
         const timeBoard = document.getElementById('time-board');
         if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
-        setTimeout(() => { updateScoreLogos(); }, 100);
+        
+        setTimeout(() => {
+            updateScoreLogos();
+        }, 100);
+        
         startSetupPhase();
     });
+    
     socket.on("opponent-disconnected", () => { alert("Rakip oyundan ayrıldı."); exitToMenu(); });
     socket.on("sync-setup-pin-move", ({ team, index, x, y }) => {
         if (currentPhase === 'setup') {
@@ -601,7 +818,9 @@ function startLocalGame(mode, aiLevelParam) {
         aiLevel = aiLevelParam;
         closeAILevelMenu();
         selectRandomAITeam();
-        setTimeout(() => { updateScoreLogos(); }, 100);
+        setTimeout(() => {
+            updateScoreLogos();
+        }, 100);
     }
     document.getElementById('settings-popup').style.display = 'none';
     document.getElementById('menu').style.display = 'none';
@@ -609,6 +828,7 @@ function startLocalGame(mode, aiLevelParam) {
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
     showField();
     startSetupPhase();
 }
@@ -634,27 +854,34 @@ function startSetupPhase() {
     score = { p1: 0, p2: 0 };
     document.getElementById('score-p1').innerText = "0";
     document.getElementById('score-p2').innerText = "0";
+
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+
     const startBtn = document.getElementById('start-match-btn');
     startBtn.style.display = 'flex';
     startBtn.style.opacity = '1';
     startBtn.disabled = false;
+
     const indicator = document.getElementById('turn-indicator');
     if (indicator) {
         indicator.innerText = "🏆 Takım Taktik Ayarla";
         indicator.style.borderColor = "#f1c40f";
         indicator.style.color = "#f1c40f";
     }
+
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) shotTimer.style.display = 'none';
+
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
+
     pins = [
         { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: false },
         { x: (width + goalWidth) / 2, y: goalHeight, isPost: true, locked: false },
         { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true, locked: false },
         { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true, locked: false }
     ];
+
     const blue442 = [
         { x: width * 0.50, y: height * 0.88, team: 1 }, { x: width * 0.15, y: height * 0.73, team: 1 },
         { x: width * 0.38, y: height * 0.77, team: 1 }, { x: width * 0.62, y: height * 0.77, team: 1 },
@@ -663,6 +890,7 @@ function startSetupPhase() {
         { x: width * 0.85, y: height * 0.58, team: 1 }, { x: width * 0.35, y: height * 0.45, team: 1 },
         { x: width * 0.65, y: height * 0.45, team: 1 }
     ];
+
     const red442 = [
         { x: width * 0.50, y: height * 0.12, team: 2 }, { x: width * 0.85, y: height * 0.27, team: 2 },
         { x: width * 0.62, y: height * 0.23, team: 2 }, { x: width * 0.38, y: height * 0.23, team: 2 },
@@ -671,13 +899,17 @@ function startSetupPhase() {
         { x: width * 0.15, y: height * 0.42, team: 2 }, { x: width * 0.65, y: height * 0.55, team: 2 },
         { x: width * 0.35, y: height * 0.55, team: 2 }
     ];
+
     blue442.forEach(p => pins.push({ ...p, locked: false }));
     red442.forEach(p => pins.push({ ...p, locked: false }));
+
     cap.x = width / 2;
     cap.y = height / 2;
     cap.vx = 0;
     cap.vy = 0;
+
     updateScoreLogos();
+
     startSetupTimer();
     animate();
 }
@@ -842,6 +1074,7 @@ function exitToMenu() {
     document.getElementById('start-match-btn').style.display = 'none';
     isAiThinking = false;
     isDraggingBall = false;
+    
     hideField();
     drawFieldLinesOnly();
 }
@@ -865,6 +1098,7 @@ function updatePhysics() {
                     if (myTeamNumber === 1) { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
                     else { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
                 } else { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
+                triggerGoalAnimation();
                 turn = 2;
                 updateHUDTurn();
                 cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
@@ -884,6 +1118,7 @@ function updatePhysics() {
                     if (myTeamNumber === 2) { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
                     else { score.p1++; document.getElementById('score-p1').innerText = score.p1; }
                 } else { score.p2++; document.getElementById('score-p2').innerText = score.p2; }
+                triggerGoalAnimation();
                 turn = 1;
                 updateHUDTurn();
                 cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
@@ -1084,6 +1319,7 @@ canvas.addEventListener('touchcancel', (e) => {
 // BAŞLANGIÇ
 // ============================================================
 drawFieldLinesOnly();
+console.log("🎮 Çivili Futbol Başlatıldı!");
 startPeriodicSync();
 
 // ============================================================
@@ -1120,6 +1356,7 @@ function selectFieldColor(color) {
     if (canvas && currentPhase !== 'menu') {
         canvas.style.background = color;
     }
+    console.log(`🟩 Saha rengi seçildi: ${color}`);
 }
 
 // ============================================================
@@ -1128,10 +1365,13 @@ function selectFieldColor(color) {
 function toggleTeamSelect() {
     const container = document.getElementById('team-logo-container');
     if (!container) return;
+    
     if (container.style.display === 'block') {
         container.style.display = 'none';
+        console.log('🔽 Takım seçimi kapatıldı');
     } else {
         container.style.display = 'block';
+        console.log('🔼 Takım seçimi açıldı');
         loadTeamLogos();
     }
 }
@@ -1139,29 +1379,42 @@ function toggleTeamSelect() {
 function loadTeamLogos() {
     const container = document.getElementById('team-logo-options');
     if (!container) return;
+    
     container.innerHTML = '';
+    console.log('🏆 Logolar yükleniyor...');
+    
     teamLogos.forEach((logo) => {
         const btn = document.createElement('button');
         btn.className = 'team-logo-btn';
         btn.title = logo.name;
         if (logo.file === selectedTeamLogo) btn.classList.add('active');
+        
         const img = document.createElement('img');
         img.src = `takimlar/${logo.file}`;
         img.alt = logo.name;
-        img.onerror = function() { this.src = 'takimlar/default.png'; };
+        img.onerror = function() { 
+            console.warn(`⚠️ Logo yüklenemedi: ${logo.file}`);
+            this.src = 'takimlar/default.png'; 
+        };
         btn.appendChild(img);
+        
         btn.onclick = function(e) {
             e.stopPropagation();
             selectTeamLogo(logo.file);
         };
+        
         container.appendChild(btn);
     });
+    
     updateTeamLogoDisplay();
     updateSelectedTeamName();
+    console.log(`✅ ${teamLogos.length} logo yüklendi`);
 }
 
 function selectTeamLogo(logoFile) {
+    console.log(`🏆 Takım seçildi: ${logoFile}`);
     selectedTeamLogo = logoFile;
+    
     document.querySelectorAll('.team-logo-btn').forEach(btn => {
         btn.classList.remove('active');
         const img = btn.querySelector('img');
@@ -1169,6 +1422,7 @@ function selectTeamLogo(logoFile) {
             btn.classList.add('active');
         }
     });
+    
     updateTeamLogoDisplay();
     updateSelectedTeamName();
     updateScoreLogos();
@@ -1192,16 +1446,28 @@ function updateTeamLogoDisplay() {
             this.src = 'takimlar/default.png';
             this.style.opacity = '0.3';
         };
+        console.log('🔄 Takım logosu güncellendi:', selectedTeamLogo || 'default');
     }
 }
 
 function updateSelectedTeamName() {
     const logo = teamLogos.find(l => l.file === selectedTeamLogo);
-    const teamName = logo ? logo.name : 'Varsayılan';
+    const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
     const displayName = document.getElementById('selected-team-name-display');
     if (displayName) displayName.textContent = teamName;
 }
 
+function updateTeamLogoDisplayOld() {
+    const displayImg = document.getElementById('selected-team-logo');
+    if (displayImg) {
+        displayImg.src = `takimlar/${selectedTeamLogo}`;
+        displayImg.onerror = function() { this.src = 'takimlar/default.png'; };
+    }
+}
+
+// ============================================================
+// SKORBORD LOGO GÜNCELLEME
+// ============================================================
 function updateScoreLogos() {
     const logoP1 = document.getElementById('score-logo-p1');
     if (logoP1) {
@@ -1214,6 +1480,7 @@ function updateScoreLogos() {
         }
         logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
     }
+    
     const logoP2 = document.getElementById('score-logo-p2');
     if (logoP2) {
         if (gameMode === 'local' && localPlayer2Logo) {
@@ -1252,64 +1519,16 @@ function loadTeamLogoImage(logoFile) {
 }
 
 // ============================================================
-// ZORLUK SEÇİMİ
+// 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
 // ============================================================
-function selectDifficulty(level) {
-    document.getElementById('ai-level-menu').style.display = 'none';
-    startLocalGame('ai', level);
-}
 
-// ============================================================
-// AYARLAR - SÜRE SEÇİMLERİ
-// ============================================================
-const durationOptions = [60, 90, 120, 180];
-let durationIndex = 1;
-const shotDurationOptions = [3, 4, 5, 6];
-let shotDurationIndex = 0;
-
-function cycleDuration() {
-    durationIndex = (durationIndex + 1) % durationOptions.length;
-    const newDuration = durationOptions[durationIndex];
-    matchSecondsLeft = newDuration;
-    const durationSelect = document.getElementById('match-duration');
-    if (durationSelect) { durationSelect.value = newDuration; }
-    const display = document.getElementById('durationDisplay');
-    if (display) { display.textContent = newDuration + 's'; }
-}
-
-function cycleShotDuration() {
-    shotDurationIndex = (shotDurationIndex + 1) % shotDurationOptions.length;
-    const newDuration = shotDurationOptions[shotDurationIndex];
-    shotSecondsLeft = newDuration;
-    const display = document.getElementById('shotDurationDisplay');
-    if (display) { display.textContent = newDuration + 's'; }
-}
-
-// ============================================================
-// AYARLAR - SES AÇ/KAPA
-// ============================================================
-let isSoundOn = true;
-
-function toggleSound() {
-    isSoundOn = !isSoundOn;
-    const soundImg = document.getElementById('soundBtnImg');
-    if (soundImg) {
-        if (isSoundOn) {
-            soundImg.src = 'menu/ayarlar/ses.webp';
-        } else {
-            soundImg.src = 'menu/ayarlar/ses-off.webp';
-        }
-    }
-    if (isSoundOn) { audioCtx.resume(); } 
-    else { audioCtx.suspend(); }
-}
-
-// ============================================================
-// 2 KİŞİLİK AYNI EKRAN
-// ============================================================
 function openLocalTeamSelect() {
+    console.log('👥 2 Kişilik takım seç açılıyor...');
     const popup = document.getElementById('local-team-select');
-    if (!popup) return;
+    if (!popup) {
+        console.error('❌ local-team-select pop-up bulunamadı!');
+        return;
+    }
     popup.style.display = 'flex';
     localP1Selected = false;
     localP2Selected = false;
@@ -1329,9 +1548,15 @@ function closeLocalTeamSelect() {
 function loadLocalTeamLogos() {
     const container1 = document.getElementById('local-player1-logos');
     const container2 = document.getElementById('local-player2-logos');
-    if (!container1 || !container2) return;
+    
+    if (!container1 || !container2) {
+        console.warn('⚠️ Logo containerları bulunamadı!');
+        return;
+    }
+    
     container1.innerHTML = '';
     container2.innerHTML = '';
+    
     teamLogos.forEach((logo) => {
         const btn1 = document.createElement('button');
         btn1.className = 'team-logo-btn';
@@ -1344,6 +1569,7 @@ function loadLocalTeamLogos() {
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
+        
         const btn2 = document.createElement('button');
         btn2.className = 'team-logo-btn';
         btn2.title = logo.name;
@@ -1359,6 +1585,8 @@ function loadLocalTeamLogos() {
 }
 
 function selectLocalTeam(player, logoFile) {
+    console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
+    
     if (player === 1) {
         if (logoFile === localPlayer2Logo && localP2Selected) {
             alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
@@ -1366,15 +1594,18 @@ function selectLocalTeam(player, logoFile) {
         }
         localPlayer1Logo = logoFile;
         localP1Selected = true;
+        
         document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p1');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p1');
             }
         });
+        
         const logo = teamLogos.find(l => l.file === logoFile);
-        document.getElementById('local-p1-name').textContent = logo ? logo.name : 'Seçildi';
+        document.getElementById('local-p1-name').textContent = logo ? logo.name.replace('⚽ ', '') : 'Seçildi';
         document.getElementById('local-p1-name').style.color = '#3498db';
+        
     } else if (player === 2) {
         if (logoFile === localPlayer1Logo && localP1Selected) {
             alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
@@ -1382,43 +1613,58 @@ function selectLocalTeam(player, logoFile) {
         }
         localPlayer2Logo = logoFile;
         localP2Selected = true;
+        
         document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p2');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p2');
             }
         });
+        
         const logo = teamLogos.find(l => l.file === logoFile);
-        document.getElementById('local-p2-name').textContent = logo ? logo.name : 'Seçildi';
+        document.getElementById('local-p2-name').textContent = logo ? logo.name.replace('⚽ ', '') : 'Seçildi';
         document.getElementById('local-p2-name').style.color = '#e74c3c';
     }
 }
 
 function startLocalGameWithTeams() {
+    console.log('🚀 2 Kişilik maç başlatılıyor...');
+    
     if (!localP1Selected || !localP2Selected) {
         alert('⚠️ Lütfen her iki oyuncu için de takım seçin!');
         return;
     }
+    
     if (localPlayer1Logo === localPlayer2Logo) {
         alert('⚠️ İki oyuncu aynı takımı seçemez!');
         return;
     }
+    
     closeLocalTeamSelect();
+    
     selectedTeamLogo = localPlayer1Logo;
     aiTeamLogo = localPlayer2Logo;
+    
     loadTeamLogoImage(selectedTeamLogo);
     loadTeamLogoImage(aiTeamLogo);
+    
     gameMode = 'local';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
     showField();
-    setTimeout(() => { updateScoreLogos(); }, 100);
+    
+    setTimeout(() => {
+        updateScoreLogos();
+    }, 100);
+    
     startSetupPhase();
 }
 
+// Sayfa yüklendiğinde
 document.addEventListener('DOMContentLoaded', function() {
     selectRandomTeam();
     updateSelectedTeamName();
