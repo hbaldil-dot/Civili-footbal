@@ -836,3 +836,34 @@ canvas.canvas-active {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
     letter-spacing: 3px !important;
 }
+/* ============================================================
+   ZORLUK SEÇİMİ - IMAGE MAP (EN SONA EKLE)
+   ============================================================ */
+
+/* Image map alanlarının üzerine gelince el işareti */
+map area {
+    cursor: pointer;
+}
+
+/* Zorluk seçimi görseli */
+#ai-level-menu img {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Pop-up içi düzen */
+#ai-level-menu .popup-body {
+    padding: 16px;
+    position: relative;
+}
+
+#ai-level-menu .popup-content {
+    max-width: 340px;
+}
+
+/* Tıklama geri bildirimi için */
+#ai-level-menu img:active {
+    opacity: 0.8;
+}
