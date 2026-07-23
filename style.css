@@ -973,7 +973,7 @@ map area {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    max-width: 360px;
+    max-width: 380px;  /* Biraz büyütüldü */
 }
 
 .settings-container {
@@ -987,11 +987,12 @@ map area {
     border-radius: 16px;
 }
 
+/* Butonlar %5 daha büyük */
 .settings-btn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 70%;
+    width: 75%;  /* Eski: 70% → %5 büyüdü */
     padding: 0;
     border: none;
     background: transparent;
@@ -1010,12 +1011,13 @@ map area {
     pointer-events: none;
 }
 
+/* Geri butonu da %5 büyüdü */
 .settings-back {
     position: absolute;
     bottom: 4%;
     left: 50%;
     transform: translateX(-50%);
-    width: 30%;
+    width: 35%;  /* Eski: 30% → %5 büyüdü */
     padding: 0;
     border: none;
     background: transparent;
