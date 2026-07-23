@@ -1674,3 +1674,24 @@ document.addEventListener('DOMContentLoaded', function() {
     selectRandomAITeam();
     hideField();
 });
+// ============================================================
+// ZORLUK SEÇİMİ
+// ============================================================
+function selectDifficulty(level) {
+    console.log('🎯 Zorluk seçildi:', level);
+    
+    // Pop-up'ı kapat
+    const menu = document.getElementById('ai-level-menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    
+    // Ana menüyü göster
+    const mainMenu = document.getElementById('menu');
+    if (mainMenu) {
+        mainMenu.style.display = 'block';
+    }
+    
+    // Oyunu başlat
+    startLocalGame('ai', level);
+}
