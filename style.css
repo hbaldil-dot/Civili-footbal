@@ -145,7 +145,7 @@ body::before {
 .input-wrapper input {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 30%;
     width: 65%;
     height: 100%;
     background: transparent !important;
@@ -154,7 +154,7 @@ body::before {
     font-size: clamp(14px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
-    text-align: left;
+    text-align: center;
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
