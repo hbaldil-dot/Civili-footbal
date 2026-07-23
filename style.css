@@ -151,7 +151,7 @@ body::before {
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
-    font-size: clamp(12px, 2vw, 16px);
+    font-size: clamp(14px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
     text-align: center;
