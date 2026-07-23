@@ -36,6 +36,7 @@ body {
     background-attachment: fixed;
 }
 
+/* SADECE ARKA PLAN KARARTMASI - KUTU YOK */
 body::before {
     content: '';
     position: fixed;
@@ -47,6 +48,10 @@ body::before {
     z-index: 0;
     pointer-events: none;
 }
+
+/* ============================================================
+   MENÜ - TAMAMEN ŞEFFAF, KUTU YOK
+   ============================================================ */
 
 #menu {
     position: absolute;
@@ -62,11 +67,12 @@ body::before {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    bottom: 3vh;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
 }
 
+/* TÜM MENÜ İÇERİKLERİ ŞEFFAF */
 #menu * {
     background: transparent !important;
     box-shadow: none !important;
@@ -75,9 +81,26 @@ body::before {
     -webkit-backdrop-filter: none !important;
 }
 
+/* ===== LOGO ALANI ===== */
+.logo-area {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 1.5vh auto;
+}
+
+.logo-image {
+    width: 100%;
+    display: block;
+    opacity: 0.95;
+}
+
+/* ===== İSMİNİ GİR ===== */
 .input-group {
-    margin-bottom: 1.2vh;
+    margin-bottom: 0 !important;
     text-align: center;
+    height: 0;
+    overflow: hidden;
+    display: none !important;
 }
 
 .input-wrapper {
@@ -87,78 +110,47 @@ body::before {
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
-    gap: 4px;
+    gap: 6px;
     background: transparent !important;
-    flex-direction: row;
-}
-
-.logo-container {
-    position: relative;
-    width: 20%;
-    max-width: 50px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    order: 2;
-    margin-left: auto;
-}
-
-.input-logo {
-    width: 100%;
-    height: auto;
-    display: block;
-    opacity: 0.9;
-}
-
-.team-logo-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 55%;
-    height: auto;
-    border-radius: 50%;
-    object-fit: contain;
-    background: transparent;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-    pointer-events: none;
-    z-index: 5;
-    display: block !important;
 }
 
 .input-icon {
     flex: 1;
     min-width: 0;
-    display: block;
+    display: none !important;
     opacity: 0.9;
-    pointer-events: none;
-    order: 0;
 }
 
 .input-wrapper input {
     position: absolute;
     top: 0;
     left: 0;
-    width: 70%;
+    width: 65%;
     height: 100%;
     background: transparent !important;
     border: none !important;
-    color: #ffffff !important;
-    font-size: clamp(18px, 4vw, 28px) !important;
-    font-family: 'Arial', 'Helvetica', sans-serif !important;
-    font-weight: 900 !important;
+    color: transparent;
+    font-size: clamp(12px, 2vw, 16px);
+    font-family: 'Courier New', monospace;
     outline: none;
     text-align: center;
     padding: 0 5px;
-    letter-spacing: 3px !important;
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    z-index: 10 !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+    display: none !important;
+    visibility: hidden !important;
 }
 
+.input-logo {
+    width: 25%;
+    max-width: 55px;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+/* ===== MENÜ BUTONLARI - ŞEFFAF ===== */
 .menu-btn {
     display: block;
     width: 100%;
@@ -187,17 +179,25 @@ body::before {
     opacity: 1;
 }
 
+/* AYARLAR butonu */
 .settings-btn {
     margin-top: 0.5vh;
+    background: transparent !important;
+    display: none !important;
 }
 
 .settings-btn .menu-btn-img {
     opacity: 0.5;
+    display: none !important;
 }
 
 .settings-btn:hover .menu-btn-img {
     opacity: 0.7;
 }
+
+/* ============================================================
+   TAKIM LOGO SEÇİM ALANI
+   ============================================================ */
 
 .team-logo-container {
     margin: 0.5vh auto 1vh auto;
@@ -252,8 +252,16 @@ body::before {
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-4px); max-height: 0; }
-    to { opacity: 1; transform: translateY(0); max-height: 140px; }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 140px;
+    }
 }
 
 .team-logo-container::-webkit-scrollbar {
@@ -278,6 +286,10 @@ body::before {
 .team-logo-container .selected-text span {
     color: #2ecc71;
 }
+
+/* ============================================================
+   POP-UP'LAR
+   ============================================================ */
 
 #settings-popup,
 #ai-level-menu,
@@ -414,6 +426,10 @@ body::before {
     border-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.06);
 }
+
+/* ============================================================
+   OYUN EKRANI
+   ============================================================ */
 
 #top-bar {
     width: 100%;
@@ -658,192 +674,89 @@ canvas.canvas-active {
     transition: width 0.05s;
 }
 
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
 @media (max-width: 420px) {
     #menu {
         padding: 2vh 2vw 2vh 2vw;
         max-width: 340px;
-        bottom: 2vh;
     }
-    .input-wrapper { max-width: 280px; gap: 4px; }
-    .input-wrapper input { font-size: clamp(14px, 3vw, 20px) !important; width: 60%; }
-    .logo-container { max-width: 45px; }
-    .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
-    .team-logo-btn { width: 28px; height: 28px; }
-    .team-logo-container { max-width: 280px; max-height: 120px; }
+    
+    .logo-area {
+        max-width: 280px;
+    }
+    
+    .input-wrapper {
+        max-width: 280px;
+        gap: 4px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(10px, 1.8vw, 14px);
+        width: 60%;
+    }
+    
+    .input-logo {
+        max-width: 45px;
+    }
+    
+    .menu-btn {
+        max-width: 280px;
+        margin-bottom: 0.4vh;
+    }
+    
+    .team-logo-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .team-logo-container {
+        max-width: 280px;
+        max-height: 120px;
+    }
 }
 
 @media (max-width: 360px) {
     #menu {
         padding: 1.5vh 2vw 1.5vh 2vw;
         max-width: 300px;
-        bottom: 1.5vh;
     }
-    .input-wrapper { max-width: 240px; gap: 3px; }
-    .input-wrapper input { font-size: clamp(12px, 2.5vw, 16px) !important; width: 55%; }
-    .logo-container { max-width: 38px; }
-    .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
-    .team-logo-btn { width: 24px; height: 24px; }
-    .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
+    
+    .logo-area {
+        max-width: 240px;
+    }
+    
+    .input-wrapper {
+        max-width: 240px;
+        gap: 3px;
+    }
+    
+    .input-wrapper input {
+        font-size: clamp(9px, 1.5vw, 12px);
+        width: 55%;
+    }
+    
+    .input-logo {
+        max-width: 35px;
+    }
+    
+    .menu-btn {
+        max-width: 240px;
+        margin-bottom: 0.3vh;
+    }
+    
+    .team-logo-btn {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .team-logo-container {
+        max-width: 240px;
+        max-height: 100px;
+        padding: 6px;
+    }
 }
-
-.difficulty-popup .popup-content {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 360px;
-}
-
-.difficulty-container {
-    position: relative;
-    width: 100%;
-}
-
-.difficulty-bg {
-    width: 100%;
-    display: block;
-    border-radius: 16px;
-}
-
-.difficulty-btn {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease;
-}
-
-.difficulty-btn:active {
-    transform: translateX(-50%) scale(0.95);
-}
-
-.difficulty-btn img {
-    width: 100%;
-    display: block;
-    pointer-events: none;
-}
-
-.difficulty-back {
-    position: absolute;
-    bottom: 4%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease;
-}
-
-.difficulty-back:active {
-    transform: translateX(-50%) scale(0.95);
-}
-
-.difficulty-back img {
-    width: 100%;
-    display: block;
-    pointer-events: none;
-}
-
-#ai-level-menu {
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-
-.settings-popup .popup-content {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 380px;
-}
-
-.settings-container {
-    position: relative;
-    width: 100%;
-}
-
-.settings-bg {
-    width: 100%;
-    display: block;
-    border-radius: 16px;
-}
-
-.settings-btn {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 75%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease;
-}
-
-.settings-btn:active {
-    transform: translateX(-50%) scale(0.95);
-}
-
-.settings-btn img {
-    width: 100%;
-    display: block;
-    pointer-events: none;
-}
-
-.settings-btn-wrapper {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 75%;
-}
-
-.settings-back {
-    position: absolute;
-    bottom: 4%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 35%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease;
-}
-
-.settings-back:active {
-    transform: translateX(-50%) scale(0.95);
-}
-
-.settings-back img {
-    width: 100%;
-    display: block;
-    pointer-events: none;
-}
-
-#settings-popup {
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-
-.duration-display {
-    position: absolute;
-    right: 8%;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-    font-family: 'Arial', sans-serif;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    pointer-events: none;
-}
+/* KARE KUTULARI KALDIR */
+#menu, #menu *, .menu-btn, .menu-btn *, div { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
