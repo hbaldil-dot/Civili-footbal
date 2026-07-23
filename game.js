@@ -1747,21 +1747,43 @@ function openShotDurationSelect() {
     }
 }
 
-// Ses aç/kapa
+// ============================================================
+// AYARLAR - SES AÇ/KAPA (GÜNCELLENDİ)
+// ============================================================
+
 let isSoundOn = true;
 
 function toggleSound() {
     isSoundOn = !isSoundOn;
     console.log('🔊 Ses:', isSoundOn ? 'AÇIK' : 'KAPALI');
-    alert('🔊 Ses ' + (isSoundOn ? 'AÇILDI' : 'KAPATILDI'));
     
-    // Ses butonunun görselini değiştir (isteğe bağlı)
-    const soundBtn = document.querySelector('.settings-btn img[src*="ses"]');
-    if (soundBtn) {
+    // Ses butonunun görselini değiştir
+    const soundImg = document.getElementById('soundBtnImg');
+    if (soundImg) {
         if (isSoundOn) {
-            soundBtn.src = 'menu/ayarlar/ses.webp';
+            soundImg.src = 'menu/ayarlar/ses.webp';
+            soundImg.alt = 'Ses Açık';
         } else {
-            soundBtn.src = 'menu/ayarlar/ses-kapali.webp';
+            soundImg.src = 'menu/ayarlar/ses-off.webp';
+            soundImg.alt = 'Ses Kapalı';
         }
     }
+    
+    // Ses efektlerini aç/kapa
+    if (isSoundOn) {
+        alert('🔊 Ses AÇILDI');
+        // Ses açık, playSound çalışır
+        audioCtx.resume();
+    } else {
+        alert('🔇 Ses KAPATILDI');
+        // Ses kapalı, playSound çalışmaz
+        audioCtx.suspend();
+    }
+}
+
+// Ses durumuna göre playSound'u güncelle
+function playSound(type) {
+    if (!isSoundOn) return;  // Ses kapalıysa çalma
+    
+    // ... mevcut playSound kodu ...
 }
