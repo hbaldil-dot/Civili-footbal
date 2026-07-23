@@ -227,11 +227,15 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 
+// ============================================================
+// ÇİZİM FONKSİYONLARI
+// ============================================================
+
 function drawFieldLinesOnly() {
     ctx.clearRect(0, 0, width, height);
 }
 
-// ===== RETRO OYUNCU ÇİZİMİ (EKSİKTI - EKLENDİ) =====
+// ===== BURAYA EKLE =====
 function drawRetroPlayer(x, y, team) {
     ctx.save();
     ctx.translate(x, y);
@@ -252,6 +256,15 @@ function drawRetroPlayer(x, y, team) {
     ctx.fillStyle = '#111111';
     ctx.fillRect(-4, 4, 8, 7);
     ctx.restore();
+}
+// ===== EKLEME BİTİŞ =====
+
+function drawSoccerBall(x, y, r, rotation) {
+    // ...
+}
+
+function drawPlayerWithLogo(x, y, logoFile) {
+    // ...
 }
 
 function drawSoccerBall(x, y, r, rotation) {
