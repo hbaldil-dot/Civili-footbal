@@ -965,3 +965,78 @@ map area {
 #ai-level-menu .popup-close:hover {
     color: rgba(255, 255, 255, 0.6);
 }
+/* ============================================================
+   AYARLAR MENÜSÜ - ÖZEL STİLLER (EN SONA EKLE)
+   ============================================================ */
+
+.settings-popup .popup-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 360px;
+}
+
+.settings-container {
+    position: relative;
+    width: 100%;
+}
+
+.settings-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+.settings-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.settings-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.settings-btn img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+.settings-back {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.settings-back:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.settings-back img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+/* Ayarlar pop-up arka plan */
+#settings-popup {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
