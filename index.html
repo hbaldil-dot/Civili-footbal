@@ -59,39 +59,41 @@
     </div>
 
     <!-- ===== AYARLAR POP-UP ===== -->
-    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>AYARLAR</h2>
-                <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
-            </div>
-            <div class="popup-body">
-                <div class="input-group">
-                    <label>MAÇ SÜRESİ</label>
-                    <select id="match-duration">
-                        <option value="60">1 Dakika</option>
-                        <option value="90" selected>1.5 Dakika</option>
-                        <option value="120">2 Dakika</option>
-                        <option value="180">3 Dakika</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>SAHA RENGİ</label>
-                    <div class="color-options">
-                        <button class="color-btn active" data-field="#2e7d32" style="background:#2e7d32" onclick="selectFieldColor('#2e7d32')"></button>
-                        <button class="color-btn" data-field="#1a5276" style="background:#1a5276" onclick="selectFieldColor('#1a5276')"></button>
-                        <button class="color-btn" data-field="#7d6608" style="background:#7d6608" onclick="selectFieldColor('#7d6608')"></button>
-                        <button class="color-btn" data-field="#6c3483" style="background:#6c3483" onclick="selectFieldColor('#6c3483')"></button>
-                        <button class="color-btn" data-field="#1a1a1a" style="background:#1a1a1a; border-color:#555" onclick="selectFieldColor('#1a1a1a')"></button>
-                    </div>
-                </div>
-            </div>
-            <div class="popup-footer">
-                <button class="popup-close-btn" onclick="closeSettingsPopup()">TAMAM</button>
-            </div>
+<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
+    <div class="popup-content settings-popup">
+        
+        <!-- AYARLAR ANA GÖRSEL -->
+        <div class="settings-container">
+            <img src="menu/ayarlar/ayarlar.webp" alt="Ayarlar" class="settings-bg">
+            
+            <!-- STADYUM BUTONU -->
+            <button class="settings-btn" onclick="alert('🏟️ Stadyum seçimi açılıyor...')" style="top: 22%;">
+                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum">
+            </button>
+            
+            <!-- MAÇ SÜRESİ BUTONU -->
+            <button class="settings-btn" onclick="openDurationSelect()" style="top: 38%;">
+                <img src="menu/ayarlar/mac-suresi.webp" alt="Maç Süresi">
+            </button>
+            
+            <!-- VURUŞ SÜRESİ BUTONU -->
+            <button class="settings-btn" onclick="openShotDurationSelect()" style="top: 54%;">
+                <img src="menu/ayarlar/vurus-suresi.webp" alt="Vuruş Süresi">
+            </button>
+            
+            <!-- SES AÇ/KAPA BUTONU -->
+            <button class="settings-btn" onclick="toggleSound()" style="top: 70%;">
+                <img src="menu/ayarlar/ses.webp" alt="Ses Aç/Kapa">
+            </button>
+            
+            <!-- GERİ BUTONU -->
+            <button class="settings-back" onclick="closeSettingsPopup()">
+                <img src="menu/ayarlar/geri.webp" alt="Geri">
+            </button>
         </div>
+        
     </div>
-
+</div>
   <!-- ===== AI ZORLUK POP-UP ===== -->
 <div id="ai-level-menu" style="display: none;">
     <div class="popup-content difficulty-popup">
