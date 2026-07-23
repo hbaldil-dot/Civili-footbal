@@ -834,3 +834,13 @@ important;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
+/* ============================================================
+   AYARLAR POP-UP ARKA FONU (EN SONA EKLE)
+   ============================================================ */
+
+#settings-popup .popup-content {
+    background-image: url('menu/ayarlar/arkafon.webp') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
