@@ -785,3 +785,52 @@ important;
 .input-wrapper input {
     left: 65px !important;
 }
+/* ============================================================
+   ZORLUK MENÜSÜ - DÜZENLENMİŞ (EN SONA EKLE)
+   ============================================================ */
+
+.difficulty-popup .popup-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 360px;
+    padding: 0 !important;
+}
+
+.difficulty-container {
+    position: relative;
+    width: 100%;
+}
+
+.difficulty-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+/* Tıklanabilir alanlar */
+.difficulty-btn-area {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.difficulty-btn-area:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.difficulty-btn-area img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+/* Pop-up arka plan */
+#ai-level-menu {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
