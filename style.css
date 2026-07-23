@@ -16,7 +16,7 @@ textarea {
 }
 
 body {
-    background: #111;
+    background: #0a0a0a;
     font-family: 'Courier New', Courier, monospace;
     overflow: hidden;
     display: flex;
@@ -29,142 +29,181 @@ body {
     padding: 8px;
     position: relative;
     touch-action: none;
+    background-image: url('7124A696-3229-4D12-AED9-5EE046CFF275.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* ============================================================
-   ANA MENÜ
+   MENÜ
    ============================================================ */
 
 #menu {
     position: absolute;
-    border: 3px solid rgba(74, 117, 74, 0.5);
-    border-radius: 16px;
-    padding: 30px 25px 25px 25px;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 2vh 2vw 2vh 2vw;
     text-align: center;
     z-index: 100;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    width: 92%;
+    max-width: 400px;
+    box-shadow: none !important;
     display: block;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
-/* ===== BAŞLIK ===== */
-.menu-title {
-    margin-bottom: 22px;
+#menu * {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
-.menu-title h1 {
-    color: #2ecc71;
-    font-size: 28px;
-    font-weight: bold;
-    text-shadow: 0 0 30px rgba(46, 204, 113, 0.2), 2px 2px 8px rgba(0, 0, 0, 0.9);
-    letter-spacing: 4px;
-    margin: 0;
-    font-family: 'Courier New', monospace;
-}
-
-.menu-subtitle {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 4px;
-    color: #f1c40f;
-    font-size: 13px;
-    letter-spacing: 4px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-    font-weight: bold;
-}
-
-.menu-subtitle span {
-    padding: 0 2px;
-}
-
-/* ===== INPUT ===== */
+/* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
-    margin-bottom: 14px;
-    text-align: left;
+    margin-bottom: 1.2vh;
+    text-align: center;
 }
 
-.input-group label {
-    font-size: 13px;
-    color: #aaa;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 4px;
-    letter-spacing: 3px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-.input-line {
-    border-bottom: 2px solid rgba(74, 117, 74, 0.4);
-    padding: 4px 0;
-    transition: border-color 0.3s ease;
-}
-
-.input-line:focus-within {
-    border-color: #2ecc71;
-}
-
-#menu input {
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 6px 4px;
+    max-width: 320px;
+    margin: 0 auto;
+    gap: 4px;
+    background: transparent !important;
+    flex-direction: row;
+}
+
+/* Logo solda */
+.logo-container {
+    position: relative;
+    width: 30%;
+    max-width: 65px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 0;
+}
+
+.input-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+}
+
+.team-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: auto;
+    border-radius: 50%;
+    object-fit: contain;
     background: transparent;
-    border: none;
-    color: white;
-    font-size: 15px;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+    pointer-events: none;
+    z-index: 5;
+    display: block !important;
+}
+
+/* İsim girişi sağda */
+.input-icon {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    opacity: 0.9;
+    pointer-events: none;
+    order: 1;
+}
+
+.input-wrapper input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 65%;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: clamp(12px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
+    text-align: center;
+    padding: 0 5px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
 
 /* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
     display: block;
     width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    color: white;
-    border: 2px solid rgba(74, 117, 74, 0.3);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
+    max-width: 320px;
+    margin: 0 auto 0.6vh auto;
+    background: transparent !important;
+    border: none !important;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
-    text-align: center;
-    transition: all 0.3s ease;
-    letter-spacing: 3px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.menu-btn:hover {
-    border-color: rgba(46, 204, 113, 0.5);
-    background: rgba(46, 204, 113, 0.08);
-    transform: scale(1.02);
+    padding: 0;
+    transition: transform 0.2s ease;
+    box-shadow: none !important;
 }
 
 .menu-btn:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
 }
 
-.menu-btn:last-child {
-    margin-bottom: 0;
+.menu-btn-img {
+    width: 100%;
+    display: block;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.menu-btn:hover .menu-btn-img {
+    opacity: 1;
 }
 
 .settings-btn {
-    border-color: rgba(85, 85, 85, 0.25);
-    color: #888;
-    font-size: 12px;
-    letter-spacing: 4px;
-    margin-top: 4px;
+    margin-top: 0.5vh;
 }
 
-.settings-btn:hover {
-    border-color: #888;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+.settings-btn .menu-btn-img {
+    opacity: 0.5;
+}
+
+.settings-btn:hover .menu-btn-img {
+    opacity: 0.7;
 }
 
 /* ============================================================
@@ -172,47 +211,47 @@ body {
    ============================================================ */
 
 .team-logo-container {
-    margin-top: 6px;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(46, 204, 113, 0.2);
+    margin: 0.5vh auto 1vh auto;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 10px;
+    border: 1px solid rgba(46, 204, 113, 0.1) !important;
     animation: slideDown 0.3s ease;
-    max-height: 180px;
+    max-height: 140px;
     overflow-y: auto;
+    max-width: 320px;
 }
 
 .team-logo-options {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
     padding: 2px;
 }
 
 .team-logo-btn {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 3px solid #444;
+    border: 2px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     padding: 2px;
     flex-shrink: 0;
 }
 
 .team-logo-btn:hover {
-    transform: scale(1.1);
-    border-color: #666;
+    transform: scale(1.08);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .team-logo-btn.active {
     border-color: #2ecc71;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
-    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.2);
+    transform: scale(1.06);
 }
 
 .team-logo-btn img {
@@ -220,34 +259,35 @@ body {
     height: 100%;
     object-fit: contain;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.team-logo-container::-webkit-scrollbar {
-    width: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.team-logo-container::-webkit-scrollbar-thumb {
-    background: #2ecc71;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 180px;
-    }
+    from { opacity: 0; transform: translateY(-4px); max-height: 0; }
+    to { opacity: 1; transform: translateY(0); max-height: 140px; }
+}
+
+.team-logo-container::-webkit-scrollbar {
+    width: 3px;
+}
+.team-logo-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+}
+.team-logo-container::-webkit-scrollbar-thumb {
+    background: rgba(46, 204, 113, 0.15);
+    border-radius: 4px;
+}
+
+.team-logo-container .selected-text {
+    text-align: center;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #888;
+}
+
+.team-logo-container .selected-text span {
+    color: #2ecc71;
 }
 
 /* ============================================================
@@ -256,7 +296,8 @@ body {
 
 #settings-popup,
 #ai-level-menu,
-#online-lobby {
+#online-lobby,
+#local-team-select {
     position: fixed;
     top: 0;
     left: 0;
@@ -273,13 +314,13 @@ body {
 }
 
 .popup-content {
-    background: rgba(20, 30, 20, 0.98);
-    border: 3px solid #4a754a;
-    border-radius: 16px;
+    background: rgba(10, 15, 10, 0.95);
+    border: 1px solid rgba(46, 204, 113, 0.08);
+    border-radius: 14px;
     width: 100%;
     max-width: 380px;
     max-height: 90vh;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -289,54 +330,83 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
-    border-bottom: 2px solid #2ecc71;
-    background: rgba(46, 204, 113, 0.05);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(46, 204, 113, 0.04);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .popup-header h2 {
-    font-size: 18px;
+    font-size: 15px;
     margin: 0;
-    color: #2ecc71;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 4px;
+    font-weight: bold;
 }
 
 .popup-close {
     background: none;
     border: none;
-    color: #888;
-    font-size: 24px;
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 20px;
     cursor: pointer;
     padding: 0 8px;
     font-family: inherit;
 }
 
 .popup-close:hover {
-    color: #fff;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .popup-body {
-    padding: 20px;
+    padding: 18px;
     overflow-y: auto;
     flex: 1;
 }
 
+.popup-body .input-group label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.popup-body select {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-family: inherit;
+}
+
 .popup-footer {
-    padding: 12px 20px;
-    border-top: 1px solid #333;
+    padding: 10px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
     display: flex;
     justify-content: flex-end;
 }
 
 .popup-close-btn {
-    padding: 10px 30px;
-    background: #2ecc71;
-    color: white;
-    border: none;
+    padding: 8px 28px;
+    background: rgba(46, 204, 113, 0.05);
+    color: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(46, 204, 113, 0.04);
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     font-family: inherit;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
+}
+
+.popup-close-btn:hover {
+    background: rgba(46, 204, 113, 0.08);
+    border-color: rgba(46, 204, 113, 0.08);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .color-options {
@@ -347,129 +417,17 @@ body {
 }
 
 .color-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 3px solid #444;
+    border: 2px solid rgba(255, 255, 255, 0.04);
     cursor: pointer;
-    font-size: 14px;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .color-btn.active {
-    border-color: #fff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-}
-
-/* ===== ONLINE LOBI ===== */
-.player-list {
-    background: #111;
-    border: 2px solid #444;
-    border-radius: 6px;
-    max-height: 200px;
-    overflow-y: auto;
-    text-align: left;
-}
-
-.player-item {
-    padding: 10px 14px;
-    border-bottom: 1px solid #222;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.player-item:last-child {
-    border-bottom: none;
-}
-
-.player-item .status {
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: bold;
-    background: #27ae60;
-    color: white;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-}
-
-.lobby-logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    vertical-align: middle;
-    margin-right: 8px;
-}
-
-.player-item span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* ============================================================
-   2 KİŞİLİK TAKIM SEÇ
-   ============================================================ */
-
-#local-team-select {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 300;
-    padding: 20px;
-}
-
-#local-team-select .popup-content {
-    max-width: 420px;
-    max-height: 90vh;
-}
-
-.player-team-select {
-    margin-bottom: 4px;
-}
-
-.player-team-select h3 {
-    font-size: 16px;
-    margin-bottom: 6px;
-}
-
-.player-team-select .team-logo-options {
-    max-height: 100px;
-    padding: 6px;
-    gap: 6px;
-}
-
-.player-team-select .team-logo-btn {
-    width: 42px;
-    height: 42px;
-    border-width: 2px;
-}
-
-.player-team-select .team-logo-btn.active-p1 {
-    border-color: #3498db;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
-}
-
-.player-team-select .team-logo-btn.active-p2 {
-    border-color: #e74c3c;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.06);
 }
 
 /* ============================================================
@@ -508,39 +466,41 @@ body {
 }
 
 #exit-btn {
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
     font-weight: bold;
     cursor: pointer;
     pointer-events: auto;
     font-family: inherit;
-    background: rgba(192, 57, 43, 0.8);
+    background: rgba(192, 57, 43, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    flex-shrink: 0;
-    border-radius: 50%;
+}
+
+#exit-btn:hover {
+    background: rgba(192, 57, 43, 0.15);
 }
 
 #score-board {
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 18px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 16px;
     font-weight: bold;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.02);
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
     align-items: center;
-    min-width: 80px;
+    min-width: 70px;
     flex: 1;
     pointer-events: none;
 }
@@ -548,80 +508,88 @@ body {
 .team-score {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .score-logo {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.03);
     background: rgba(0, 0, 0, 0.3);
 }
 
 #score-p1 {
-    color: #3498db;
-    font-size: 20px;
-    min-width: 20px;
+    color: rgba(52, 152, 219, 0.6);
+    font-size: 18px;
+    min-width: 16px;
 }
 
 #score-divider {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 18px;
+    color: rgba(255, 255, 255, 0.08);
+    font-size: 16px;
 }
 
 #score-p2 {
-    color: #e74c3c;
-    font-size: 20px;
-    min-width: 20px;
+    color: rgba(231, 76, 60, 0.6);
+    font-size: 18px;
+    min-width: 16px;
 }
 
 #time-board {
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: bold;
-    border: 2px solid rgba(52, 152, 219, 0.5);
-    color: #3498db;
-    min-width: 60px;
+    border: 1px solid rgba(52, 152, 219, 0.04);
+    color: rgba(52, 152, 219, 0.3);
+    min-width: 44px;
     flex-shrink: 0;
     pointer-events: none;
+    letter-spacing: 1px;
 }
 
 #turn-indicator {
-    background: rgba(0, 0, 0, 0.85);
-    padding: 4px 16px;
-    border-radius: 16px;
-    font-size: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 3px 12px;
+    border-radius: 8px;
+    font-size: 11px;
     font-weight: bold;
-    border: 2px solid #f1c40f;
-    color: #f1c40f;
-    min-width: 120px;
+    border: 1px solid rgba(241, 196, 15, 0.03);
+    color: rgba(241, 196, 15, 0.2);
+    min-width: 90px;
     text-align: center;
     pointer-events: none;
     flex: 1;
+    letter-spacing: 3px;
 }
 
 #shot-timer {
-    background: rgba(231, 76, 60, 0.9);
+    background: rgba(231, 76, 60, 0.04);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 11px;
     font-weight: bold;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
-    min-width: 70px;
+    border: 1px solid rgba(231, 76, 60, 0.03);
+    color: rgba(231, 76, 60, 0.2);
+    min-width: 55px;
     text-align: center;
     pointer-events: none;
     display: none;
     flex-shrink: 0;
+    letter-spacing: 1px;
+}
+
+#shot-timer.warning {
+    color: rgba(231, 76, 60, 0.4);
+    border-color: rgba(231, 76, 60, 0.06);
+    background: rgba(231, 76, 60, 0.06);
 }
 
 .canvas-container {
@@ -633,10 +601,10 @@ body {
 }
 
 canvas {
-    background: #2e7d32;
-    border: 6px solid #1b5e20;
-    border-radius: 8px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     width: 100%;
     height: 100%;
     display: block;
@@ -644,19 +612,26 @@ canvas {
     touch-action: none;
 }
 
+canvas.canvas-active {
+    background: #2e7d32 !important;
+    border: 4px solid rgba(27, 94, 32, 0.4) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
 #start-match-btn {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 84px;
-    height: 84px;
+    width: 76px;
+    height: 76px;
     border-radius: 50%;
-    border: 4px solid #27ae60;
-    background: rgba(39, 174, 96, 0.9);
-    color: white;
+    border: 1px solid rgba(39, 174, 96, 0.1);
+    background: rgba(39, 174, 96, 0.04);
+    color: rgba(255, 255, 255, 0.2);
     font-family: inherit;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
     cursor: pointer;
     z-index: 50;
@@ -664,17 +639,31 @@ canvas {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     text-align: center;
     line-height: 1.2;
+    letter-spacing: 3px;
+}
+
+#start-match-btn:hover {
+    background: rgba(39, 174, 96, 0.06);
+    border-color: rgba(39, 174, 96, 0.15);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+#start-match-btn .timer-subtext {
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+    color: rgba(241, 196, 15, 0.15);
 }
 
 #power-bar-container {
     width: 100%;
     max-width: 360px;
-    height: 8px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 4px;
+    height: 3px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 2px;
     margin-top: 4px;
     overflow: hidden;
     display: none;
@@ -683,8 +672,8 @@ canvas {
 #power-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
-    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(46, 204, 113, 0.3), rgba(241, 196, 15, 0.3), rgba(231, 76, 60, 0.3));
+    border-radius: 2px;
     transition: width 0.05s;
 }
 
@@ -692,67 +681,58 @@ canvas {
    MOBİL UYUM
    ============================================================ */
 
-@media (max-width: 400px) {
+@media (max-width: 420px) {
     #menu {
-        padding: 22px 16px 16px 16px;
+        padding: 2vh 2vw 2vh 2vw;
+        max-width: 340px;
+        bottom: 2vh;
     }
-    
-    .menu-title h1 {
-        font-size: 22px;
-        letter-spacing: 2px;
-    }
-    
-    .menu-subtitle {
-        font-size: 11px;
-        letter-spacing: 2px;
-        gap: 4px;
-    }
-    
-    .menu-btn {
-        font-size: 12px;
-        padding: 10px 14px;
-        letter-spacing: 2px;
-    }
-    
-    .input-group label {
-        font-size: 12px;
-        letter-spacing: 2px;
-    }
-    
-    #exit-btn { width: 30px; height: 30px; font-size: 14px; }
-    #score-board { font-size: 15px; padding: 4px 10px; min-width: 60px; }
-    #score-p1, #score-p2 { font-size: 17px; }
-    #time-board { font-size: 13px; padding: 4px 8px; min-width: 50px; }
-    #turn-indicator { font-size: 12px; padding: 3px 12px; min-width: 90px; }
-    #shot-timer { font-size: 12px; padding: 3px 8px; min-width: 55px; }
-    #start-match-btn { width: 70px; height: 70px; font-size: 11px; }
-    .team-logo-btn { width: 38px; height: 38px; }
-    .score-logo { width: 18px; height: 18px; }
-    .lobby-logo { width: 22px; height: 22px; }
+    .input-wrapper { max-width: 280px; gap: 4px; }
+    .input-wrapper input { font-size: clamp(10px, 1.8vw, 14px); width: 60%; }
+    .logo-container { max-width: 50px; }
+    .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
+    .team-logo-btn { width: 28px; height: 28px; }
+    .team-logo-container { max-width: 280px; max-height: 120px; }
 }
 
 @media (max-width: 360px) {
     #menu {
-        padding: 16px 12px 12px 12px;
+        padding: 1.5vh 2vw 1.5vh 2vw;
+        max-width: 300px;
+        bottom: 1.5vh;
     }
-    
-    .menu-title h1 {
-        font-size: 18px;
-        letter-spacing: 1px;
-    }
-    
-    .menu-subtitle {
-        font-size: 10px;
-        letter-spacing: 1px;
-        gap: 2px;
-    }
-    
-    .menu-btn {
-        font-size: 11px;
-        padding: 8px 12px;
-        letter-spacing: 1px;
-    }
-    
-    .team-logo-btn { width: 34px; height: 34px; }
-    .score-logo { width: 16px; height: 16px; border-width: 1px; }
+    .input-wrapper { max-width: 240px; gap: 3px; }
+    .input-wrapper input { font-size: clamp(9px, 1.5vw, 12px); width: 55%; }
+    .logo-container { max-width: 40px; }
+    .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
+    .team-logo-btn { width: 24px; height: 24px; }
+    .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
+}
+
+/* ============================================================
+   TÜM KUTULARI KALDIR
+   ============================================================ */
+
+#menu,
+#menu *,
+.menu-btn,
+.menu-btn *,
+.input-group,
+.input-group *,
+.input-wrapper,
+.input-wrapper * {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.input-wrapper input {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
