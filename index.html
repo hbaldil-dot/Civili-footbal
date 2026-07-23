@@ -92,24 +92,28 @@
         </div>
     </div>
 
-   <!-- ===== AI ZORLUK POP-UP ===== -->
+  <!-- ===== AI ZORLUK POP-UP ===== -->
 <div id="ai-level-menu" style="display: none;">
-    <div class="popup-content">
-        <div class="popup-header">
-            <h2>ZORLUK SEÇİMİ</h2>
-            <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
-        </div>
-        <div class="popup-body">
-            <!-- TEK GÖRSEL - Image Map ile -->
-            <img src="menu/zorluk-secimi.webp" alt="Zorluk Seçimi" usemap="#zorlukHaritasi" style="width:100%; display:block; border-radius:8px;">
+    <div class="popup-content difficulty-popup">
+        <div class="difficulty-container">
+            <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
             
-            <map name="zorlukHaritasi">
-                <area shape="rect" coords="0,200,480,270" onclick="selectDifficulty('kolay')" title="Kolay">
-                <area shape="rect" coords="0,280,480,335" onclick="selectDifficulty('orta')" title="Orta">
-                <area shape="rect" coords="0,345,480,390" onclick="selectDifficulty('zor')" title="Zor">
-                <area shape="rect" coords="0,395,480,440" onclick="selectDifficulty('usta')" title="Usta">
-                <area shape="rect" coords="0,440,480,480" onclick="selectDifficulty('usta')" title="menu">
-            </map>
+            <button class="difficulty-btn" onclick="selectDifficulty('kolay')" style="top: 22%;">
+                <img src="menu/zorluk/kolay.webp" alt="Kolay">
+            </button>
+            <button class="difficulty-btn" onclick="selectDifficulty('orta')" style="top: 38%;">
+                <img src="menu/zorluk/orta.webp" alt="Orta">
+            </button>
+            <button class="difficulty-btn" onclick="selectDifficulty('zor')" style="top: 54%;">
+                <img src="menu/zorluk/zor.webp" alt="Zor">
+            </button>
+            <button class="difficulty-btn" onclick="selectDifficulty('usta')" style="top: 70%;">
+                <img src="menu/zorluk/usta.webp" alt="Usta">
+            </button>
+            
+            <button class="difficulty-back" onclick="closeAILevelMenu()">
+                <img src="menu/zorluk/geri.webp" alt="Geri">
+            </button>
         </div>
     </div>
 </div>
