@@ -226,7 +226,6 @@ function triggerGoalAnimation() {
 // ÇİZİM FONKSİYONLARI
 // ============================================================
 function drawFieldLinesOnly() {
-    // MENÜDEYKEN SAHA ÇİZGİLERİNİ GÖSTERME
     ctx.clearRect(0, 0, width, height);
 }
 
@@ -253,50 +252,31 @@ function drawSoccerBall(x, y, r, rotation) {
     ctx.restore();
 }
 
-function drawPlayerWithLogo(x, y, logoFile) {
+function drawRetroPlayer(x, y, team) {
     ctx.save();
     ctx.translate(x, y);
-    
-    if (logoFile && loadedLogos[logoFile]) {
-        const img = loadedLogos[logoFile];
-        const size = cap.radius * 1.4;
-        
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 6;
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        ctx.beginPath();
-        ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(img, -size + 2, -size + 2, size * 2 - 4, size * 2 - 4);
-        ctx.restore();
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(0, 0, size - 1, 0, Math.PI * 2);
-        ctx.stroke();
-    } else {
-        const size = cap.radius * 1.2;
-        ctx.fillStyle = '#666';
-        ctx.beginPath();
-        ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    
+    const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
+    const skinColor = '#ffad87';
+
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-14, -4, 5, 4);
+    ctx.fillRect(9, -4, 5, 4);
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-14, -8, 4, 4);
+    ctx.fillRect(10, -8, 4, 4);
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-9, -2, 18, 7);
+    ctx.fillRect(-6, 5, 12, 4);
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-3, -5, 6, 4);
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(-4, 4, 8, 7);
     ctx.restore();
 }
 
 function draw() {
     ctx.clearRect(0, 0, width, height);
     
-    // SAHA ARKA PLANI
     ctx.fillStyle = fieldColor || '#2e7d32';
     ctx.fillRect(0, 0, width, height);
     
@@ -335,31 +315,7 @@ function draw() {
             ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
             ctx.fill();
         } else {
-            let logoFile = 'default.png';
-            if (pin.team === 1) {
-                if (gameMode === 'local' && localPlayer1Logo) {
-                    logoFile = localPlayer1Logo;
-                } else if (gameMode === 'online' && myTeamNumber === 2) {
-                    logoFile = aiTeamLogo || 'default.png';
-                } else {
-                    logoFile = selectedTeamLogo || 'default.png';
-                }
-            } else if (pin.team === 2) {
-                if (gameMode === 'ai') {
-                    logoFile = aiTeamLogo || 'default.png';
-                } else if (gameMode === 'local' && localPlayer2Logo) {
-                    logoFile = localPlayer2Logo;
-                } else if (gameMode === 'online') {
-                    if (myTeamNumber === 1) {
-                        logoFile = aiTeamLogo || 'default.png';
-                    } else {
-                        logoFile = selectedTeamLogo || 'default.png';
-                    }
-                } else {
-                    logoFile = 'default.png';
-                }
-            }
-            drawPlayerWithLogo(pin.x, pin.y, logoFile);
+            drawRetroPlayer(pin.x, pin.y, pin.team);
         }
     });
 
@@ -406,7 +362,6 @@ function draw() {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
 
-    // GOL ANİMASYONU
     if (goalAnimation) {
         const elapsed = Date.now() - goalAnimationStartTime;
         const progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
@@ -813,18 +768,25 @@ if (socket) setupSocketListeners();
 // OYUN FONKSİYONLARI
 // ============================================================
 function startLocalGame(mode, aiLevelParam) {
+    console.log('🚀 Oyun başlatılıyor:', mode, aiLevelParam);
+    
     gameMode = mode;
+    
     if (mode === 'ai' && aiLevelParam) {
         aiLevel = aiLevelParam;
-        closeAILevelMenu();
+        console.log('🤖 AI Zorluk:', aiLevel);
         selectRandomAITeam();
         setTimeout(() => {
             updateScoreLogos();
         }, 100);
     }
+    
     document.getElementById('settings-popup').style.display = 'none';
+    document.getElementById('ai-level-menu').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
+    
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
@@ -1326,20 +1288,24 @@ startPeriodicSync();
 // MENÜ FONKSİYONLARI
 // ============================================================
 function openAILevelMenu() {
+    console.log('🔓 Zorluk menüsü açılıyor...');
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
 }
 
 function closeAILevelMenu() {
+    console.log('🔒 Zorluk menüsü kapatılıyor...');
     document.getElementById('ai-level-menu').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
 }
 
 function openSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü açılıyor...');
     document.getElementById('settings-popup').style.display = 'flex';
 }
 
 function closeSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
     document.getElementById('settings-popup').style.display = 'none';
 }
 
@@ -1457,14 +1423,6 @@ function updateSelectedTeamName() {
     if (displayName) displayName.textContent = teamName;
 }
 
-function updateTeamLogoDisplayOld() {
-    const displayImg = document.getElementById('selected-team-logo');
-    if (displayImg) {
-        displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() { this.src = 'takimlar/default.png'; };
-    }
-}
-
 // ============================================================
 // SKORBORD LOGO GÜNCELLEME
 // ============================================================
@@ -1516,6 +1474,42 @@ function loadTeamLogoImage(logoFile) {
         };
         img.src = `takimlar/${logoFile}`;
     });
+}
+
+// ============================================================
+// ZORLUK SEÇİMİ
+// ============================================================
+function selectDifficulty(level) {
+    console.log('🎯 Zorluk seçildi:', level);
+    document.getElementById('ai-level-menu').style.display = 'none';
+    startLocalGame('ai', level);
+}
+
+// ============================================================
+// AYARLAR - SES AÇ/KAPA
+// ============================================================
+let isSoundOn = true;
+
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    console.log('🔊 Ses:', isSoundOn ? 'AÇIK' : 'KAPALI');
+    
+    const soundImg = document.getElementById('soundBtnImg');
+    if (soundImg) {
+        if (isSoundOn) {
+            soundImg.src = 'menu/ayarlar/ses.webp';
+            soundImg.alt = 'Ses Açık';
+        } else {
+            soundImg.src = 'menu/ayarlar/ses-off.webp';
+            soundImg.alt = 'Ses Kapalı';
+        }
+    }
+    
+    if (isSoundOn) {
+        audioCtx.resume();
+    } else {
+        audioCtx.suspend();
+    }
 }
 
 // ============================================================
@@ -1674,94 +1668,3 @@ document.addEventListener('DOMContentLoaded', function() {
     selectRandomAITeam();
     hideField();
 });
-// ============================================================
-// ZORLUK SEÇİMİ - MENÜ (EN SONA EKLE)
-// ============================================================
-
-// Zorluk seç ve oyunu başlat
-function selectDifficulty(level) {
-    console.log('🎯 Zorluk seçildi:', level);
-    
-    // Pop-up'ı kapat
-    document.getElementById('ai-level-menu').style.display = 'none';
-    
-    // Oyunu başlat
-    startLocalGame('ai', level);
-}
-
-// Zorluk menüsünü aç
-function openAILevelMenu() {
-    console.log('🔓 Zorluk menüsü açılıyor...');
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('ai-level-menu').style.display = 'flex';
-}
-
-// Zorluk menüsünü kapat
-function closeAILevelMenu() {
-    console.log('🔒 Zorluk menüsü kapatılıyor...');
-    document.getElementById('ai-level-menu').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
-}
-// ============================================================
-// AYARLAR MENÜSÜ - FONKSİYONLAR (EN SONA EKLE)
-// ============================================================
-
-// Ayarlar menüsünü aç
-function openSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü açılıyor...');
-    document.getElementById('settings-popup').style.display = 'flex';
-}
-
-// Ayarlar menüsünü kapat
-function closeSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
-    document.getElementById('settings-popup').style.display = 'none';
-}
-
-// Maç süresi seçimi
-function openDurationSelect() {
-    console.log('⏱️ Maç süresi seçimi açılıyor...');
-    // Mevcut maç süresi seçimini göster
-    const durationSelect = document.getElementById('match-duration');
-    if (durationSelect) {
-        // Pop-up içinde select gösterilebilir
-        alert('Maç süresi seçimi: ' + durationSelect.value + ' saniye');
-    }
-}
-
-// Vuruş süresi seçimi
-function openShotDurationSelect() {
-    console.log('⏱️ Vuruş süresi seçimi açılıyor...');
-    // Vuruş süresi için basit bir seçenek
-    const shotOptions = ['3 sn', '4 sn', '5 sn', '6 sn'];
-    const choice = prompt('Vuruş süresi seçin (3-6 sn):', '3');
-    if (choice) {
-        const seconds = parseInt(choice);
-        if (seconds >= 3 && seconds <= 6) {
-            shotSecondsLeft = seconds;
-            console.log('✅ Vuruş süresi:', seconds, 'sn');
-            alert('Vuruş süresi ' + seconds + ' sn olarak ayarlandı!');
-        } else {
-            alert('Lütfen 3-6 arası bir değer girin!');
-        }
-    }
-}
-
-// Ses aç/kapa
-let isSoundOn = true;
-
-function toggleSound() {
-    isSoundOn = !isSoundOn;
-    console.log('🔊 Ses:', isSoundOn ? 'AÇIK' : 'KAPALI');
-    alert('🔊 Ses ' + (isSoundOn ? 'AÇILDI' : 'KAPATILDI'));
-    
-    // Ses butonunun görselini değiştir (isteğe bağlı)
-    const soundBtn = document.querySelector('.settings-btn img[src*="ses"]');
-    if (soundBtn) {
-        if (isSoundOn) {
-            soundBtn.src = 'menu/ayarlar/ses.webp';
-        } else {
-            soundBtn.src = 'menu/ayarlar/ses-kapali.webp';
-        }
-    }
-}
