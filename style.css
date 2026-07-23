@@ -835,15 +835,52 @@ important;
     -webkit-backdrop-filter: blur(4px);
 }
 /* ============================================================
-   AYARLAR POP-UP ARKA FONU - TAM EKRAN (EN SONA EKLE)
+   AYARLAR POP-UP - TAM EKRAN ARKA FON (EN SONA EKLE)
    ============================================================ */
 
-#settings-popup .popup-content {
+/* Ayarlar pop-up arka plan overlay */
+#settings-popup {
+    background: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ayarlar pop-up içerik - tüm ekranı kapla */
+.settings-popup-bg {
     background-image: url('menu/ayarlar/arkafon.webp') !important;
-    background-size: 100% 100% !important;
+    background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
     border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
-    padding: 20px !important;
-    border-radius: 16px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Pop-up içindeki eski içerikleri gizle */
+#settings-popup .popup-header,
+#settings-popup .popup-body,
+#settings-popup .popup-footer,
+#settings-popup .input-group,
+#settings-popup .color-options,
+#settings-popup .color-btn,
+#settings-popup .popup-close,
+#settings-popup .popup-close-btn {
+    display: none !important;
+}
