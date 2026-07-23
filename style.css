@@ -145,7 +145,7 @@ body::before {
 .input-wrapper input {
     position: absolute;
     top: 0;
-    left: 70%;
+    left: 0;
     width: 65%;
     height: 100%;
     background: transparent !important;
@@ -154,7 +154,7 @@ body::before {
     font-size: clamp(16px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
-    text-align: right;
+    text-align: center;
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
@@ -737,4 +737,32 @@ canvas.canvas-active {
     text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
 important;
+}
+/* ============================================================
+   LOGO %10 BÜYÜK VE İSİM ORTADA (EN SONA EKLE)
+   ============================================================ */
+
+/* Logo container - büyüdü */
+.logo-container {
+    width: 22% !important;
+    max-width: 55px !important;
+    order: 0 !important;
+    margin-right: auto !important;
+}
+
+/* Takım logosu - büyüdü */
+.team-logo-overlay {
+    width: 60% !important;
+}
+
+/* İsim girişi - ortada */
+.input-icon {
+    order: 1 !important;
+    flex: 1 !important;
+}
+
+.input-wrapper input {
+    left: 0 !important;
+    width: 70% !important;
+    text-align: center !important;
 }
