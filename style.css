@@ -834,27 +834,3 @@ important;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
-/* ============================================================
-   AYARLAR POP-UP - SADECE AYARLAR (EN SONA EKLE)
-   ============================================================ */
-
-.settings-popup .popup-content {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 380px;
-    padding: 0 !important;
-}
-
-.settings-container {
-    position: relative;
-    width: 100%;
-    max-width: 380px;
-    margin: 0 auto;
-}
-
-.settings-bg {
-    width: 100%;
-    display: block;
-    border-radius: 16px;
-}
