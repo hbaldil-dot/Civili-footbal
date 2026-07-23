@@ -778,3 +778,10 @@ important;
     text-overflow: ellipsis !important;
     width: 65% !important;
 }
+/* ============================================================
+   İSİM GİRİŞİ 10px SAĞA KAYDIR (EN SONA EKLE)
+   ============================================================ */
+
+.input-wrapper input {
+    left: 10px !important;
+}
