@@ -100,13 +100,14 @@ body::before {
 /* Logo solda */
 .logo-container {
     position: relative;
-    width: 40%;
-    max-width: 65px;
+    width: 22% !important;
+    max-width: 55px !important;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     order: 0;
+    margin-right: auto !important;
 }
 
 .input-logo {
@@ -121,7 +122,7 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%;
+    width: 60% !important;
     height: auto;
     border-radius: 50%;
     object-fit: contain;
@@ -145,24 +146,27 @@ body::before {
 .input-wrapper input {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 65%;
+    left: 65px !important;
+    width: 65% !important;
     height: 100%;
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
-    font-size: clamp(16px, 2vw, 16px);
+    font-size: clamp(14px, 3vw, 20px) !important;
     font-family: 'Courier New', monospace;
     outline: none;
-    text-align: center;
+    text-align: center !important;
     padding: 0 5px;
     font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 2px !important;
     display: block !important;
     visibility: visible !important;
     pointer-events: auto !important;
     z-index: 10 !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 /* ===== MENÜ BUTONLARI ===== */
@@ -409,27 +413,6 @@ body::before {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.color-options {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-}
-
-.color-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.04);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.color-btn.active {
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.06);
-}
-
 /* ============================================================
    OYUN EKRANI
    ============================================================ */
@@ -600,23 +583,29 @@ body::before {
     touch-action: none;
 }
 
-canvas {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+#gameCanvas {
+    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     width: 100%;
     height: 100%;
     display: block;
     image-rendering: pixelated;
     touch-action: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
-canvas.canvas-active {
-    background: #2e7d32 !important;
+#gameCanvas.canvas-active {
     border: 4px solid rgba(27, 94, 32, 0.4) !important;
     border-radius: 8px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
 
 #start-match-btn {
@@ -678,6 +667,54 @@ canvas.canvas-active {
 }
 
 /* ============================================================
+   ZORLUK MENÜSÜ
+   ============================================================ */
+
+.difficulty-popup .popup-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 360px;
+    padding: 0 !important;
+}
+
+.difficulty-container {
+    position: relative;
+    width: 100%;
+}
+
+.difficulty-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+.difficulty-btn-area {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.difficulty-btn-area:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.difficulty-btn-area img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+#ai-level-menu {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============================================================
    MOBİL UYUM
    ============================================================ */
 
@@ -735,102 +772,4 @@ canvas.canvas-active {
     color: #ffffff !important;
     background: transparent !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
-}
-important;
-}
-/* ============================================================
-   LOGO %10 BÜYÜK VE İSİM ORTADA (EN SONA EKLE)
-   ============================================================ */
-
-/* Logo container - büyüdü */
-.logo-container {
-    width: 22% !important;
-    max-width: 55px !important;
-    order: 0 !important;
-    margin-right: auto !important;
-}
-
-/* Takım logosu - büyüdü */
-.team-logo-overlay {
-    width: 60% !important;
-}
-
-/* İsim girişi - ortada */
-.input-icon {
-    order: 1 !important;
-    flex: 1 !important;
-}
-
-.input-wrapper input {
-    left: 0 !important;
-    width: 70% !important;
-    text-align: center !important;
-}
-/* ============================================================
-   İSİM TAŞMASINI DÜZELT (EN SONA EKLE)
-   ============================================================ */
-
-.input-wrapper input {
-    font-size: clamp(14px, 3vw, 20px) !important;
-    letter-spacing: 2px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    width: 65% !important;
-}
-/* ============================================================
-   İSİM GİRİŞİ 10px SAĞA KAYDIR (EN SONA EKLE)
-   ============================================================ */
-
-.input-wrapper input {
-    left: 65px !important;
-}
-/* ============================================================
-   ZORLUK MENÜSÜ - DÜZENLENMİŞ (EN SONA EKLE)
-   ============================================================ */
-
-.difficulty-popup .popup-content {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 360px;
-    padding: 0 !important;
-}
-
-.difficulty-container {
-    position: relative;
-    width: 100%;
-}
-
-.difficulty-bg {
-    width: 100%;
-    display: block;
-    border-radius: 16px;
-}
-
-/* Tıklanabilir alanlar */
-.difficulty-btn-area {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease;
-}
-
-.difficulty-btn-area:active {
-    transform: translateX(-50%) scale(0.95);
-}
-
-.difficulty-btn-area img {
-    width: 100%;
-    display: block;
-    pointer-events: none;
-}
-
-/* Pop-up arka plan */
-#ai-level-menu {
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
 }
