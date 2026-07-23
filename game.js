@@ -1674,3 +1674,17 @@ document.addEventListener('DOMContentLoaded', function() {
     selectRandomAITeam();
     hideField();
 });
+// ============================================================
+// ZORLUK SEÇİMİ - IMAGE MAP
+// ============================================================
+
+// Zorluk seç ve oyunu başlat
+function selectDifficulty(level) {
+    console.log('🎯 Zorluk seçildi (Image Map):', level);
+    
+    // Pop-up'ı kapat
+    document.getElementById('ai-level-menu').style.display = 'none';
+    
+    // Oyunu başlat
+    startLocalGame('ai', level);
+}
