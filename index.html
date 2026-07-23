@@ -93,27 +93,20 @@
     </div>
 
   <!-- ===== AI ZORLUK POP-UP ===== -->
-<div id="ai-level-menu" style="display: none;">
-    <div class="popup-content difficulty-popup">
-        <div class="difficulty-container">
-            <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg" style="top: %;"> 
-            
-            <button class="difficulty-btn" onclick="selectDifficulty('kolay')" style="top: 35%;">
-                <img src="menu/zorluk/kolay.webp" alt="Kolay">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('orta')" style="top: 48%;">
-                <img src="menu/zorluk/orta.webp" alt="Orta">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('zor')" style="top: 61%;">
-                <img src="menu/zorluk/zor.webp" alt="Zor">
-            </button>
-            <button class="difficulty-btn" onclick="selectDifficulty('usta')" style="top: 74%;">
-                <img src="menu/zorluk/usta.webp" alt="Usta">
-            </button>
-            
-            <button class="difficulty-back" onclick="closeAILevelMenu()">
-                <img src="menu/zorluk/ana menu.webp" alt="Geri">
-            </button>
+<div id="ai-level-menu" style="display: none;" onclick="if(event.target===this) closeAILevelMenu()">
+    <div class="popup-content" style="padding:0; overflow:hidden; max-width:400px;">
+        <div class="popup-header" style="padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.05);">
+            <h2 style="font-size:15px; margin:0; color:rgba(255,255,255,0.5); letter-spacing:3px;">ZORLUK SEÇİMİ</h2>
+            <button class="popup-close" onclick="closeAILevelMenu()" style="background:none; border:none; color:rgba(255,255,255,0.3); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="popup-body" style="padding:0 !important; position:relative;">
+            <img src="butonlar/zorluk-secimi.webp" alt="Zorluk Seçimi" usemap="#zorlukHaritasi" style="width:100%; display:block;">
+            <map name="zorlukHaritasi">
+                <area shape="rect" coords="0,0,400,80" onclick="selectDifficulty('kolay')" title="Kolay">
+                <area shape="rect" coords="0,80,400,160" onclick="selectDifficulty('orta')" title="Orta">
+                <area shape="rect" coords="0,160,400,240" onclick="selectDifficulty('zor')" title="Zor">
+                <area shape="rect" coords="0,240,400,320" onclick="selectDifficulty('usta')" title="Usta">
+            </map>
         </div>
     </div>
 </div>
