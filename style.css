@@ -97,16 +97,16 @@ body::before {
     flex-direction: row;
 }
 
-/* Logo solda */
 .logo-container {
     position: relative;
-    width: 30%;
-    max-width: 65px;
+    width: 20%;
+    max-width: 50px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    order: 0;
+    order: 2;
+    margin-left: auto;
 }
 
 .input-logo {
@@ -121,48 +121,47 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60%;
+    width: 55%;
     height: auto;
     border-radius: 50%;
     object-fit: contain;
     background: transparent;
-    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
     pointer-events: none;
     z-index: 5;
     display: block !important;
 }
 
-/* İsim girişi sağda */
 .input-icon {
     flex: 1;
     min-width: 0;
     display: block;
     opacity: 0.9;
     pointer-events: none;
-    order: 1;
+    order: 0;
 }
 
 .input-wrapper input {
     position: absolute;
     top: 0;
     left: 0;
-    width: 65%;
+    width: 70%;
     height: 100%;
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
-    font-size: clamp(12px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
+    font-size: clamp(18px, 4vw, 28px) !important;
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+    font-weight: 900 !important;
     outline: none;
     text-align: center;
     padding: 0 5px;
-    font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 3px !important;
     display: block !important;
     visibility: visible !important;
     pointer-events: auto !important;
     z-index: 10 !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* ===== MENÜ BUTONLARI ===== */
@@ -688,8 +687,8 @@ canvas.canvas-active {
         bottom: 2vh;
     }
     .input-wrapper { max-width: 280px; gap: 4px; }
-    .input-wrapper input { font-size: clamp(10px, 1.8vw, 14px); width: 60%; }
-    .logo-container { max-width: 50px; }
+    .input-wrapper input { font-size: clamp(14px, 3vw, 20px) !important; width: 60%; }
+    .logo-container { max-width: 45px; }
     .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
     .team-logo-btn { width: 28px; height: 28px; }
     .team-logo-container { max-width: 280px; max-height: 120px; }
@@ -702,142 +701,15 @@ canvas.canvas-active {
         bottom: 1.5vh;
     }
     .input-wrapper { max-width: 240px; gap: 3px; }
-    .input-wrapper input { font-size: clamp(9px, 1.5vw, 12px); width: 55%; }
-    .logo-container { max-width: 40px; }
+    .input-wrapper input { font-size: clamp(12px, 2.5vw, 16px) !important; width: 55%; }
+    .logo-container { max-width: 38px; }
     .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
     .team-logo-btn { width: 24px; height: 24px; }
     .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
 }
 
 /* ============================================================
-   TÜM KUTULARI KALDIR
-   ============================================================ */
-
-#menu,
-#menu *,
-.menu-btn,
-.menu-btn *,
-.input-group,
-.input-group *,
-.input-wrapper,
-.input-wrapper * {
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
-}
-
-.input-wrapper input {
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    color: #ffffff !important;
-    background: transparent !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
-}
-/* ============================================================
-   LOGO SAĞA VE KÜÇÜK (EN SONA EKLE)
-   ============================================================ */
-
-/* Logo container - sağda ve küçük */
-.logo-container {
-    position: relative;
-    width: 20%;
-    max-width: 50px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    order: 2;
-    margin-left: auto;
-}
-
-/* Logo arka plan resmi */
-.input-logo {
-    width: 140%;
-    height: auto;
-    display: block;
-    opacity: 0.9;
-}
-
-/* Takım logosu - logo alanının ortasında */
-.team-logo-overlay {
-    position: absolute;
-    top: 55%;
-    left: 55%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    height: auto;
-    border-radius: 50%;
-    object-fit: contain;
-    background: transparent;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-    pointer-events: none;
-    z-index: 5;
-    display: block !important;
-}
-
-/* İsim girişi solda */
-.input-icon {
-    flex: 1;
-    min-width: 0;
-    display: block;
-    opacity: 0.9;
-    pointer-events: none;
-    order: 0;
-}
-
-/* Input alanı */
-.input-wrapper input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 70%;
-    height: 100%;
-    background: transparent !important;
-    border: none !important;
-    color: #ffffff !important;
-    font-size: clamp(12px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
-    outline: none;
-    text-align: center;
-    padding: 0 5px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    z-index: 10 !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-}
-
-/* Input wrapper */
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-    gap: 4px;
-    background: transparent !important;
-    flex-direction: row;
-}
-/* ============================================================
-   OYUNCU İSMİ FONT DÜZENLEMESİ (EN SONA EKLE)
-   ============================================================ */
-
-.input-wrapper input {
-    font-family: 'Arial', 'Helvetica', sans-serif !important;
-    font-weight: 900 !important;
-    font-size: clamp(18px, 4vw, 28px) !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
-    letter-spacing: 3px !important;
-}
-/* ============================================================
-   ZORLUK SEÇİMİ - ÖZEL STİLLER (EN SONA EKLE)
+   ZORLUK SEÇİMİ - ÖZEL STİLLER
    ============================================================ */
 
 .difficulty-popup .popup-content {
@@ -905,68 +777,14 @@ canvas.canvas-active {
     pointer-events: none;
 }
 
-/* Zorluk seçimi pop-up arka plan */
 #ai-level-menu {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
+
 /* ============================================================
-   ZORLUK SEÇİMİ GÖRSELİNİ TAM BOYUT YAP (EN SONA EKLE)
-   ============================================================ */
-
-/* Pop-up içeriğini yeniden düzenle */
-#ai-level-menu .popup-content {
-    max-width: 380px;
-    padding: 0;
-    overflow: hidden;
-}
-
-#ai-level-menu .popup-header {
-    padding: 12px 16px;
-}
-
-#ai-level-menu .popup-header h2 {
-    font-size: 16px;
-    margin: 0;
-    color: rgba(255, 255, 255, 0.6);
-    letter-spacing: 3px;
-}
-
-/* Pop-up gövdesinde padding'i kaldır */
-#ai-level-menu .popup-body {
-    padding: 0 !important;
-    position: relative;
-}
-
-/* Zorluk seçimi görseli - tam kaplasın */
-#ai-level-menu img[usemap] {
-    width: 100% !important;
-    height: auto !important;
-    display: block !important;
-    border-radius: 0 !important;
-}
-
-/* Image map alanları */
-map area {
-    cursor: pointer;
-}
-
-/* Pop-up başlık ve kapatma butonu */
-#ai-level-menu .popup-close {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.3);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 8px;
-}
-
-#ai-level-menu .popup-close:hover {
-    color: rgba(255, 255, 255, 0.6);
-}
-/* ============================================================
-   AYARLAR MENÜSÜ - ÖZEL STİLLER (EN SONA EKLE)
+   AYARLAR MENÜSÜ - ÖZEL STİLLER
    ============================================================ */
 
 .settings-popup .popup-content {
@@ -987,7 +805,6 @@ map area {
     border-radius: 16px;
 }
 
-/* Butonlar */
 .settings-btn {
     position: absolute;
     left: 50%;
@@ -1011,7 +828,6 @@ map area {
     pointer-events: none;
 }
 
-/* Buton wrapper - süre göstergesi için */
 .settings-btn-wrapper {
     position: absolute;
     left: 50%;
@@ -1019,7 +835,6 @@ map area {
     width: 75%;
 }
 
-/* Geri butonu */
 .settings-back {
     position: absolute;
     bottom: 4%;
@@ -1044,14 +859,12 @@ map area {
     pointer-events: none;
 }
 
-/* Ayarlar pop-up arka plan */
 #settings-popup {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
 
-/* Süre göstergeleri */
 .duration-display {
     position: absolute;
     right: 8%;
