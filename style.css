@@ -100,7 +100,7 @@ body::before {
 /* Logo solda */
 .logo-container {
     position: relative;
-    width: 30%;
+    width: 40%;
     max-width: 65px;
     flex-shrink: 0;
     display: flex;
