@@ -100,24 +100,14 @@
             <button class="popup-close" onclick="closeAILevelMenu()">✕</button>
         </div>
         <div class="popup-body">
-            <!-- TEK BÜYÜK GÖRSEL -->
-            <img src="butonlar/zorluk-secimi.webp" alt="Zorluk Seçimi" style="width:100%; display:block; cursor:pointer;" onclick="startLocalGame('ai', 'kolay')">
+            <img src="menu/zorluk-secimi.webp" alt="Zorluk Seçimi" usemap="#zorlukHaritasi" style="width:100%; display:block;">
             
-            <!-- VEYA BUTONLARI AYRI AYRI KULLANMAK İSTERSENİZ -->
-            <!--
-            <button class="menu-btn" onclick="startLocalGame('ai', 'kolay')">
-                <img src="butonlar/zorluk-kolay.webp" alt="Kolay" class="menu-btn-img">
-            </button>
-            <button class="menu-btn" onclick="startLocalGame('ai', 'orta')">
-                <img src="butonlar/zorluk-orta.webp" alt="Orta" class="menu-btn-img">
-            </button>
-            <button class="menu-btn" onclick="startLocalGame('ai', 'zor')">
-                <img src="butonlar/zorluk-zor.webp" alt="Zor" class="menu-btn-img">
-            </button>
-            <button class="menu-btn" onclick="startLocalGame('ai', 'usta')">
-                <img src="butonlar/zorluk-usta.webp" alt="Usta" class="menu-btn-img">
-            </button>
-            -->
+            <map name="zorlukHaritasi">
+                <area shape="rect" coords="0,0,100,50" onclick="startLocalGame('ai', 'kolay')" title="Kolay">
+                <area shape="rect" coords="0,50,100,100" onclick="startLocalGame('ai', 'orta')" title="Orta">
+                <area shape="rect" coords="0,100,100,150" onclick="startLocalGame('ai', 'zor')" title="Zor">
+                <area shape="rect" coords="0,150,100,200" onclick="startLocalGame('ai', 'usta')" title="Usta">
+            </map>
         </div>
     </div>
 </div>
