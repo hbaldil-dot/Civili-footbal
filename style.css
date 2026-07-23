@@ -36,7 +36,6 @@ body {
     background-attachment: fixed;
 }
 
-/* SADECE ARKA PLAN KARARTMASI - KUTU YOK */
 body::before {
     content: '';
     position: fixed;
@@ -50,7 +49,7 @@ body::before {
 }
 
 /* ============================================================
-   MENÜ - TAMAMEN ŞEFFAF, KUTU YOK
+   MENÜ
    ============================================================ */
 
 #menu {
@@ -67,12 +66,11 @@ body::before {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    top: 50%;
+    bottom: 3vh;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
 }
 
-/* TÜM MENÜ İÇERİKLERİ ŞEFFAF */
 #menu * {
     background: transparent !important;
     box-shadow: none !important;
@@ -81,26 +79,10 @@ body::before {
     -webkit-backdrop-filter: none !important;
 }
 
-/* ===== LOGO ALANI ===== */
-.logo-area {
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto 1.5vh auto;
-}
-
-.logo-image {
-    width: 100%;
-    display: block;
-    opacity: 0.95;
-}
-
-/* ===== İSMİNİ GİR ===== */
+/* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
-    margin-bottom: 0 !important;
+    margin-bottom: 1.2vh;
     text-align: center;
-    height: 0;
-    overflow: hidden;
-    display: none !important;
 }
 
 .input-wrapper {
@@ -110,15 +92,54 @@ body::before {
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
-    gap: 6px;
+    gap: 4px;
     background: transparent !important;
+    flex-direction: row;
 }
 
+/* Logo solda */
+.logo-container {
+    position: relative;
+    width: 30%;
+    max-width: 65px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 0;
+}
+
+.input-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.9;
+}
+
+.team-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: auto;
+    border-radius: 50%;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+    pointer-events: none;
+    z-index: 5;
+    display: block !important;
+}
+
+/* İsim girişi sağda */
 .input-icon {
     flex: 1;
     min-width: 0;
-    display: none !important;
+    display: block;
     opacity: 0.9;
+    pointer-events: none;
+    order: 1;
 }
 
 .input-wrapper input {
@@ -129,7 +150,7 @@ body::before {
     height: 100%;
     background: transparent !important;
     border: none !important;
-    color: transparent;
+    color: #ffffff !important;
     font-size: clamp(12px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
@@ -137,20 +158,14 @@ body::before {
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
-    display: none !important;
-    visibility: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
 
-.input-logo {
-    width: 25%;
-    max-width: 55px;
-    height: auto;
-    display: block;
-    opacity: 0.9;
-    flex-shrink: 0;
-}
-
-/* ===== MENÜ BUTONLARI - ŞEFFAF ===== */
+/* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
     display: block;
     width: 100%;
@@ -179,16 +194,12 @@ body::before {
     opacity: 1;
 }
 
-/* AYARLAR butonu */
 .settings-btn {
     margin-top: 0.5vh;
-    background: transparent !important;
-    display: none !important;
 }
 
 .settings-btn .menu-btn-img {
     opacity: 0.5;
-    display: none !important;
 }
 
 .settings-btn:hover .menu-btn-img {
@@ -252,16 +263,8 @@ body::before {
 }
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 140px;
-    }
+    from { opacity: 0; transform: translateY(-4px); max-height: 0; }
+    to { opacity: 1; transform: translateY(0); max-height: 140px; }
 }
 
 .team-logo-container::-webkit-scrollbar {
@@ -682,81 +685,54 @@ canvas.canvas-active {
     #menu {
         padding: 2vh 2vw 2vh 2vw;
         max-width: 340px;
+        bottom: 2vh;
     }
-    
-    .logo-area {
-        max-width: 280px;
-    }
-    
-    .input-wrapper {
-        max-width: 280px;
-        gap: 4px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(10px, 1.8vw, 14px);
-        width: 60%;
-    }
-    
-    .input-logo {
-        max-width: 45px;
-    }
-    
-    .menu-btn {
-        max-width: 280px;
-        margin-bottom: 0.4vh;
-    }
-    
-    .team-logo-btn {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .team-logo-container {
-        max-width: 280px;
-        max-height: 120px;
-    }
+    .input-wrapper { max-width: 280px; gap: 4px; }
+    .input-wrapper input { font-size: clamp(10px, 1.8vw, 14px); width: 60%; }
+    .logo-container { max-width: 50px; }
+    .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
+    .team-logo-btn { width: 28px; height: 28px; }
+    .team-logo-container { max-width: 280px; max-height: 120px; }
 }
 
 @media (max-width: 360px) {
     #menu {
         padding: 1.5vh 2vw 1.5vh 2vw;
         max-width: 300px;
+        bottom: 1.5vh;
     }
-    
-    .logo-area {
-        max-width: 240px;
-    }
-    
-    .input-wrapper {
-        max-width: 240px;
-        gap: 3px;
-    }
-    
-    .input-wrapper input {
-        font-size: clamp(9px, 1.5vw, 12px);
-        width: 55%;
-    }
-    
-    .input-logo {
-        max-width: 35px;
-    }
-    
-    .menu-btn {
-        max-width: 240px;
-        margin-bottom: 0.3vh;
-    }
-    
-    .team-logo-btn {
-        width: 24px;
-        height: 24px;
-    }
-    
-    .team-logo-container {
-        max-width: 240px;
-        max-height: 100px;
-        padding: 6px;
-    }
+    .input-wrapper { max-width: 240px; gap: 3px; }
+    .input-wrapper input { font-size: clamp(9px, 1.5vw, 12px); width: 55%; }
+    .logo-container { max-width: 40px; }
+    .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
+    .team-logo-btn { width: 24px; height: 24px; }
+    .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
 }
-/* KARE KUTULARI KALDIR */
-#menu, #menu *, .menu-btn, .menu-btn *, div { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
+
+/* ============================================================
+   TÜM KUTULARI KALDIR
+   ============================================================ */
+
+#menu,
+#menu *,
+.menu-btn,
+.menu-btn *,
+.input-group,
+.input-group *,
+.input-wrapper,
+.input-wrapper * {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.input-wrapper input {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
+}
