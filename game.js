@@ -1675,16 +1675,30 @@ document.addEventListener('DOMContentLoaded', function() {
     hideField();
 });
 // ============================================================
-// ZORLUK SEÇİMİ - IMAGE MAP
+// ZORLUK SEÇİMİ - MENÜ (EN SONA EKLE)
 // ============================================================
 
 // Zorluk seç ve oyunu başlat
 function selectDifficulty(level) {
-    console.log('🎯 Zorluk seçildi (Image Map):', level);
+    console.log('🎯 Zorluk seçildi:', level);
     
     // Pop-up'ı kapat
     document.getElementById('ai-level-menu').style.display = 'none';
     
     // Oyunu başlat
     startLocalGame('ai', level);
+}
+
+// Zorluk menüsünü aç
+function openAILevelMenu() {
+    console.log('🔓 Zorluk menüsü açılıyor...');
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('ai-level-menu').style.display = 'flex';
+}
+
+// Zorluk menüsünü kapat
+function closeAILevelMenu() {
+    console.log('🔒 Zorluk menüsü kapatılıyor...');
+    document.getElementById('ai-level-menu').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
 }
