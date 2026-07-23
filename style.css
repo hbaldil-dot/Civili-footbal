@@ -48,10 +48,6 @@ body::before {
     pointer-events: none;
 }
 
-/* ============================================================
-   MENÜ
-   ============================================================ */
-
 #menu {
     position: absolute;
     border: none !important;
@@ -79,7 +75,6 @@ body::before {
     -webkit-backdrop-filter: none !important;
 }
 
-/* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
     margin-bottom: 1.2vh;
     text-align: center;
@@ -97,16 +92,16 @@ body::before {
     flex-direction: row;
 }
 
-/* Logo solda */
 .logo-container {
     position: relative;
-    width: 30%;
-    max-width: 65px;
+    width: 20%;
+    max-width: 50px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    order: 0;
+    order: 2;
+    margin-left: auto;
 }
 
 .input-logo {
@@ -121,51 +116,49 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60%;
+    width: 55%;
     height: auto;
     border-radius: 50%;
     object-fit: contain;
     background: transparent;
-    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
     pointer-events: none;
     z-index: 5;
     display: block !important;
 }
 
-/* İsim girişi sağda */
 .input-icon {
     flex: 1;
     min-width: 0;
     display: block;
     opacity: 0.9;
     pointer-events: none;
-    order: 1;
+    order: 0;
 }
 
 .input-wrapper input {
     position: absolute;
     top: 0;
     left: 0;
-    width: 65%;
+    width: 70%;
     height: 100%;
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
-    font-size: clamp(12px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
+    font-size: clamp(18px, 4vw, 28px) !important;
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+    font-weight: 900 !important;
     outline: none;
     text-align: center;
     padding: 0 5px;
-    font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 3px !important;
     display: block !important;
     visibility: visible !important;
     pointer-events: auto !important;
     z-index: 10 !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
 }
 
-/* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
     display: block;
     width: 100%;
@@ -205,10 +198,6 @@ body::before {
 .settings-btn:hover .menu-btn-img {
     opacity: 0.7;
 }
-
-/* ============================================================
-   TAKIM LOGO SEÇİM ALANI
-   ============================================================ */
 
 .team-logo-container {
     margin: 0.5vh auto 1vh auto;
@@ -289,10 +278,6 @@ body::before {
 .team-logo-container .selected-text span {
     color: #2ecc71;
 }
-
-/* ============================================================
-   POP-UP'LAR
-   ============================================================ */
 
 #settings-popup,
 #ai-level-menu,
@@ -429,10 +414,6 @@ body::before {
     border-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.06);
 }
-
-/* ============================================================
-   OYUN EKRANI
-   ============================================================ */
 
 #top-bar {
     width: 100%;
@@ -677,10 +658,6 @@ canvas.canvas-active {
     transition: width 0.05s;
 }
 
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
 @media (max-width: 420px) {
     #menu {
         padding: 2vh 2vw 2vh 2vw;
@@ -688,8 +665,8 @@ canvas.canvas-active {
         bottom: 2vh;
     }
     .input-wrapper { max-width: 280px; gap: 4px; }
-    .input-wrapper input { font-size: clamp(10px, 1.8vw, 14px); width: 60%; }
-    .logo-container { max-width: 50px; }
+    .input-wrapper input { font-size: clamp(14px, 3vw, 20px) !important; width: 60%; }
+    .logo-container { max-width: 45px; }
     .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
     .team-logo-btn { width: 28px; height: 28px; }
     .team-logo-container { max-width: 280px; max-height: 120px; }
@@ -702,125 +679,171 @@ canvas.canvas-active {
         bottom: 1.5vh;
     }
     .input-wrapper { max-width: 240px; gap: 3px; }
-    .input-wrapper input { font-size: clamp(9px, 1.5vw, 12px); width: 55%; }
-    .logo-container { max-width: 40px; }
+    .input-wrapper input { font-size: clamp(12px, 2.5vw, 16px) !important; width: 55%; }
+    .logo-container { max-width: 38px; }
     .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
     .team-logo-btn { width: 24px; height: 24px; }
     .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
 }
 
-/* ============================================================
-   TÜM KUTULARI KALDIR
-   ============================================================ */
-
-#menu,
-#menu *,
-.menu-btn,
-.menu-btn *,
-.input-group,
-.input-group *,
-.input-wrapper,
-.input-wrapper * {
+.difficulty-popup .popup-content {
     background: transparent !important;
-    background-color: transparent !important;
+    border: none !important;
     box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
+    max-width: 360px;
 }
 
-.input-wrapper input {
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    color: #ffffff !important;
-    background: transparent !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
-}
-/* ============================================================
-   LOGO SAĞA VE KÜÇÜK (EN SONA EKLE)
-   ============================================================ */
-
-/* Logo container - sağda ve küçük */
-.logo-container {
+.difficulty-container {
     position: relative;
-    width: 20%;
-    max-width: 50px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    order: 2;
-    margin-left: auto;
-}
-
-/* Logo arka plan resmi */
-.input-logo {
     width: 100%;
-    height: auto;
-    display: block;
-    opacity: 0.9;
 }
 
-/* Takım logosu - logo alanının ortasında */
-.team-logo-overlay {
+.difficulty-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+.difficulty-btn {
     position: absolute;
-    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 55%;
-    height: auto;
-    border-radius: 50%;
-    object-fit: contain;
-    background: transparent;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-    pointer-events: none;
-    z-index: 5;
-    display: block !important;
-}
-
-/* İsim girişi solda */
-.input-icon {
-    flex: 1;
-    min-width: 0;
-    display: block;
-    opacity: 0.9;
-    pointer-events: none;
-    order: 0;
-}
-
-/* Input alanı */
-.input-wrapper input {
-    position: absolute;
-    top: 0;
-    left: 0;
+    transform: translateX(-50%);
     width: 70%;
-    height: 100%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.difficulty-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.difficulty-btn img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+.difficulty-back {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.difficulty-back:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.difficulty-back img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+#ai-level-menu {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.settings-popup .popup-content {
     background: transparent !important;
     border: none !important;
-    color: #ffffff !important;
-    font-size: clamp(12px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
-    outline: none;
-    text-align: center;
-    padding: 0 5px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    z-index: 10 !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    box-shadow: none !important;
+    max-width: 380px;
 }
 
-/* Input wrapper */
-.input-wrapper {
+.settings-container {
     position: relative;
-    display: flex;
-    align-items: center;
     width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-    gap: 4px;
-    background: transparent !important;
-    flex-direction: row;
+}
+
+.settings-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+.settings-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.settings-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.settings-btn img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+.settings-btn-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+}
+
+.settings-back {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.settings-back:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.settings-back img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+#settings-popup {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.duration-display {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
 }
