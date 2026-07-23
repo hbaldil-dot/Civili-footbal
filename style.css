@@ -973,7 +973,7 @@ map area {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    max-width: 380px;  /* Biraz büyütüldü */
+    max-width: 380px;
 }
 
 .settings-container {
@@ -987,12 +987,12 @@ map area {
     border-radius: 16px;
 }
 
-/* Butonlar %5 daha büyük */
+/* Butonlar */
 .settings-btn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 75%;  /* Eski: 70% → %5 büyüdü */
+    width: 75%;
     padding: 0;
     border: none;
     background: transparent;
@@ -1011,13 +1011,21 @@ map area {
     pointer-events: none;
 }
 
-/* Geri butonu da %5 büyüdü */
+/* Buton wrapper - süre göstergesi için */
+.settings-btn-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+}
+
+/* Geri butonu */
 .settings-back {
     position: absolute;
     bottom: 4%;
     left: 50%;
     transform: translateX(-50%);
-    width: 35%;  /* Eski: 30% → %5 büyüdü */
+    width: 35%;
     padding: 0;
     border: none;
     background: transparent;
@@ -1041,4 +1049,18 @@ map area {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+}
+
+/* Süre göstergeleri */
+.duration-display {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
 }
