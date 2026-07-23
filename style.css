@@ -154,7 +154,7 @@ body::before {
     font-size: clamp(14px, 2vw, 16px);
     font-family: 'Courier New', monospace;
     outline: none;
-    text-align: center;
+    text-align: left;
     padding: 0 5px;
     font-weight: bold;
     letter-spacing: 2px;
