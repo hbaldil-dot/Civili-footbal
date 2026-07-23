@@ -1702,3 +1702,66 @@ function closeAILevelMenu() {
     document.getElementById('ai-level-menu').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
 }
+// ============================================================
+// AYARLAR MENÜSÜ - FONKSİYONLAR (EN SONA EKLE)
+// ============================================================
+
+// Ayarlar menüsünü aç
+function openSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü açılıyor...');
+    document.getElementById('settings-popup').style.display = 'flex';
+}
+
+// Ayarlar menüsünü kapat
+function closeSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
+    document.getElementById('settings-popup').style.display = 'none';
+}
+
+// Maç süresi seçimi
+function openDurationSelect() {
+    console.log('⏱️ Maç süresi seçimi açılıyor...');
+    // Mevcut maç süresi seçimini göster
+    const durationSelect = document.getElementById('match-duration');
+    if (durationSelect) {
+        // Pop-up içinde select gösterilebilir
+        alert('Maç süresi seçimi: ' + durationSelect.value + ' saniye');
+    }
+}
+
+// Vuruş süresi seçimi
+function openShotDurationSelect() {
+    console.log('⏱️ Vuruş süresi seçimi açılıyor...');
+    // Vuruş süresi için basit bir seçenek
+    const shotOptions = ['3 sn', '4 sn', '5 sn', '6 sn'];
+    const choice = prompt('Vuruş süresi seçin (3-6 sn):', '3');
+    if (choice) {
+        const seconds = parseInt(choice);
+        if (seconds >= 3 && seconds <= 6) {
+            shotSecondsLeft = seconds;
+            console.log('✅ Vuruş süresi:', seconds, 'sn');
+            alert('Vuruş süresi ' + seconds + ' sn olarak ayarlandı!');
+        } else {
+            alert('Lütfen 3-6 arası bir değer girin!');
+        }
+    }
+}
+
+// Ses aç/kapa
+let isSoundOn = true;
+
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    console.log('🔊 Ses:', isSoundOn ? 'AÇIK' : 'KAPALI');
+    alert('🔊 Ses ' + (isSoundOn ? 'AÇILDI' : 'KAPATILDI'));
+    
+    // Ses butonunun görselini değiştir (isteğe bağlı)
+    const soundBtn = document.querySelector('.settings-btn img[src*="ses"]');
+    if (soundBtn) {
+        if (isSoundOn) {
+            soundBtn.src = 'menu/ayarlar/ses.webp';
+        } else {
+            soundBtn.src = 'menu/ayarlar/ses-kapali.webp';
+        }
+    }
+}
