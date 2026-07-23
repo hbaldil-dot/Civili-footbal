@@ -837,33 +837,77 @@ canvas.canvas-active {
     letter-spacing: 3px !important;
 }
 /* ============================================================
-   ZORLUK SEÇİMİ - IMAGE MAP (EN SONA EKLE)
+   ZORLUK SEÇİMİ - ÖZEL STİLLER (EN SONA EKLE)
    ============================================================ */
 
-/* Image map alanlarının üzerine gelince el işareti */
-map area {
-    cursor: pointer;
+.difficulty-popup .popup-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 360px;
 }
 
-/* Zorluk seçimi görseli */
-#ai-level-menu img {
+.difficulty-container {
+    position: relative;
+    width: 100%;
+}
+
+.difficulty-bg {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+}
+
+.difficulty-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    padding: 0;
+    border: none;
+    background: transparent;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    -webkit-user-select: none;
+    transition: transform 0.15s ease;
 }
 
-/* Pop-up içi düzen */
-#ai-level-menu .popup-body {
-    padding: 16px;
-    position: relative;
+.difficulty-btn:active {
+    transform: translateX(-50%) scale(0.95);
 }
 
-#ai-level-menu .popup-content {
-    max-width: 340px;
+.difficulty-btn img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
 }
 
-/* Tıklama geri bildirimi için */
-#ai-level-menu img:active {
-    opacity: 0.8;
+.difficulty-back {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease;
+}
+
+.difficulty-back:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.difficulty-back img {
+    width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+/* Zorluk seçimi pop-up arka plan */
+#ai-level-menu {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
