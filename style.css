@@ -835,7 +835,7 @@ important;
     -webkit-backdrop-filter: blur(4px);
 }
 /* ============================================================
-   AYARLAR POP-UP ARKA PLAN - SADECE STİL (EN SONA EKLE)
+   AYARLAR POP-UP ARKA PLAN - 10px BOŞLUK (EN SONA EKLE)
    ============================================================ */
 
 #settings-popup .popup-content {
@@ -846,4 +846,19 @@ important;
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    padding: 10px !important; /* Yukarı ve aşağı 10px boşluk */
+    margin: 10px !important;
+    border-radius: 16px !important;
+    max-width: calc(100% - 20px) !important;
+    max-height: calc(100% - 20px) !important;
+    width: auto !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+}
+
+/* Pop-up içeriğinin taşmasını engelle */
+#settings-popup {
+    padding: 10px !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
