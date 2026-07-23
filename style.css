@@ -152,7 +152,7 @@ body::before {
     border: none !important;
     color: #ffffff !important;
     font-size: clamp(16px, 2vw, 16px);
-    font-family: 'Courier New', monospace;
+    font-family: 'Ariel Bold', monospace;
     outline: none;
     text-align: center;
     padding: 0 5px;
