@@ -174,6 +174,7 @@ loadGoalImage('goal.webp');
 const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
+    if (!isSoundOn) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -225,8 +226,32 @@ function triggerGoalAnimation() {
 // ============================================================
 // ÇİZİM FONKSİYONLARI
 // ============================================================
+
 function drawFieldLinesOnly() {
     ctx.clearRect(0, 0, width, height);
+}
+
+// ===== RETRO OYUNCU ÇİZİMİ (EKSİKTI - EKLENDİ) =====
+function drawRetroPlayer(x, y, team) {
+    ctx.save();
+    ctx.translate(x, y);
+    const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
+    const skinColor = '#ffad87';
+
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-14, -4, 5, 4);
+    ctx.fillRect(9, -4, 5, 4);
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-14, -8, 4, 4);
+    ctx.fillRect(10, -8, 4, 4);
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-9, -2, 18, 7);
+    ctx.fillRect(-6, 5, 12, 4);
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-3, -5, 6, 4);
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(-4, 4, 8, 7);
+    ctx.restore();
 }
 
 function drawSoccerBall(x, y, r, rotation) {
@@ -252,25 +277,43 @@ function drawSoccerBall(x, y, r, rotation) {
     ctx.restore();
 }
 
-function drawRetroPlayer(x, y, team) {
+function drawPlayerWithLogo(x, y, logoFile) {
     ctx.save();
     ctx.translate(x, y);
-    const bodyColor = (team === 1) ? '#3498db' : '#cc0000';
-    const skinColor = '#ffad87';
-
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-14, -4, 5, 4);
-    ctx.fillRect(9, -4, 5, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-14, -8, 4, 4);
-    ctx.fillRect(10, -8, 4, 4);
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-9, -2, 18, 7);
-    ctx.fillRect(-6, 5, 12, 4);
-    ctx.fillStyle = skinColor;
-    ctx.fillRect(-3, -5, 6, 4);
-    ctx.fillStyle = '#111111';
-    ctx.fillRect(-4, 4, 8, 7);
+    
+    if (logoFile && loadedLogos[logoFile]) {
+        const img = loadedLogos[logoFile];
+        const size = cap.radius * 1.4;
+        
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, -size + 2, -size + 2, size * 2 - 4, size * 2 - 4);
+        ctx.restore();
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, size - 1, 0, Math.PI * 2);
+        ctx.stroke();
+    } else {
+        const size = cap.radius * 1.2;
+        ctx.fillStyle = '#666';
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
     ctx.restore();
 }
 
@@ -768,25 +811,18 @@ if (socket) setupSocketListeners();
 // OYUN FONKSİYONLARI
 // ============================================================
 function startLocalGame(mode, aiLevelParam) {
-    console.log('🚀 Oyun başlatılıyor:', mode, aiLevelParam);
-    
     gameMode = mode;
-    
     if (mode === 'ai' && aiLevelParam) {
         aiLevel = aiLevelParam;
-        console.log('🤖 AI Zorluk:', aiLevel);
+        closeAILevelMenu();
         selectRandomAITeam();
         setTimeout(() => {
             updateScoreLogos();
         }, 100);
     }
-    
     document.getElementById('settings-popup').style.display = 'none';
-    document.getElementById('ai-level-menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
-    
     matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
@@ -864,6 +900,8 @@ function startSetupPhase() {
 
     blue442.forEach(p => pins.push({ ...p, locked: false }));
     red442.forEach(p => pins.push({ ...p, locked: false }));
+
+    console.log('✅ Oyuncular eklendi, toplam:', pins.length);
 
     cap.x = width / 2;
     cap.y = height / 2;
@@ -1288,24 +1326,20 @@ startPeriodicSync();
 // MENÜ FONKSİYONLARI
 // ============================================================
 function openAILevelMenu() {
-    console.log('🔓 Zorluk menüsü açılıyor...');
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
 }
 
 function closeAILevelMenu() {
-    console.log('🔒 Zorluk menüsü kapatılıyor...');
     document.getElementById('ai-level-menu').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
 }
 
 function openSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü açılıyor...');
     document.getElementById('settings-popup').style.display = 'flex';
 }
 
 function closeSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
     document.getElementById('settings-popup').style.display = 'none';
 }
 
@@ -1483,6 +1517,45 @@ function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
     document.getElementById('ai-level-menu').style.display = 'none';
     startLocalGame('ai', level);
+}
+
+// ============================================================
+// AYARLAR - SÜRE SEÇİMLERİ
+// ============================================================
+
+const durationOptions = [60, 90, 120, 180];
+let durationIndex = 1;
+
+const shotDurationOptions = [3, 4, 5, 6];
+let shotDurationIndex = 0;
+
+function cycleDuration() {
+    durationIndex = (durationIndex + 1) % durationOptions.length;
+    const newDuration = durationOptions[durationIndex];
+    matchSecondsLeft = newDuration;
+    
+    const durationSelect = document.getElementById('match-duration');
+    if (durationSelect) {
+        durationSelect.value = newDuration;
+    }
+    
+    const display = document.getElementById('durationDisplay');
+    if (display) {
+        display.textContent = newDuration + 's';
+    }
+    console.log('⏱️ Maç süresi:', newDuration, 'sn');
+}
+
+function cycleShotDuration() {
+    shotDurationIndex = (shotDurationIndex + 1) % shotDurationOptions.length;
+    const newDuration = shotDurationOptions[shotDurationIndex];
+    shotSecondsLeft = newDuration;
+    
+    const display = document.getElementById('shotDurationDisplay');
+    if (display) {
+        display.textContent = newDuration + 's';
+    }
+    console.log('⏱️ Vuruş süresi:', newDuration, 'sn');
 }
 
 // ============================================================
