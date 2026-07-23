@@ -1718,33 +1718,63 @@ function closeSettingsPopup() {
     document.getElementById('settings-popup').style.display = 'none';
 }
 
-// Maç süresi seçimi
-function openDurationSelect() {
-    console.log('⏱️ Maç süresi seçimi açılıyor...');
-    // Mevcut maç süresi seçimini göster
+// ============================================================
+// AYARLAR - SÜRE SEÇİMLERİ (GÜNCELLENDİ)
+// ============================================================
+
+// Maç süresi seçenekleri
+const durationOptions = [60, 90, 120, 180];
+let durationIndex = 1; // Varsayılan: 90
+
+// Vuruş süresi seçenekleri
+const shotDurationOptions = [3, 4, 5, 6];
+let shotDurationIndex = 0; // Varsayılan: 3
+
+// Maç süresini değiştir
+function cycleDuration(direction) {
+    durationIndex = (durationIndex + 1) % durationOptions.length;
+    const newDuration = durationOptions[durationIndex];
+    matchSecondsLeft = newDuration;
+    
+    // Select elementini güncelle
     const durationSelect = document.getElementById('match-duration');
     if (durationSelect) {
-        // Pop-up içinde select gösterilebilir
-        alert('Maç süresi seçimi: ' + durationSelect.value + ' saniye');
+        durationSelect.value = newDuration;
     }
+    
+    // Ekrandaki göstergeyi güncelle
+    const display = document.getElementById('durationDisplay');
+    if (display) {
+        display.textContent = newDuration + 's';
+    }
+    
+    console.log('⏱️ Maç süresi:', newDuration, 'sn');
 }
 
-// Vuruş süresi seçimi
-function openShotDurationSelect() {
-    console.log('⏱️ Vuruş süresi seçimi açılıyor...');
-    // Vuruş süresi için basit bir seçenek
-    const shotOptions = ['3 sn', '4 sn', '5 sn', '6 sn'];
-    const choice = prompt('Vuruş süresi seçin (3-6 sn):', '3');
-    if (choice) {
-        const seconds = parseInt(choice);
-        if (seconds >= 3 && seconds <= 6) {
-            shotSecondsLeft = seconds;
-            console.log('✅ Vuruş süresi:', seconds, 'sn');
-            alert('Vuruş süresi ' + seconds + ' sn olarak ayarlandı!');
-        } else {
-            alert('Lütfen 3-6 arası bir değer girin!');
-        }
+// Vuruş süresini değiştir
+function cycleShotDuration(direction) {
+    shotDurationIndex = (shotDurationIndex + 1) % shotDurationOptions.length;
+    const newDuration = shotDurationOptions[shotDurationIndex];
+    shotSecondsLeft = newDuration;
+    
+    // Ekrandaki göstergeyi güncelle
+    const display = document.getElementById('shotDurationDisplay');
+    if (display) {
+        display.textContent = newDuration + 's';
     }
+    
+    console.log('⏱️ Vuruş süresi:', newDuration, 'sn');
+}
+
+// Mevcut openDurationSelect ve openShotDurationSelect fonksiyonlarını güncelle
+// veya aşağıdaki gibi değiştir:
+
+function openDurationSelect() {
+    cycleDuration(1);
+}
+
+function openShotDurationSelect() {
+    cycleShotDuration(1);
 }
 
 // ============================================================
