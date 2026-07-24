@@ -1377,3 +1377,9 @@ body { ... }
         height: 30px;
     }
 }
+/* Dosya Sonu (Güncellendi) */
+@media (max-width: 420px) {
+    .settings-popup-content {
+        max-width: 320px !important;
+    }
+}
