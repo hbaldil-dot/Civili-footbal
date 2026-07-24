@@ -1179,22 +1179,33 @@ body { ... }
 }
 
 /* ============================================================
-   SEÇİLEN SÜRE YAZISI (EN SAĞA DAYALI VE 2 KAT BÜYÜK)
+   SEÇİLEN SÜRE YAZISI - SOLA YINELENMİŞ VE TAM DİKEY ORTALI
    ============================================================ */
 
-.settings-selected-value {
+.settings-selected-value,
+.settings-match-wrapper .settings-selected-value,
+.settings-shot-wrapper .settings-selected-value {
     position: absolute !important;
-    top: 40% !important;
-    right: 1% !important; /* Tam olarak sağ kenara dayar *
+    
+    /* Üstten ve alttan tam ortalama */
+    top: 50% !important;
     transform: translateY(-50%) !important;
-    color: #000000 !important; /* Kapkara */
-    font-weight: 900 !important; /* En kalın bold */
-    font-size: 23px !important; /* 13px-14px değerinden en az 2 kat büyütüldü */
+    
+    /* Butonun sol/orta hizasına konumlandırma */
+    left: 60% !important; /* "MAÇ SÜRESİ" yazısının hemen sağı / butonun sol-orta bölümü */
+    right: auto !important; /* Sağdaki dayamayı kaldırıyoruz */
+    
+    color: #000000 !important;
+    font-weight: 900 !important;
+    font-size: 24px !important; /* Dikeyde taşma yapmaması için ideal boyut */
     font-family: 'Arial Black', 'Impact', sans-serif !important;
-    text-align: right !important;
+    text-align: left !important;
+    
     background: transparent !important;
     padding: 0 !important;
-    letter-spacing: 0.5px !important;
+    margin: 0 !important;
+    line-height: 1 !important; /* Dikey hizada kaymayı engeller */
+    
     pointer-events: none !important;
     white-space: nowrap !important;
     text-shadow: none !important;
