@@ -35,7 +35,8 @@ let SHOT_DURATION = 5;
 function showField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
-        canvas.style.backgroundImage = "url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp')";
+        // Sabit webp ismi yerine seçilen stadyum değişkenini (currentStadiumTexture) yazıyoruz:
+        canvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
         canvas.style.backgroundSize = "cover";
         canvas.style.backgroundPosition = "center";
         canvas.style.backgroundRepeat = "no-repeat";
@@ -44,7 +45,7 @@ function showField() {
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
         canvas.classList.add('canvas-active');
-        console.log('✅ Saha gösteriliyor');
+        console.log('✅ Saha gösteriliyor:', currentStadiumTexture);
     }
 }
 
