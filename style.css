@@ -1184,8 +1184,8 @@ body { ... }
 
 .settings-selected-value {
     position: absolute !important;
-    top: 45% !important;
-    right: 3% !important; /* Tam olarak sağ kenara dayar *
+    top: 40% !important;
+    right: 1% !important; /* Tam olarak sağ kenara dayar *
     transform: translateY(-50%) !important;
     color: #000000 !important; /* Kapkara */
     font-weight: 900 !important; /* En kalın bold */
