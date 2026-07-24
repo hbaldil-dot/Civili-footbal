@@ -1138,7 +1138,7 @@ body { ... }
 }
 
 /* ============================================================
-   MAÇ SÜRESİ - TAKIM SEÇİMİ GİBİ
+   MAÇ SÜRESİ - TAKIM SEÇİMİ GİBİ (GÜNCELLENMİŞ - %256 BÜYÜK)
    ============================================================ */
 
 .settings-row {
@@ -1168,22 +1168,23 @@ body { ... }
     pointer-events: auto !important;
 }
 
+/* MAÇ SÜRESİ BUTONU - %256 BÜYÜK */
 .settings-match-header .settings-btn-img {
-    width: 45% !important;
+    width: 100% !important;
     flex-shrink: 0 !important;
     pointer-events: none !important;
-    transform: scale(1.65) !important;
+    transform: scale(2.56) !important;  /* %256 büyük */
 }
 
 .settings-selected-value {
     color: #000000 !important;
     font-weight: bold !important;
-    font-size: 11px !important;
+    font-size: 14px !important;  /* Biraz büyüt */
     font-family: 'Courier New', monospace !important;
-    min-width: 35px !important;
+    min-width: 45px !important;
     text-align: center !important;
     background: rgba(255, 255, 255, 0.8) !important;
-    padding: 2px 8px !important;
+    padding: 4px 10px !important;
     border-radius: 3px !important;
     letter-spacing: 1px !important;
     flex-shrink: 0 !important;
@@ -1191,7 +1192,7 @@ body { ... }
 
 .settings-arrow {
     color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 10px !important;
+    font-size: 12px !important;  /* Biraz büyüt */
     transition: transform 0.3s ease !important;
     flex-shrink: 0 !important;
 }
@@ -1242,90 +1243,4 @@ body { ... }
 
 .settings-option:active {
     transform: scale(0.95) !important;
-}
-
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 420px) {
-    .settings-buttons-container {
-        width: 70% !important;
-        max-width: 200px !important;
-        gap: 8px !important;
-        transform: translate(-50%, -50%) translateY(15px) !important;
-    }
-    .settings-btn-img {
-        transform: scale(0.80) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.30) !important;
-    }
-    .settings-match-header .settings-btn-img {
-        transform: scale(0.80) !important;
-    }
-    .settings-selected-value {
-        font-size: 9px !important;
-        min-width: 30px !important;
-        padding: 2px 6px !important;
-    }
-    .settings-option {
-        font-size: 8px !important;
-        padding: 3px 8px !important;
-    }
-}
-
-@media (max-width: 360px) {
-    .settings-buttons-container {
-        width: 75% !important;
-        max-width: 170px !important;
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(12px) !important;
-    }
-    .settings-btn-img {
-        transform: scale(0.80) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.28) !important;
-    }
-    .settings-match-header .settings-btn-img {
-        transform: scale(0.80) !important;
-    }
-    .settings-selected-value {
-        font-size: 8px !important;
-        min-width: 25px !important;
-        padding: 1px 4px !important;
-    }
-    .settings-option {
-        font-size: 7px !important;
-        padding: 2px 6px !important;
-    }
-}
-
-@media (max-height: 700px) {
-    .settings-buttons-container {
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(10px) !important;
-    }
-    .settings-btn-img {
-        max-height: 40px !important;
-        width: auto !important;
-        transform: scale(0.80) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.30) !important;
-        max-height: 15px !important;
-    }
-    .settings-match-header .settings-btn-img {
-        transform: scale(0.80) !important;
-        max-height: 35px !important;
-    }
-    .settings-selected-value {
-        font-size: 8px !important;
-        padding: 1px 4px !important;
-    }
-    .settings-option {
-        font-size: 7px !important;
-        padding: 2px 6px !important;
-    }
 }
