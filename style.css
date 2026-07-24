@@ -1259,7 +1259,7 @@ body { ... }
     box-shadow: 0 0 10px rgba(255, 46, 46, 0.5) !important;
 }
 /* ============================================================
-   VURUŞ SÜRESİ - DÜZENİ
+   VURUŞ SÜRESİ - BİREBİR HİZALAMA VE BUTON DÜZELTMESİ
    ============================================================ */
 
 .settings-shot-container {
@@ -1288,6 +1288,7 @@ body { ... }
     justify-content: center !important;
 }
 
+/* PEMBE BUTON GÖRSELİ */
 .settings-shot-wrapper .settings-btn-img {
     width: 100% !important;
     height: auto !important;
@@ -1297,7 +1298,7 @@ body { ... }
     transform-origin: center center !important;
 }
 
-/* SEÇİLEN SÜRE YAZISI (EN SAĞA DAYALI VE BÜYÜK) */
+/* SEÇİLEN SÜRE YAZISI (5sn) - EN SAĞA DAYALI VE BÜYÜK */
 .settings-shot-wrapper .settings-selected-value {
     position: absolute !important;
     top: 50% !important;
@@ -1315,7 +1316,7 @@ body { ... }
     z-index: 10 !important;
 }
 
-/* AÇILIR MENÜ KUTUSU */
+/* AÇILIR MENÜ SEÇENEKLERİ */
 .settings-shot-options {
     display: none !important;
     flex-wrap: wrap !important;
