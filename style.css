@@ -791,12 +791,107 @@ body { ... }
 #menu, #menu * { ... }
 
 /* ============================================================
-   AYARLAR POP-UP (BURAYA EKLE - DOSYANIN EN SONU)
+   AYARLAR POP-UP (DOSYA SONUNA EKLE - GÜÇLENDİRİLMİŞ)
    ============================================================ */
 
-#settings-popup { ... }
-.settings-popup-content { ... }
-.settings-bg { ... }
-.settings-buttons-container { ... }
-.settings-btn-img { ... }
-/* ... devamı ... */
+#settings-popup {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+    margin: 0 !important;
+}
+
+#settings-popup[style*="display: flex"] {
+    display: flex !important;
+}
+
+.settings-popup-content {
+    position: relative !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 420px !important;
+    width: 90% !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+}
+
+.settings-bg {
+    width: 100% !important;
+    display: block !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+.settings-buttons-container {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 65% !important;
+    max-width: 260px !important;
+    pointer-events: none !important;
+}
+
+.settings-btn-img {
+    width: 100% !important;
+    display: block !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    opacity: 0.9 !important;
+    pointer-events: auto !important;
+}
+
+.settings-btn-img:hover {
+    transform: scale(1.05) !important;
+    opacity: 1 !important;
+}
+
+.settings-btn-img:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================================
+   AYARLAR POP-UP - MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .settings-buttons-container {
+        width: 70% !important;
+        max-width: 200px !important;
+        gap: 6px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .settings-buttons-container {
+        width: 75% !important;
+        max-width: 170px !important;
+        gap: 4px !important;
+    }
+}
+
+@media (max-height: 700px) {
+    .settings-buttons-container {
+        gap: 4px !important;
+    }
+    .settings-btn-img {
+        max-height: 40px !important;
+        width: auto !important;
+    }
+}
