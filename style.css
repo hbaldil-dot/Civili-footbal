@@ -791,7 +791,7 @@ body { ... }
 #menu, #menu * { ... }
 
 /* ============================================================
-   AYARLAR POP-UP (DOSYA SONUNA EKLE - GÜÇLENDİRİLMİŞ)
+   AYARLAR POP-UP (GÜNCELLENMİŞ)
    ============================================================ */
 
 #settings-popup {
@@ -834,20 +834,22 @@ body { ... }
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
 }
 
+/* ===== BUTON KONTEYNERİ - 20px AŞAĞI ===== */
 .settings-buttons-container {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translate(-50%, -50%) translateY(20px) !important; /* 20px aşağı */
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 10px !important;
     width: 65% !important;
     max-width: 260px !important;
     pointer-events: none !important;
 }
 
+/* ===== TÜM BUTONLAR - %80 BÜYÜK ===== */
 .settings-btn-img {
     width: 100% !important;
     display: block !important;
@@ -855,15 +857,30 @@ body { ... }
     transition: transform 0.2s ease, opacity 0.2s ease !important;
     opacity: 0.9 !important;
     pointer-events: auto !important;
+    transform: scale(0.8) !important; /* %80 boyut */
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.05) !important;
+    transform: scale(0.84) !important; /* Hover'da biraz büyüsün */
     opacity: 1 !important;
 }
 
 .settings-btn-img:active {
-    transform: scale(0.95) !important;
+    transform: scale(0.76) !important;
+}
+
+/* ===== EN ALTAKİ BUTON (GERİ/ANA MENU) - %30 UFALMIŞ ===== */
+.settings-btn-img:last-child {
+    transform: scale(0.3) !important; /* %30 boyut */
+    margin-top: 4px !important;
+}
+
+.settings-btn-img:last-child:hover {
+    transform: scale(0.33) !important;
+}
+
+.settings-btn-img:last-child:active {
+    transform: scale(0.28) !important;
 }
 
 /* ============================================================
@@ -874,7 +891,14 @@ body { ... }
     .settings-buttons-container {
         width: 70% !important;
         max-width: 200px !important;
-        gap: 6px !important;
+        gap: 8px !important;
+        transform: translate(-50%, -50%) translateY(15px) !important;
+    }
+    .settings-btn-img {
+        transform: scale(0.8) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(0.3) !important;
     }
 }
 
@@ -882,16 +906,29 @@ body { ... }
     .settings-buttons-container {
         width: 75% !important;
         max-width: 170px !important;
-        gap: 4px !important;
+        gap: 6px !important;
+        transform: translate(-50%, -50%) translateY(12px) !important;
+    }
+    .settings-btn-img {
+        transform: scale(0.8) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(0.28) !important;
     }
 }
 
 @media (max-height: 700px) {
     .settings-buttons-container {
-        gap: 4px !important;
+        gap: 6px !important;
+        transform: translate(-50%, -50%) translateY(10px) !important;
     }
     .settings-btn-img {
-        max-height: 40px !important;
+        max-height: 45px !important;
         width: auto !important;
+        transform: scale(0.8) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(0.3) !important;
+        max-height: 20px !important;
     }
 }
