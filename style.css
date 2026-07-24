@@ -1304,7 +1304,7 @@ body { ... }
 /* Buton üzerindeki seçili zemin önizleme görseli (%50 büyütüldü) */
 .stadium-preview-icon {
     position: absolute !important;
-    right: 700px !important;            /* Sağ kenardan hizalama */
+    right: 70px !important;            /* Sağ kenardan hizalama */
     top: 50% !important;
     transform: translateY(-50%) !important;
     
