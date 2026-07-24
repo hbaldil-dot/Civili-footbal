@@ -1301,18 +1301,30 @@ body { ... }
    ============================================================ */
 
 /* Buton yanında beliren küçük önizleme resmi */
+/* Buton üzerindeki seçili zemin önizleme görseli (%50 büyütüldü) */
 .stadium-preview-icon {
-    position: absolute;
-    right: 45px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 38px;
-    height: 26px;
-    border-radius: 4px;
-    border: 2px solid #ffffff;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-    object-fit: cover;
-    z-index: 5;
+    position: absolute !important;
+    right: 50px !important;            /* Sağ kenardan hizalama */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    
+    width: 57px !important;            /* 38px -> 57px (%50 büyük) */
+    height: 39px !important;           /* 26px -> 39px (%50 büyük) */
+    
+    border-radius: 6px !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5) !important;
+    object-fit: cover !important;
+    z-index: 5 !important;
+}
+
+/* Mobil Ekranlar İçin Büyütülmüş Değerler */
+@media (max-width: 420px) {
+    .stadium-preview-icon {
+        width: 45px !important;        /* Mobil için de orantılı büyütüldü */
+        height: 30px !important;
+        right: 40px !important;
+    }
 }
 
 /* Açılır menü ızgara yapısı */
