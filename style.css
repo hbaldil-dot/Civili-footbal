@@ -1296,3 +1296,73 @@ body { ... }
         font-size: 14px !important;
     }
 }
+/* ============================================================
+   STADYUM / ZEMİN SEÇİMİ STİLLERİ
+   ============================================================ */
+
+/* Buton yanında beliren küçük önizleme resmi */
+.stadium-preview-icon {
+    position: absolute;
+    right: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 26px;
+    border-radius: 4px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    object-fit: cover;
+    z-index: 5;
+}
+
+/* Açılır menü ızgara yapısı */
+.stadium-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+/* Küçük zemin kartları */
+.stadium-option-card {
+    width: 55px;
+    height: 38px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.stadium-option-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stadium-option-card:hover {
+    transform: scale(1.08);
+}
+
+/* Seçili olan kart vurgusu */
+.stadium-option-card.active {
+    border-color: #2ecc71;
+    box-shadow: 0 0 8px #2ecc71;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 420px) {
+    .stadium-preview-icon {
+        width: 30px;
+        height: 20px;
+        right: 35px;
+    }
+    .stadium-option-card {
+        width: 45px;
+        height: 30px;
+    }
+}
