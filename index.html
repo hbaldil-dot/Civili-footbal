@@ -62,22 +62,23 @@
             <div class="settings-buttons-container">
                 
                 <!-- MAÇ SÜRESİ (AKTİF) -->
-                <div class="settings-row">
-                    <div class="settings-match-container">
-                        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
-                            <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
-                            <span class="settings-selected-value" id="match-duration-display">90sn</span>
-                            <span class="settings-arrow">▼</span>
-                        </div>
-                        <div class="settings-match-options" id="match-duration-options" style="display: none;">
-                            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
-                            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
-                            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
-                            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
-                        </div>
-                    </div>
-                </div>
-                
+<div class="settings-row">
+    <div class="settings-match-container">
+        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
+            <div class="settings-match-wrapper">
+                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+                <span class="settings-selected-value" id="match-duration-display">90sn</span>
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+        <div class="settings-match-options" id="match-duration-options" style="display: none;">
+            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
+            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
+            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
+            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
+        </div>
+    </div>
+</div>
                 <!-- VURUŞ SÜRESİ (PASİF) -->
                 <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
                 
