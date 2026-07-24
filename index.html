@@ -59,7 +59,7 @@
     </div>
 
     <!-- ============================================================
-          AYARLAR POP-UP (ARKA FONLU)
+         AYARLAR POP-UP (ARKA FONLU)
          ============================================================ -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
@@ -68,20 +68,55 @@
             
             <!-- Butonlar - Sıralı şekilde ortada aşağı doğru -->
             <div class="settings-buttons-container">
-                <!-- Maç Süresi -->
-                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
                 
-                <!-- Vuruş Süresi -->
-                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                <!-- MAÇ SÜRESİ -->
+                <div class="settings-row">
+                    <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+                    <div class="settings-options">
+                        <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
+                        <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
+                        <button class="settings-option" data-duration="180" onclick="setMatchDuration(180)">180sn</button>
+                    </div>
+                </div>
                 
-                <!-- Stadyum -->
-                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
+                <!-- VURUŞ SÜRESİ -->
+                <div class="settings-row">
+                    <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                    <div class="settings-options">
+                        <button class="settings-option" data-duration="3" onclick="setShotDuration(3)">3sn</button>
+                        <button class="settings-option active" data-duration="5" onclick="setShotDuration(5)">5sn</button>
+                        <button class="settings-option" data-duration="7" onclick="setShotDuration(7)">7sn</button>
+                    </div>
+                </div>
                 
-                <!-- Ses Açık -->
-                <img src="menu/ayarlar/ses.webp" alt="Ses Açık" class="settings-btn-img">
-                         
-                <!-- Ana Menü -->
-                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img">
+                <!-- STADYUM -->
+                <div class="settings-row">
+                    <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
+                    <div class="settings-options">
+                        <button class="settings-option active" data-stadium="default" onclick="setStadium('default')">📋</button>
+                        <button class="settings-option" data-stadium="custom" onclick="setStadium('custom')">🖼️</button>
+                    </div>
+                </div>
+                
+                <!-- SES AÇIK -->
+                <div class="settings-row">
+                    <img src="menu/ayarlar/ses.webp" alt="Ses Açık" class="settings-btn-img">
+                    <div class="settings-options">
+                        <button class="settings-option active" data-sound="on" onclick="setSound('on')">AÇIK</button>
+                        <button class="settings-option" data-sound="off" onclick="setSound('off')">KAPALI</button>
+                    </div>
+                </div>
+                
+                <!-- SES KAPALI (gizli) -->
+                <div class="settings-row" style="display:none;">
+                    <img src="menu/ayarlar/ses-off.webp" alt="Ses Kapalı" class="settings-btn-img">
+                </div>
+                
+                <!-- ANA MENÜ (GERİ) -->
+                <div class="settings-row settings-back">
+                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img" onclick="closeSettingsPopup()">
+                </div>
+                
             </div>
         </div>
     </div>
