@@ -97,7 +97,6 @@ body::before {
     flex-direction: row;
 }
 
-/* Logo solda */
 .logo-container {
     position: relative;
     width: 22% !important;
@@ -133,7 +132,6 @@ body::before {
     display: block !important;
 }
 
-/* İsim girişi sağda */
 .input-icon {
     flex: 1;
     min-width: 0;
@@ -298,7 +296,6 @@ body::before {
    POP-UP'LAR
    ============================================================ */
 
-#settings-popup,
 #ai-level-menu,
 #online-lobby,
 #local-team-select {
@@ -583,11 +580,8 @@ body::before {
     touch-action: none;
 }
 
+/* ===== CANVAS - SAHA RESMİ ===== */
 #gameCanvas {
-    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     width: 100%;
     height: 100%;
     display: block;
@@ -596,16 +590,17 @@ body::before {
     border: none;
     border-radius: 0;
     box-shadow: none;
+    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #2e7d32;
 }
 
 #gameCanvas.canvas-active {
     border: 4px solid rgba(27, 94, 32, 0.4) !important;
     border-radius: 8px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
-    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
 }
 
 #start-match-btn {
