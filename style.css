@@ -1261,3 +1261,38 @@ body { ... }
 .settings-match-options.show {
     display: flex !important;
 }
+/* ============================================================
+   VURUŞ SÜRESİ - KONSOLİDE STİLLER
+   ============================================================ */
+
+.settings-shot-wrapper .settings-selected-value {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: 75% !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    font-size: 24px !important;
+    font-family: 'Arial Black', 'Impact', sans-serif !important;
+    text-align: left !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+    z-index: 10 !important;
+}
+
+/* Mobil Uyum */
+@media (max-width: 420px) {
+    .settings-shot-wrapper .settings-selected-value {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .settings-shot-wrapper .settings-selected-value {
+        font-size: 14px !important;
+    }
+}
