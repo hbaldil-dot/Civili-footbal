@@ -2061,3 +2061,64 @@ function setShotDuration(seconds) {
 
     console.log(`🎯 Vuruş süresi ayarlandı: ${seconds} saniye`);
 }
+// ============================================================
+// STADYUM / ZEMİN SEÇİMİ MANTIĞI
+// ============================================================
+
+// Varsayılan saha kaplama (texture) adresi
+let currentStadiumTexture = 'menu/ayarlar/stat/texure/z1-t.webp';
+
+// Açılır menüyü aç/kapat
+function toggleStadiumOptions() {
+    const optionsDiv = document.getElementById('stadium-options');
+    if (!optionsDiv) return;
+
+    // Diğer açık menüler varsa kapatır
+    const otherOptions = ['match-duration-options', 'shot-duration-options'];
+    otherOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    optionsDiv.style.display = (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') ? 'flex' : 'none';
+}
+
+// Zemin seçme fonksiyonu
+function selectStadium(stadiumKey, texturePath) {
+    // 1. Oyun alanında kullanılacak texture yolunu kaydet
+    currentStadiumTexture = texturePath;
+
+    // 2. Butonun yanındaki küçük önizleme görselini güncelle (z1.webp, z2.webp ...)
+    const previewImg = document.getElementById('selected-stadium-preview');
+    if (previewImg) {
+        previewImg.src = `menu/ayarlar/stat/${stadiumKey}.webp`;
+    }
+
+    // 3. Seçili karta aktiflik çerçevesi ekle
+    const cards = document.querySelectorAll('.stadium-option-card');
+    cards.forEach(card => {
+        if (card.querySelector('img').src.includes(`${stadiumKey}.webp`)) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+
+    // 4. Menüyü kapat
+    const optionsDiv = document.getElementById('stadium-options');
+    if (optionsDiv) optionsDiv.style.display = 'none';
+
+    // 5. Saha çizimini / kaplamasını anında güncelle
+    applyStadiumTextureToField();
+
+    console.log(`⚽ Saha Zemini Değiştirildi: Texture -> ${texturePath}`);
+}
+
+// Saha zeminini güncelleyen fonksiyon (Oyun render motorunuza uyarlayın)
+function applyStadiumTextureToField() {
+    // Örnek: Canvas veya HTML arka planınıza seçilen texture'ı basar
+    const pitchElement = document.getElementById('game-pitch'); // Canvas veya div ID'niz
+    if (pitchElement) {
+        pitchElement.style.backgroundImage = `url('${currentStadiumTexture}')`;
+    }
+}
