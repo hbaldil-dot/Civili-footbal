@@ -946,6 +946,34 @@ body::before {
         max-height: 15px !important;
     }
 }
+
+/* ============================================================
+   TÜM KUTULARI KALDIR
+   ============================================================ */
+
+#menu,
+#menu *,
+.menu-btn,
+.menu-btn *,
+.input-group,
+.input-group *,
+.input-wrapper,
+.input-wrapper * {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.input-wrapper input {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
+}
 /* ============================================================
    AYARLAR - SATIR DÜZENİ (DOSYA SONUNA EKLE)
    ============================================================ */
@@ -1016,31 +1044,4 @@ body::before {
 
 .settings-back .settings-btn-img:hover {
     transform: scale(0.95) !important;
-}
-/* ============================================================
-   TÜM KUTULARI KALDIR
-   ============================================================ */
-
-#menu,
-#menu *,
-.menu-btn,
-.menu-btn *,
-.input-group,
-.input-group *,
-.input-wrapper,
-.input-wrapper * {
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
-}
-
-.input-wrapper input {
-    display: block !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    color: #ffffff !important;
-    background: transparent !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
