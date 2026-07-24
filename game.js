@@ -2124,11 +2124,4 @@ function applyStadiumTextureToField() {
     loadFieldImage(currentStadiumTexture);
 }
 
-// Saha zeminini güncelleyen fonksiyon (Oyun render motorunuza uyarlayın)
-function applyStadiumTextureToField() {
-    // Örnek: Canvas veya HTML arka planınıza seçilen texture'ı basar
-    const pitchElement = document.getElementById('game-pitch'); // Canvas veya div ID'niz
-    if (pitchElement) {
-        pitchElement.style.backgroundImage = `url('${currentStadiumTexture}')`;
-    }
-}
+
