@@ -1920,3 +1920,78 @@ document.addEventListener('DOMContentLoaded', function() {
     // hideField() çağrısını kaldırdık çünkü showField zaten doğru yerde çağrılıyor
     console.log('✅ Sayfa yüklendi!');
 });
+// ============================================================
+// SES AÇ/KAPA - TAM FONKSİYONLAR
+// ============================================================
+
+let isSoundOn = true;
+
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    
+    const soundBtn = document.getElementById('sound-toggle-btn');
+    if (soundBtn) {
+        if (isSoundOn) {
+            soundBtn.src = 'menu/ayarlar/ses.webp';
+            soundBtn.alt = 'Ses Açık';
+            console.log('🔊 Ses AÇIK');
+        } else {
+            soundBtn.src = 'menu/ayarlar/ses-off.webp';
+            soundBtn.alt = 'Ses Kapalı';
+            console.log('🔇 Ses KAPALI');
+        }
+    }
+    
+    localStorage.setItem('soundEnabled', isSoundOn ? 'true' : 'false');
+}
+
+function loadSoundSettings() {
+    const savedSound = localStorage.getItem('soundEnabled');
+    if (savedSound !== null) {
+        isSoundOn = savedSound === 'true';
+        
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        if (soundBtn) {
+            soundBtn.src = isSoundOn ? 'menu/ayarlar/ses.webp' : 'menu/ayarlar/ses-off.webp';
+        }
+        console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
+    }
+}
+
+// GÜNCELLENMİŞ playSound fonksiyonu
+function playSound(type) {
+    if (!isSoundOn) return;  // Ses kapalıysa çalma
+    
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+
+    if (type === 'kick') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+    } else if (type === 'hit') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+    } else if (type === 'goal') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+    }
+}
