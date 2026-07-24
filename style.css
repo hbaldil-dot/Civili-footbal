@@ -501,24 +501,24 @@ body::before {
 }
 
 #score-p1 {
-    color: rgba(52, 152, 219, 0.6);
+    color: rgba(52, 152, 219, 0.9);
     font-size: 23px;
     min-width: 16px;
 }
 
 #score-divider {
-    color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.2);
     font-size: 20px;
 }
 
 #score-p2 {
-    color: rgba(231, 76, 60, 0.6);
+    color: rgba(231, 76, 60, 0.9);
     font-size: 23px;
     min-width: 16px;
 }
 
 #time-board {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(190, 190, 190, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     padding: 4px 10px;
