@@ -2017,3 +2017,29 @@ function setMatchDuration(seconds) {
 
 window.MATCH_DURATION = 90;
 console.log('⏱️ Varsayılan maç süresi: 90sn');
+// Vuruş Süresi Menü Aç/Kapat
+const shotHeader = document.getElementById('shot-time-header');
+const shotOptions = document.getElementById('shot-time-options');
+const selectedShotText = document.getElementById('selected-shot-time');
+
+shotHeader.addEventListener('click', () => {
+    shotOptions.classList.toggle('show');
+});
+
+// Seçenek Seçimi
+document.querySelectorAll('#shot-time-options .settings-option').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Aktif sınıfını güncelle
+        document.querySelectorAll('#shot-time-options .settings-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Yazıyı güncelle
+        const val = btn.getAttribute('data-shot');
+        selectedShotText.textContent = val + 'sn';
+        
+        // Menüyü kapat
+        shotOptions.classList.remove('show');
+        
+        // Oyun değişkeninize atama yapın (örneğin: shotTimeLimit = parseInt(val);)
+    });
+});
