@@ -51,41 +51,47 @@
             <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
         </button>
 
-        <!-- AYARLAR BUTONU (sadece bilgi gösterir) -->
-        <button class="menu-btn settings-btn" onclick="showGameInfo()">
+        <!-- AYARLAR BUTONU -->
+        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
 
     </div>
-<!-- ===== AYARLAR POP-UP ===== -->
-<div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-    <div class="popup-content settings-popup-content">
-        <!-- Arka Plan Resmi -->
-        <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
-        
-        <!-- Butonlar - Sıralı şekilde ortada aşağı doğru -->
-        <div class="settings-buttons-container">
-            <!-- Maç Süresi -->
-            <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+
+    <!-- ============================================================
+         AYARLAR POP-UP (ARKA FONLU)
+         ============================================================ -->
+    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
+        <div class="popup-content settings-popup-content">
+            <!-- Arka Plan Resmi -->
+            <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
             
-            <!-- Vuruş Süresi -->
-            <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
-            
-            <!-- Stadyum -->
-            <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
-            
-            <!-- Ses Açık -->
-            <img src="menu/ayarlar/ses.webp" alt="Ses Açık" class="settings-btn-img">
-            
-            <!-- Ses Kapalı -->
-            <img src="menu/ayarlar/ses-off.webp" alt="Ses Kapalı" class="settings-btn-img">
-            
-            <!-- Ana Menü -->
-            <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img">
+            <!-- Butonlar - Sıralı şekilde ortada aşağı doğru -->
+            <div class="settings-buttons-container">
+                <!-- Maç Süresi -->
+                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+                
+                <!-- Vuruş Süresi -->
+                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                
+                <!-- Stadyum -->
+                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
+                
+                <!-- Ses Açık -->
+                <img src="menu/ayarlar/ses.webp" alt="Ses Açık" class="settings-btn-img">
+                
+                <!-- Ses Kapalı -->
+                <img src="menu/ayarlar/ses-off.webp" alt="Ses Kapalı" class="settings-btn-img">
+                
+                <!-- Ana Menü -->
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img">
+            </div>
         </div>
     </div>
-</div>
-    <!-- ===== AI ZORLUK POP-UP ===== -->
+
+    <!-- ============================================================
+         AI ZORLUK POP-UP
+         ============================================================ -->
     <div id="ai-level-menu" style="display: none;">
         <div class="popup-content difficulty-popup">
             <div class="difficulty-container">
@@ -114,7 +120,9 @@
         </div>
     </div>
 
-    <!-- ===== ONLINE LOBI POP-UP ===== -->
+    <!-- ============================================================
+         ONLINE LOBI POP-UP
+         ============================================================ -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
             <div class="popup-header">
@@ -130,7 +138,9 @@
         </div>
     </div>
 
-    <!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+    <!-- ============================================================
+         2 KİŞİLİK TAKIM SEÇ POP-UP
+         ============================================================ -->
     <div id="local-team-select" style="display: none;" onclick="if(event.target===this) closeLocalTeamSelect()">
         <div class="popup-content">
             <div class="popup-header">
@@ -157,7 +167,9 @@
         </div>
     </div>
 
-    <!-- ===== OYUN EKRANI ===== -->
+    <!-- ============================================================
+         OYUN EKRANI
+         ============================================================ -->
     <div id="top-bar" style="display: none;">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
@@ -180,13 +192,17 @@
         </div>
     </div>
 
-    <!-- ===== CANVAS VE BUTON ===== -->
+    <!-- ============================================================
+         CANVAS VE BUTON
+         ============================================================ -->
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
-    <!-- ===== GÜÇ GÖSTERGESİ ===== -->
+    <!-- ============================================================
+         GÜÇ GÖSTERGESİ
+         ============================================================ -->
     <div id="power-bar-container">
         <div id="power-bar"></div>
     </div>
