@@ -1780,14 +1780,11 @@ let selectedStadium = 'default';
 let selectedSound = 'on';
 
 // ============================================================
-// MAÇ SÜRESİ - 60, 90, 120, 150 SN
+// MAÇ SÜRESİ FONKSİYONU (SADECE BU)
 // ============================================================
+
 function setMatchDuration(seconds) {
     console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
-    selectedMatchDuration = seconds;
-    
-    // MATCH_DURATION sabitini güncelle
-    window.MATCH_DURATION = seconds;
     
     // Aktif butonu güncelle
     document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
@@ -1797,167 +1794,8 @@ function setMatchDuration(seconds) {
         }
     });
     
-    // Oyun içinde kullanılmak üzere
-    if (typeof MATCH_DURATION !== 'undefined') {
-        window.MATCH_DURATION = seconds;
-    }
+    // MATCH_DURATION sabitini güncelle
+    window.MATCH_DURATION = seconds;
     
-    // Geri bildirim
     console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
-    
-    // Eğer oyun aktifse süreyi güncelle
-    if (currentPhase === 'playing' || currentPhase === 'setup') {
-        matchSecondsLeft = seconds;
-        const timeBoard = document.getElementById('time-board');
-        if (timeBoard) {
-            timeBoard.innerText = seconds + 's';
-        }
-    }
 }
-
-// ============================================================
-// VURUŞ SÜRESİ
-// ============================================================
-function setShotDuration(seconds) {
-    console.log('🎯 Vuruş süresi seçildi:', seconds, 'saniye');
-    selectedShotDuration = seconds;
-    window.SHOT_DURATION = seconds;
-    
-    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.duration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    if (typeof SHOT_DURATION !== 'undefined') {
-        window.SHOT_DURATION = seconds;
-    }
-    
-    console.log('✅ Vuruş süresi güncellendi:', seconds, 'sn');
-}
-
-// ============================================================
-// STADYUM SEÇİMİ
-// ============================================================
-function setStadium(type) {
-    console.log('🏟️ Stadyum seçildi:', type);
-    selectedStadium = type;
-    
-    document.querySelectorAll('.settings-option[data-stadium]').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.stadium === type) {
-            btn.classList.add('active');
-        }
-    });
-    
-    if (type === 'custom') {
-        if (typeof loadFieldImage === 'function') {
-            loadFieldImage();
-        }
-        if (typeof showField === 'function') {
-            showField();
-        }
-        console.log('✅ Özel stadyum aktif');
-    } else {
-        const canvas = document.getElementById('gameCanvas');
-        if (canvas) {
-            canvas.style.backgroundImage = 'none';
-            canvas.style.background = '#2e7d32';
-            canvas.style.backgroundColor = '#2e7d32';
-        }
-        if (typeof fieldImage !== 'undefined') {
-            fieldImage = null;
-        }
-        console.log('✅ Varsayılan stadyum aktif');
-    }
-}
-
-// ============================================================
-// SES AÇ/KAPA
-// ============================================================
-function setSound(state) {
-    console.log('🔊 Ses durumu:', state);
-    selectedSound = state;
-    
-    document.querySelectorAll('.settings-option[data-sound]').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.sound === state) {
-            btn.classList.add('active');
-        }
-    });
-    
-    const soundIcon = document.getElementById('sound-icon');
-    if (soundIcon) {
-        if (state === 'on') {
-            soundIcon.src = 'menu/ayarlar/ses.webp';
-            soundIcon.alt = 'Ses Açık';
-            console.log('🔊 Ses ikonu: AÇIK');
-        } else {
-            soundIcon.src = 'menu/ayarlar/ses-off.webp';
-            soundIcon.alt = 'Ses Kapalı';
-            console.log('🔇 Ses ikonu: KAPALI');
-        }
-    }
-    
-    if (typeof audioCtx !== 'undefined' && audioCtx) {
-        if (state === 'off') {
-            audioCtx.suspend();
-            console.log('🔇 Sesler kapatıldı');
-        } else {
-            audioCtx.resume();
-            console.log('🔊 Sesler açıldı');
-        }
-    }
-    
-    console.log('✅ Ses durumu güncellendi:', state);
-}
-
-// ============================================================
-// AYARLAR POP-UP AÇ/KAPA
-// ============================================================
-function openSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü açılıyor...');
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.visibility = 'visible';
-        popup.style.opacity = '1';
-        console.log('✅ Ayarlar pop-up gösteriliyor');
-        console.log('  ⏱️ Maç Süresi:', window.MATCH_DURATION || 90, 'sn');
-        console.log('  🎯 Vuruş Süresi:', window.SHOT_DURATION || 5, 'sn');
-        console.log('  🏟️ Stadyum:', selectedStadium);
-        console.log('  🔊 Ses:', selectedSound);
-    } else {
-        console.error('❌ settings-popup bulunamadı!');
-    }
-}
-
-function closeSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'none';
-        popup.style.visibility = 'hidden';
-        popup.style.opacity = '0';
-        console.log('✅ Ayarlar pop-up kapatıldı');
-    }
-}
-
-// ============================================================
-// BAŞLANGIÇ - Varsayılan Değerler
-// ============================================================
-
-// Varsayılan değerleri ata (GLOBAL)
-window.MATCH_DURATION = 90;
-window.SHOT_DURATION = 5;
-window.selectedMatchDuration = 90;
-window.selectedShotDuration = 5;
-window.selectedStadium = 'default';
-window.selectedSound = 'on';
-
-console.log('⚙️ Ayarlar başlatıldı:');
-console.log('  ⏱️ Maç Süresi:', window.MATCH_DURATION, 'saniye');
-console.log('  🎯 Vuruş Süresi:', window.SHOT_DURATION, 'saniye');
-console.log('  🏟️ Stadyum:', window.selectedStadium);
-console.log('  🔊 Ses:', window.selectedSound);
