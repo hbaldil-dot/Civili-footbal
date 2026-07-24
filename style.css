@@ -1182,7 +1182,7 @@ body { ... }
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
     pointer-events: none !important;
-    transform: scale(2.1) !important;  /* ← BOYUT: %120 (1.2 = %120) */
+    transform: scale(5.1) !important;  /* ← BOYUT: %120 (1.2 = %120) */
     transform-origin: center center !important;
 }
 
