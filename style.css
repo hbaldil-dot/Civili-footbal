@@ -1161,55 +1161,60 @@ body { ... }
     z-index: 10 !important;
 }
 
-/* 2. AÇILIR MENÜ KUTUSU - KOYU VE OKUNUR ARKA PLAN */
+/* ============================================================
+   AÇILIR SÜRE SEÇENEKLERİ (KIRMIZI BOLD & %20 OPAKLIK ZEMİN)
+   ============================================================ */
+
+/* SEÇENEKLERİ TUTAN KAPSAYICI */
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     gap: 8px !important;
     width: 100% !important;
-    padding: 8px 12px !important;
-    margin-top: 6px !important;
-    background: rgba(0, 0, 0, 0.85) !important; /* Arkadaki ahşap deseni kapatan koyu zemin */
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 10px !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    z-index: 20 !important;
+    padding: 6px 10px !important;
+    margin-top: 4px !important;
+    background: transparent !important;
 }
 
 .settings-match-options.show {
     display: flex !important;
 }
 
-/* 3. ALT MENÜDEKİ SEÇENEK BUTONLARI (60sn, 90sn vs.) */
+/* SÜRE BUTONLARI (60sn, 90sn, 120sn, 150sn) */
 .settings-option {
-    padding: 6px 14px !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    padding: 6px 12px !important;
+    /* %20 opaklığa sahip siyah zemin */
+    background: rgba(0, 0, 0, 0.2) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 6px !important;
-    color: #ffffff !important; /* Kristal beyaz net yazı */
-    font-size: 13px !important;
+    
+    /* Kırmızı ve çok kalın yazı */
+    color: #ff2e2e !important;
+    font-size: 14px !important;
     font-family: 'Arial', sans-serif !important;
-    font-weight: bold !important;
+    font-weight: 900 !important;
+    
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     letter-spacing: 1px !important;
     pointer-events: auto !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+    
+    /* Okunurluğu artıran hafif siyah gölge */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 }
 
+/* ÜZERİNE GELİNDİĞİNDE (HOVER) */
 .settings-option:hover {
-    background: rgba(255, 255, 255, 0.35) !important;
-    color: #ffffff !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ff5555 !important;
     transform: scale(1.05) !important;
 }
 
-/* Seçili olan seçeneğin vurgusu (Örn: Yeşil parlama) */
+/* SEÇİLİ OLAN SEÇENEK (ACTIVE) */
 .settings-option.active {
-    background: #2ecc71 !important;
-    border-color: #27ae60 !important;
-    color: #000000 !important; /* Seçilinin yazısını siyah yapar */
-    font-weight: 900 !important;
-    box-shadow: 0 0 10px rgba(46, 204, 113, 0.6) !important;
+    background: rgba(255, 46, 46, 0.3) !important; /* Seçili olunca zemin biraz daha kırmızılaşır */
+    border-color: #ff2e2e !important;
+    color: #ffffff !important; /* Seçili seçenek net beyaz görünür */
+    box-shadow: 0 0 10px rgba(255, 46, 46, 0.5) !important;
 }
