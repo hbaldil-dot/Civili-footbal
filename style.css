@@ -1144,7 +1144,7 @@ body { ... }
 /* 1. SATIR - TÜM SATIRI ORTALAR */
 .settings-row {
     display: flex !important;
-    align-items: center !important;
+    align-items: left !important;
     justify-content: center !important;  /* ← KONUM: Ortalar */
     width: 100% !important;
     pointer-events: auto !important;
@@ -1182,7 +1182,7 @@ body { ... }
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
     pointer-events: none !important;
-    transform: scale(1.2) !important;  /* ← BOYUT: %120 (1.2 = %120) */
+    transform: scale(1.1) !important;  /* ← BOYUT: %120 (1.2 = %120) */
     transform-origin: center center !important;
 }
 
