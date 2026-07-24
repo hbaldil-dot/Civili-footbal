@@ -1774,21 +1774,32 @@ function selectDifficulty(level) {
 // ============================================================
 
 function openSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü açılıyor...');
     const popup = document.getElementById('settings-popup');
     if (popup) {
         popup.style.display = 'flex';
-        console.log('⚙️ Ayarlar menüsü açıldı - Arka fonlu');
+        popup.style.visibility = 'visible';
+        popup.style.opacity = '1';
+        console.log('✅ Ayarlar pop-up gösteriliyor');
     } else {
         console.error('❌ settings-popup bulunamadı!');
-        // Yedek: Eski bilgi mesajı
+        // Yedek olarak eski bilgi
         alert('⚙️ Oyun Bilgileri\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin\n🏆 Takım: Seçtiğiniz logo');
     }
 }
 
 function closeSettingsPopup() {
+    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
     const popup = document.getElementById('settings-popup');
     if (popup) {
         popup.style.display = 'none';
-        console.log('⚙️ Ayarlar menüsü kapatıldı');
+        popup.style.visibility = 'hidden';
+        popup.style.opacity = '0';
+        console.log('✅ Ayarlar pop-up kapatıldı');
     }
+}
+
+// Eski fonksiyonu override et (eğer varsa)
+if (typeof window.showGameInfo === 'function') {
+    window.showGameInfo = openSettingsPopup;
 }
