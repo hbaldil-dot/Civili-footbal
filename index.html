@@ -11,43 +11,47 @@
 <body>
 
     <!-- ===== ANA MENÜ ===== -->
-<div id="menu">
+    <div id="menu">
 
-    <div class="input-group">
-        <div class="input-wrapper">
-            <div class="logo-container">
-                <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
-                <img id="selected-team-logo-display" src="takimlar/default.png" alt="Takım Logosu" class="team-logo-overlay">
+        <div class="input-group">
+            <div class="input-wrapper">
+                <div class="logo-container">
+                    <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
+                    <img id="selected-team-logo-display" src="takimlar/default.png" alt="Takım Logosu" class="team-logo-overlay">
+                </div>
+                <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
+                <input type="text" id="player-name" value="Oyuncu" maxlength="12">
             </div>
-            <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
-            <input type="text" id="player-name" value="Oyuncu" maxlength="12">
         </div>
+
+        <button class="menu-btn" onclick="toggleTeamSelect()">
+            <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+        </button>
+
+        <div class="team-logo-container" id="team-logo-container" style="display: none;">
+            <div class="team-logo-options" id="team-logo-options"></div>
+            <div class="selected-text">
+                Seçili: <span id="selected-team-name-display">Varsayılan</span>
+            </div>
+        </div>
+
+        <button class="menu-btn" onclick="openAILevelMenu()">
+            <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openLocalTeamSelect()">
+            <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openOnlineLobby()">
+            <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
+        </button>
+
+        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
+            <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
+        </button>
+
     </div>
-
-    <!-- TAKIM SEÇ -->
-<button class="menu-btn" onclick="toggleTeamSelect(); playButtonSound();">
-    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
-</button>
-
-<!-- BİLGİSAYARA KARŞI -->
-<button class="menu-btn" onclick="openAILevelMenu(); playButtonSound();">
-    <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
-</button>
-
-<!-- 2 KİŞİLİK AYNI EKRAN -->
-<button class="menu-btn" onclick="openLocalTeamSelect(); playButtonSound();">
-    <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" class="menu-btn-img">
-</button>
-
-<!-- ONLINE MAÇ -->
-<button class="menu-btn" onclick="openOnlineLobby(); playButtonSound();">
-    <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
-</button>
-
-<!-- AYARLAR -->
-<button class="menu-btn settings-btn" onclick="openSettingsPopup(); playButtonSound();">
-    <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
-</button>
 
     <!-- ============================================================
          AYARLAR POP-UP
@@ -127,8 +131,8 @@
     </div>
 </div>
                 
-                <!-- SES (AKTİF) -->
-<img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img" id="sound-toggle-btn" onclick="toggleSound()">
+                <!-- SES (PASİF) -->
+                <img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img">
                          
                 <!-- ANA MENÜ -->
                 <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img" onclick="closeSettingsPopup()">
