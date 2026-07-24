@@ -1138,33 +1138,33 @@ body { ... }
 }
 
 /* ============================================================
-   MAÇ SÜRESİ - BOYUT VE KONUM
+   MAÇ SÜRESİ - DÜZELTİLMİŞ (ORTALI)
    ============================================================ */
 
-/* 1. SATIR - TÜM SATIRI ORTALAR */
+/* SATIR - TÜM MENÜLERLE AYNI HİZADA */
 .settings-row {
     display: flex !important;
-    align-items: right !important;
-    justify-content: right !important;  /* ← KONUM: Ortalar */
+    align-items: center !important;
+    justify-content: center !important;  /* ORTALI - düzeltildi */
     width: 100% !important;
     pointer-events: auto !important;
     position: relative !important;
 }
 
-/* 2. KONTEYNER - TÜM BİLEŞENLERİ ORTALAR */
+/* KONTEYNER - ORTALI */
 .settings-match-container {
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;  /* ← KONUM: Ortalar */
+    align-items: center !important;
     gap: 4px !important;
 }
 
-/* 3. HEADER - BUTON VE OK İŞARETİNİ ORTALAR */
+/* HEADER - ORTALI */
 .settings-match-header {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;  /* ← KONUM: Ortalar */
+    justify-content: center !important;
     width: 100% !important;
     gap: 8px !important;
     cursor: pointer !important;
@@ -1172,40 +1172,21 @@ body { ... }
     position: relative !important;
 }
 
-/* 4. WRAPPER - BUTON VE SÜRE YAZISINI KAPLAR */
+/* WRAPPER - BUTON VE SÜRE YAZISI */
 .settings-match-wrapper {
     position: relative !important;
     display: inline-block !important;
 }
 
-/* 5. MAÇ SÜRESİ BUTONU - BOYUT */
+/* MAÇ SÜRESİ BUTONU */
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
     pointer-events: none !important;
-    transform: scale(5.1) !important;  /* ← BOYUT: %120 (1.2 = %120) */
+    transform: scale(1.8) !important;
     transform-origin: center center !important;
 }
 
-/* 6. SEÇİLEN SÜRE YAZISI - BUTONUN ÜZERİNDE */
-.settings-selected-value {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;  /* ← KONUM: Butonun tam ortası */
-    color: #000000 !important;
-    font-weight: bold !important;
-    font-size: 14px !important;
-    font-family: 'Arial', 'Helvetica', sans-serif !important;
-    text-align: center !important;
-    background: transparent !important;
-    padding: 0 !important;
-    letter-spacing: 1px !important;
-    pointer-events: none !important;
-    white-space: nowrap !important;
-    text-shadow: none !important;
-}
-
-/* SEÇİLEN SÜRE - ARIAL BOLD */
+/* SEÇİLEN SÜRE YAZISI - ARIAL BOLD */
 .settings-selected-value {
     position: absolute !important;
     top: 50% !important;
@@ -1214,7 +1195,7 @@ body { ... }
     color: #000000 !important;
     font-weight: bold !important;
     font-size: 14px !important;
-    font-family: 'Arial', 'Helvetica', sans-serif !important;  /* Arial Bold */
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
     text-align: center !important;
     background: transparent !important;
     padding: 0 !important;
@@ -1235,7 +1216,7 @@ body { ... }
     transform: rotate(180deg) !important;
 }
 
-/* SEÇENEKLER */
+/* SEÇENEKLER - BEYAZ VE OKUNAKLI */
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
