@@ -836,7 +836,7 @@ body { ... }
 
 .settings-buttons-container {
     position: absolute !important;
-    top: 50% !important;
+    top: 65% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     display: flex !important;
@@ -858,12 +858,12 @@ body { ... }
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.05) !important;
+    transform: scale(1.5) !important;
     opacity: 1 !important;
 }
 
 .settings-btn-img:active {
-    transform: scale(0.95) !important;
+    transform: scale(0.5) !important;
 }
 
 /* ============================================================
