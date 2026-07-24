@@ -319,7 +319,6 @@ function draw() {
     if (fieldImage) {
         ctx.drawImage(fieldImage, 0, 0, width, height);
     } else {
-        // Yedek: eğer resim yüklenmediyse yeşil arka plan
         ctx.fillStyle = '#2e7d32';
         ctx.fillRect(0, 0, width, height);
     }
@@ -332,9 +331,13 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    // SAHA ÇİZGİLERİ - Yarı saydam yapıldı
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 2;
+    // ============================================================
+    // SAHA ÇİZGİLERİ - 2 KAT KALIN
+    // ============================================================
+    
+    // ORTA ÇİZGİ VE DAİRE
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(0, height / 2);
     ctx.lineTo(width, height / 2);
@@ -342,13 +345,62 @@ function draw() {
     ctx.beginPath();
     ctx.arc(width / 2, height / 2, 45, 0, Math.PI * 2);
     ctx.stroke();
+
+    // CEZA SAHALARI
     ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
+    // KALE ÇİZGİLERİ - Daha kalın
+    const goalLeft = (width - goalWidth) / 2;
+    const goalRight = (width + goalWidth) / 2;
+    
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, goalHeight);
+    ctx.lineTo(goalRight, goalHeight);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, height - goalHeight);
+    ctx.lineTo(goalRight, height - goalHeight);
+    ctx.stroke();
+
+    // KALE DİREKLERİ - En kalın
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, goalHeight - 10);
+    ctx.lineTo(goalLeft, goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalRight, goalHeight - 10);
+    ctx.lineTo(goalRight, goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, height - goalHeight - 10);
+    ctx.lineTo(goalLeft, height - goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalRight, height - goalHeight - 10);
+    ctx.lineTo(goalRight, height - goalHeight + 10);
+    ctx.stroke();
+
+    // KENAR ÇİZGİLERİ
+    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width, 0);
+    ctx.lineTo(width, height);
+    ctx.stroke();
+
     if (currentPhase === 'setup') {
         ctx.fillStyle = "rgba(46, 204, 113, 0.05)";
-        ctx.strokeStyle = "rgba(46, 204, 113, 0.15)";
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "rgba(46, 204, 113, 0.2)";
+        ctx.lineWidth = 2.5;
         ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
@@ -1373,9 +1425,7 @@ function selectColor(team, color) {
 }
 
 function selectFieldColor(color) {
-    // Saha rengi seçimi artık geçersiz - resim kullanılıyor
     console.log('🟩 Saha rengi seçimi devre dışı - resim kullanılıyor');
-    // Uyarı mesajı göster
     alert('Saha rengi seçimi devre dışı! Artık özel saha resmi kullanılıyor.');
 }
 
