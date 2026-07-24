@@ -1769,3 +1769,22 @@ function selectDifficulty(level) {
     
     startLocalGame('ai', level);
 }
+// ============================================================
+// AYARLAR POP-UP FONKSİYONLARI
+// ============================================================
+
+function openSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'flex';
+        console.log('⚙️ Ayarlar menüsü açıldı');
+    }
+}
+
+function closeSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'none';
+        console.log('⚙️ Ayarlar menüsü kapatıldı');
+    }
+}
