@@ -549,7 +549,7 @@ body::before {
 }
 
 #shot-timer {
-    background: rgba(245, 245, 245, 0.34);
+    background: rgba(245, 245, 245, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     padding: 3px 10px;
