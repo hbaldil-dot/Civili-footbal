@@ -13,7 +13,6 @@
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
 
-        <!-- İSMİNİ GİR + LOGO -->
         <div class="input-group">
             <div class="input-wrapper">
                 <div class="logo-container">
@@ -25,12 +24,10 @@
             </div>
         </div>
 
-        <!-- TAKIM SEÇ BUTONU -->
         <button class="menu-btn" onclick="toggleTeamSelect()">
             <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
         </button>
 
-        <!-- TAKIM LOGO SEÇİM ALANI -->
         <div class="team-logo-container" id="team-logo-container" style="display: none;">
             <div class="team-logo-options" id="team-logo-options"></div>
             <div class="selected-text">
@@ -38,7 +35,6 @@
             </div>
         </div>
 
-        <!-- OYUN MODLARI -->
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
         </button>
@@ -51,22 +47,18 @@
             <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
         </button>
 
-        <!-- AYARLAR BUTONU -->
         <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
 
     </div>
 
-<!-- ============================================================
-          AYARLAR POP-UP (ARKA FONLU)
+    <!-- ============================================================
+         AYARLAR POP-UP
          ============================================================ -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
-            <!-- Arka Plan Resmi -->
             <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
-            
-            <!-- Butonlar - Sıralı şekilde ortada aşağı doğru -->
             <div class="settings-buttons-container">
                 
                 <!-- MAÇ SÜRESİ -->
@@ -91,7 +83,8 @@
                 <img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img">
                          
                 <!-- ANA MENÜ -->
-                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img" onclick="closeSettingsPopup()">
+                
             </div>
         </div>
     </div>
