@@ -122,9 +122,13 @@ let turn = 1;
 let myTeamNumber = 1;
 let currentRoomId = null;
 
-let matchSecondsLeft = 90;
+// SABİT SÜRELER
+const MATCH_DURATION = 90; // 90 saniye
+const SHOT_DURATION = 5; // 5 saniye
+
+let matchSecondsLeft = MATCH_DURATION;
 let timerInterval = null;
-let shotSecondsLeft = 3;
+let shotSecondsLeft = SHOT_DURATION;
 let shotTimerInterval = null;
 let setupSecondsLeft = 15;
 let setupTimerInterval = null;
@@ -818,7 +822,7 @@ function setupSocketListeners() {
         
         document.getElementById('online-lobby').style.display = 'none';
         document.getElementById('top-bar').style.display = 'flex';
-        matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+        matchSecondsLeft = MATCH_DURATION;
         const timeBoard = document.getElementById('time-board');
         if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
         
@@ -899,10 +903,9 @@ function startLocalGame(mode, aiLevelParam) {
             updateScoreLogos();
         }, 100);
     }
-    document.getElementById('settings-popup').style.display = 'none';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
-    matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+    matchSecondsLeft = MATCH_DURATION;
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
@@ -948,7 +951,10 @@ function startSetupPhase() {
     }
 
     const shotTimer = document.getElementById('shot-timer');
-    if (shotTimer) shotTimer.style.display = 'none';
+    if (shotTimer) {
+        shotTimer.style.display = 'none';
+        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+    }
 
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
 
@@ -1004,7 +1010,10 @@ function confirmFormationsAndStart() {
         currentPhase = 'playing';
         document.getElementById('start-match-btn').style.display = 'none';
         const shotTimer = document.getElementById('shot-timer');
-        if (shotTimer) shotTimer.style.display = 'block';
+        if (shotTimer) {
+            shotTimer.style.display = 'block';
+            shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+        }
         updateHUDTurn();
         startMatchTimer();
         resetShotTimer();
@@ -1046,10 +1055,10 @@ function startSetupTimer() {
 
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
-    shotSecondsLeft = 3;
+    shotSecondsLeft = SHOT_DURATION;
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) {
-        shotTimer.innerText = 'ŞUT: 3s';
+        shotTimer.innerText = 'ŞUT: ' + shotSecondsLeft + 's';
         shotTimer.classList.remove('warning');
     }
     if (gameMode === 'ai' && turn === 2) {
@@ -1413,11 +1422,12 @@ function closeAILevelMenu() {
 }
 
 function openSettingsPopup() {
-    document.getElementById('settings-popup').style.display = 'flex';
+    // Artık ayarlar pop-up'ı yok - sadece bilgi mesajı
+    alert('⚙️ Oyun Ayarları\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin');
 }
 
 function closeSettingsPopup() {
-    document.getElementById('settings-popup').style.display = 'none';
+    // Kullanılmıyor
 }
 
 function selectColor(team, color) {
@@ -1721,7 +1731,7 @@ function startLocalGameWithTeams() {
     gameMode = 'local';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
-    matchSecondsLeft = parseInt(document.getElementById('match-duration').value);
+    matchSecondsLeft = MATCH_DURATION;
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
