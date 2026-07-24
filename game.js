@@ -1777,7 +1777,11 @@ function openSettingsPopup() {
     const popup = document.getElementById('settings-popup');
     if (popup) {
         popup.style.display = 'flex';
-        console.log('⚙️ Ayarlar menüsü açıldı');
+        console.log('⚙️ Ayarlar menüsü açıldı - Arka fonlu');
+    } else {
+        console.error('❌ settings-popup bulunamadı!');
+        // Yedek: Eski bilgi mesajı
+        alert('⚙️ Oyun Bilgileri\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin\n🏆 Takım: Seçtiğiniz logo');
     }
 }
 
