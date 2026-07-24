@@ -25,8 +25,8 @@ if (typeof io !== 'undefined') {
 // ============================================================
 // SABİT SÜRELER
 // ============================================================
-const MATCH_DURATION = 90;
-const SHOT_DURATION = 5;
+let MATCH_DURATION = 90;
+let SHOT_DURATION = 5;
 
 // ============================================================
 // SAHA GÖSTER/GİZLE FONKSİYONLARI
@@ -2017,3 +2017,47 @@ function setMatchDuration(seconds) {
 
 window.MATCH_DURATION = 90;
 console.log('⏱️ Varsayılan maç süresi: 90sn');
+// ============================================================
+// VURUŞ SÜRESİ MENÜ VE SEÇİM FONKSİYONLARI
+// ============================================================
+
+function toggleShotDurationOptions() {
+    const optionsDiv = document.getElementById('shot-duration-options');
+    if (!optionsDiv) return;
+    
+    // Maç süresi menüsü açıksa onu kapat
+    const matchOptions = document.getElementById('match-duration-options');
+    if (matchOptions) matchOptions.style.display = 'none';
+
+    if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
+        optionsDiv.style.display = 'flex';
+    } else {
+        optionsDiv.style.display = 'none';
+    }
+}
+
+function setShotDuration(seconds) {
+    SHOT_DURATION = seconds;
+    
+    // Ekranda seçilen değeri güncelle (3sn, 5sn, 7sn)
+    const displaySpan = document.getElementById('shot-duration-display');
+    if (displaySpan) {
+        displaySpan.innerText = seconds + 'sn';
+    }
+
+    // Butonlardaki active (yeşil) durumunu güncelle
+    const options = document.querySelectorAll('#shot-duration-options .settings-option');
+    options.forEach(opt => {
+        if (parseInt(opt.getAttribute('data-shot-duration')) === seconds) {
+            opt.classList.add('active');
+        } else {
+            opt.classList.remove('active');
+        }
+    });
+
+    // Menüyü kapat
+    const optionsDiv = document.getElementById('shot-duration-options');
+    if (optionsDiv) optionsDiv.style.display = 'none';
+
+    console.log(`🎯 Vuruş süresi ayarlandı: ${seconds} saniye`);
+}
