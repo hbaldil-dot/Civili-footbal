@@ -1138,7 +1138,7 @@ body { ... }
 }
 
 /* ============================================================
-   MAÇ SÜRESİ - SOLA YASLI, ORTA POZİSYON
+   MAÇ SÜRESİ - GÜNCELLENMİŞ
    ============================================================ */
 
 .settings-row {
@@ -1154,14 +1154,14 @@ body { ... }
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;  /* Sola yaslı */
+    align-items: center !important;  /* Orta hizalama */
     gap: 4px !important;
 }
 
 .settings-match-header {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;  /* Sola yaslı */
+    justify-content: center !important;  /* Orta hizalama */
     width: 100% !important;
     gap: 8px !important;
     cursor: pointer !important;
@@ -1175,12 +1175,12 @@ body { ... }
     display: inline-block !important;
 }
 
-/* MAÇ SÜRESİ BUTONU */
+/* MAÇ SÜRESİ BUTONU - KÜÇÜK */
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
     pointer-events: none !important;
-    transform: scale(2.56) !important;
-    transform-origin: left center !important;  /* Sola yaslı */
+    transform: scale(1.2) !important;  /* Küçültüldü */
+    transform-origin: center center !important;
 }
 
 /* SEÇİLEN SÜRE - BUTONUN ÜZERİNE */
@@ -1191,10 +1191,10 @@ body { ... }
     transform: translate(-50%, -50%) !important;
     color: #000000 !important;
     font-weight: bold !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
     font-family: 'Courier New', monospace !important;
     text-align: center !important;
-    background: transparent !important;  /* Şeffaf */
+    background: transparent !important;
     padding: 0 !important;
     letter-spacing: 1px !important;
     pointer-events: none !important;
@@ -1204,20 +1204,20 @@ body { ... }
 
 .settings-arrow {
     color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 12px !important;
+    font-size: 10px !important;
     transition: transform 0.3s ease !important;
     flex-shrink: 0 !important;
-    margin-left: 4px !important;
 }
 
 .settings-arrow.open {
     transform: rotate(180deg) !important;
 }
 
+/* SEÇENEKLER - BEYAZ RENK */
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
-    justify-content: flex-start !important;  /* Sola yaslı */
+    justify-content: center !important;
     gap: 4px !important;
     width: 100% !important;
     padding: 4px 0 !important;
@@ -1234,13 +1234,14 @@ body { ... }
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 4px !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    font-size: 9px !important;
+    color: #ffffff !important;  /* BEYAZ */
+    font-size: 10px !important;  /* Biraz büyüt */
     font-family: 'Courier New', monospace !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
     letter-spacing: 1px !important;
     pointer-events: auto !important;
+    font-weight: bold !important;  /* Kalın */
 }
 
 .settings-option:hover {
@@ -1249,7 +1250,7 @@ body { ... }
 }
 
 .settings-option.active {
-    background: rgba(46, 204, 113, 0.2) !important;
+    background: rgba(46, 204, 113, 0.3) !important;
     border-color: rgba(46, 204, 113, 0.4) !important;
     color: #2ecc71 !important;
 }
