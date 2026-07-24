@@ -51,81 +51,42 @@
             <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
         </button>
 
-        <!-- AYARLAR -->
-        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
+        <!-- AYARLAR BUTONU (pop-up yok, sadece buton) -->
+        <button class="menu-btn settings-btn" onclick="alert('⚙️ Maç süresi: 90 saniye\n⏱️ Vuruş süresi: 5 saniye\n🟢 Saha: Özel zemin')">
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
 
     </div>
 
-    <!-- ===== AYARLAR POP-UP ===== -->
-    <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>AYARLAR</h2>
-                <button class="popup-close" onclick="closeSettingsPopup()">✕</button>
-            </div>
-            <div class="popup-body">
-                <div class="input-group">
-                    <label>MAÇ SÜRESİ</label>
-                    <select id="match-duration">
-                        <option value="60">1 Dakika</option>
-                        <option value="90" selected>1.5 Dakika</option>
-                        <option value="120">2 Dakika</option>
-                        <option value="180">3 Dakika</option>
-                    </select>
+    <!-- ===== AI ZORLUK POP-UP ===== -->
+    <div id="ai-level-menu" style="display: none;">
+        <div class="popup-content difficulty-popup">
+            <div class="difficulty-container">
+                <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
+                
+                <div class="difficulty-btn-area" style="position:absolute; top:40%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('kolay')">
+                    <img src="menu/zorluk/kolay.webp" alt="Kolay" style="width:100%; display:block; pointer-events:none;">
                 </div>
-                <div class="input-group">
-                    <label>SAHA RENGİ</label>
-                    <div class="color-options">
-                        <button class="color-btn active" data-field="#2e7d32" style="background:#2e7d32" onclick="selectFieldColor('#2e7d32')"></button>
-                        <button class="color-btn" data-field="#1a5276" style="background:#1a5276" onclick="selectFieldColor('#1a5276')"></button>
-                        <button class="color-btn" data-field="#7d6608" style="background:#7d6608" onclick="selectFieldColor('#7d6608')"></button>
-                        <button class="color-btn" data-field="#6c3483" style="background:#6c3483" onclick="selectFieldColor('#6c3483')"></button>
-                        <button class="color-btn" data-field="#1a1a1a" style="background:#1a1a1a; border-color:#555" onclick="selectFieldColor('#1a1a1a')"></button>
-                    </div>
+                
+                <div class="difficulty-btn-area" style="position:absolute; top:52%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('orta')">
+                    <img src="menu/zorluk/orta.webp" alt="Orta" style="width:100%; display:block; pointer-events:none;">
                 </div>
-            </div>
-            <div class="popup-footer">
-                <button class="popup-close-btn" onclick="closeSettingsPopup()">TAMAM</button>
+                
+                <div class="difficulty-btn-area" style="position:absolute; top:64%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('zor')">
+                    <img src="menu/zorluk/zor.webp" alt="Zor" style="width:100%; display:block; pointer-events:none;">
+                </div>
+                
+                <div class="difficulty-btn-area" style="position:absolute; top:76%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('usta')">
+                    <img src="menu/zorluk/usta.webp" alt="Usta" style="width:100%; display:block; pointer-events:none;">
+                </div>
+                
+                <div class="difficulty-btn-area" style="position:absolute; bottom:1%; left:50%; transform:translateX(-50%); width:35%; cursor:pointer;" onclick="closeAILevelMenu()">
+                    <img src="menu/zorluk/ana menu.webp" alt="Geri" style="width:100%; display:block; pointer-events:none;">
+                </div>
             </div>
         </div>
     </div>
 
-<!-- ===== AI ZORLUK POP-UP ===== -->
-<div id="ai-level-menu" style="display: none;">
-    <div class="popup-content difficulty-popup">
-        <div class="difficulty-container">
-            <!-- Zorluk Seçimi Ana Görseli -->
-            <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
-            
-            <!-- KOLAY -->
-            <div class="difficulty-btn-area" style="position:absolute; top:40%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('kolay')">
-                <img src="menu/zorluk/kolay.webp" alt="Kolay" style="width:100%; display:block; pointer-events:none;">
-            </div>
-            
-            <!-- ORTA -->
-            <div class="difficulty-btn-area" style="position:absolute; top:52%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('orta')">
-                <img src="menu/zorluk/orta.webp" alt="Orta" style="width:100%; display:block; pointer-events:none;">
-            </div>
-            
-            <!-- ZOR -->
-            <div class="difficulty-btn-area" style="position:absolute; top:64%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('zor')">
-                <img src="menu/zorluk/zor.webp" alt="Zor" style="width:100%; display:block; pointer-events:none;">
-            </div>
-            
-            <!-- USTA -->
-            <div class="difficulty-btn-area" style="position:absolute; top:76%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('usta')">
-                <img src="menu/zorluk/usta.webp" alt="Usta" style="width:100%; display:block; pointer-events:none;">
-            </div>
-            
-            <!-- GERİ -->
-            <div class="difficulty-btn-area" style="position:absolute; bottom:1%; left:50%; transform:translateX(-50%); width:35%; cursor:pointer;" onclick="closeAILevelMenu()">
-                <img src="menu/zorluk/ana menu.webp" alt="Geri" style="width:100%; display:block; pointer-events:none;">
-            </div>
-        </div>
-    </div>
-</div>
     <!-- ===== ONLINE LOBI POP-UP ===== -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
@@ -188,7 +149,7 @@
         </div>
         <div class="hud-row-second">
             <div id="turn-indicator">Diziliş</div>
-            <div id="shot-timer">ŞUT: 3s</div>
+            <div id="shot-timer">ŞUT: 5s</div>
         </div>
     </div>
 
