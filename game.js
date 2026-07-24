@@ -1803,7 +1803,7 @@ function toggleMatchDurationOptions() {
 function setMatchDuration(seconds) {
     console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
     
-    // Seçilen değeri güncelle
+    // Seçilen değeri butonun SOLUNDA göster
     const display = document.getElementById('match-duration-display');
     if (display) {
         display.textContent = seconds + 'sn';
@@ -1827,8 +1827,21 @@ function setMatchDuration(seconds) {
         options.classList.remove('show');
     }
     
+    // Oyun içinde süreyi güncelle
+    if (currentPhase === 'playing' || currentPhase === 'setup') {
+        matchSecondsLeft = seconds;
+        const timeBoard = document.getElementById('time-board');
+        if (timeBoard) {
+            timeBoard.innerText = seconds + 's';
+        }
+    }
+    
     console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
 }
+
+// Varsayılan maç süresi
+window.MATCH_DURATION = 90;
+console.log('⏱️ Varsayılan maç süresi:', window.MATCH_DURATION, 'sn');
 
 // ============================================================
 // BAŞLANGIÇ - Varsayılan Değer
