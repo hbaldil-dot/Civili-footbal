@@ -1,6 +1,3 @@
-// Sayfa açıldığında sahanın kapalı olduğundan emin olalım
-hideField();
-
 // ============================================================
 // SOCKET BAĞLANTISI
 // ============================================================
@@ -36,27 +33,21 @@ let SHOT_DURATION = 5;
 // ============================================================
 
 function showField() {
-    const gameCanvas = document.getElementById('gameCanvas');
-    if (gameCanvas) {
-        gameCanvas.style.display = 'block'; // Sahayı görünür yap
-        gameCanvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
-        gameCanvas.style.backgroundSize = "cover";
-        gameCanvas.style.backgroundPosition = "center";
-        gameCanvas.style.backgroundRepeat = "no-repeat";
-        gameCanvas.style.backgroundColor = "#2e7d32";
-        gameCanvas.classList.add('canvas-active');
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        canvas.style.backgroundImage = "url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp')";
+        canvas.style.backgroundSize = "cover";
+        canvas.style.backgroundPosition = "center";
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundColor = "#2e7d32";
+        canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
+        canvas.style.borderRadius = '8px';
+        canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
+        canvas.classList.add('canvas-active');
         console.log('✅ Saha gösteriliyor');
     }
 }
 
-function hideField() {
-    const gameCanvas = document.getElementById('gameCanvas');
-    if (gameCanvas) {
-        gameCanvas.style.display = 'none'; // Sahayı gizle
-        gameCanvas.classList.remove('canvas-active');
-        console.log('🙈 Saha gizlendi');
-    }
-}
 function hideField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
@@ -174,11 +165,8 @@ let goalImage = null;
 // SAHA RESMİ
 let fieldImage = null;
 
-function loadFieldImage(imagePath) {
-    // Parametre gelmişse onu, gelmemişse seçili olan zemin değişkenini kullanır
-    const path = imagePath || currentStadiumTexture; 
-    
-    console.log('🔄 Saha resmi yükleniyor:', path);
+function loadFieldImage() {
+    console.log('🔄 Saha resmi yükleniyor...');
     const img = new Image();
     img.onload = function() {
         fieldImage = img;
@@ -191,11 +179,10 @@ function loadFieldImage(imagePath) {
         console.warn('⚠️ Saha resmi yüklenemedi! Varsayılan yeşil arka plan kullanılacak.');
         fieldImage = null;
     };
-    img.src = path; // Artık sabit dosya adı değil, değişken yol kullanılıyor!
+    img.src = 'C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp';
 }
-
-// İlk açılışta seçili olan varsayılan zemini yükler
 loadFieldImage();
+
 // ============================================================
 // FOTOĞRAF YÜKLEME
 // ============================================================
@@ -2078,6 +2065,9 @@ function setShotDuration(seconds) {
 // STADYUM / ZEMİN SEÇİMİ MANTIĞI
 // ============================================================
 
+// Varsayılan saha kaplama (texture) adresi
+let currentStadiumTexture = 'menu/ayarlar/stat/texure/z1-t.webp';
+
 // Açılır menüyü aç/kapat
 function toggleStadiumOptions() {
     const optionsDiv = document.getElementById('stadium-options');
@@ -2107,8 +2097,7 @@ function selectStadium(stadiumKey, texturePath) {
     // 3. Seçili karta aktiflik çerçevesi ekle
     const cards = document.querySelectorAll('.stadium-option-card');
     cards.forEach(card => {
-        const img = card.querySelector('img');
-        if (img && img.src.includes(`${stadiumKey}.webp`)) {
+        if (card.querySelector('img').src.includes(`${stadiumKey}.webp`)) {
             card.classList.add('active');
         } else {
             card.classList.remove('active');
@@ -2125,16 +2114,11 @@ function selectStadium(stadiumKey, texturePath) {
     console.log(`⚽ Saha Zemini Değiştirildi: Texture -> ${texturePath}`);
 }
 
-// Saha zeminini Canvas ve HTML elemanlarına uygulayan fonksiyon
+// Saha zeminini güncelleyen fonksiyon (Oyun render motorunuza uyarlayın)
 function applyStadiumTextureToField() {
-    // Canvas CSS arka planını güncelle
-    const canvas = document.getElementById('gameCanvas');
-    if (canvas) {
-        canvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
+    // Örnek: Canvas veya HTML arka planınıza seçilen texture'ı basar
+    const pitchElement = document.getElementById('game-pitch'); // Canvas veya div ID'niz
+    if (pitchElement) {
+        pitchElement.style.backgroundImage = `url('${currentStadiumTexture}')`;
     }
-
-    // Canvas 2D çizim motorundaki imajı yeniden yükle
-    loadFieldImage(currentStadiumTexture);
 }
-
-
