@@ -97,8 +97,39 @@
     </div>
 </div>
                 
-                <!-- STADYUM (PASİF) -->
-                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
+                <!-- STADYUM SEÇİMİ -->
+<div class="settings-row">
+    <div class="settings-match-container">
+        <!-- Ana Buton & Seçili Görsel Önizlemesi -->
+        <div class="settings-match-header" onclick="toggleStadiumOptions()">
+            <div class="settings-match-wrapper">
+                <img src="menu/ayarlar/stadyum-buton.webp" alt="Stadyum Seç" class="settings-btn-img">
+                <!-- Seçilen görsel butonun yanında mini önizleme olarak görünecek -->
+                <img src="menu/ayarlar/stat/z1.webp" id="selected-stadium-preview" class="stadium-preview-icon" alt="Seçili Zemin">
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+
+        <!-- Seçenekler Menüsü (Tıklanınca Açılan Ufak Resim Dizilimi) -->
+        <div class="settings-match-options stadium-options-grid" id="stadium-options" style="display: none;">
+            <div class="stadium-option-card active" onclick="selectStadium('z1', 'menu/ayarlar/stat/texure/z1-t.webp')">
+                <img src="menu/ayarlar/stat/z1.webp" alt="Zemin 1">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z2', 'menu/ayarlar/stat/texure/z2-t.webp')">
+                <img src="menu/ayarlar/stat/z2.webp" alt="Zemin 2">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z3', 'menu/ayarlar/stat/texure/z3-t.webp')">
+                <img src="menu/ayarlar/stat/z3.webp" alt="Zemin 3">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z4', 'menu/ayarlar/stat/texure/z4-t.webp')">
+                <img src="menu/ayarlar/stat/z4.webp" alt="Zemin 4">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z5', 'menu/ayarlar/stat/texure/z5-5.webp')">
+                <img src="menu/ayarlar/stat/z5.webp" alt="Zemin 5">
+            </div>
+        </div>
+    </div>
+</div>
                 
                 <!-- SES (PASİF) -->
                 <img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img">
