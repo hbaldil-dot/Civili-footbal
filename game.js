@@ -2064,7 +2064,32 @@ function setShotDuration(seconds) {
 // ============================================================
 // STADYUM / ZEMİN SEÇİMİ MANTIĞI
 // ============================================================
+// Available 5 stadiums/textures
+const stadiumList = [
+    { key: 'z1', texture: 'menu/ayarlar/stat/texure/z1-t.webp' },
+    { key: 'z2', texture: 'menu/ayarlar/stat/texure/z2-t.webp' },
+    { key: 'z3', texture: 'menu/ayarlar/stat/texure/z3-t.webp' },
+    { key: 'z4', texture: 'menu/ayarlar/stat/texure/z4-t.webp' },
+    { key: 'z5', texture: 'menu/ayarlar/stat/texure/z5-t.webp' }
+];
 
+// Select a random stadium out of 5 on match load
+function selectRandomStadium() {
+    const randomIndex = Math.floor(Math.random() * stadiumList.length);
+    const selected = stadiumList[randomIndex];
+    currentStadiumTexture = selected.texture;
+    
+    // Update preview icon in settings menu if exists
+    const previewImg = document.getElementById('selected-stadium-preview');
+    if (previewImg) {
+        previewImg.src = `menu/ayarlar/stat/${selected.key}.webp`;
+    }
+    console.log(`🎲 Başlangıçta rastgele zemin seçildi: ${selected.key} (${selected.texture})`);
+}
+
+// Call it initially
+let currentStadiumTexture = stadiumList[0].texture;
+selectRandomStadium();
 // Varsayılan saha kaplama (texture) adresi
 let currentStadiumTexture = 'menu/ayarlar/stat/texure/z1-t.webp';
 
