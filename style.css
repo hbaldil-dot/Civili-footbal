@@ -932,3 +932,117 @@ body { ... }
         max-height: 20px !important;
     }
 }
+/* ============================================================
+   MAÇ SÜRESİ - SATIR DÜZENİ (DOSYA SONUNA EKLE)
+   ============================================================ */
+
+.settings-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 6px !important;
+    pointer-events: auto !important;
+    position: relative !important;
+}
+
+.settings-row .settings-btn-img {
+    width: 40% !important;
+    flex-shrink: 0 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* ===== SEÇİLEN DEĞER (Siyah ve Bold) ===== */
+.settings-selected-value {
+    color: #000000 !important;
+    font-weight: bold !important;
+    font-size: 11px !important;
+    font-family: 'Courier New', monospace !important;
+    min-width: 35px !important;
+    text-align: center !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    letter-spacing: 1px !important;
+    flex-shrink: 0 !important;
+}
+
+/* ===== SEÇENEKLER ===== */
+.settings-options {
+    display: none !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
+    pointer-events: auto !important;
+}
+
+.settings-options.show {
+    display: flex !important;
+}
+
+.settings-option {
+    padding: 2px 6px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 3px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 8px !important;
+    font-family: 'Courier New', monospace !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    letter-spacing: 1px !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+}
+
+.settings-option:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.settings-option.active {
+    background: rgba(46, 204, 113, 0.2) !important;
+    border-color: rgba(46, 204, 113, 0.4) !important;
+    color: #2ecc71 !important;
+}
+
+.settings-option:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .settings-row {
+        gap: 4px !important;
+    }
+    .settings-row .settings-btn-img {
+        width: 35% !important;
+    }
+    .settings-selected-value {
+        font-size: 9px !important;
+        min-width: 30px !important;
+        padding: 2px 4px !important;
+    }
+    .settings-option {
+        font-size: 7px !important;
+        padding: 1px 4px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .settings-row .settings-btn-img {
+        width: 30% !important;
+    }
+    .settings-selected-value {
+        font-size: 8px !important;
+        min-width: 25px !important;
+        padding: 1px 3px !important;
+    }
+    .settings-option {
+        font-size: 6px !important;
+        padding: 1px 3px !important;
+    }
+}
