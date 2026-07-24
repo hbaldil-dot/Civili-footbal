@@ -1192,7 +1192,7 @@ body { ... }
     transform: translateY(-50%) !important;
     
     /* Butonun sol/orta hizasına konumlandırma */
-    left: 60% !important; /* "MAÇ SÜRESİ" yazısının hemen sağı / butonun sol-orta bölümü */
+    left: 20% !important; /* "MAÇ SÜRESİ" yazısının hemen sağı / butonun sol-orta bölümü */
     right: auto !important; /* Sağdaki dayamayı kaldırıyoruz */
     
     color: #000000 !important;
