@@ -446,17 +446,17 @@ body::before {
 }
 
 #exit-btn {
-    color: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 1);
     border-radius: 50%;
     width: 30px;
     height: 30px;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     pointer-events: auto;
     font-family: inherit;
-    background: rgba(192, 57, 43, 0.28);
+    background: rgba(192, 57, 43, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
