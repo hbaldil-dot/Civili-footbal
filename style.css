@@ -615,11 +615,11 @@ body::before {
     width: 100px;  /* 76px → 100px (büyüdü) */
     height: 100px; /* 76px → 100px (büyüdü) */
     border-radius: 50%;
-    border: 2px solid rgba(46, 204, 113, 0.3);  /* Daha belirgin kenarlık */
-    background: rgba(46, 204, 113, 0.15);  /* Daha görünür arka plan */
-    color: #2ecc71;  /* Canlı yeşil */
+    border: 2px solid rgba(46, 204, 113, 0.5);  /* Daha belirgin kenarlık */
+    background: rgba(46, 204, 113, 0.35);  /* Daha görünür arka plan */
+    color: #f1c40f;  /* Canlı yeşil */
     font-family: inherit;
-    font-size: 16px;  /* 10px → 16px (büyüdü) */
+    font-size: 20px;  /* 10px → 16px (büyüdü) */
     font-weight: 900;  /* Daha kalın */
     cursor: pointer;
     z-index: 50;
