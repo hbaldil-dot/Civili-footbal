@@ -454,8 +454,8 @@ function draw() {
         
         if (dist > 10) {
             ctx.save();
-            ctx.strokeStyle = 'rgba(46, 204, 113, 0.4)';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = 'rgba(240, 248, 255, 0.6)';
+            ctx.lineWidth = 6;
             ctx.setLineDash([6, 6]);
             ctx.beginPath();
             ctx.moveTo(cap.x, cap.y);
