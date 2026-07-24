@@ -2113,33 +2113,35 @@ function toggleStadiumOptions() {
 
 // Zemin seçme fonksiyonu
 function selectStadium(stadiumKey, texturePath) {
-    // 1. Oyun alanında kullanılacak texture yolunu kaydet
     currentStadiumTexture = texturePath;
 
-    // 2. Butonun yanındaki küçük önizleme görselini güncelle (z1.webp, z2.webp ...)
     const previewImg = document.getElementById('selected-stadium-preview');
     if (previewImg) {
         previewImg.src = `menu/ayarlar/stat/${stadiumKey}.webp`;
     }
 
-    // 3. Seçili karta aktiflik çerçevesi ekle
     const cards = document.querySelectorAll('.stadium-option-card');
     cards.forEach(card => {
-        if (card.querySelector('img').src.includes(`${stadiumKey}.webp`)) {
+        const img = card.querySelector('img');
+        if (img && img.src.includes(`${stadiumKey}.webp`)) {
             card.classList.add('active');
         } else {
             card.classList.remove('active');
         }
     });
 
-    // 4. Menüyü kapat
     const optionsDiv = document.getElementById('stadium-options');
     if (optionsDiv) optionsDiv.style.display = 'none';
 
-    // 5. Saha çizimini / kaplamasını anında güncelle
+    // Update field images directly
     applyStadiumTextureToField();
-
+    
     console.log(`⚽ Saha Zemini Değiştirildi: Texture -> ${texturePath}`);
+}
+
+function applyStadiumTextureToField() {
+    loadFieldImage(currentStadiumTexture);
+    showField();
 }
 
 // Saha zeminini güncelleyen fonksiyon (Oyun render motorunuza uyarlayın)
