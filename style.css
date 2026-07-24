@@ -1178,25 +1178,29 @@ body { ... }
     transform-origin: center center !important;
 }
 
-/* 3. "90sn" YAZISI VE YAZI KONUMU (SARI BUTONUN ÜSTÜNE TAM ORTALAR) */
+/* ============================================================
+   SEÇİLEN SÜRE YAZISI (EN SAĞA DAYALI VE 2 KAT BÜYÜK)
+   ============================================================ */
+
 .settings-selected-value {
     position: absolute !important;
     top: 50% !important;
-    right: 18% !important; /* Resmin üzerindeki sarı alanın sağına denk getirir */
+    right: 5% !important; /* Tam olarak sağ kenara dayar */
     transform: translateY(-50%) !important;
-    color: #000000 !important;
-    font-weight: 900 !important;
-    font-size: 13px !important;
-    font-family: 'Arial', 'Helvetica', sans-serif !important;
-    text-align: center !important;
+    color: #000000 !important; /* Kapkara */
+    font-weight: 900 !important; /* En kalın bold */
+    font-size: 28px !important; /* 13px-14px değerinden en az 2 kat büyütüldü */
+    font-family: 'Arial Black', 'Impact', sans-serif !important;
+    text-align: right !important;
     background: transparent !important;
     padding: 0 !important;
     letter-spacing: 0.5px !important;
     pointer-events: none !important;
     white-space: nowrap !important;
     text-shadow: none !important;
-    z-index: 5 !important;
+    z-index: 10 !important;
 }
+
 
 /* 4. AÇILIR MENÜ (SEÇENEKLER) DÜZENİ */
 .settings-match-options {
