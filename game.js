@@ -1770,7 +1770,90 @@ function selectDifficulty(level) {
     startLocalGame('ai', level);
 }
 // ============================================================
-// AYARLAR POP-UP FONKSİYONLARI
+// AYARLAR - FONKSİYONLAR
+// ============================================================
+
+// Global değişkenler
+let selectedMatchDuration = 90;
+let selectedShotDuration = 5;
+let selectedStadium = 'default';
+let selectedSound = 'on';
+
+// Maç Süresi
+function setMatchDuration(seconds) {
+    console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
+    selectedMatchDuration = seconds;
+    
+    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.duration) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // MATCH_DURATION sabitini güncelle
+    if (typeof MATCH_DURATION !== 'undefined') {
+        window.MATCH_DURATION = seconds;
+    }
+}
+
+// Vuruş Süresi
+function setShotDuration(seconds) {
+    console.log('🎯 Vuruş süresi seçildi:', seconds, 'saniye');
+    selectedShotDuration = seconds;
+    
+    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.duration) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    if (typeof SHOT_DURATION !== 'undefined') {
+        window.SHOT_DURATION = seconds;
+    }
+}
+
+// Stadyum Seçimi
+function setStadium(type) {
+    console.log('🏟️ Stadyum seçildi:', type);
+    selectedStadium = type;
+    
+    document.querySelectorAll('.settings-option[data-stadium]').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.stadium === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    if (type === 'custom') {
+        loadFieldImage();
+        showField();
+    } else {
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.style.backgroundImage = 'none';
+            canvas.style.background = '#2e7d32';
+        }
+        fieldImage = null;
+    }
+}
+
+// Ses Aç/Kapa
+function setSound(state) {
+    console.log('🔊 Ses durumu:', state);
+    selectedSound = state;
+    
+    document.querySelectorAll('.settings-option[data-sound]').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.sound === state) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+// ============================================================
+// AYARLAR POP-UP AÇ/KAPA
 // ============================================================
 
 function openSettingsPopup() {
@@ -1783,8 +1866,6 @@ function openSettingsPopup() {
         console.log('✅ Ayarlar pop-up gösteriliyor');
     } else {
         console.error('❌ settings-popup bulunamadı!');
-        // Yedek olarak eski bilgi
-        alert('⚙️ Oyun Bilgileri\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin\n🏆 Takım: Seçtiğiniz logo');
     }
 }
 
@@ -1799,7 +1880,10 @@ function closeSettingsPopup() {
     }
 }
 
-// Eski fonksiyonu override et (eğer varsa)
-if (typeof window.showGameInfo === 'function') {
-    window.showGameInfo = openSettingsPopup;
-}
+// ============================================================
+// BAŞLANGIÇ - Varsayılan Değerler
+// ============================================================
+
+// Varsayılan değerleri ata
+window.MATCH_DURATION = 90;
+window.SHOT_DURATION = 5;
