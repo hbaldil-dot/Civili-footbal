@@ -79,8 +79,23 @@
         </div>
     </div>
 </div>
-                <!-- VURUŞ SÜRESİ (PASİF) -->
+               <!-- VURUŞ SÜRESİ (AKTİF) -->
+<div class="settings-row">
+    <div class="settings-shot-container settings-match-container">
+        <div class="settings-match-header" onclick="toggleShotDurationOptions()">
+            <div class="settings-match-wrapper settings-shot-wrapper">
                 <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                <span class="settings-selected-value" id="shot-duration-display">5sn</span>
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+        <div class="settings-match-options" id="shot-duration-options" style="display: none;">
+            <button class="settings-option" data-shot-duration="3" onclick="setShotDuration(3)">3sn</button>
+            <button class="settings-option active" data-shot-duration="5" onclick="setShotDuration(5)">5sn</button>
+            <button class="settings-option" data-shot-duration="7" onclick="setShotDuration(7)">7sn</button>
+        </div>
+    </div>
+</div>
                 
                 <!-- STADYUM (PASİF) -->
                 <img src="menu/ayarlar/stadyum.webp" alt="Stadyum" class="settings-btn-img">
