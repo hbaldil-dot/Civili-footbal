@@ -612,38 +612,42 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 76px;
-    height: 76px;
+    width: 100px;  /* 76px → 100px (büyüdü) */
+    height: 100px; /* 76px → 100px (büyüdü) */
     border-radius: 50%;
-    border: 1px solid rgba(39, 174, 96, 0.1);
-    background: rgba(39, 174, 96, 0.04);
-    color: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(46, 204, 113, 0.3);  /* Daha belirgin kenarlık */
+    background: rgba(46, 204, 113, 0.15);  /* Daha görünür arka plan */
+    color: #2ecc71;  /* Canlı yeşil */
     font-family: inherit;
-    font-size: 10px;
-    font-weight: bold;
+    font-size: 16px;  /* 10px → 16px (büyüdü) */
+    font-weight: 900;  /* Daha kalın */
     cursor: pointer;
     z-index: 50;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(46, 204, 113, 0.1);  /* Parlaklık efekti */
     text-align: center;
     line-height: 1.2;
-    letter-spacing: 3px;
+    letter-spacing: 4px;  /* Daha geniş harf aralığı */
+    text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);  /* Işıltı efekti */
+    transition: all 0.3s ease;  /* Yumuşak geçiş */
 }
 
 #start-match-btn:hover {
-    background: rgba(39, 174, 96, 0.06);
-    border-color: rgba(39, 174, 96, 0.15);
-    color: rgba(255, 255, 255, 0.4);
+    background: rgba(46, 204, 113, 0.25);
+    border-color: rgba(46, 204, 113, 0.6);
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6), 0 0 50px rgba(46, 204, 113, 0.2);
+    transform: translate(-50%, -50%) scale(1.05);  /* Hover'da hafif büyüme */
 }
 
 #start-match-btn .timer-subtext {
-    font-size: 12px;
+    font-size: 14px;  /* 12px → 14px */
     display: block;
-    margin-top: 2px;
-    color: rgba(241, 196, 15, 0.15);
+    margin-top: 4px;
+    color: rgba(241, 196, 15, 0.6);  /* Daha görünür sarı */
+    font-weight: bold;
 }
 
 #power-bar-container {
