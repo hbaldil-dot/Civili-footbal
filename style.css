@@ -1179,7 +1179,7 @@ body { ... }
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
     pointer-events: none !important;
-    transform: scale(1.2) !important;  /* Küçültüldü */
+    transform: scale(3.5) !important;  /* Küçültüldü */
     transform-origin: center center !important;
 }
 
