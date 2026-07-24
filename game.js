@@ -1921,7 +1921,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Sayfa yüklendi!');
 });
 // ============================================================
-// SES AÇ/KAPA - TAM FONKSİYONLAR
+// SES AÇ/KAPA FONKSİYONLARI
 // ============================================================
 
 let isSoundOn = true;
@@ -1935,13 +1935,11 @@ function toggleSound() {
     if (soundBtn) {
         if (isSoundOn) {
             soundBtn.src = 'menu/ayarlar/ses.webp';
-            soundBtn.alt = 'Ses Açık';
             console.log('🔊 Ses AÇIK');
-            // Test sesi çal - ses açıldığında bir bip sesi duy
-            playSound('kick');
+            // Ses açıldığında test sesi çal
+            setTimeout(() => playButtonSound(), 100);
         } else {
             soundBtn.src = 'menu/ayarlar/ses-off.webp';
-            soundBtn.alt = 'Ses Kapalı';
             console.log('🔇 Ses KAPALI');
         }
     }
@@ -1957,8 +1955,8 @@ function loadSoundSettings() {
         const soundBtn = document.getElementById('sound-toggle-btn');
         if (soundBtn) {
             soundBtn.src = isSoundOn ? 'menu/ayarlar/ses.webp' : 'menu/ayarlar/ses-off.webp';
-            console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
         }
+        console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
     }
 }
 // ============================================================
@@ -1976,7 +1974,6 @@ function testSound() {
 // GÜNCELLENMİŞ playSound - SES KONTROLÜ EKLENDİ
 // ============================================================
 function playSound(type) {
-    // SES KAPALIYSA HİÇBİR ŞEY YAPMA
     if (!isSoundOn) {
         console.log('🔇 Ses kapalı, ses çalınmadı:', type);
         return;
@@ -1985,10 +1982,7 @@ function playSound(type) {
     console.log('🔊 Ses çalınıyor:', type);
     
     try {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
