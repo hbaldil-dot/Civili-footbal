@@ -1173,7 +1173,7 @@ body { ... }
     width: 100% !important;
     flex-shrink: 0 !important;
     pointer-events: none !important;
-    transform: scale1.81) !important;  /* %256 büyük */
+    transform: scale(1.81) !important;  /* %256 büyük */
 }
 
 .settings-selected-value {
