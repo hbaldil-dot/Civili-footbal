@@ -1794,6 +1794,8 @@ function setMatchDuration(seconds) {
     // MATCH_DURATION sabitini güncelle
     if (typeof MATCH_DURATION !== 'undefined') {
         window.MATCH_DURATION = seconds;
+    } else {
+        window.MATCH_DURATION = seconds;
     }
 }
 
@@ -1811,6 +1813,8 @@ function setShotDuration(seconds) {
     
     if (typeof SHOT_DURATION !== 'undefined') {
         window.SHOT_DURATION = seconds;
+    } else {
+        window.SHOT_DURATION = seconds;
     }
 }
 
@@ -1827,13 +1831,16 @@ function setStadium(type) {
     });
     
     if (type === 'custom') {
+        // Özel saha resmi
         loadFieldImage();
         showField();
     } else {
+        // Varsayılan yeşil saha
         const canvas = document.getElementById('gameCanvas');
         if (canvas) {
             canvas.style.backgroundImage = 'none';
             canvas.style.background = '#2e7d32';
+            canvas.style.backgroundColor = '#2e7d32';
         }
         fieldImage = null;
     }
@@ -1844,12 +1851,38 @@ function setSound(state) {
     console.log('🔊 Ses durumu:', state);
     selectedSound = state;
     
+    // Butonları güncelle
     document.querySelectorAll('.settings-option[data-sound]').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.sound === state) {
             btn.classList.add('active');
         }
     });
+    
+    // Ses ikonunu değiştir
+    const soundIcon = document.getElementById('sound-icon');
+    if (soundIcon) {
+        if (state === 'on') {
+            soundIcon.src = 'menu/ayarlar/ses.webp';
+            soundIcon.alt = 'Ses Açık';
+        } else {
+            soundIcon.src = 'menu/ayarlar/ses-off.webp';
+            soundIcon.alt = 'Ses Kapalı';
+        }
+    }
+    
+    // Ses efektlerini kontrol et
+    if (state === 'off') {
+        // Sesleri kapat
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            audioCtx.suspend();
+        }
+    } else {
+        // Sesleri aç
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            audioCtx.resume();
+        }
+    }
 }
 
 // ============================================================
@@ -1887,3 +1920,13 @@ function closeSettingsPopup() {
 // Varsayılan değerleri ata
 window.MATCH_DURATION = 90;
 window.SHOT_DURATION = 5;
+window.selectedMatchDuration = 90;
+window.selectedShotDuration = 5;
+window.selectedStadium = 'default';
+window.selectedSound = 'on';
+
+console.log('⚙️ Ayarlar başlatıldı:');
+console.log('  ⏱️ Maç Süresi:', window.MATCH_DURATION, 'saniye');
+console.log('  🎯 Vuruş Süresi:', window.SHOT_DURATION, 'saniye');
+console.log('  🏟️ Stadyum:', window.selectedStadium);
+console.log('  🔊 Ses:', window.selectedSound);
