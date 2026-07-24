@@ -946,7 +946,77 @@ body::before {
         max-height: 15px !important;
     }
 }
+/* ============================================================
+   AYARLAR - SATIR DÜZENİ (DOSYA SONUNA EKLE)
+   ============================================================ */
 
+.settings-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+    pointer-events: auto !important;
+}
+
+.settings-row .settings-btn-img {
+    width: 45% !important;
+    flex-shrink: 0 !important;
+    transform: scale(1.5) !important;
+    pointer-events: none !important;
+}
+
+.settings-options {
+    display: flex !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    pointer-events: auto !important;
+}
+
+.settings-option {
+    padding: 2px 8px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 9px !important;
+    font-family: 'Courier New', monospace !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    letter-spacing: 1px !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+}
+
+.settings-option:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.settings-option.active {
+    background: rgba(46, 204, 113, 0.15) !important;
+    border-color: rgba(46, 204, 113, 0.3) !important;
+    color: rgba(46, 204, 113, 0.8) !important;
+}
+
+.settings-option:active {
+    transform: scale(0.95) !important;
+}
+
+/* ===== GERİ BUTONU ===== */
+.settings-back {
+    margin-top: 4px !important;
+}
+
+.settings-back .settings-btn-img {
+    width: 30% !important;
+    transform: scale(0.9) !important;
+    pointer-events: auto !important;
+}
+
+.settings-back .settings-btn-img:hover {
+    transform: scale(0.95) !important;
+}
 /* ============================================================
    TÜM KUTULARI KALDIR
    ============================================================ */
