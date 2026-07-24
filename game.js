@@ -166,8 +166,10 @@ let goalImage = null;
 // SAHA RESMİ
 let fieldImage = null;
 
-function loadFieldImage() {
-    console.log('🔄 Saha resmi yükleniyor...');
+function loadFieldImage(imagePath) {
+    const path = imagePath || currentStadiumTexture;
+    console.log('🔄 Saha resmi yükleniyor:', path);
+    
     const img = new Image();
     img.onload = function() {
         fieldImage = img;
@@ -180,7 +182,7 @@ function loadFieldImage() {
         console.warn('⚠️ Saha resmi yüklenemedi! Varsayılan yeşil arka plan kullanılacak.');
         fieldImage = null;
     };
-    img.src = 'C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp';
+    img.src = path; // Updated from hardcoded string
 }
 loadFieldImage();
 
