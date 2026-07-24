@@ -662,148 +662,6 @@ body::before {
 }
 
 /* ============================================================
-   AYARLAR POP-UP (GÜNCELLENMİŞ)
-   ============================================================ */
-
-#settings-popup {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 9999 !important;
-    padding: 20px !important;
-    margin: 0 !important;
-}
-
-#settings-popup[style*="display: flex"] {
-    display: flex !important;
-}
-
-.settings-popup-content {
-    position: relative !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 420px !important;
-    width: 90% !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    margin: 0 auto !important;
-}
-
-.settings-bg {
-    width: 100% !important;
-    display: block !important;
-    border-radius: 20px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* ===== BUTON KONTEYNERİ - 20px AŞAĞI ===== */
-.settings-buttons-container {
-    position: absolute !important;
-    top: 66% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) translateY(20px) !important; /* 20px aşağı */
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 10px !important;
-    width: 65% !important;
-    max-width: 260px !important;
-    pointer-events: none !important;
-}
-
-/* ===== TÜM BUTONLAR - %80 BÜYÜK ===== */
-.settings-btn-img {
-    width: 100% !important;
-    display: block !important;
-    cursor: pointer !important;
-    transition: transform 0.2s ease, opacity 0.2s ease !important;
-    opacity: 0.9 !important;
-    pointer-events: auto !important;
-    transform: scale(1.5) !important; /* %80 boyut */
-}
-
-.settings-btn-img:hover {
-    transform: scale(1.5) !important; /* Hover'da biraz büyüsün */
-    opacity: 1 !important;
-}
-
-.settings-btn-img:active {
-    transform: scale(0.76) !important;
-}
-
-/* ===== EN ALTAKİ BUTON (GERİ/ANA MENU) - %30 UFALMIŞ ===== */
-.settings-btn-img:last-child {
-    transform: scale(0.9) !important; /* %30 boyut */
-    margin-top: 4px !important;
-}
-
-.settings-btn-img:last-child:hover {
-    transform: scale(0.33) !important;
-}
-
-.settings-btn-img:last-child:active {
-    transform: scale(0.28) !important;
-}
-
-/* ============================================================
-   AYARLAR POP-UP - MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 420px) {
-    .settings-buttons-container {
-        width: 70% !important;
-        max-width: 200px !important;
-        gap: 8px !important;
-        transform: translate(-50%, -50%) translateY(15px) !important;
-    }
-    .settings-btn-img {
-        transform: scale(0.8) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.3) !important;
-    }
-}
-
-@media (max-width: 360px) {
-    .settings-buttons-container {
-        width: 75% !important;
-        max-width: 170px !important;
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(12px) !important;
-    }
-    .settings-btn-img {
-        transform: scale(0.8) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.28) !important;
-    }
-}
-
-@media (max-height: 700px) {
-    .settings-buttons-container {
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(10px) !important;
-    }
-    .settings-btn-img {
-        max-height: 45px !important;
-        width: auto !important;
-        transform: scale(0.8) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.3) !important;
-        max-height: 20px !important;
-    }
-}
-/* ============================================================
    ZORLUK MENÜSÜ
    ============================================================ */
 
@@ -867,26 +725,6 @@ body::before {
     .menu-btn { max-width: 280px; margin-bottom: 0.4vh; }
     .team-logo-btn { width: 28px; height: 28px; }
     .team-logo-container { max-width: 280px; max-height: 120px; }
-    
-    .settings-buttons-container {
-        width: 70% !important;
-        max-width: 200px !important;
-        gap: 8px !important;
-        transform: translate(-50%, -50%) translateY(15px) !important;
-    }
-    .settings-row .settings-btn-img {
-        transform: scale(0.8) !important;
-    }
-    .settings-option {
-        font-size: 8px !important;
-        padding: 2px 6px !important;
-    }
-    .settings-back .settings-btn-img {
-        transform: scale(0.3) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.3) !important;
-    }
 }
 
 @media (max-width: 360px) {
@@ -901,50 +739,6 @@ body::before {
     .menu-btn { max-width: 240px; margin-bottom: 0.3vh; }
     .team-logo-btn { width: 24px; height: 24px; }
     .team-logo-container { max-width: 240px; max-height: 100px; padding: 6px; }
-    
-    .settings-buttons-container {
-        width: 75% !important;
-        max-width: 170px !important;
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(12px) !important;
-    }
-    .settings-row .settings-btn-img {
-        transform: scale(0.8) !important;
-    }
-    .settings-option {
-        font-size: 7px !important;
-        padding: 1px 5px !important;
-    }
-    .settings-back .settings-btn-img {
-        transform: scale(0.28) !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.28) !important;
-    }
-}
-
-@media (max-height: 700px) {
-    .settings-buttons-container {
-        gap: 6px !important;
-        transform: translate(-50%, -50%) translateY(10px) !important;
-    }
-    .settings-row .settings-btn-img {
-        max-height: 40px !important;
-        width: auto !important;
-        transform: scale(0.8) !important;
-    }
-    .settings-option {
-        font-size: 7px !important;
-        padding: 1px 5px !important;
-    }
-    .settings-back .settings-btn-img {
-        transform: scale(0.3) !important;
-        max-height: 15px !important;
-    }
-    .settings-btn-img:last-child {
-        transform: scale(0.3) !important;
-        max-height: 15px !important;
-    }
 }
 
 /* ============================================================
@@ -975,73 +769,129 @@ body::before {
     text-shadow: 0 1px 4px rgba(0,0,0,0.7) !important;
 }
 /* ============================================================
-   AYARLAR - SATIR DÜZENİ (DOSYA SONUNA EKLE)
+   TÜM KURALLAR
    ============================================================ */
 
-.settings-row {
-    display: flex !important;
+* { ... }
+body { ... }
+#menu { ... }
+/* ... diğer stiller ... */
+
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) { ... }
+@media (max-width: 360px) { ... }
+
+/* ============================================================
+   TÜM KUTULARI KALDIR
+   ============================================================ */
+
+#menu, #menu * { ... }
+
+/* ============================================================
+   AYARLAR POP-UP (DOSYA SONUNA EKLE - GÜÇLENDİRİLMİŞ)
+   ============================================================ */
+
+#settings-popup {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    display: none !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 100% !important;
-    gap: 8px !important;
-    pointer-events: auto !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+    margin: 0 !important;
 }
 
-.settings-row .settings-btn-img {
-    width: 45% !important;
-    flex-shrink: 0 !important;
-    transform: scale(1.5) !important;
+#settings-popup[style*="display: flex"] {
+    display: flex !important;
+}
+
+.settings-popup-content {
+    position: relative !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 420px !important;
+    width: 90% !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+}
+
+.settings-bg {
+    width: 100% !important;
+    display: block !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+.settings-buttons-container {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 65% !important;
+    max-width: 260px !important;
     pointer-events: none !important;
 }
 
-.settings-options {
-    display: flex !important;
-    gap: 4px !important;
-    flex-shrink: 0 !important;
-    pointer-events: auto !important;
-}
-
-.settings-option {
-    padding: 2px 8px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 4px !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 9px !important;
-    font-family: 'Courier New', monospace !important;
+.settings-btn-img {
+    width: 100% !important;
+    display: block !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    letter-spacing: 1px !important;
-    pointer-events: auto !important;
-    z-index: 10 !important;
-}
-
-.settings-option:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.settings-option.active {
-    background: rgba(46, 204, 113, 0.15) !important;
-    border-color: rgba(46, 204, 113, 0.3) !important;
-    color: rgba(46, 204, 113, 0.8) !important;
-}
-
-.settings-option:active {
-    transform: scale(0.95) !important;
-}
-
-/* ===== GERİ BUTONU ===== */
-.settings-back {
-    margin-top: 4px !important;
-}
-
-.settings-back .settings-btn-img {
-    width: 30% !important;
-    transform: scale(0.9) !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    opacity: 0.9 !important;
     pointer-events: auto !important;
 }
 
-.settings-back .settings-btn-img:hover {
+.settings-btn-img:hover {
+    transform: scale(1.05) !important;
+    opacity: 1 !important;
+}
+
+.settings-btn-img:active {
     transform: scale(0.95) !important;
+}
+
+/* ============================================================
+   AYARLAR POP-UP - MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .settings-buttons-container {
+        width: 70% !important;
+        max-width: 200px !important;
+        gap: 6px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .settings-buttons-container {
+        width: 75% !important;
+        max-width: 170px !important;
+        gap: 4px !important;
+    }
+}
+
+@media (max-height: 700px) {
+    .settings-buttons-container {
+        gap: 4px !important;
+    }
+    .settings-btn-img {
+        max-height: 40px !important;
+        width: auto !important;
+    }
 }
