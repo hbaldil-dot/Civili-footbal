@@ -1138,83 +1138,77 @@ body { ... }
 }
 
 /* ============================================================
-   MAÇ SÜRESİ - YAZI VE ALT MENÜ DÜZELTMELERİ
+   MAÇ SÜRESİ - TAM EŞİTLENMİŞ BOYUT VE BİREBİR HİZALAMA
    ============================================================ */
 
-/* 1. SEÇİLEN SÜRE YAZISI (90sn) - SAĞDA, BÜYÜK VE BOLD */
+/* 1. KAPSAYICI - TÜM SATIR DİĞER BUTONLARLA BİREBİR AYNI BOYUTTA */
+.settings-match-container {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.settings-match-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+}
+
+.settings-match-wrapper {
+    position: relative !important;
+    width: 100% !important; /* Diğer butonlarla genişliği eşitler */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. MAÇ SÜRESİ RESMİ - DİĞER BUTONLARLA BİREBİR EŞİT AÖILIM */
+.settings-match-wrapper .settings-btn-img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    pointer-events: none !important;
+    transform: scale(1.65) !important; /* Diğer butonların ölçeğiyle (1.65) eşitlendi */
+    transform-origin: center center !important;
+}
+
+/* 3. "90sn" YAZISI VE YAZI KONUMU (SARI BUTONUN ÜSTÜNE TAM ORTALAR) */
 .settings-selected-value {
     position: absolute !important;
     top: 50% !important;
-    right: 12% !important; /* Butonun en sağ tarafına iter */
+    right: 18% !important; /* Resmin üzerindeki sarı alanın sağına denk getirir */
     transform: translateY(-50%) !important;
-    color: #000000 !important; /* Kapkara */
-    font-weight: 900 !important; /* En kalın bold */
-    font-size: 18px !important; /* Daha büyük boyut */
-    font-family: 'Impact', 'Arial Black', sans-serif !important; /* Grafiti stiline uygun güçlü font */
-    text-align: right !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    font-size: 13px !important;
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+    text-align: center !important;
     background: transparent !important;
     padding: 0 !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 0.5px !important;
     pointer-events: none !important;
     white-space: nowrap !important;
     text-shadow: none !important;
-    z-index: 10 !important;
+    z-index: 5 !important;
 }
 
-/* ============================================================
-   AÇILIR SÜRE SEÇENEKLERİ (KIRMIZI BOLD & %20 OPAKLIK ZEMİN)
-   ============================================================ */
-
-/* SEÇENEKLERİ TUTAN KAPSAYICI */
+/* 4. AÇILIR MENÜ (SEÇENEKLER) DÜZENİ */
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
-    gap: 8px !important;
+    gap: 6px !important;
     width: 100% !important;
-    padding: 6px 10px !important;
+    padding: 6px 0 !important;
     margin-top: 4px !important;
-    background: transparent !important;
 }
 
 .settings-match-options.show {
     display: flex !important;
-}
-
-/* SÜRE BUTONLARI (60sn, 90sn, 120sn, 150sn) */
-.settings-option {
-    padding: 6px 12px !important;
-    /* %20 opaklığa sahip siyah zemin */
-    background: rgba(0, 0, 0, 0.2) !important; 
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 6px !important;
-    
-    /* Kırmızı ve çok kalın yazı */
-    color: #ff2e2e !important;
-    font-size: 14px !important;
-    font-family: 'Arial', sans-serif !important;
-    font-weight: 900 !important;
-    
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    letter-spacing: 1px !important;
-    pointer-events: auto !important;
-    
-    /* Okunurluğu artıran hafif siyah gölge */
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* ÜZERİNE GELİNDİĞİNDE (HOVER) */
-.settings-option:hover {
-    background: rgba(0, 0, 0, 0.4) !important;
-    color: #ff5555 !important;
-    transform: scale(1.05) !important;
-}
-
-/* SEÇİLİ OLAN SEÇENEK (ACTIVE) */
-.settings-option.active {
-    background: rgba(255, 46, 46, 0.3) !important; /* Seçili olunca zemin biraz daha kırmızılaşır */
-    border-color: #ff2e2e !important;
-    color: #ffffff !important; /* Seçili seçenek net beyaz görünür */
-    box-shadow: 0 0 10px rgba(255, 46, 46, 0.5) !important;
 }
