@@ -1198,17 +1198,60 @@ body { ... }
     z-index: 5 !important;
 }
 
-/* 4. AÇILIR MENÜ (SEÇENEKLER) DÜZENİ */
+/* ============================================================
+   AÇILIR SÜRE SEÇENEKLERİ (KIRMIZI BOLD & %20 OPAKLIK ZEMİN)
+   ============================================================ */
+
+/* SEÇENEKLERİ TUTAN KAPSAYICI */
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     width: 100% !important;
-    padding: 6px 0 !important;
+    padding: 6px 10px !important;
     margin-top: 4px !important;
+    background: transparent !important;
 }
 
 .settings-match-options.show {
     display: flex !important;
+}
+
+/* SÜRE BUTONLARI (60sn, 90sn, 120sn, 150sn) */
+.settings-option {
+    padding: 6px 12px !important;
+    /* %20 opaklığa sahip siyah zemin */
+    background: rgba(0, 0, 0, 0.2) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 6px !important;
+    
+    /* Kırmızı ve çok kalın yazı */
+    color: #ff2e2e !important;
+    font-size: 14px !important;
+    font-family: 'Arial', sans-serif !important;
+    font-weight: 900 !important;
+    
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    letter-spacing: 1px !important;
+    pointer-events: auto !important;
+    
+    /* Okunurluğu artıran hafif siyah gölge */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ÜZERİNE GELİNDİĞİNDE (HOVER) */
+.settings-option:hover {
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ff5555 !important;
+    transform: scale(1.05) !important;
+}
+
+/* SEÇİLİ OLAN SEÇENEK (ACTIVE) */
+.settings-option.active {
+    background: rgba(255, 46, 46, 0.3) !important; /* Seçili olunca zemin biraz daha kırmızılaşır */
+    border-color: #ff2e2e !important;
+    color: #ffffff !important; /* Seçili seçenek net beyaz görünür */
+    box-shadow: 0 0 10px rgba(255, 46, 46, 0.5) !important;
 }
