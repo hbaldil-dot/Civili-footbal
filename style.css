@@ -857,11 +857,11 @@ body { ... }
     transition: transform 0.2s ease, opacity 0.2s ease !important;
     opacity: 0.9 !important;
     pointer-events: auto !important;
-    transform: scale(0.8) !important; /* %80 boyut */
+    transform: scale(1.5) !important; /* %80 boyut */
 }
 
 .settings-btn-img:hover {
-    transform: scale(0.84) !important; /* Hover'da biraz büyüsün */
+    transform: scale(1.5) !important; /* Hover'da biraz büyüsün */
     opacity: 1 !important;
 }
 
