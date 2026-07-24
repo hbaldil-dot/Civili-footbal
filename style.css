@@ -1138,7 +1138,7 @@ body { ... }
 }
 
 /* ============================================================
-   MAÇ SÜRESİ - TAKIM SEÇİMİ GİBİ (GÜNCELLENMİŞ - %256 BÜYÜK)
+   MAÇ SÜRESİ - SOLA YASLI, ORTA POZİSYON
    ============================================================ */
 
 .settings-row {
@@ -1154,47 +1154,60 @@ body { ... }
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
+    align-items: flex-start !important;  /* Sola yaslı */
     gap: 4px !important;
 }
 
 .settings-match-header {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;  /* Sola yaslı */
     width: 100% !important;
     gap: 8px !important;
     cursor: pointer !important;
     pointer-events: auto !important;
+    position: relative !important;
 }
 
-/* MAÇ SÜRESİ BUTONU - %256 BÜYÜK */
-.settings-match-header .settings-btn-img {
-    width: 100% !important;
-    flex-shrink: 0 !important;
+/* Buton ve süre için wrapper */
+.settings-match-wrapper {
+    position: relative !important;
+    display: inline-block !important;
+}
+
+/* MAÇ SÜRESİ BUTONU */
+.settings-match-wrapper .settings-btn-img {
+    display: block !important;
     pointer-events: none !important;
-    transform: scale(1.81) !important;  /* %256 büyük */
+    transform: scale(2.56) !important;
+    transform-origin: left center !important;  /* Sola yaslı */
 }
 
+/* SEÇİLEN SÜRE - BUTONUN ÜZERİNE */
 .settings-selected-value {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
     color: #000000 !important;
     font-weight: bold !important;
-    font-size: 14px !important;  /* Biraz büyüt */
+    font-size: 16px !important;
     font-family: 'Courier New', monospace !important;
-    min-width: 45px !important;
     text-align: center !important;
-    background: rgba(255, 255, 255, 0.8) !important;
-    padding: 4px 10px !important;
-    border-radius: 3px !important;
+    background: transparent !important;  /* Şeffaf */
+    padding: 0 !important;
     letter-spacing: 1px !important;
-    flex-shrink: 0 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+    text-shadow: none !important;
 }
 
 .settings-arrow {
     color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 12px !important;  /* Biraz büyüt */
+    font-size: 12px !important;
     transition: transform 0.3s ease !important;
     flex-shrink: 0 !important;
+    margin-left: 4px !important;
 }
 
 .settings-arrow.open {
@@ -1204,7 +1217,7 @@ body { ... }
 .settings-match-options {
     display: none !important;
     flex-wrap: wrap !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;  /* Sola yaslı */
     gap: 4px !important;
     width: 100% !important;
     padding: 4px 0 !important;
