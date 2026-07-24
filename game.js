@@ -1960,17 +1960,6 @@ function loadSoundSettings() {
     }
 }
 // ============================================================
-// SES TEST FONKSİYONU - KONSOLDAN ÇALIŞTIRMAK İÇİN
-// ============================================================
-function testSound() {
-    console.log('🔊 Test sesi çalınıyor...');
-    playSound('kick');
-    setTimeout(() => playSound('hit'), 300);
-    setTimeout(() => playSound('goal'), 600);
-}
-
-// Konsoldan test etmek için: testSound()
-// ============================================================
 // GÜNCELLENMİŞ playSound - SES KONTROLÜ EKLENDİ
 // ============================================================
 function playSound(type) {
