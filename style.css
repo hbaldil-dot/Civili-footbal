@@ -590,7 +590,7 @@ body::before {
     border: none;
     border-radius: 0;
     box-shadow: none;
-    background-image: url('C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp');
+    /* Sabit resim kaldırıldı, artık JavaScript (currentStadiumTexture) dinamik kontrol edecek */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
