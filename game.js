@@ -23,6 +23,12 @@ if (typeof io !== 'undefined') {
 }
 
 // ============================================================
+// SABİT SÜRELER
+// ============================================================
+const MATCH_DURATION = 90;
+const SHOT_DURATION = 5;
+
+// ============================================================
 // SAHA GÖSTER/GİZLE FONKSİYONLARI
 // ============================================================
 
@@ -33,11 +39,12 @@ function showField() {
         canvas.style.backgroundSize = "cover";
         canvas.style.backgroundPosition = "center";
         canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundColor = "#2e7d32";
         canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
         canvas.classList.add('canvas-active');
-        console.log('✅ Saha gösteriliyor, arka plan resmi kullanılıyor');
+        console.log('✅ Saha gösteriliyor');
     }
 }
 
@@ -46,6 +53,7 @@ function hideField() {
     if (canvas) {
         canvas.style.backgroundImage = 'none';
         canvas.style.background = 'transparent';
+        canvas.style.backgroundColor = 'transparent';
         canvas.style.border = 'none';
         canvas.style.borderRadius = '0';
         canvas.style.boxShadow = 'none';
@@ -122,10 +130,6 @@ let turn = 1;
 let myTeamNumber = 1;
 let currentRoomId = null;
 
-// SABİT SÜRELER
-const MATCH_DURATION = 90; // 90 saniye
-const SHOT_DURATION = 5; // 5 saniye
-
 let matchSecondsLeft = MATCH_DURATION;
 let timerInterval = null;
 let shotSecondsLeft = SHOT_DURATION;
@@ -162,13 +166,17 @@ let goalImage = null;
 let fieldImage = null;
 
 function loadFieldImage() {
+    console.log('🔄 Saha resmi yükleniyor...');
     const img = new Image();
     img.onload = function() {
         fieldImage = img;
         console.log('✅ Saha resmi yüklendi!');
+        if (currentPhase !== 'menu') {
+            draw();
+        }
     };
     img.onerror = function() {
-        console.warn('⚠️ Saha resmi yüklenemedi');
+        console.warn('⚠️ Saha resmi yüklenemedi! Varsayılan yeşil arka plan kullanılacak.');
         fieldImage = null;
     };
     img.src = 'C6821ED1-5AA6-4147-9DF8-2B2F30C479C8.webp';
@@ -319,9 +327,15 @@ function drawPlayerWithLogo(x, y, logoFile) {
 function draw() {
     ctx.clearRect(0, 0, width, height);
     
-    // SAHA ARKA PLANI - RESİM KULLAN
+    // SAHA ARKA PLANI
     if (fieldImage) {
-        ctx.drawImage(fieldImage, 0, 0, width, height);
+        try {
+            ctx.drawImage(fieldImage, 0, 0, width, height);
+        } catch(e) {
+            console.warn('⚠️ Saha resmi çizilemedi, yedek kullanılıyor');
+            ctx.fillStyle = '#2e7d32';
+            ctx.fillRect(0, 0, width, height);
+        }
     } else {
         ctx.fillStyle = '#2e7d32';
         ctx.fillRect(0, 0, width, height);
@@ -335,11 +349,10 @@ function draw() {
         ctx.translate(-width / 2, -height / 2);
     }
 
-    // ============================================================
     // SAHA ÇİZGİLERİ - 2 KAT KALIN
-    // ============================================================
+    const goalLeft = (width - goalWidth) / 2;
+    const goalRight = (width + goalWidth) / 2;
     
-    // ORTA ÇİZGİ VE DAİRE
     ctx.strokeStyle = "rgba(255,255,255,0.25)";
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -349,15 +362,9 @@ function draw() {
     ctx.beginPath();
     ctx.arc(width / 2, height / 2, 45, 0, Math.PI * 2);
     ctx.stroke();
-
-    // CEZA SAHALARI
     ctx.strokeRect(pBoxX1, 0, penaltyBoxW, penaltyBoxH);
     ctx.strokeRect(pBoxX1, height - penaltyBoxH, penaltyBoxW, penaltyBoxH);
 
-    // KALE ÇİZGİLERİ - Daha kalın
-    const goalLeft = (width - goalWidth) / 2;
-    const goalRight = (width + goalWidth) / 2;
-    
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -369,7 +376,6 @@ function draw() {
     ctx.lineTo(goalRight, height - goalHeight);
     ctx.stroke();
 
-    // KALE DİREKLERİ - En kalın
     ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 6;
     ctx.beginPath();
@@ -389,7 +395,6 @@ function draw() {
     ctx.lineTo(goalRight, height - goalHeight + 10);
     ctx.stroke();
 
-    // KENAR ÇİZGİLERİ
     ctx.strokeStyle = "rgba(255,255,255,0.2)";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -1402,10 +1407,19 @@ canvas.addEventListener('touchcancel', (e) => {
 }, { passive: false });
 
 // ============================================================
+// BİLGİ GÖSTERİCİ
+// ============================================================
+function showGameInfo() {
+    alert('⚙️ Oyun Bilgileri\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin\n🏆 Takım: Seçtiğiniz logo');
+}
+
+// ============================================================
 // BAŞLANGIÇ
 // ============================================================
 drawFieldLinesOnly();
 console.log("🎮 Çivili Futbol Başlatıldı!");
+console.log("⏱️ Maç Süresi: " + MATCH_DURATION + " saniye");
+console.log("🎯 Vuruş Süresi: " + SHOT_DURATION + " saniye");
 startPeriodicSync();
 
 // ============================================================
@@ -1421,22 +1435,12 @@ function closeAILevelMenu() {
     document.getElementById('menu').style.display = 'block';
 }
 
-function openSettingsPopup() {
-    // Artık ayarlar pop-up'ı yok - sadece bilgi mesajı
-    alert('⚙️ Oyun Ayarları\n\n⏱️ Maç Süresi: 90 saniye\n🎯 Vuruş Süresi: 5 saniye\n🟢 Saha: Özel zemin');
-}
-
-function closeSettingsPopup() {
-    // Kullanılmıyor
-}
-
 function selectColor(team, color) {
     alert('🎨 Artık takım logoları kullanılıyor. Forma rengi seçimine gerek yok!');
 }
 
 function selectFieldColor(color) {
     console.log('🟩 Saha rengi seçimi devre dışı - resim kullanılıyor');
-    alert('Saha rengi seçimi devre dışı! Artık özel saha resmi kullanılıyor.');
 }
 
 // ============================================================
@@ -1535,14 +1539,6 @@ function updateSelectedTeamName() {
     const teamName = logo ? logo.name.replace('⚽ ', '') : 'Varsayılan';
     const displayName = document.getElementById('selected-team-name-display');
     if (displayName) displayName.textContent = teamName;
-}
-
-function updateTeamLogoDisplayOld() {
-    const displayImg = document.getElementById('selected-team-logo');
-    if (displayImg) {
-        displayImg.src = `takimlar/${selectedTeamLogo}`;
-        displayImg.onerror = function() { this.src = 'takimlar/default.png'; };
-    }
 }
 
 // ============================================================
@@ -1753,7 +1749,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
     hideField();
-    loadFieldImage();
 });
 
 // ============================================================
