@@ -837,7 +837,7 @@ body { ... }
 /* ===== BUTON KONTEYNERİ - 20px AŞAĞI ===== */
 .settings-buttons-container {
     position: absolute !important;
-    top: 50% !important;
+    top: 66% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) translateY(20px) !important; /* 20px aşağı */
     display: flex !important;
@@ -871,7 +871,7 @@ body { ... }
 
 /* ===== EN ALTAKİ BUTON (GERİ/ANA MENU) - %30 UFALMIŞ ===== */
 .settings-btn-img:last-child {
-    transform: scale(0.3) !important; /* %30 boyut */
+    transform: scale(0.9) !important; /* %30 boyut */
     margin-top: 4px !important;
 }
 
