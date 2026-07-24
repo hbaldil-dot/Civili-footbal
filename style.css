@@ -1178,6 +1178,7 @@ body { ... }
 /* MAÇ SÜRESİ BUTONU */
 .settings-match-wrapper .settings-btn-img {
     display: block !important;
+        justify-content: center !important;
     pointer-events: none !important;
     transform: scale(3.5) !important;
     transform-origin: center center !important;
