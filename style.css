@@ -1296,20 +1296,15 @@ body { ... }
         font-size: 14px !important;
     }
 }
-/* ============================================================
-   STADYUM / ZEMİN SEÇİMİ STİLLERİ
-   ============================================================ */
-
-/* Buton yanında beliren küçük önizleme resmi */
-/* Buton üzerindeki seçili zemin önizleme görseli (%50 büyütüldü) */
+/* Buton üzerindeki seçili zemin önizleme görseli (Sağa kaydırıldı) */
 .stadium-preview-icon {
     position: absolute !important;
-    right: 70px !important;            /* Sağ kenardan hizalama */
+    right: 13px !important;            /* 50px - 37px = 13px (Sağa kaydırıldı) */
     top: 50% !important;
     transform: translateY(-50%) !important;
     
-    width: 57px !important;            /* 38px -> 57px (%50 büyük) */
-    height: 39px !important;           /* 26px -> 39px (%50 büyük) */
+    width: 57px !important;            
+    height: 39px !important;           
     
     border-radius: 6px !important;
     border: 2px solid #ffffff !important;
@@ -1318,12 +1313,12 @@ body { ... }
     z-index: 5 !important;
 }
 
-/* Mobil Ekranlar İçin Büyütülmüş Değerler */
+/* Mobil Ekranlar İçin Hizalama */
 @media (max-width: 420px) {
     .stadium-preview-icon {
-        width: 45px !important;        /* Mobil için de orantılı büyütüldü */
+        width: 45px !important;        
         height: 30px !important;
-        right: 40px !important;
+        right: 10px !important;        /* Mobilde de sağ tarafa kaydırıldı */
     }
 }
 
