@@ -1,3 +1,6 @@
+// Sayfa açıldığında sahanın kapalı olduğundan emin olalım
+hideField();
+
 // ============================================================
 // SOCKET BAĞLANTISI
 // ============================================================
@@ -33,22 +36,27 @@ let SHOT_DURATION = 5;
 // ============================================================
 
 function showField() {
-    const canvas = document.getElementById('gameCanvas');
-    if (canvas) {
-        // Sabit webp ismi yerine seçilen stadyum değişkenini (currentStadiumTexture) yazıyoruz:
-        canvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
-        canvas.style.backgroundSize = "cover";
-        canvas.style.backgroundPosition = "center";
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundColor = "#2e7d32";
-        canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
-        canvas.style.borderRadius = '8px';
-        canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
-        canvas.classList.add('canvas-active');
-        console.log('✅ Saha gösteriliyor:', currentStadiumTexture);
+    const gameCanvas = document.getElementById('gameCanvas');
+    if (gameCanvas) {
+        gameCanvas.style.display = 'block'; // Sahayı görünür yap
+        gameCanvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
+        gameCanvas.style.backgroundSize = "cover";
+        gameCanvas.style.backgroundPosition = "center";
+        gameCanvas.style.backgroundRepeat = "no-repeat";
+        gameCanvas.style.backgroundColor = "#2e7d32";
+        gameCanvas.classList.add('canvas-active');
+        console.log('✅ Saha gösteriliyor');
     }
 }
 
+function hideField() {
+    const gameCanvas = document.getElementById('gameCanvas');
+    if (gameCanvas) {
+        gameCanvas.style.display = 'none'; // Sahayı gizle
+        gameCanvas.classList.remove('canvas-active');
+        console.log('🙈 Saha gizlendi');
+    }
+}
 function hideField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
