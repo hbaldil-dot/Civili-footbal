@@ -1780,11 +1780,34 @@ let selectedStadium = 'default';
 let selectedSound = 'on';
 
 // ============================================================
-// MAÇ SÜRESİ FONKSİYONU (SADECE BU)
+// MAÇ SÜRESİ FONKSİYONLARI
 // ============================================================
 
+// Seçenekleri aç/kapa
+function toggleMatchDurationOptions() {
+    const options = document.getElementById('match-duration-options');
+    if (options) {
+        if (options.style.display === 'none' || options.style.display === '') {
+            options.style.display = 'flex';
+            options.classList.add('show');
+            console.log('📋 Maç süresi seçenekleri açıldı');
+        } else {
+            options.style.display = 'none';
+            options.classList.remove('show');
+            console.log('📋 Maç süresi seçenekleri kapatıldı');
+        }
+    }
+}
+
+// Maç süresi seç
 function setMatchDuration(seconds) {
     console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
+    
+    // Seçilen değeri güncelle
+    const display = document.getElementById('match-duration-display');
+    if (display) {
+        display.textContent = seconds + 'sn';
+    }
     
     // Aktif butonu güncelle
     document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
@@ -1797,5 +1820,20 @@ function setMatchDuration(seconds) {
     // MATCH_DURATION sabitini güncelle
     window.MATCH_DURATION = seconds;
     
+    // Seçenekleri kapat
+    const options = document.getElementById('match-duration-options');
+    if (options) {
+        options.style.display = 'none';
+        options.classList.remove('show');
+    }
+    
     console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
 }
+
+// ============================================================
+// BAŞLANGIÇ - Varsayılan Değer
+// ============================================================
+
+// Varsayılan maç süresi
+window.MATCH_DURATION = 90;
+console.log('⏱️ Varsayılan maç süresi:', window.MATCH_DURATION, 'sn');
