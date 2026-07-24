@@ -1185,11 +1185,11 @@ body { ... }
 .settings-selected-value {
     position: absolute !important;
     top: 50% !important;
-    right: 0% !important; /* Tam olarak sağ kenara dayar *
+    right: 5% !important; /* Tam olarak sağ kenara dayar *
     transform: translateY(-50%) !important;
     color: #000000 !important; /* Kapkara */
     font-weight: 900 !important; /* En kalın bold */
-    font-size: 28px !important; /* 13px-14px değerinden en az 2 kat büyütüldü */
+    font-size: 23px !important; /* 13px-14px değerinden en az 2 kat büyütüldü */
     font-family: 'Arial Black', 'Impact', sans-serif !important;
     text-align: right !important;
     background: transparent !important;
