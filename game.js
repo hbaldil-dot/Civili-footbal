@@ -1964,135 +1964,6 @@ function loadSoundSettings() {
     }
 }
 // ============================================================
-// MP3 SES DOSYALARI YÜKLEMESİ (Çarpma ve Gol)
-// ============================================================
-const hitSound = new Audio('sesler/Carpma.mp3');
-hitSound.preload = 'auto';
-
-const goalSound = new Audio('sesler/gol.mp3');
-goalSound.preload = 'auto';
-
-// ============================================================
-// GÜNCELLENMİŞ playSound (Hızlı Vuruş Destekli)
-// ============================================================
-function playSound(type) {
-    if (!isSoundOn) return;
-    
-    // Tarayıcı Ses Kilidini Aç (User Gesture Protection)
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    
-    // 1. MP3 ÇARPMA SESİ
-    if (type === 'hit') {
-        hitSound.currentTime = 0;
-        hitSound.play().catch(err => console.log('Çarpma sesi hatası:', err));
-        return;
-    }
-    
-    // 2. MP3 GOL SESİ
-    if (type === 'goal') {
-        goalSound.currentTime = 0;
-        // cloneNode kullanımı üst üste binen seslerde ve hızlı yüklemelerde kilitlenmeyi önler
-        const goalClone = goalSound.cloneNode();
-        goalClone.play().catch(err => {
-            console.error('❌ Gol sesi çalınamadı. Dosya yolu doğru mu? Error:', err);
-        });
-        return;
-    }
-
-    // 3. HAFİF VURUŞ SESİ (Synth)
-    if (type === 'kick') {
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            const now = audioCtx.currentTime;
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            
-            osc.start(now);
-            osc.stop(now + 0.15);
-        } catch (error) {
-            console.error('❌ Vuruş sesi hatası:', error);
-        }
-    }
-}
-// ============================================================
-// TAKIM SEÇİM POP-UP MANTIĞI
-// ============================================================
-
-function openTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    const grid = document.getElementById('team-select-grid');
-    const shieldImg = document.getElementById('popup-selected-team-img');
-    
-    if (!popup || !grid) return;
-
-    // Mevcut seçili takımı armaya yerleştir
-    if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
-        shieldImg.src = 'takimlar/' + selectedTeamLogo;
-        shieldImg.style.display = 'block';
-    }
-
-    grid.innerHTML = '';
-    
-    if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
-        teamLogos.forEach(team => {
-            const btn = document.createElement('div');
-            btn.className = 'big-team-logo-btn';
-            
-            if (typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo === team.file) {
-                btn.classList.add('active');
-            }
-            
-            const img = document.createElement('img');
-            img.src = 'takimlar/' + team.file;
-            img.alt = team.name;
-            btn.appendChild(img);
-            
-            btn.onclick = () => {
-                document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                selectedTeamLogo = team.file;
-                
-                if (shieldImg) {
-                    shieldImg.src = 'takimlar/' + team.file;
-                    shieldImg.style.display = 'block';
-                }
-                
-                const menuOverlay = document.getElementById('selected-team-logo-display');
-                if (menuOverlay) {
-                    menuOverlay.src = 'takimlar/' + team.file;
-                }
-                
-                if (typeof loadTeamLogoImage === 'function') {
-                    loadTeamLogoImage(team.file);
-                }
-            };
-            
-            grid.appendChild(btn);
-        });
-    }
-
-    // Ekranı tam blok olarak kaplatıyoruz
-    popup.style.display = 'block';
-}
-
-function closeTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-}
-// ============================================================
 // MP3 SES DOSYALARI - iOS Safari İçin Özel
 // ============================================================
 
@@ -2210,5 +2081,74 @@ function playSound(type) {
         } catch (error) {
             console.error('❌ Vuruş sesi hatası:', error);
         }
+    }
+}
+
+// ============================================================
+// TAKIM SEÇİM POP-UP MANTIĞI
+// ============================================================
+
+function openTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    const grid = document.getElementById('team-select-grid');
+    const shieldImg = document.getElementById('popup-selected-team-img');
+    
+    if (!popup || !grid) return;
+
+    // Mevcut seçili takımı armaya yerleştir
+    if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
+        shieldImg.src = 'takimlar/' + selectedTeamLogo;
+        shieldImg.style.display = 'block';
+    }
+
+    grid.innerHTML = '';
+    
+    if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
+        teamLogos.forEach(team => {
+            const btn = document.createElement('div');
+            btn.className = 'big-team-logo-btn';
+            
+            if (typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo === team.file) {
+                btn.classList.add('active');
+            }
+            
+            const img = document.createElement('img');
+            img.src = 'takimlar/' + team.file;
+            img.alt = team.name;
+            btn.appendChild(img);
+            
+            btn.onclick = () => {
+                document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                selectedTeamLogo = team.file;
+                
+                if (shieldImg) {
+                    shieldImg.src = 'takimlar/' + team.file;
+                    shieldImg.style.display = 'block';
+                }
+                
+                const menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + team.file;
+                }
+                
+                if (typeof loadTeamLogoImage === 'function') {
+                    loadTeamLogoImage(team.file);
+                }
+            };
+            
+            grid.appendChild(btn);
+        });
+    }
+
+    // Ekranı tam blok olarak kaplatıyoruz
+    popup.style.display = 'block';
+}
+
+function closeTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    if (popup) {
+        popup.style.display = 'none';
     }
 }
