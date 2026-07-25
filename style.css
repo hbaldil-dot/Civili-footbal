@@ -1387,3 +1387,145 @@ body { ... }
         max-width: 320px !important;
     }
 }
+/* ============================================================
+   TAKIM SEÇ POP-UP (YENİ PENCERE EKRANI)
+   ============================================================ */
+
+#team-select-popup {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 15px !important;
+}
+
+#team-select-popup[style*="display: flex"] {
+    display: flex !important;
+}
+
+.team-select-popup-content {
+    position: relative !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 420px !important;
+    width: 95% !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+}
+
+.team-select-bg {
+    width: 100% !important;
+    display: block !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* ===== BÜYÜK LOGO IZGARASI ===== */
+.team-select-grid {
+    position: absolute !important;
+    top: 25% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 85% !important;
+    max-height: 58% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    align-content: flex-start !important;
+    overflow-y: auto !important;
+    padding: 6px !important;
+}
+
+/* Kaydırma Çubuğu (Scrollbar) Şeffaflaştırma */
+.team-select-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.team-select-grid::-webkit-scrollbar-thumb {
+    background: rgba(46, 204, 113, 0.4);
+    border-radius: 4px;
+}
+
+/* Büyütülmüş Logo Butonları */
+.big-team-logo-btn {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    padding: 4px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.big-team-logo-btn:hover {
+    transform: scale(1.12) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.big-team-logo-btn.active {
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6) !important;
+    transform: scale(1.15) !important;
+    background: rgba(46, 204, 113, 0.15) !important;
+}
+
+.big-team-logo-btn img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    border-radius: 50% !important;
+}
+
+/* ===== EN ALTAKİ GERİ / ANA MENÜ BUTONU ===== */
+.team-select-close-area {
+    position: absolute !important;
+    bottom: 3% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 35% !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease !important;
+}
+
+.team-select-close-area:hover {
+    transform: translateX(-50%) scale(1.05) !important;
+}
+
+.team-select-close-area:active {
+    transform: translateX(-50%) scale(0.95) !important;
+}
+
+.team-select-close-area img {
+    width: 100% !important;
+    display: block !important;
+}
+
+/* Mobil Ekran Uyumları */
+@media (max-width: 420px) {
+    .big-team-logo-btn {
+        width: 52px !important;
+        height: 52px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .big-team-logo-btn {
+        width: 44px !important;
+        height: 44px !important;
+    }
+}
