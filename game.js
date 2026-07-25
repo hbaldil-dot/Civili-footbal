@@ -203,40 +203,7 @@ loadGoalImage('goal.webp');
 // ============================================================
 const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
-function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
 
-    if (type === 'kick') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.15);
-        osc.start(now);
-        osc.stop(now + 0.15);
-    } else if (type === 'hit') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
-    } else if (type === 'goal') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.45);
-        osc.start(now);
-        osc.stop(now + 0.45);
-    }
-}
 
 // ============================================================
 // GOL ANİMASYONU - SES İLE SENKRONİZE (BASİT ÇÖZÜM)
