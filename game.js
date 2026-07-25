@@ -206,7 +206,7 @@ const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
 
 // ============================================================
-// GOL ANİMASYONU - iOS İÇİN OPTİMİZE
+// GOL ANİMASYONU - EN BASİT VERSİYON
 // ============================================================
 function triggerGoalAnimation() {
     goalAnimation = {
@@ -217,66 +217,16 @@ function triggerGoalAnimation() {
     };
     goalAnimationStartTime = Date.now();
     
-    // ===== GOL SESİ - iOS İÇİN ÖZEL =====
+    // Sadece MP3 çalıştırmayı dene, başarısız olursa sessiz kal
     if (isSoundOn) {
         try {
-            // AudioContext'i uyandır
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            
-            // iOS Safari'de her golde YENİ Audio nesnesi oluştur
-            // Bu, iOS'un önbellek sorununu çözer
             const goalSound = new Audio('sesler/gol.mp3');
-            goalSound.preload = 'auto';
             goalSound.volume = 1.0;
-            
-            // Ses dosyasını yükle
-            goalSound.load();
-            
-            // Küçük bir gecikme ile çal (animasyonla senkronize)
             setTimeout(() => {
-                const playPromise = goalSound.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(() => {
-                        // MP3 çalışmazsa sentezleyici ile yedek ses
-                        try {
-                            const osc = audioCtx.createOscillator();
-                            const gain = audioCtx.createGain();
-                            osc.connect(gain);
-                            gain.connect(audioCtx.destination);
-                            const now = audioCtx.currentTime;
-                            osc.type = 'sawtooth';
-                            osc.frequency.setValueAtTime(200, now);
-                            osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                            gain.gain.setValueAtTime(0.2, now);
-                            gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                            osc.start(now);
-                            osc.stop(now + 0.45);
-                        } catch (e) {
-                            console.log('Yedek sentezleyici hatası:', e);
-                        }
-                    });
-                }
+                goalSound.play().catch(() => {});
             }, 50);
-            
-        } catch (error) {
-            console.log('Gol sesi hatası:', error);
-            // Sentezleyici ile yedek ses
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } catch (e) {}
+        } catch (e) {
+            // Sessiz kal
         }
     }
 }
