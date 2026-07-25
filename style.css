@@ -1466,7 +1466,7 @@ body { ... }
 /* ===== TAKIM LOGO GRİDİ ===== */
 .team-select-grid {
     position: absolute !important;
-    top: 48% !important;
+    top: 49% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
@@ -1563,7 +1563,7 @@ body { ... }
     }
     
     .selected-team-shield-area {
-        top: 24% !important;
+        top: 25% !important;
         width: 18% !important;
         height: 11% !important;
         max-height: 50px !important;
@@ -1615,7 +1615,7 @@ body { ... }
 /* iOS Safari özel */
 @supports (-webkit-touch-callout: none) {
     .selected-team-shield-area {
-        top: calc(26% + 27px) !important;
+        top: calc(27% + 27px) !important;
     }
     
     .selected-team-shield-area img {
