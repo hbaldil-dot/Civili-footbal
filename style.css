@@ -1388,7 +1388,7 @@ body { ... }
     }
 }
 /* ============================================================
-   EKRANIN TAMAMINI KAPLAYAN TAKIM SEÇİM MENÜSÜ
+   EKRANIN TAMAMINI KAPLAYAN TAKIM SEÇİM MENÜSÜ - MOBİL OPTİMİZE
    ============================================================ */
 
 #team-select-popup {
@@ -1416,28 +1416,29 @@ body { ... }
     height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
 }
 
-/* Arka Fon Görseli - Tüm Ekranı Kaplar */
+/* Arka Fon Görseli */
 .team-select-bg {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: fill !important;
+    object-fit: cover !important;
 }
 
 /* ===== SEÇİLEN TAKIM - 7px SAĞA KAYDIR ===== */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 30% !important;
+    top: 25% !important;
     left: 50% !important;
     transform: translate(calc(-50% + 7px), -50%) !important;
-    width: 28% !important;
-    max-width: 120px !important;
-    height: 16% !important;
-    max-height: 80px !important;
+    width: 22% !important;
+    max-width: 90px !important;
+    height: 14% !important;
+    max-height: 65px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1450,52 +1451,52 @@ body { ... }
     object-fit: contain !important;
 }
 
-/* ===== TAKIM LOGO GRİDİ - MOBİL İÇİN KÜÇÜLTÜLDÜ ===== */
+/* ===== TAKIM LOGO GRİDİ - MOBİL İÇİN KÜÇÜK ===== */
 .team-select-grid {
     position: absolute !important;
-    top: 54% !important;
+    top: 50% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 82% !important;
-    max-height: 38% !important;
-    min-height: 20% !important;
+    width: 85% !important;
+    max-height: 35% !important;
+    min-height: 15% !important;
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 6px !important;
+    gap: 4px !important;
     justify-content: center !important;
     align-content: center !important;
     overflow-y: auto !important;
-    padding: 8px 5px !important;
+    padding: 4px 3px !important;
     z-index: 10 !important;
-    background: rgba(0, 0, 0, 0.2) !important;
-    border-radius: 10px !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-radius: 8px !important;
 }
 
-/* ===== LOGO BUTONLARI - MOBİL İÇİN KÜÇÜK ===== */
+/* ===== LOGO BUTONLARI - MOBİL İÇİN ÇOK KÜÇÜK ===== */
 .big-team-logo-btn {
-    width: 38px !important;
-    height: 38px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
     cursor: pointer !important;
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     padding: 2px !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.15s ease !important;
 }
 
 .big-team-logo-btn:active {
-    transform: scale(0.92) !important;
+    transform: scale(0.90) !important;
 }
 
 .big-team-logo-btn.active {
     border-color: #2ecc71 !important;
-    box-shadow: 0 0 12px rgba(46, 204, 113, 0.4) !important;
-    background: rgba(46, 204, 113, 0.15) !important;
-    transform: scale(1.05) !important;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.3) !important;
+    background: rgba(46, 204, 113, 0.12) !important;
+    transform: scale(1.04) !important;
 }
 
 .big-team-logo-btn img {
@@ -1507,11 +1508,11 @@ body { ... }
 /* ===== ANA MENÜ BUTONU ===== */
 .team-select-main-menu-btn {
     position: absolute !important;
-    bottom: 2.5% !important;
+    bottom: 2% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 32% !important;
-    max-width: 140px !important;
+    width: 30% !important;
+    max-width: 120px !important;
     cursor: pointer !important;
     z-index: 10 !important;
 }
@@ -1522,148 +1523,157 @@ body { ... }
 }
 
 /* ============================================================
-   MOBİL UYUM (TÜM EKRAN BOYUTLARI İÇİN)
+   MOBİL UYUM - TÜM EKRAN BOYUTLARI
    ============================================================ */
+
+/* Tüm mobil cihazlar için genel ayar */
+@media (max-width: 768px) {
+    .selected-team-shield-area {
+        top: 22% !important;
+        width: 20% !important;
+        max-width: 80px !important;
+        height: 12% !important;
+        max-height: 55px !important;
+    }
+    
+    .team-select-grid {
+        top: 48% !important;
+        max-height: 38% !important;
+        min-height: 20% !important;
+        gap: 5px !important;
+        padding: 6px 4px !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+}
 
 /* Orta boy telefonlar (420px altı) */
 @media (max-width: 420px) {
+    .selected-team-shield-area {
+        top: 20% !important;
+        width: 18% !important;
+        max-width: 70px !important;
+        height: 10% !important;
+        max-height: 45px !important;
+        transform: translate(calc(-50% + 4px), -50%) !important;
+    }
+    
     .team-select-grid {
-        width: 85% !important;
-        max-height: 32% !important;
-        min-height: 18% !important;
-        gap: 5px !important;
-        padding: 6px 4px !important;
-        top: 56% !important;
+        top: 46% !important;
+        max-height: 40% !important;
+        min-height: 22% !important;
+        gap: 4px !important;
+        padding: 4px 3px !important;
+        width: 88% !important;
     }
     
     .big-team-logo-btn {
         width: 32px !important;
         height: 32px !important;
-        border-width: 1.5px !important;
-    }
-    
-    .selected-team-shield-area {
-        width: 25% !important;
-        max-width: 100px !important;
-        height: 14% !important;
-        max-height: 70px !important;
-        top: 31% !important;
-        transform: translate(calc(-50% + 5px), -50%) !important;
+        border-width: 1px !important;
     }
     
     .team-select-main-menu-btn {
-        width: 38% !important;
-        max-width: 120px !important;
-        bottom: 2% !important;
+        width: 35% !important;
+        max-width: 100px !important;
+        bottom: 1.5% !important;
     }
 }
 
 /* Küçük telefonlar (360px altı) */
 @media (max-width: 360px) {
-    .team-select-grid {
-        width: 88% !important;
-        max-height: 28% !important;
-        min-height: 15% !important;
-        gap: 4px !important;
-        padding: 4px 3px !important;
-        top: 58% !important;
-    }
-    
-    .big-team-logo-btn {
-        width: 27px !important;
-        height: 27px !important;
-        border-width: 1px !important;
-    }
-    
     .selected-team-shield-area {
-        width: 22% !important;
-        max-width: 80px !important;
-        height: 12% !important;
-        max-height: 60px !important;
-        top: 32% !important;
-        transform: translate(calc(-50% + 4px), -50%) !important;
+        top: 18% !important;
+        width: 16% !important;
+        max-width: 60px !important;
+        height: 9% !important;
+        max-height: 40px !important;
     }
     
-    .team-select-main-menu-btn {
-        width: 42% !important;
-        max-width: 100px !important;
-        bottom: 1.5% !important;
-    }
-}
-
-/* Çok küçük ekranlar (320px altı) */
-@media (max-width: 320px) {
     .team-select-grid {
-        width: 90% !important;
-        max-height: 25% !important;
-        min-height: 12% !important;
+        top: 44% !important;
+        max-height: 42% !important;
+        min-height: 25% !important;
         gap: 3px !important;
         padding: 3px 2px !important;
-        top: 60% !important;
-    }
-    
-    .big-team-logo-btn {
-        width: 23px !important;
-        height: 23px !important;
-    }
-    
-    .selected-team-shield-area {
-        width: 20% !important;
-        max-width: 65px !important;
-        height: 11% !important;
-        max-height: 50px !important;
-        top: 33% !important;
-    }
-    
-    .team-select-main-menu-btn {
-        width: 45% !important;
-        max-width: 80px !important;
-        bottom: 1% !important;
-    }
-}
-
-/* Dikey modda tabletler için (768px altı) */
-@media (min-width: 421px) and (max-width: 768px) {
-    .team-select-grid {
-        max-height: 35% !important;
-        gap: 8px !important;
-    }
-    
-    .big-team-logo-btn {
-        width: 45px !important;
-        height: 45px !important;
-    }
-    
-    .selected-team-shield-area {
-        width: 26% !important;
-        height: 15% !important;
-        top: 30% !important;
-    }
-}
-
-/* Yatay modda telefonlar için */
-@media (max-height: 500px) and (orientation: landscape) {
-    .selected-team-shield-area {
-        top: 25% !important;
-        width: 20% !important;
-        height: 12% !important;
-        max-height: 60px !important;
-    }
-    
-    .team-select-grid {
-        top: 48% !important;
-        max-height: 40% !important;
-        min-height: 15% !important;
-        gap: 4px !important;
+        width: 90% !important;
     }
     
     .big-team-logo-btn {
         width: 28px !important;
         height: 28px !important;
+        border-width: 1px !important;
     }
     
     .team-select-main-menu-btn {
-        bottom: 1.5% !important;
+        width: 40% !important;
+        max-width: 80px !important;
+        bottom: 1% !important;
+    }
+}
+
+/* Çok küçük ekranlar (320px altı) */
+@media (max-width: 320px) {
+    .selected-team-shield-area {
+        top: 16% !important;
+        width: 14% !important;
+        max-width: 50px !important;
+        height: 8% !important;
+        max-height: 35px !important;
+    }
+    
+    .team-select-grid {
+        top: 42% !important;
+        max-height: 44% !important;
+        min-height: 28% !important;
+        gap: 2px !important;
+        padding: 2px 2px !important;
+        width: 92% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 24px !important;
+        height: 24px !important;
+        border-width: 1px !important;
+    }
+    
+    .team-select-main-menu-btn {
+        width: 45% !important;
+        max-width: 70px !important;
+        bottom: 0.5% !important;
+    }
+}
+
+/* Yatay modda telefonlar */
+@media (max-height: 500px) and (orientation: landscape) {
+    .selected-team-shield-area {
+        top: 20% !important;
+        width: 15% !important;
+        max-width: 60px !important;
+        height: 10% !important;
+        max-height: 40px !important;
+    }
+    
+    .team-select-grid {
+        top: 45% !important;
+        max-height: 40% !important;
+        min-height: 18% !important;
+        gap: 3px !important;
+        padding: 3px 2px !important;
+        width: 80% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 26px !important;
+        height: 26px !important;
+    }
+    
+    .team-select-main-menu-btn {
         width: 25% !important;
+        max-width: 80px !important;
+        bottom: 1% !important;
     }
 }
