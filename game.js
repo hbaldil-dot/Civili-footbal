@@ -2092,3 +2092,123 @@ function closeTeamSelectPopup() {
         popup.style.display = 'none';
     }
 }
+// ============================================================
+// MP3 SES DOSYALARI - iOS Safari İçin Özel
+// ============================================================
+
+// Ses dosyalarını önceden yükle
+let audioElements = {
+    hit: null,
+    goal: null
+};
+
+function preloadSounds() {
+    // Çarpma sesi
+    audioElements.hit = new Audio('sesler/Carpma.mp3');
+    audioElements.hit.preload = 'auto';
+    audioElements.hit.load();
+    
+    // Gol sesi - iOS için özel
+    audioElements.goal = new Audio('sesler/gol.mp3');
+    audioElements.goal.preload = 'auto';
+    audioElements.goal.load();
+}
+
+// Sayfa yüklendiğinde sesleri önceden yükle
+document.addEventListener('DOMContentLoaded', function() {
+    preloadSounds();
+});
+
+// ============================================================
+// playSound - iOS Safari Düzeltmesi
+// ============================================================
+function playSound(type) {
+    if (!isSoundOn) return;
+    
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    
+    if (type === 'hit') {
+        try {
+            if (audioElements.hit) {
+                audioElements.hit.currentTime = 0;
+                audioElements.hit.play().catch(() => {
+                    // Hata durumunda yeni ses oluştur
+                    const newHit = new Audio('sesler/Carpma.mp3');
+                    newHit.play().catch(e => console.log('Hit ses hatası:', e));
+                });
+            }
+        } catch (e) {
+            console.log('Hit ses hatası:', e);
+        }
+        return;
+    }
+    
+    if (type === 'goal') {
+        try {
+            // iOS Safari'de her seferinde yeni Audio nesnesi oluştur (en güvenilir yöntem)
+            const goalSound = new Audio('sesler/gol.mp3');
+            goalSound.preload = 'auto';
+            goalSound.volume = 1.0;
+            
+            // iOS'ta sesi çalıştır
+            const playPromise = goalSound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Başarısız olursa AudioContext ile sentezle
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        const now = audioCtx.currentTime;
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(200, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                        osc.start(now);
+                        osc.stop(now + 0.45);
+                    } catch (e) {}
+                });
+            }
+        } catch (error) {
+            // Sentezleyici ile yedek ses
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } catch (e) {}
+        }
+        return;
+    }
+    
+    if (type === 'kick') {
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (error) {
+            console.error('❌ Vuruş sesi hatası:', error);
+        }
+    }
+}
