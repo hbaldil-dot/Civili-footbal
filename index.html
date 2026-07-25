@@ -8,10 +8,12 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="game.js" defer></script>
 </head>
+    
 <body>
 
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
+
         <div class="input-group">
             <div class="input-wrapper">
                 <div class="logo-container">
@@ -23,9 +25,10 @@
             </div>
         </div>
 
-        <button class="menu-btn" onclick="openTeamSelectPopup()">
-            <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
-        </button>
+        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
+<button class="menu-btn" onclick="openTeamSelectPopup()">
+    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+</button>
 
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
@@ -42,94 +45,104 @@
         <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
-    </div>
 
-    <!-- ===== AYARLAR POP-UP ===== -->
+    </div>
+<!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
+
+       <!-- ============================================================
+         AYARLAR POP-UP
+         ============================================================ -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
             <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
             <div class="settings-buttons-container">
                 
-                <!-- MAÇ SÜRESİ -->
-                <div class="settings-row">
-                    <div class="settings-match-container">
-                        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
-                            <div class="settings-match-wrapper">
-                                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
-                                <span class="settings-selected-value" id="match-duration-display">90sn</span>
-                            </div>
-                            <span class="settings-arrow">▼</span>
-                        </div>
-                        <div class="settings-match-options" id="match-duration-options" style="display: none;">
-                            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
-                            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
-                            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
-                            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VURUŞ SÜRESİ -->
-                <div class="settings-row">
-                    <div class="settings-shot-container settings-match-container">
-                        <div class="settings-match-header" onclick="toggleShotDurationOptions()">
-                            <div class="settings-match-wrapper settings-shot-wrapper">
-                                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
-                                <span class="settings-selected-value" id="shot-duration-display">5sn</span>
-                            </div>
-                            <span class="settings-arrow">▼</span>
-                        </div>
-                        <div class="settings-match-options" id="shot-duration-options" style="display: none;">
-                            <button class="settings-option" data-shot-duration="3" onclick="setShotDuration(3)">3sn</button>
-                            <button class="settings-option active" data-shot-duration="5" onclick="setShotDuration(5)">5sn</button>
-                            <button class="settings-option" data-shot-duration="7" onclick="setShotDuration(7)">7sn</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- MAÇ SÜRESİ (AKTİF) -->
+<div class="settings-row">
+    <div class="settings-match-container">
+        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
+            <div class="settings-match-wrapper">
+                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+                <span class="settings-selected-value" id="match-duration-display">90sn</span>
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+        <div class="settings-match-options" id="match-duration-options" style="display: none;">
+            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
+            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
+            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
+            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
+        </div>
+    </div>
+</div>
+               <!-- VURUŞ SÜRESİ (AKTİF) -->
+<div class="settings-row">
+    <div class="settings-shot-container settings-match-container">
+        <div class="settings-match-header" onclick="toggleShotDurationOptions()">
+            <div class="settings-match-wrapper settings-shot-wrapper">
+                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                <span class="settings-selected-value" id="shot-duration-display">5sn</span>
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+        <div class="settings-match-options" id="shot-duration-options" style="display: none;">
+            <button class="settings-option" data-shot-duration="3" onclick="setShotDuration(3)">3sn</button>
+            <button class="settings-option active" data-shot-duration="5" onclick="setShotDuration(5)">5sn</button>
+            <button class="settings-option" data-shot-duration="7" onclick="setShotDuration(7)">7sn</button>
+        </div>
+    </div>
+</div>
                 
                 <!-- STADYUM SEÇİMİ -->
-                <div class="settings-row">
-                    <div class="settings-match-container">
-                        <div class="settings-match-header" onclick="toggleStadiumOptions()">
-                            <div class="settings-match-wrapper">
-                                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum Seç" class="settings-btn-img">
-                                <img src="menu/ayarlar/stat/z1.webp" id="selected-stadium-preview" class="stadium-preview-icon" alt="Seçili Zemin">
-                            </div>
-                            <span class="settings-arrow">▼</span>
-                        </div>
-                        <div class="settings-match-options stadium-options-grid" id="stadium-options" style="display: none;">
-                            <div class="stadium-option-card active" onclick="selectStadium('z1', 'menu/ayarlar/stat/texure/z1-t.webp')">
-                                <img src="menu/ayarlar/stat/z1.webp" alt="Zemin 1">
-                            </div>
-                            <div class="stadium-option-card" onclick="selectStadium('z2', 'menu/ayarlar/stat/texure/z2-t.webp')">
-                                <img src="menu/ayarlar/stat/z2.webp" alt="Zemin 2">
-                            </div>
-                            <div class="stadium-option-card" onclick="selectStadium('z3', 'menu/ayarlar/stat/texure/z3-t.webp')">
-                                <img src="menu/ayarlar/stat/z3.webp" alt="Zemin 3">
-                            </div>
-                            <div class="stadium-option-card" onclick="selectStadium('z4', 'menu/ayarlar/stat/texure/z4-t.webp')">
-                                <img src="menu/ayarlar/stat/z4.webp" alt="Zemin 4">
-                            </div>
-                            <div class="stadium-option-card" onclick="selectStadium('z5', 'menu/ayarlar/stat/texure/z5-t.webp')">
-                                <img src="menu/ayarlar/stat/z5.webp" alt="Zemin 5">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="settings-row">
+    <div class="settings-match-container">
+        <!-- Ana Buton & Seçili Görsel Önizlemesi -->
+        <div class="settings-match-header" onclick="toggleStadiumOptions()">
+            <div class="settings-match-wrapper">
+                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum Seç" class="settings-btn-img">
+                <!-- Seçilen görsel butonun yanında mini önizleme olarak görünecek -->
+                <img src="menu/ayarlar/stat/z1.webp" id="selected-stadium-preview" class="stadium-preview-icon" alt="Seçili Zemin">
+            </div>
+            <span class="settings-arrow">▼</span>
+        </div>
+
+        <!-- Seçenekler Menüsü (Tıklanınca Açılan Ufak Resim Dizilimi) -->
+        <div class="settings-match-options stadium-options-grid" id="stadium-options" style="display: none;">
+            <div class="stadium-option-card active" onclick="selectStadium('z1', 'menu/ayarlar/stat/texure/z1-t.webp')">
+                <img src="menu/ayarlar/stat/z1.webp" alt="Zemin 1">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z2', 'menu/ayarlar/stat/texure/z2-t.webp')">
+                <img src="menu/ayarlar/stat/z2.webp" alt="Zemin 2">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z3', 'menu/ayarlar/stat/texure/z3-t.webp')">
+                <img src="menu/ayarlar/stat/z3.webp" alt="Zemin 3">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z4', 'menu/ayarlar/stat/texure/z4-t.webp')">
+                <img src="menu/ayarlar/stat/z4.webp" alt="Zemin 4">
+            </div>
+            <div class="stadium-option-card" onclick="selectStadium('z5', 'menu/ayarlar/stat/texure/z5-t.webp')">
+                <img src="menu/ayarlar/stat/z5.webp" alt="Zemin 5">
+            </div>
+        </div>
+    </div>
+</div>
                 
-                <!-- SES -->
-                <img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img" id="sound-toggle-btn" onclick="toggleSound()" style="cursor:pointer;">
+           <!-- SES (AKTİF) -->
+<img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img" id="sound-toggle-btn" onclick="toggleSound()" style="cursor:pointer;">
                          
                 <!-- ANA MENÜ -->
                 <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img" onclick="closeSettingsPopup()">
+                
             </div>
         </div>
     </div>
 
-    <!-- ===== AI ZORLUK POP-UP ===== -->
+    <!-- ============================================================
+         AI ZORLUK POP-UP
+         ============================================================ -->
     <div id="ai-level-menu" style="display: none;">
         <div class="popup-content difficulty-popup">
-            <div class="difficulty-container" style="position: relative;">
+            <div class="difficulty-container">
                 <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
                 
                 <div class="difficulty-btn-area" style="position:absolute; top:40%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('kolay')">
@@ -155,7 +168,9 @@
         </div>
     </div>
 
-    <!-- ===== ONLINE LOBI POP-UP ===== -->
+    <!-- ============================================================
+         ONLINE LOBI POP-UP
+         ============================================================ -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content">
             <div class="popup-header">
@@ -171,7 +186,9 @@
         </div>
     </div>
 
-    <!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+    <!-- ============================================================
+         2 KİŞİLİK TAKIM SEÇ POP-UP
+         ============================================================ -->
     <div id="local-team-select" style="display: none;" onclick="if(event.target===this) closeLocalTeamSelect()">
         <div class="popup-content">
             <div class="popup-header">
@@ -198,7 +215,9 @@
         </div>
     </div>
 
-    <!-- ===== OYUN EKRANI HUD ===== -->
+    <!-- ============================================================
+         OYUN EKRANI
+         ============================================================ -->
     <div id="top-bar" style="display: none;">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
@@ -221,18 +240,28 @@
         </div>
     </div>
 
-    <!-- ===== CANVAS VE BAŞLAT BUTONU ===== -->
+    <!-- ============================================================
+         CANVAS VE BUTON
+         ============================================================ -->
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
-    <!-- ===== GÜÇ GÖSTERGESİ ===== -->
+    <!-- ============================================================
+         GÜÇ GÖSTERGESİ
+         ============================================================ -->
     <div id="power-bar-container">
         <div id="power-bar"></div>
     </div>
 
-    <!-- ===== TAKIM SEÇİM POP-UP ===== -->
+</body><!-- Ana menü, butonlar, input alanları vs. hepsi burada bitti -->
+        
+    </div> <!-- Varsa ana container kapanışı -->
+
+    <!-- ============================================================
+         TAKIM SEÇİM POP-UP (HER ŞEYİN DIŞINDA VE EN ALTTA OLMALI)
+         ============================================================ -->
     <div id="team-select-popup" style="display: none;">
         <div class="team-select-container">
             <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
@@ -246,5 +275,6 @@
         </div>
     </div>
 
-</body>
+</body> <!-- ◄◄ KODU TAM BURANIN BİR ÜSTÜNE KOYUN -->
+</html>
 </html>
