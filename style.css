@@ -1469,7 +1469,6 @@ body { ... }
     /* Kutu görünürlüğü için arka plan (isteğe bağlı) */
     background: rgba(0, 0, 0, 0.3) !important;
     border-radius: 12px !important;
-}
 
 /* ===== LOGO BUTONLARI - DAHA KÜÇÜK BOYUT ===== */
 .big-team-logo-btn {
