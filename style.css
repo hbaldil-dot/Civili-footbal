@@ -1442,7 +1442,7 @@ body { ... }
 /* ===== SEÇİLEN TAKIM - %78 BÜYÜK VE 17px AŞAĞI ===== */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 24% !important; /* Yaklaşık 17px aşağı kaydırma */
+    top: 35% !important; /* Yaklaşık 17px aşağı kaydırma */
     left: 50% !important;
     transform: translate(calc(-50% + 7px), -50%) !important;
     width: 28% !important; /* Daha büyük alan */
