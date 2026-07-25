@@ -206,7 +206,7 @@ const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
 
 // ============================================================
-// GOL ANİMASYONU - SES İLE SENKRONİZE (BASİT ÇÖZÜM)
+// GOL ANİMASYONU - iOS İÇİN OPTİMİZE
 // ============================================================
 function triggerGoalAnimation() {
     goalAnimation = {
@@ -217,7 +217,7 @@ function triggerGoalAnimation() {
     };
     goalAnimationStartTime = Date.now();
     
-    // Gol sesini çal - iOS için her seferinde yeni nesne
+    // ===== GOL SESİ - iOS İÇİN ÖZEL =====
     if (isSoundOn) {
         try {
             // AudioContext'i uyandır
@@ -225,37 +225,58 @@ function triggerGoalAnimation() {
                 audioCtx.resume();
             }
             
-            // Her golde yeni Audio nesnesi - iOS önbellek sorununu çözer
+            // iOS Safari'de her golde YENİ Audio nesnesi oluştur
+            // Bu, iOS'un önbellek sorununu çözer
             const goalSound = new Audio('sesler/gol.mp3');
             goalSound.preload = 'auto';
             goalSound.volume = 1.0;
             
-            // Ses yüklendikten sonra çal
+            // Ses dosyasını yükle
             goalSound.load();
             
             // Küçük bir gecikme ile çal (animasyonla senkronize)
             setTimeout(() => {
-                goalSound.play().catch(() => {
-                    // MP3 çalışmazsa sentezleyici ile yedek
-                    try {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        const now = audioCtx.currentTime;
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(200, now);
-                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                        gain.gain.setValueAtTime(0.2, now);
-                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                        osc.start(now);
-                        osc.stop(now + 0.45);
-                    } catch (e) {}
-                });
+                const playPromise = goalSound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        // MP3 çalışmazsa sentezleyici ile yedek ses
+                        try {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            const now = audioCtx.currentTime;
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(200, now);
+                            osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                            gain.gain.setValueAtTime(0.2, now);
+                            gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                            osc.start(now);
+                            osc.stop(now + 0.45);
+                        } catch (e) {
+                            console.log('Yedek sentezleyici hatası:', e);
+                        }
+                    });
+                }
             }, 50);
             
         } catch (error) {
             console.log('Gol sesi hatası:', error);
+            // Sentezleyici ile yedek ses
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } catch (e) {}
         }
     }
 }
