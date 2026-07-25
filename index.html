@@ -49,31 +49,7 @@
     </div>
 <!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
 
-    <!-- ============================================================
-         TAKIM SEÇİM POP-UP (KAPSAYICILARDAN BAĞIMSIZ EN DIŞTA)
-         ============================================================ -->
-    <div id="team-select-popup" style="display: none;">
-        <div class="team-select-container">
-            <!-- Arka Fon Görseli -->
-            <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
-            
-            <!-- Üst Arma Alanı -->
-            <div class="selected-team-shield-area">
-                <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
-            </div>
-
-            <!-- Alt Logo Alanı -->
-            <div class="team-select-grid" id="team-select-grid"></div>
-
-            <!-- En Alt Ana Menü Butonu -->
-            <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
-                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
-            </div>
-        </div>
-    </div>
-
- <!-- BODY KAPANMADAN HEMEN ÖNCEYE KOYUN -->
-    <!-- ============================================================
+       <!-- ============================================================
          AYARLAR POP-UP
          ============================================================ -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
@@ -279,5 +255,26 @@
         <div id="power-bar"></div>
     </div>
 
-</body>
+</body><!-- Ana menü, butonlar, input alanları vs. hepsi burada bitti -->
+        
+    </div> <!-- Varsa ana container kapanışı -->
+
+    <!-- ============================================================
+         TAKIM SEÇİM POP-UP (HER ŞEYİN DIŞINDA VE EN ALTTA OLMALI)
+         ============================================================ -->
+    <div id="team-select-popup" style="display: none;">
+        <div class="team-select-container">
+            <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
+            <div class="selected-team-shield-area">
+                <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
+            </div>
+            <div class="team-select-grid" id="team-select-grid"></div>
+            <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            </div>
+        </div>
+    </div>
+
+</body> <!-- ◄◄ KODU TAM BURANIN BİR ÜSTÜNE KOYUN -->
+</html>
 </html>
