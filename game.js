@@ -2031,6 +2031,16 @@ function openTeamSelectPopup() {
     
     if (!popup || !grid) return;
 
+    // Pop-up'ı göster - display:block ile
+    popup.style.display = 'block';
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100vw';
+    popup.style.height = '100vh';
+    popup.style.zIndex = '999999';
+    popup.style.background = '#000';
+
     // Mevcut seçili takımı armaya yerleştir
     if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
         shieldImg.src = 'takimlar/' + selectedTeamLogo;
@@ -2077,9 +2087,6 @@ function openTeamSelectPopup() {
             grid.appendChild(btn);
         });
     }
-
-    // Ekranı tam blok olarak kaplatıyoruz
-    popup.style.display = 'block';
 }
 
 function closeTeamSelectPopup() {
