@@ -29,24 +29,26 @@
     <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
 </button>
 
-<!-- ============================================================
-     TAKIM SEÇİM POP-UP (YENİ EKRAN)
-     ============================================================ -->
+<!-- TAKIM SEÇİM POP-UP -->
 <div id="team-select-popup" style="display: none;" onclick="if(event.target===this) closeTeamSelectPopup()">
-    <div class="popup-content team-select-popup-content">
+    <div class="team-select-container">
         <!-- Arka Fon Görseli -->
         <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
         
-        <!-- Büyük Logoların Listelendiği Alan -->
+        <!-- ÜST KISIM: Seçilen Logonun Göründüğü Arma Alanı -->
+        <div class="selected-team-shield-area">
+            <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
+        </div>
+
+        <!-- ALT KISIM: Dikdörtgen Kutu İçindeki Takım Logoları Izgarası -->
         <div class="team-select-grid" id="team-select-grid"></div>
 
-        <!-- Ana Menü / Kapat Butonu -->
-        <div class="team-select-close-area" onclick="closeTeamSelectPopup()">
-            <img src="menu/zorluk/ana menu.webp" alt="Ana Menü">
+        <!-- EN ALT: Ana Menüye Dönüş Butonu -->
+        <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
+            <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
         </div>
     </div>
 </div>
-
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
         </button>
