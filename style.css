@@ -584,7 +584,7 @@ body::before {
 #gameCanvas {
     width: 100%;
     height: 100%;
-    display: none; /* ← EKLENDİ: Menüdeyken saha gizli kalacak */
+    display: block !important;  /* display:none yerine block */
     image-rendering: pixelated;
     touch-action: none;
     border: none;
@@ -594,6 +594,15 @@ body::before {
     background-position: center;
     background-repeat: no-repeat;
     background-color: #2e7d32;
+    opacity: 1;
+    visibility: visible !important;
+}
+
+/* Saha aktifleştiğinde - sadece border ekle */
+#gameCanvas.canvas-active {
+    border: 4px solid rgba(27, 94, 32, 0.4) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Saha aktifleştiğinde görünmesini sağlayan sınıf */
