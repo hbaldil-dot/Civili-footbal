@@ -2021,61 +2021,73 @@ function playSound(type) {
     }
 }
 // ============================================================
-// YENİ TAKIM SEÇİMİ POP-UP SİSTEMİ
+// TAKIM SEÇİM POP-UP MANTIĞI
 // ============================================================
 
 function openTeamSelectPopup() {
     const popup = document.getElementById('team-select-popup');
     const grid = document.getElementById('team-select-grid');
+    const shieldImg = document.getElementById('popup-selected-team-img');
     
     if (!popup || !grid) return;
+
+    // Pop-up açıldığında seçili mevcut takımı üst armaya yerleştir
+    if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
+        shieldImg.src = 'takimlar/' + selectedTeamLogo;
+        shieldImg.style.display = 'block';
+    }
 
     // Izgara alanını temizle ve takımları yükle
     grid.innerHTML = '';
     
-    teamLogos.forEach(team => {
-        const btn = document.createElement('div');
-        btn.className = 'big-team-logo-btn';
-        
-        // Eğer bu takım seçiliyse aktif sınıfı ekle
-        if (selectedTeamLogo === team.file) {
-            btn.classList.add('active');
-        }
-        
-        const img = document.createElement('img');
-        img.src = 'takimlar/' + team.file;
-        img.alt = team.name;
-        
-        btn.appendChild(img);
-        
-        // Takıma tıklanınca seç
-        btn.onclick = () => {
-            // Önceki aktifi kaldır, yenisine ekle
-            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
+        teamLogos.forEach(team => {
+            const btn = document.createElement('div');
+            btn.className = 'big-team-logo-btn';
             
-            // Seçimi güncelle
-            selectedTeamLogo = team.file;
-            
-            // Ana menüdeki üst overlay logosunu güncelle
-            const overlay = document.getElementById('selected-team-logo-display');
-            if (overlay) {
-                overlay.src = 'takimlar/' + team.file;
+            // Mevcut seçili takım ise aktif sınıfı ekle
+            if (typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo === team.file) {
+                btn.classList.add('active');
             }
             
-            console.log('🏆 Takım seçildi:', team.name);
+            const img = document.createElement('img');
+            img.src = 'takimlar/' + team.file;
+            img.alt = team.name;
             
-            // Logoyu önceden hafızaya al
-            loadTeamLogoImage(team.file);
+            btn.appendChild(img);
             
-            // Seçim yapıldıktan 200ms sonra pop-up'ı kapat
-            setTimeout(() => {
-                closeTeamSelectPopup();
-            }, 200);
-        };
-        
-        grid.appendChild(btn);
-    });
+            // LOGOYA TIKLANDIĞINDA:
+            btn.onclick = () => {
+                // 1. Izgaradaki aktif görünümü değiştir
+                document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // 2. Seçili takımı değişken seviyesinde güncelle
+                selectedTeamLogo = team.file;
+                
+                // 3. Pop-up'ın üstündeki arma boşluğuna yeni logoyu yerleştir
+                if (shieldImg) {
+                    shieldImg.src = 'takimlar/' + team.file;
+                    shieldImg.style.display = 'block';
+                }
+                
+                // 4. Ana menüdeki overlay logosunu da güncelle
+                const menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + team.file;
+                }
+                
+                // 5. Görsel önbellekleme fonksiyonu varsa çağır
+                if (typeof loadTeamLogoImage === 'function') {
+                    loadTeamLogoImage(team.file);
+                }
+                
+                // UYARI: Takım seçilince pop-up OTOMATİK KAPANMAZ!
+            };
+            
+            grid.appendChild(btn);
+        });
+    }
 
     popup.style.display = 'flex';
 }
