@@ -1621,3 +1621,93 @@ body { ... }
         transform: scale(2.12) !important;
     }
 }
+/* ============================================================
+   MOBİL UYUM - LOGOLAR %12 BÜYÜK VE 12px AŞAĞI
+   ============================================================ */
+
+/* Orta boy telefonlar (420px altı) */
+@media (max-width: 420px) {
+    .team-select-grid {
+        top: calc(44% + 12px) !important; /* 12px aşağı */
+        max-height: 42% !important;
+        min-height: 22% !important;
+        gap: 5px !important;
+        padding: 5px 4px !important;
+        width: 86% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 34px !important;  /* 30px → 34px (%12 büyüdü) */
+        height: 34px !important; /* 30px → 34px (%12 büyüdü) */
+        border-width: 1px !important;
+    }
+}
+
+/* Küçük telefonlar (375px altı) */
+@media (max-width: 375px) {
+    .team-select-grid {
+        top: calc(42% + 12px) !important;
+        max-height: 44% !important;
+        min-height: 25% !important;
+        gap: 4px !important;
+        padding: 4px 3px !important;
+        width: 88% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 29px !important;  /* 26px → 29px (%12 büyüdü) */
+        height: 29px !important; /* 26px → 29px (%12 büyüdü) */
+        border-width: 1px !important;
+    }
+}
+
+/* Çok küçük ekranlar (320px altı) */
+@media (max-width: 320px) {
+    .team-select-grid {
+        top: calc(40% + 12px) !important;
+        max-height: 46% !important;
+        min-height: 28% !important;
+        gap: 3px !important;
+        padding: 3px 2px !important;
+        width: 90% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 25px !important;  /* 22px → 25px (%12 büyüdü) */
+        height: 25px !important; /* 22px → 25px (%12 büyüdü) */
+        border-width: 1px !important;
+    }
+}
+
+/* iOS Safari özel */
+@supports (-webkit-touch-callout: none) {
+    .team-select-grid {
+        top: calc(50% + 12px) !important;
+        padding: 6px 4px !important;
+        gap: 5px !important;
+        max-height: 35% !important;
+        min-height: 20% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 36px !important;  /* 32px → 36px (%12 büyüdü) */
+        height: 36px !important; /* 32px → 36px (%12 büyüdü) */
+    }
+}
+
+/* Yatay modda telefonlar */
+@media (max-height: 500px) and (orientation: landscape) {
+    .team-select-grid {
+        top: calc(44% + 12px) !important;
+        max-height: 42% !important;
+        min-height: 18% !important;
+        gap: 4px !important;
+        padding: 4px 3px !important;
+        width: 78% !important;
+    }
+    
+    .big-team-logo-btn {
+        width: 27px !important;  /* 24px → 27px (%12 büyüdü) */
+        height: 27px !important; /* 24px → 27px (%12 büyüdü) */
+    }
+}
