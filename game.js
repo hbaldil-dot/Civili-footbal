@@ -2031,15 +2031,8 @@ function openTeamSelectPopup() {
     
     if (!popup || !grid) return;
 
-    // Pop-up'ı göster - display:block ile
+    // Pop-up'ı göster
     popup.style.display = 'block';
-    popup.style.position = 'fixed';
-    popup.style.top = '0';
-    popup.style.left = '0';
-    popup.style.width = '100vw';
-    popup.style.height = '100vh';
-    popup.style.zIndex = '999999';
-    popup.style.background = '#000';
 
     // Mevcut seçili takımı armaya yerleştir
     if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
@@ -2050,6 +2043,7 @@ function openTeamSelectPopup() {
     grid.innerHTML = '';
     
     if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
+        // Mobilde daha fazla logo sığması için logoları 2 sütunlu göster
         teamLogos.forEach(team => {
             const btn = document.createElement('div');
             btn.className = 'big-team-logo-btn';
@@ -2061,6 +2055,7 @@ function openTeamSelectPopup() {
             const img = document.createElement('img');
             img.src = 'takimlar/' + team.file;
             img.alt = team.name;
+            img.loading = 'lazy'; // Performans için
             btn.appendChild(img);
             
             btn.onclick = () => {
