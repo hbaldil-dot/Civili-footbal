@@ -1628,7 +1628,7 @@ body { ... }
 /* Orta boy telefonlar (420px altı) */
 @media (max-width: 420px) {
     .team-select-grid {
-        top: calc(44% + 12px) !important; /* 12px aşağı */
+        top: calc(40% + 12px) !important; /* 12px aşağı */
         max-height: 42% !important;
         min-height: 22% !important;
         gap: 5px !important;
@@ -1682,7 +1682,7 @@ body { ... }
 /* iOS Safari özel */
 @supports (-webkit-touch-callout: none) {
     .team-select-grid {
-        top: calc(60% + 12px) !important;
+        top: calc(55%) !important;
         padding: 6px 4px !important;
         gap: 5px !important;
         max-height: 35% !important;
