@@ -199,14 +199,16 @@ function loadGoalImage(imageUrl) {
 loadGoalImage('goal.webp');
 
 // ============================================================
-// SES EFEKTLERİ
+// SES EFEKTLERİ (iOS Safari Uyumlu)
 // ============================================================
-const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-
+// Gol sesini global olarak tek bir nesnede saklıyoruz
+const goalSound = new Audio('sesler/gol.mp3');
+goalSound.preload = 'auto';
 
 // ============================================================
-// GOL ANİMASYONU - EN BASİT VERSİYON
+// GOL ANİMASYONU
 // ============================================================
 function triggerGoalAnimation() {
     goalAnimation = {
@@ -217,16 +219,26 @@ function triggerGoalAnimation() {
     };
     goalAnimationStartTime = Date.now();
     
-    // Sadece MP3 çalıştırmayı dene, başarısız olursa sessiz kal
-    if (isSoundOn) {
+    // iOS Safari düzeltmesi: Doğrudan çalma ve başa sarma
+    if (typeof isSoundOn === 'undefined' || isSoundOn) {
         try {
-            const goalSound = new Audio('sesler/gol.mp3');
+            // Web Audio Context kilitliyse (Safari kısıtlaması) uyandır
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            // Sesi başa sar ve çal (setTimeout olmadan)
+            goalSound.currentTime = 0;
             goalSound.volume = 1.0;
-            setTimeout(() => {
-                goalSound.play().catch(() => {});
-            }, 50);
+            
+            const playPromise = goalSound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn("Safari ses çalma engeli:", error);
+                });
+            }
         } catch (e) {
-            // Sessiz kal
+            console.error("Gol sesi hatası:", e);
         }
     }
 }
