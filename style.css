@@ -1388,7 +1388,7 @@ body { ... }
     }
 }
 /* ============================================================
-   TAKIM SEÇ POP-UP (HİZALANMIŞ & TAM EKRAN TASARIM)
+   TAKIM SEÇ POP-UP (TAM EKRAN & KUSURSUZ HİZALAMA)
    ============================================================ */
 
 #team-select-popup {
@@ -1401,39 +1401,42 @@ body { ... }
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
     display: none;
-    align-items: center !important;
+    align-items: flex-start !important; /* Ekranın en üstünden başlatır */
     justify-content: center !important;
     z-index: 99999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
-/* Konteyner Boyutu (Ekranın büyük kısmını kaplar) */
+/* Ana Konteynır: Tam ekran yüksekliği kaplar */
 .team-select-container {
     position: relative !important;
-    width: 92% !important;
-    max-width: 450px !important;
-    height: 90vh !important;
-    max-height: 800px !important;
+    width: 100% !important;
+    max-width: 480px !important; /* Mobil oyun görünüm oranı */
+    height: 100vh !important;
+    margin: 0 auto !important;
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
 }
 
+/* Arka Fon Görseli: En üstten en alta tam kaplar */
 .team-select-bg {
     width: 100% !important;
     height: 100% !important;
-    object-fit: fill !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+    object-fit: fill !important; /* Görseli panoya tam oturtur */
+    display: block !important;
 }
 
-/* 1. ÜST ARMA ALANI (Seçilen Logonun Durduğu Yer) */
+/* 1. ÜST ARMA ALANI (Seçilen Logonun Oturduğu Yer) */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 33.5% !important;
+    top: 28.5% !important; /* Arka plandaki beyaz kalkan alanına tam hizalama */
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 32% !important;
-    height: 20% !important;
+    height: 18% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1446,36 +1449,36 @@ body { ... }
     object-fit: contain !important;
 }
 
-/* 2. ALT DİKDÖRTGEN İÇİNDEKİ LOGO IZGARASI */
+/* 2. DİKDÖRTGEN İÇİNDEKİ LOGO IZGARASI */
 .team-select-grid {
     position: absolute !important;
-    top: 61% !important;
+    top: 56.5% !important; /* Yeşil çerçeveli alt kutunun tam içi */
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
-    height: 28% !important;
+    height: 30% !important;
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 10px !important;
+    gap: 8px !important;
     justify-content: center !important;
     align-content: flex-start !important;
     overflow-y: auto !important;
-    padding: 8px 4px !important;
+    padding: 6px 4px !important;
 }
 
-/* Kaydırma Çubuğu Gizleme / Şeffaflaştırma */
+/* Kaydırma Çubuğu Şeffaflaştırma */
 .team-select-grid::-webkit-scrollbar {
-    width: 3px;
+    width: 4px;
 }
 .team-select-grid::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
 }
 
-/* Seçilebilir Takım Logoları */
+/* Takım Logo Butonları */
 .big-team-logo-btn {
-    width: 52px !important;
-    height: 52px !important;
+    width: 50px !important;
+    height: 50px !important;
     border-radius: 50% !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
@@ -1509,7 +1512,7 @@ body { ... }
 /* 3. EN ALTTAKİ ANA MENÜ BUTONU */
 .team-select-main-menu-btn {
     position: absolute !important;
-    bottom: 2% !important;
+    bottom: 2.5% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 48% !important;
