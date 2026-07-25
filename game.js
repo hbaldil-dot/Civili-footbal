@@ -2020,3 +2020,69 @@ function playSound(type) {
         }
     }
 }
+// ============================================================
+// YENİ TAKIM SEÇİMİ POP-UP SİSTEMİ
+// ============================================================
+
+function openTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    const grid = document.getElementById('team-select-grid');
+    
+    if (!popup || !grid) return;
+
+    // Izgara alanını temizle ve takımları yükle
+    grid.innerHTML = '';
+    
+    teamLogos.forEach(team => {
+        const btn = document.createElement('div');
+        btn.className = 'big-team-logo-btn';
+        
+        // Eğer bu takım seçiliyse aktif sınıfı ekle
+        if (selectedTeamLogo === team.file) {
+            btn.classList.add('active');
+        }
+        
+        const img = document.createElement('img');
+        img.src = 'takimlar/' + team.file;
+        img.alt = team.name;
+        
+        btn.appendChild(img);
+        
+        // Takıma tıklanınca seç
+        btn.onclick = () => {
+            // Önceki aktifi kaldır, yenisine ekle
+            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Seçimi güncelle
+            selectedTeamLogo = team.file;
+            
+            // Ana menüdeki üst overlay logosunu güncelle
+            const overlay = document.getElementById('selected-team-logo-display');
+            if (overlay) {
+                overlay.src = 'takimlar/' + team.file;
+            }
+            
+            console.log('🏆 Takım seçildi:', team.name);
+            
+            // Logoyu önceden hafızaya al
+            loadTeamLogoImage(team.file);
+            
+            // Seçim yapıldıktan 200ms sonra pop-up'ı kapat
+            setTimeout(() => {
+                closeTeamSelectPopup();
+            }, 200);
+        };
+        
+        grid.appendChild(btn);
+    });
+
+    popup.style.display = 'flex';
+}
+
+function closeTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+}
