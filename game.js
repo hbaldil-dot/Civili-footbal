@@ -1972,30 +1972,34 @@ goalSound.preload = 'auto';
 // GÜNCELLENMİŞ playSound (Hızlı Vuruş Destekli)
 // ============================================================
 function playSound(type) {
-    if (!isSoundOn) {
-        return;
+    if (!isSoundOn) return;
+    
+    // Tarayıcı Ses Kilidini Aç (User Gesture Protection)
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
     }
     
     // 1. MP3 ÇARPMA SESİ
     if (type === 'hit') {
         hitSound.currentTime = 0;
-        hitSound.play().catch(error => console.error('❌ Çarpma MP3 Çalma hatası:', error));
+        hitSound.play().catch(err => console.log('Çarpma sesi hatası:', err));
         return;
     }
     
     // 2. MP3 GOL SESİ
     if (type === 'goal') {
         goalSound.currentTime = 0;
-        goalSound.play().catch(error => console.error('❌ Gol MP3 Çalma hatası:', error));
+        // cloneNode kullanımı üst üste binen seslerde ve hızlı yüklemelerde kilitlenmeyi önler
+        const goalClone = goalSound.cloneNode();
+        goalClone.play().catch(err => {
+            console.error('❌ Gol sesi çalınamadı. Dosya yolu doğru mu? Error:', err);
+        });
         return;
     }
 
-    // 3. HAFİF VE PERFORMANSLI VURUŞ SESİ (Eski Tarz Web Audio API)
+    // 3. HAFİF VURUŞ SESİ (Synth)
     if (type === 'kick') {
         try {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
