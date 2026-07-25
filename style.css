@@ -1481,7 +1481,7 @@ body { ... }
     overflow-x: hidden !important;
     padding: 8px 5px !important;
     z-index: 10 !important;
-    background: rgba(250, 240, 240, 0.6) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
     border-radius: 10px !important;
     -webkit-overflow-scrolling: touch !important;
 }
