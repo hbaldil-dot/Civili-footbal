@@ -1682,10 +1682,10 @@ body { ... }
 /* iOS Safari özel */
 @supports (-webkit-touch-callout: none) {
     .team-select-grid {
-        top: calc(57%) !important;
+        top: calc(58%) !important;
         padding: 6px 4px !important;
         gap: 5px !important;
-        max-height: 44% !important;
+        max-height: 48% !important;
         min-height: 20% !important;
     }
     
