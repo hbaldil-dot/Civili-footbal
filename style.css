@@ -1442,7 +1442,7 @@ body { ... }
 /* ===== SEÇİLEN TAKIM - %78 BÜYÜK VE 17px AŞAĞI ===== */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 31% !important; /* Yaklaşık 17px aşağı kaydırma */
+    top: 28% !important; /* Yaklaşık 17px aşağı kaydırma */
     left: 50% !important;
     transform: translate(calc(-50% + 7px), -50%) !important;
     width: 28% !important; /* Daha büyük alan */
@@ -1563,7 +1563,7 @@ body { ... }
     }
     
     .selected-team-shield-area {
-        top: 27% !important;
+        top: 24% !important;
         width: 18% !important;
         height: 11% !important;
         max-height: 50px !important;
@@ -1582,7 +1582,7 @@ body { ... }
 /* Orta boy telefonlar (420px altı) */
 @media (max-width: 420px) {
     .selected-team-shield-area {
-        top: calc(26% + 27px) !important; /* 17px aşağı */
+        top: calc(24% + 27px) !important; /* 17px aşağı */
         width: 24% !important;
         max-width: 100px !important;
         height: 14% !important;
@@ -1600,7 +1600,7 @@ body { ... }
 /* Küçük telefonlar (375px altı) */
 @media (max-width: 375px) {
     .selected-team-shield-area {
-        top: calc(24% + 27px) !important;
+        top: calc(22% + 27px) !important;
         width: 22% !important;
         max-width: 85px !important;
         height: 12% !important;
@@ -1615,7 +1615,7 @@ body { ... }
 /* iOS Safari özel */
 @supports (-webkit-touch-callout: none) {
     .selected-team-shield-area {
-        top: calc(30% + 27px) !important;
+        top: calc(26% + 27px) !important;
     }
     
     .selected-team-shield-area img {
