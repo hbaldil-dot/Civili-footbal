@@ -249,7 +249,11 @@ function triggerGoalAnimation() {
         type: goalImage ? 'image' : 'text'
     };
     goalAnimationStartTime = Date.now();
-    playSound('goal');
+    
+    // Gol sesini çal (iOS için gecikmeli)
+    setTimeout(() => {
+        playSound('goal');
+    }, 50);
 }
 
 // ============================================================
