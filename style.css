@@ -1488,8 +1488,8 @@ body { ... }
 
 /* ===== LOGO BUTONLARI - %12 BÜYÜTÜLDÜ ===== */
 .big-team-logo-btn {
-    width: 40px !important;   /* 36px → 40px (%12 büyüdü) */
-    height: 40px !important;  /* 36px → 40px (%12 büyüdü) */
+    width: 52px !important;   /* 36px → 40px (%12 büyüdü) */
+    height: 52px !important;  /* 36px → 40px (%12 büyüdü) */
     border-radius: 50% !important;
     border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
@@ -1557,8 +1557,8 @@ body { ... }
     }
     
     .big-team-logo-btn {
-        width: 32px !important;
-        height: 32px !important;
+        width: 45px !important;
+        height: 45px !important;
     }
     
     .selected-team-shield-area {
@@ -1690,8 +1690,8 @@ body { ... }
     }
     
     .big-team-logo-btn {
-        width: 36px !important;  /* 32px → 36px (%12 büyüdü) */
-        height: 36px !important; /* 32px → 36px (%12 büyüdü) */
+        width: 46px !important;  /* 32px → 36px (%12 büyüdü) */
+        height: 46px !important; /* 32px → 36px (%12 büyüdü) */
     }
 }
 
