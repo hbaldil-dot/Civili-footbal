@@ -1960,9 +1960,16 @@ function loadSoundSettings() {
     }
 }
 // ============================================================
-// GÜNCELLENMİŞ playSound - SES KONTROLÜ EKLENDİ
+// MP3 SES DOSYASI YÜKLEMESİ
+// ============================================================
+const hitSound = new Audio('sesler/Carpma.mp3');
+hitSound.preload = 'auto';
+
+// ============================================================
+// GÜNCELLENMİŞ playSound - MP3 VE SES KONTROLÜ
 // ============================================================
 function playSound(type) {
+    // Ses kapalıysa hiçbir şey çalma
     if (!isSoundOn) {
         console.log('🔇 Ses kapalı, ses çalınmadı:', type);
         return;
@@ -1970,6 +1977,14 @@ function playSound(type) {
     
     console.log('🔊 Ses çalınıyor:', type);
     
+    // MP3 ÇARPMA SESİ (Çiviler, Direkler ve Kenar Duvarları için)
+    if (type === 'hit') {
+        hitSound.currentTime = 0;
+        hitSound.play().catch(error => console.error('❌ MP3 Çalma hatası:', error));
+        return;
+    }
+    
+    // DİĞER SESLER (Vuruş ve Gol için AudioContext yapısı)
     try {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -1986,14 +2001,6 @@ function playSound(type) {
             gain.gain.linearRampToValueAtTime(0, now + 0.15);
             osc.start(now);
             osc.stop(now + 0.15);
-        } else if (type === 'hit') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.08);
-            osc.start(now);
-            osc.stop(now + 0.08);
         } else if (type === 'goal') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(200, now);
