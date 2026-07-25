@@ -24,16 +24,28 @@
             </div>
         </div>
 
-        <button class="menu-btn" onclick="toggleTeamSelect()">
-            <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
-        </button>
+        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
+<button class="menu-btn" onclick="openTeamSelectPopup()">
+    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+</button>
 
-        <div class="team-logo-container" id="team-logo-container" style="display: none;">
-            <div class="team-logo-options" id="team-logo-options"></div>
-            <div class="selected-text">
-                Seçili: <span id="selected-team-name-display">Varsayılan</span>
-            </div>
+<!-- ============================================================
+     TAKIM SEÇİM POP-UP (YENİ EKRAN)
+     ============================================================ -->
+<div id="team-select-popup" style="display: none;" onclick="if(event.target===this) closeTeamSelectPopup()">
+    <div class="popup-content team-select-popup-content">
+        <!-- Arka Fon Görseli -->
+        <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
+        
+        <!-- Büyük Logoların Listelendiği Alan -->
+        <div class="team-select-grid" id="team-select-grid"></div>
+
+        <!-- Ana Menü / Kapat Butonu -->
+        <div class="team-select-close-area" onclick="closeTeamSelectPopup()">
+            <img src="menu/zorluk/ana menu.webp" alt="Ana Menü">
         </div>
+    </div>
+</div>
 
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
