@@ -2031,13 +2031,12 @@ function openTeamSelectPopup() {
     
     if (!popup || !grid) return;
 
-    // Pop-up açıldığında seçili mevcut takımı üst armaya yerleştir
+    // Mevcut seçili takımı armaya yerleştir
     if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
         shieldImg.src = 'takimlar/' + selectedTeamLogo;
         shieldImg.style.display = 'block';
     }
 
-    // Izgara alanını temizle ve takımları yükle
     grid.innerHTML = '';
     
     if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
@@ -2045,7 +2044,6 @@ function openTeamSelectPopup() {
             const btn = document.createElement('div');
             btn.className = 'big-team-logo-btn';
             
-            // Mevcut seçili takım ise aktif sınıfı ekle
             if (typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo === team.file) {
                 btn.classList.add('active');
             }
@@ -2053,43 +2051,35 @@ function openTeamSelectPopup() {
             const img = document.createElement('img');
             img.src = 'takimlar/' + team.file;
             img.alt = team.name;
-            
             btn.appendChild(img);
             
-            // LOGOYA TIKLANDIĞINDA:
             btn.onclick = () => {
-                // 1. Izgaradaki aktif görünümü değiştir
                 document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 
-                // 2. Seçili takımı değişken seviyesinde güncelle
                 selectedTeamLogo = team.file;
                 
-                // 3. Pop-up'ın üstündeki arma boşluğuna yeni logoyu yerleştir
                 if (shieldImg) {
                     shieldImg.src = 'takimlar/' + team.file;
                     shieldImg.style.display = 'block';
                 }
                 
-                // 4. Ana menüdeki overlay logosunu da güncelle
                 const menuOverlay = document.getElementById('selected-team-logo-display');
                 if (menuOverlay) {
                     menuOverlay.src = 'takimlar/' + team.file;
                 }
                 
-                // 5. Görsel önbellekleme fonksiyonu varsa çağır
                 if (typeof loadTeamLogoImage === 'function') {
                     loadTeamLogoImage(team.file);
                 }
-                
-                // UYARI: Takım seçilince pop-up OTOMATİK KAPANMAZ!
             };
             
             grid.appendChild(btn);
         });
     }
 
-    popup.style.display = 'flex';
+    // Ekranı tam blok olarak kaplatıyoruz
+    popup.style.display = 'block';
 }
 
 function closeTeamSelectPopup() {
