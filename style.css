@@ -1466,7 +1466,7 @@ body { ... }
 /* ===== TAKIM LOGO GRİDİ - LOGOLAR %12 BÜYÜK VE 12px AŞAĞI ===== */
 .team-select-grid {
     position: absolute !important;
-    top: calc(48% + 12px) !important; /* 12px aşağı */
+    top: calc(55% + 12px) !important; /* 12px aşağı */
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
@@ -1481,7 +1481,7 @@ body { ... }
     overflow-x: hidden !important;
     padding: 8px 5px !important;
     z-index: 10 !important;
-    background: rgba(0, 0, 0, 0.15) !important;
+    background: rgba(250, 240, 240, 0.6) !important;
     border-radius: 10px !important;
     -webkit-overflow-scrolling: touch !important;
 }
@@ -1682,7 +1682,7 @@ body { ... }
 /* iOS Safari özel */
 @supports (-webkit-touch-callout: none) {
     .team-select-grid {
-        top: calc(50% + 12px) !important;
+        top: calc(60% + 12px) !important;
         padding: 6px 4px !important;
         gap: 5px !important;
         max-height: 35% !important;
@@ -1698,7 +1698,7 @@ body { ... }
 /* Yatay modda telefonlar */
 @media (max-height: 500px) and (orientation: landscape) {
     .team-select-grid {
-        top: calc(44% + 12px) !important;
+        top: calc(50% + 12px) !important;
         max-height: 42% !important;
         min-height: 18% !important;
         gap: 4px !important;
