@@ -239,7 +239,7 @@ function playSound(type) {
 }
 
 // ============================================================
-// GOL ANİMASYONU
+// GOL ANİMASYONU - SES İLE SENKRONİZE (BASİT ÇÖZÜM)
 // ============================================================
 function triggerGoalAnimation() {
     goalAnimation = {
@@ -250,12 +250,48 @@ function triggerGoalAnimation() {
     };
     goalAnimationStartTime = Date.now();
     
-    // Gol sesini çal (iOS için gecikmeli)
-    setTimeout(() => {
-        playSound('goal');
-    }, 50);
+    // Gol sesini çal - iOS için her seferinde yeni nesne
+    if (isSoundOn) {
+        try {
+            // AudioContext'i uyandır
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            // Her golde yeni Audio nesnesi - iOS önbellek sorununu çözer
+            const goalSound = new Audio('sesler/gol.mp3');
+            goalSound.preload = 'auto';
+            goalSound.volume = 1.0;
+            
+            // Ses yüklendikten sonra çal
+            goalSound.load();
+            
+            // Küçük bir gecikme ile çal (animasyonla senkronize)
+            setTimeout(() => {
+                goalSound.play().catch(() => {
+                    // MP3 çalışmazsa sentezleyici ile yedek
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        const now = audioCtx.currentTime;
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(200, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                        osc.start(now);
+                        osc.stop(now + 0.45);
+                    } catch (e) {}
+                });
+            }, 50);
+            
+        } catch (error) {
+            console.log('Gol sesi hatası:', error);
+        }
+    }
 }
-
 // ============================================================
 // ÇİZİM FONKSİYONLARI
 // ============================================================
