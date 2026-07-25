@@ -36,6 +36,7 @@ let currentStadiumTexture = 'menu/ayarlar/stat/texure/z1-t.webp';
 function showField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
+        canvas.style.display = 'block'; // Oyuna girince tuvali aç
         canvas.style.backgroundImage = `url('${currentStadiumTexture}')`;
         canvas.style.backgroundSize = "cover";
         canvas.style.backgroundPosition = "center";
@@ -44,7 +45,6 @@ function showField() {
         canvas.style.border = '4px solid rgba(27, 94, 32, 0.4)';
         canvas.style.borderRadius = '8px';
         canvas.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.6)';
-        canvas.classList.add('canvas-active');
         console.log('✅ Saha gösteriliyor:', currentStadiumTexture);
     }
 }
@@ -52,13 +52,7 @@ function showField() {
 function hideField() {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
-        canvas.style.backgroundImage = 'none';
-        canvas.style.background = 'transparent';
-        canvas.style.backgroundColor = 'transparent';
-        canvas.style.border = 'none';
-        canvas.style.borderRadius = '0';
-        canvas.style.boxShadow = 'none';
-        canvas.classList.remove('canvas-active');
+        canvas.style.display = 'none'; // Menüdeyken tuvali tamamen kapat (Tıklamaları engellemesin)
         console.log('✅ Saha gizlendi');
     }
 }
