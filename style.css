@@ -1387,7 +1387,7 @@ body { ... }
         max-width: 320px !important;
     }
 }
-//* ============================================================
+/* ============================================================
    EKRANIN TAMAMINI KAPLAYAN TAKIM SEÇİM MENÜSÜ
    ============================================================ */
 
@@ -1400,11 +1400,12 @@ body { ... }
     margin: 0 !important;
     padding: 0 !important;
     background: #000000 !important;
-    
-    /* KATMAN ÖNCELİĞİ: Tüm butonların ve menülerin üstüne çıkmasını sağlar */
-    z-index: 2147483647 !important; 
-    
-    display: none;
+    z-index: 999999 !important; 
+    display: none !important;
+}
+
+#team-select-popup[style*="display: block"] {
+    display: block !important;
 }
 
 .team-select-container {
