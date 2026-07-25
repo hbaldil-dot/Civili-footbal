@@ -2143,3 +2143,47 @@ function loadSoundSettings() {
         console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
     }
 }
+// ============================================================
+// BAŞLANGIÇ - DÜZELTİLMİŞ
+// ============================================================
+
+// Önce mevcut başlangıç kodlarını temizle
+console.log("🎮 Çivili Futbol Başlatıldı!");
+console.log("⏱️ Maç Süresi: " + MATCH_DURATION + " saniye");
+console.log("🎯 Vuruş Süresi: " + SHOT_DURATION + " saniye");
+
+startPeriodicSync();
+
+// Sayfa yüklendiğinde - TEK BİR DOMContentLoaded OLAYI
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Sayfa yüklendi! Menü butonları kontrol ediliyor...');
+    
+    // Takım seçimlerini yap
+    selectRandomTeam();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    loadSoundSettings();
+    
+    // Canvas'ı gizle (menüdeyken saha görünmesin)
+    hideField();
+    
+    // Butonları kontrol et
+    console.log('📋 Menü butonları kontrol ediliyor:');
+    
+    const btn1 = document.querySelector('.menu-btn[onclick*="openAILevelMenu"]');
+    console.log('  - Bilgisayara karşı:', btn1 ? '✅ Bulundu' : '❌ Bulunamadı');
+    
+    const btn2 = document.querySelector('.menu-btn[onclick*="openLocalTeamSelect"]');
+    console.log('  - 2 Kişilik:', btn2 ? '✅ Bulundu' : '❌ Bulunamadı');
+    
+    const btn3 = document.querySelector('.menu-btn[onclick*="openOnlineLobby"]');
+    console.log('  - Online maç:', btn3 ? '✅ Bulundu' : '❌ Bulunamadı');
+    
+    const btn4 = document.querySelector('.menu-btn[onclick*="openSettingsPopup"]');
+    console.log('  - Ayarlar:', btn4 ? '✅ Bulundu' : '❌ Bulunamadı');
+    
+    console.log('✅ Başlangıç tamamlandı!');
+});
