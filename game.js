@@ -1960,19 +1960,23 @@ function loadSoundSettings() {
     }
 }
 // ============================================================
-// MP3 SES DOSYASI YÜKLEMESİ
+// MP3 SES DOSYALARI YÜKLEMESİ
 // ============================================================
 const hitSound = new Audio('sesler/Carpma.mp3');
 hitSound.preload = 'auto';
 
-// Gol ses dosyasını tanımlıyoruz:
 const goalSound = new Audio('sesler/gol.mp3');
 goalSound.preload = 'auto';
 
+// Topa vurma ses dosyası:
+const kickSound = new Audio('sesler/vurus.mp3');
+kickSound.preload = 'auto';
+
 // ============================================================
-// GÜNCELLENMİŞ playSound - MP3 VE SES KONTROLÜ
+// GÜNCELLENMİŞ playSound - TÜM MP3 SESLERİ VE SES KONTROLÜ
 // ============================================================
 function playSound(type) {
+    // Ses kapalıysa hiçbir şey çalma
     if (!isSoundOn) {
         console.log('🔇 Ses kapalı, ses çalınmadı:', type);
         return;
@@ -1980,39 +1984,24 @@ function playSound(type) {
     
     console.log('🔊 Ses çalınıyor:', type);
     
-    // MP3 ÇARPMA SESİ
+    // 1. MP3 ÇARPMA SESİ
     if (type === 'hit') {
         hitSound.currentTime = 0;
-        hitSound.play().catch(error => console.error('❌ MP3 Çalma hatası:', error));
+        hitSound.play().catch(error => console.error('❌ Çarpma MP3 Çalma hatası:', error));
         return;
     }
     
-    // MP3 GOL SESİ
+    // 2. MP3 GOL SESİ
     if (type === 'goal') {
         goalSound.currentTime = 0;
         goalSound.play().catch(error => console.error('❌ Gol MP3 Çalma hatası:', error));
         return;
     }
-    
-    // VURUŞ (KICK) SESİ İÇİN DAHİLİ SES ÜRETİCİ
-    try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
 
-        if (type === 'kick') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-        }
-    } catch (error) {
-        console.error('❌ Ses çalma hatası:', error);
+    // 3. MP3 VURUŞ / TOPA VURMA SESİ
+    if (type === 'kick') {
+        kickSound.currentTime = 0;
+        kickSound.play().catch(error => console.error('❌ Vuruş MP3 Çalma hatası:', error));
+        return;
     }
 }
