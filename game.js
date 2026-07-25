@@ -1965,11 +1965,14 @@ function loadSoundSettings() {
 const hitSound = new Audio('sesler/Carpma.mp3');
 hitSound.preload = 'auto';
 
+// Gol ses dosyasını tanımlıyoruz:
+const goalSound = new Audio('sesler/gol.mp3');
+goalSound.preload = 'auto';
+
 // ============================================================
 // GÜNCELLENMİŞ playSound - MP3 VE SES KONTROLÜ
 // ============================================================
 function playSound(type) {
-    // Ses kapalıysa hiçbir şey çalma
     if (!isSoundOn) {
         console.log('🔇 Ses kapalı, ses çalınmadı:', type);
         return;
@@ -1977,14 +1980,21 @@ function playSound(type) {
     
     console.log('🔊 Ses çalınıyor:', type);
     
-    // MP3 ÇARPMA SESİ (Çiviler, Direkler ve Kenar Duvarları için)
+    // MP3 ÇARPMA SESİ
     if (type === 'hit') {
         hitSound.currentTime = 0;
         hitSound.play().catch(error => console.error('❌ MP3 Çalma hatası:', error));
         return;
     }
     
-    // DİĞER SESLER (Vuruş ve Gol için AudioContext yapısı)
+    // MP3 GOL SESİ
+    if (type === 'goal') {
+        goalSound.currentTime = 0;
+        goalSound.play().catch(error => console.error('❌ Gol MP3 Çalma hatası:', error));
+        return;
+    }
+    
+    // VURUŞ (KICK) SESİ İÇİN DAHİLİ SES ÜRETİCİ
     try {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -2001,14 +2011,6 @@ function playSound(type) {
             gain.gain.linearRampToValueAtTime(0, now + 0.15);
             osc.start(now);
             osc.stop(now + 0.15);
-        } else if (type === 'goal') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.45);
-            osc.start(now);
-            osc.stop(now + 0.45);
         }
     } catch (error) {
         console.error('❌ Ses çalma hatası:', error);
