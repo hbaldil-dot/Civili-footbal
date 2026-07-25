@@ -1618,7 +1618,7 @@ body { ... }
 .selected-team-shield-area {
     position: absolute !important;
     top: 31% !important;
-    left: 52% !important;
+    left: 51% !important;
     transform: translate(-50%, -50%) !important;
     width: 30% !important;
     height: 18% !important;
