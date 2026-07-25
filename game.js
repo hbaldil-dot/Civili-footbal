@@ -1988,19 +1988,14 @@ function playSound(type) {
     
     // 2. MP3 GOL SESİ
     if (type === 'goal') {
-       // Gol sesi objen
-const goalSound = new Audio('gol-sesi.mp3');
-
-function playGoalSound() {
-    // Sesi başa sar (Eğer zaten çalıyorsa veya bittiyse sıfırlar)
-    goalSound.currentTime = 0; 
-    
-    // Sesi çal
-    goalSound.play().catch(error => {
-        console.log("Ses oynatma engellendi:", error);
-    });
-}
-
+        goalSound.currentTime = 0;
+        // cloneNode kullanımı üst üste binen seslerde ve hızlı yüklemelerde kilitlenmeyi önler
+        const goalClone = goalSound.cloneNode();
+        goalClone.play().catch(err => {
+            console.error('❌ Gol sesi çalınamadı. Dosya yolu doğru mu? Error:', err);
+        });
+        return;
+    }
 
     // 3. HAFİF VURUŞ SESİ (Synth)
     if (type === 'kick') {
@@ -2036,18 +2031,6 @@ function openTeamSelectPopup() {
     
     if (!popup || !grid) return;
 
-    // Pop-up'ı göster
-    popup.style.display = 'block';
-    popup.style.opacity = '1';
-    
-    // iOS Safari için viewport düzeltmesi
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.overflow = 'hidden';
-    }
-
     // Mevcut seçili takımı armaya yerleştir
     if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
         shieldImg.src = 'takimlar/' + selectedTeamLogo;
@@ -2068,7 +2051,6 @@ function openTeamSelectPopup() {
             const img = document.createElement('img');
             img.src = 'takimlar/' + team.file;
             img.alt = team.name;
-            img.loading = 'lazy';
             btn.appendChild(img);
             
             btn.onclick = () => {
@@ -2095,22 +2077,9 @@ function openTeamSelectPopup() {
             grid.appendChild(btn);
         });
     }
-}
 
-function closeTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    if (popup) {
-        popup.style.display = 'none';
-        popup.style.opacity = '0';
-    }
-    
-    // iOS Safari için body'yi eski haline getir
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.height = '';
-        document.body.style.overflow = '';
-    }
+    // Ekranı tam blok olarak kaplatıyoruz
+    popup.style.display = 'block';
 }
 
 function closeTeamSelectPopup() {
