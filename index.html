@@ -8,28 +8,7 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="game.js" defer></script>
 </head>
-<body>
-
-    <!-- ===== ANA MENÜ ===== -->
-    <div id="menu">
-
-        <div class="input-group">
-            <div class="input-wrapper">
-                <div class="logo-container">
-                    <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
-                    <img id="selected-team-logo-display" src="takimlar/default.png" alt="Takım Logosu" class="team-logo-overlay">
-                </div>
-                <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
-                <input type="text" id="player-name" value="Oyuncu" maxlength="12">
-            </div>
-        </div>
-
-        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
-<button class="menu-btn" onclick="openTeamSelectPopup()">
-    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
-</button>
-
-<!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
+    <!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
 
     <!-- ============================================================
          TAKIM SEÇİM POP-UP (KAPSAYICILARDAN BAĞIMSIZ EN DIŞTA)
@@ -54,7 +33,28 @@
         </div>
     </div>
 
-</body> <!-- BODY KAPANMADAN HEMEN ÖNCEYE KOYUN -->
+ <!-- BODY KAPANMADAN HEMEN ÖNCEYE KOYUN -->
+<body>
+
+    <!-- ===== ANA MENÜ ===== -->
+    <div id="menu">
+
+        <div class="input-group">
+            <div class="input-wrapper">
+                <div class="logo-container">
+                    <img src="butonlar/logo-alani.webp" alt="Logo" class="input-logo">
+                    <img id="selected-team-logo-display" src="takimlar/default.png" alt="Takım Logosu" class="team-logo-overlay">
+                </div>
+                <img src="butonlar/ismini-gir.webp" alt="İsmini Gir" class="input-icon">
+                <input type="text" id="player-name" value="Oyuncu" maxlength="12">
+            </div>
+        </div>
+
+        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
+<button class="menu-btn" onclick="openTeamSelectPopup()">
+    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+</button>
+
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
         </button>
