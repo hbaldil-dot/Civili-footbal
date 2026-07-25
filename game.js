@@ -1026,7 +1026,7 @@ function exitToMenu() {
 }
 
 // ============================================================
-// FİZİK MOTORU
+// FİZİK MOTORU - GÜNCELLENMİŞ
 // ============================================================
 function updatePhysics() {
     if (currentPhase !== 'playing') return;
@@ -1034,8 +1034,16 @@ function updatePhysics() {
     for (let step = 0; step < SUB_STEPS; step++) {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
-        if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
-        if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x - cap.radius < 0) { 
+            cap.x = cap.radius; 
+            cap.vx *= -0.85; 
+            playSound('hit');  // ← Çarpma sesi (carpma.mp3)
+        }
+        if (cap.x + cap.radius > width) { 
+            cap.x = width - cap.radius; 
+            cap.vx *= -0.85; 
+            playSound('hit');  // ← Çarpma sesi (carpma.mp3)
+        }
         if (cap.y - cap.radius <= goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
@@ -1053,7 +1061,7 @@ function updatePhysics() {
             } else {
                 cap.y = goalHeight + cap.radius;
                 cap.vy *= -0.85;
-                playSound('hit');
+                playSound('hit');  // ← Çarpma sesi (carpma.mp3)
             }
         }
         if (cap.y + cap.radius >= height - goalHeight) {
@@ -1073,14 +1081,14 @@ function updatePhysics() {
             } else {
                 cap.y = height - goalHeight - cap.radius;
                 cap.vy *= -0.85;
-                playSound('hit');
+                playSound('hit');  // ← Çarpma sesi (carpma.mp3)
             }
         }
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
             if (dist < minDist) {
-                playSound('hit');
+                playSound('hit');  // ← Çarpma sesi (carpma.mp3) - ÇİVİLERE ÇARPMA
                 const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
                 cap.x = pin.x + Math.cos(angle) * minDist;
                 cap.y = pin.y + Math.sin(angle) * minDist;
@@ -1099,7 +1107,6 @@ function updatePhysics() {
         runAIMove();
     }
 }
-
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
