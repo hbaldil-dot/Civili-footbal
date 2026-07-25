@@ -199,11 +199,25 @@ function loadGoalImage(imageUrl) {
 loadGoalImage('goal.webp');
 
 // ============================================================
+// SES EFEKTLERİ DÜZENLEMESİ
+// ============================================================
+const hitSound = new Audio('sesler/Carpma.mp3');
+hitSound.preload = 'auto'; // Sesin önceden hızlı yüklenmesi için
+
+// ============================================================
 // SES EFEKTLERİ
 // ============================================================
 const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
+    if (type === 'hit') {
+        // Üst üste hızlı çarpmalarda sesin takılmaması için zamanı sıfırlayıp baştan çaldırıyoruz
+        hitSound.currentTime = 0; 
+        hitSound.play().catch(e => console.log("Ses çalma hatası:", e));
+        return;
+    }
+
+    // Vuruş ve Gol sesleri için mevcut AudioContext yapısı korunur
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -219,14 +233,6 @@ function playSound(type) {
         gain.gain.linearRampToValueAtTime(0, now + 0.15);
         osc.start(now);
         osc.stop(now + 0.15);
-    } else if (type === 'hit') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
     } else if (type === 'goal') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(200, now);
@@ -237,6 +243,7 @@ function playSound(type) {
         osc.stop(now + 0.45);
     }
 }
+
 
 // ============================================================
 // GOL ANİMASYONU
