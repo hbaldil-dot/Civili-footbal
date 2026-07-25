@@ -1026,7 +1026,7 @@ function exitToMenu() {
 }
 
 // ============================================================
-// FİZİK MOTORU - GÜNCELLENMİŞ
+// FİZİK MOTORU
 // ============================================================
 function updatePhysics() {
     if (currentPhase !== 'playing') return;
@@ -1034,16 +1034,8 @@ function updatePhysics() {
     for (let step = 0; step < SUB_STEPS; step++) {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
-        if (cap.x - cap.radius < 0) { 
-            cap.x = cap.radius; 
-            cap.vx *= -0.85; 
-            playSound('hit');  // ← Çarpma sesi (carpma.mp3)
-        }
-        if (cap.x + cap.radius > width) { 
-            cap.x = width - cap.radius; 
-            cap.vx *= -0.85; 
-            playSound('hit');  // ← Çarpma sesi (carpma.mp3)
-        }
+        if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
         if (cap.y - cap.radius <= goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
@@ -1061,7 +1053,7 @@ function updatePhysics() {
             } else {
                 cap.y = goalHeight + cap.radius;
                 cap.vy *= -0.85;
-                playSound('hit');  // ← Çarpma sesi (carpma.mp3)
+                playSound('hit');
             }
         }
         if (cap.y + cap.radius >= height - goalHeight) {
@@ -1081,14 +1073,14 @@ function updatePhysics() {
             } else {
                 cap.y = height - goalHeight - cap.radius;
                 cap.vy *= -0.85;
-                playSound('hit');  // ← Çarpma sesi (carpma.mp3)
+                playSound('hit');
             }
         }
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
             if (dist < minDist) {
-                playSound('hit');  // ← Çarpma sesi (carpma.mp3) - ÇİVİLERE ÇARPMA
+                playSound('hit');
                 const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
                 cap.x = pin.x + Math.cos(angle) * minDist;
                 cap.y = pin.y + Math.sin(angle) * minDist;
@@ -1107,6 +1099,7 @@ function updatePhysics() {
         runAIMove();
     }
 }
+
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
@@ -2014,176 +2007,3 @@ function playSound(type) {
         console.error('❌ Ses çalma hatası:', error);
     }
 }
-// ============================================================
-// SES EFEKTLERİ - MP3 DOSYALARI İLE
-// ============================================================
-
-const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-
-// Ses dosyalarını yükle
-const soundFiles = {
-    kick: new Audio('sesler/vurus.mp3'),      // Vuruş sesi
-    hit: new Audio('sesler/carpma.mp3'),      // Çarpma sesi (çivilere)
-    goal: new Audio('sesler/gol.mp3'),        // Gol sesi
-    click: new Audio('sesler/tik.mp3')        // Tık sesi (butonlar için)
-};
-
-// Sesleri önceden yükle
-Object.values(soundFiles).forEach(audio => {
-    audio.load();
-    audio.volume = 0.7; // Varsayılan ses seviyesi
-});
-
-// ============================================================
-// GÜNCELLENMİŞ playSound - MP3 KULLANAN
-// ============================================================
-function playSound(type) {
-    if (!isSoundOn) {
-        console.log('🔇 Ses kapalı, ses çalınmadı:', type);
-        return;
-    }
-    
-    console.log('🔊 Ses çalınıyor:', type);
-    
-    try {
-        const audio = soundFiles[type];
-        if (audio) {
-            audio.currentTime = 0; // Sıfırdan başlat
-            audio.play().catch(err => {
-                console.warn('⚠️ Ses çalınamadı:', err);
-            });
-        } else {
-            console.warn('⚠️ Ses dosyası bulunamadı:', type);
-        }
-    } catch (error) {
-        console.error('❌ Ses çalma hatası:', error);
-    }
-}
-
-// ============================================================
-// PLAY SOUND - YEDEK (OSC) - MP3 YÜKLENMEZSE ÇALIŞIR
-// ============================================================
-function playSoundFallback(type) {
-    if (!isSoundOn) return;
-    
-    try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'kick') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-        } else if (type === 'hit') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.08);
-            osc.start(now);
-            osc.stop(now + 0.08);
-        } else if (type === 'goal') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.45);
-            osc.start(now);
-            osc.stop(now + 0.45);
-        }
-    } catch (error) {
-        console.error('❌ Yedek ses çalma hatası:', error);
-    }
-}
-
-// ============================================================
-// SES KONTROL FONKSİYONLARI
-// ============================================================
-
-let isSoundOn = true;
-
-function toggleSound() {
-    console.log('🔊 Ses butonuna tıklandı! Mevcut durum:', isSoundOn ? 'AÇIK' : 'KAPALI');
-    
-    isSoundOn = !isSoundOn;
-    
-    const soundBtn = document.getElementById('sound-toggle-btn');
-    if (soundBtn) {
-        if (isSoundOn) {
-            soundBtn.src = 'menu/ayarlar/ses.webp';
-            console.log('🔊 Ses AÇIK');
-            // Ses açıldığında test sesi çal
-            setTimeout(() => playSound('click'), 100);
-        } else {
-            soundBtn.src = 'menu/ayarlar/ses-off.webp';
-            console.log('🔇 Ses KAPALI');
-        }
-    }
-    
-    localStorage.setItem('soundEnabled', isSoundOn ? 'true' : 'false');
-}
-
-function loadSoundSettings() {
-    const savedSound = localStorage.getItem('soundEnabled');
-    if (savedSound !== null) {
-        isSoundOn = savedSound === 'true';
-        
-        const soundBtn = document.getElementById('sound-toggle-btn');
-        if (soundBtn) {
-            soundBtn.src = isSoundOn ? 'menu/ayarlar/ses.webp' : 'menu/ayarlar/ses-off.webp';
-        }
-        console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
-    }
-}
-// ============================================================
-// BAŞLANGIÇ - DÜZELTİLMİŞ
-// ============================================================
-
-// Önce mevcut başlangıç kodlarını temizle
-console.log("🎮 Çivili Futbol Başlatıldı!");
-console.log("⏱️ Maç Süresi: " + MATCH_DURATION + " saniye");
-console.log("🎯 Vuruş Süresi: " + SHOT_DURATION + " saniye");
-
-startPeriodicSync();
-
-// Sayfa yüklendiğinde - TEK BİR DOMContentLoaded OLAYI
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Sayfa yüklendi! Menü butonları kontrol ediliyor...');
-    
-    // Takım seçimlerini yap
-    selectRandomTeam();
-    updateSelectedTeamName();
-    updateTeamLogoDisplay();
-    updateScoreLogos();
-    loadTeamLogoImage(selectedTeamLogo);
-    selectRandomAITeam();
-    loadSoundSettings();
-    
-    // Canvas'ı gizle (menüdeyken saha görünmesin)
-    hideField();
-    
-    // Butonları kontrol et
-    console.log('📋 Menü butonları kontrol ediliyor:');
-    
-    const btn1 = document.querySelector('.menu-btn[onclick*="openAILevelMenu"]');
-    console.log('  - Bilgisayara karşı:', btn1 ? '✅ Bulundu' : '❌ Bulunamadı');
-    
-    const btn2 = document.querySelector('.menu-btn[onclick*="openLocalTeamSelect"]');
-    console.log('  - 2 Kişilik:', btn2 ? '✅ Bulundu' : '❌ Bulunamadı');
-    
-    const btn3 = document.querySelector('.menu-btn[onclick*="openOnlineLobby"]');
-    console.log('  - Online maç:', btn3 ? '✅ Bulundu' : '❌ Bulunamadı');
-    
-    const btn4 = document.querySelector('.menu-btn[onclick*="openSettingsPopup"]');
-    console.log('  - Ayarlar:', btn4 ? '✅ Bulundu' : '❌ Bulunamadı');
-    
-    console.log('✅ Başlangıç tamamlandı!');
-});
