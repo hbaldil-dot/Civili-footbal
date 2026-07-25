@@ -29,24 +29,26 @@
     <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
 </button>
 
-<!-- TAKIM SEÇİM POP-UP -->
-<div id="team-select-popup" style="display: none;" onclick="if(event.target===this) closeTeamSelectPopup()">
+<!-- TAKIM SEÇİM EKRANI (TAM KAPLAMA KATMANI) -->
+<div id="team-select-popup" class="full-screen-modal" style="display: none;">
     <div class="team-select-container">
-        <!-- Arka Fon Görseli -->
+        
+        <!-- Arka Fon Görseli (Tüm ekranı sıfıra sıfır kaplar) -->
         <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
         
-        <!-- ÜST KISIM: Seçilen Logonun Göründüğü Arma Alanı -->
+        <!-- ÜST KISIM: Seçilen Takım Arması -->
         <div class="selected-team-shield-area">
             <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
         </div>
 
-        <!-- ALT KISIM: Dikdörtgen Kutu İçindeki Takım Logoları Izgarası -->
+        <!-- ALT KISIM: Yeşil Çerçeveli Kutu İçindeki Logolar -->
         <div class="team-select-grid" id="team-select-grid"></div>
 
         <!-- EN ALT: Ana Menüye Dönüş Butonu -->
         <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
             <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
         </div>
+
     </div>
 </div>
         <button class="menu-btn" onclick="openAILevelMenu()">
