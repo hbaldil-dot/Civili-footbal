@@ -1960,7 +1960,7 @@ function loadSoundSettings() {
     }
 }
 // ============================================================
-// MP3 SES DOSYALARI YÜKLEMESİ
+// MP3 SES DOSYALARI YÜKLEMESİ (Çarpma ve Gol)
 // ============================================================
 const hitSound = new Audio('sesler/Carpma.mp3');
 hitSound.preload = 'auto';
@@ -1968,21 +1968,13 @@ hitSound.preload = 'auto';
 const goalSound = new Audio('sesler/gol.mp3');
 goalSound.preload = 'auto';
 
-// Topa vurma ses dosyası:
-const kickSound = new Audio('sesler/vurus.mp3');
-kickSound.preload = 'auto';
-
 // ============================================================
-// GÜNCELLENMİŞ playSound - TÜM MP3 SESLERİ VE SES KONTROLÜ
+// GÜNCELLENMİŞ playSound (Hızlı Vuruş Destekli)
 // ============================================================
 function playSound(type) {
-    // Ses kapalıysa hiçbir şey çalma
     if (!isSoundOn) {
-        console.log('🔇 Ses kapalı, ses çalınmadı:', type);
         return;
     }
-    
-    console.log('🔊 Ses çalınıyor:', type);
     
     // 1. MP3 ÇARPMA SESİ
     if (type === 'hit') {
@@ -1998,10 +1990,29 @@ function playSound(type) {
         return;
     }
 
-    // 3. MP3 VURUŞ / TOPA VURMA SESİ
+    // 3. HAFİF VE PERFORMANSLI VURUŞ SESİ (Eski Tarz Web Audio API)
     if (type === 'kick') {
-        kickSound.currentTime = 0;
-        kickSound.play().catch(error => console.error('❌ Vuruş MP3 Çalma hatası:', error));
-        return;
+        try {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.15);
+            
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (error) {
+            console.error('❌ Vuruş sesi hatası:', error);
+        }
     }
 }
