@@ -1395,12 +1395,15 @@ body { ... }
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important;  /* Ekran genişliğini zorla %100 yapar */
-    height: 100vh !important; /* Ekran yüksekliğini zorla %100 yapar */
+    width: 100vw !important;
+    height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #000000 !important;
-    z-index: 9999999 !important; /* En üst katmana çıkarır */
+    
+    /* KATMAN ÖNCELİĞİ: Tüm butonların ve menülerin üstüne çıkmasını sağlar */
+    z-index: 2147483647 !important; 
+    
     display: none;
 }
 
