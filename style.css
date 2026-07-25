@@ -1463,10 +1463,10 @@ body { ... }
     transform-origin: center center !important;
 }
 
-/* ===== TAKIM LOGO GRİDİ ===== */
+/* ===== TAKIM LOGO GRİDİ - LOGOLAR %12 BÜYÜK VE 12px AŞAĞI ===== */
 .team-select-grid {
     position: absolute !important;
-    top: 49% !important;
+    top: calc(48% + 12px) !important; /* 12px aşağı */
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
@@ -1483,13 +1483,13 @@ body { ... }
     z-index: 10 !important;
     background: rgba(0, 0, 0, 0.15) !important;
     border-radius: 10px !important;
-    -webkit-overflow-scrolling: touch !important; /* iOS için kaydırma */
+    -webkit-overflow-scrolling: touch !important;
 }
 
-/* ===== LOGO BUTONLARI ===== */
+/* ===== LOGO BUTONLARI - %12 BÜYÜTÜLDÜ ===== */
 .big-team-logo-btn {
-    width: 36px !important;
-    height: 36px !important;
+    width: 40px !important;   /* 36px → 40px (%12 büyüdü) */
+    height: 40px !important;  /* 36px → 40px (%12 büyüdü) */
     border-radius: 50% !important;
     border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
@@ -1520,7 +1520,6 @@ body { ... }
     object-fit: contain !important;
     border-radius: 50% !important;
 }
-
 /* ===== ANA MENÜ BUTONU ===== */
 .team-select-main-menu-btn {
     position: absolute !important;
