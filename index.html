@@ -8,32 +8,7 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="game.js" defer></script>
 </head>
-    <!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
-
-    <!-- ============================================================
-         TAKIM SEÇİM POP-UP (KAPSAYICILARDAN BAĞIMSIZ EN DIŞTA)
-         ============================================================ -->
-    <div id="team-select-popup" style="display: none;">
-        <div class="team-select-container">
-            <!-- Arka Fon Görseli -->
-            <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
-            
-            <!-- Üst Arma Alanı -->
-            <div class="selected-team-shield-area">
-                <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
-            </div>
-
-            <!-- Alt Logo Alanı -->
-            <div class="team-select-grid" id="team-select-grid"></div>
-
-            <!-- En Alt Ana Menü Butonu -->
-            <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
-                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
-            </div>
-        </div>
-    </div>
-
- <!-- BODY KAPANMADAN HEMEN ÖNCEYE KOYUN -->
+    
 <body>
 
     <!-- ===== ANA MENÜ ===== -->
@@ -72,7 +47,32 @@
         </button>
 
     </div>
+<!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
 
+    <!-- ============================================================
+         TAKIM SEÇİM POP-UP (KAPSAYICILARDAN BAĞIMSIZ EN DIŞTA)
+         ============================================================ -->
+    <div id="team-select-popup" style="display: none;">
+        <div class="team-select-container">
+            <!-- Arka Fon Görseli -->
+            <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
+            
+            <!-- Üst Arma Alanı -->
+            <div class="selected-team-shield-area">
+                <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
+            </div>
+
+            <!-- Alt Logo Alanı -->
+            <div class="team-select-grid" id="team-select-grid"></div>
+
+            <!-- En Alt Ana Menü Butonu -->
+            <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            </div>
+        </div>
+    </div>
+
+ <!-- BODY KAPANMADAN HEMEN ÖNCEYE KOYUN -->
     <!-- ============================================================
          AYARLAR POP-UP
          ============================================================ -->
