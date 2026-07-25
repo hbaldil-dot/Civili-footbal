@@ -1685,8 +1685,8 @@ body { ... }
         top: calc(58%) !important;
         padding: 6px 4px !important;
         gap: 5px !important;
-        max-height: 30% !important;
-        min-height: 27% !important;
+        max-height: 29% !important;
+        min-height: 26% !important;
     }
     
     .big-team-logo-btn {
