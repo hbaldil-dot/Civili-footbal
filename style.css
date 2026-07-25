@@ -1387,40 +1387,34 @@ body { ... }
         max-width: 320px !important;
     }
 }
-/* ============================================================
-   KESİN ÇÖZÜM: TAM EKRAN KAPLAYAN TAKIM SEÇİM KATMANI
+//* ============================================================
+   EKRANIN TAMAMINI KAPLAYAN TAKIM SEÇİM MENÜSÜ
    ============================================================ */
 
-/* Dış Katman: Eski ekranı %100 örter, kaymayı kesin olarak engeller */
-#team-select-popup.full-screen-modal {
+#team-select-popup {
     position: fixed !important;
     top: 0 !important;
-    bottom: 0 !important;
     left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100vw !important;  /* Ekran genişliğini zorla %100 yapar */
+    height: 100vh !important; /* Ekran yüksekliğini zorla %100 yapar */
     margin: 0 !important;
     padding: 0 !important;
-    background-color: #000000 !important; /* Arka planı sıfır boşlukla siyah kapatır */
-    z-index: 999999 !important; /* En üstte durmasını garanti eder */
+    background: #000000 !important;
+    z-index: 9999999 !important; /* En üst katmana çıkarır */
     display: none;
-    overflow: hidden !important;
 }
 
-/* Ana İçerik Kutusu (Ekran boyutunu birebir alır) */
 .team-select-container {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100vw !important;
+    height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
-    transform: none !important; /* Yanlış hizalamayı önlemek için ortalama transformunu sıfırladık */
 }
 
-/* Arka Fon Görseli: En tepeden en alta kadar %100 kaplar */
+/* Arka Fon Görseli - Tüm Ekranı Kaplar */
 .team-select-bg {
     position: absolute !important;
     top: 0 !important;
@@ -1428,65 +1422,53 @@ body { ... }
     width: 100% !important;
     height: 100% !important;
     object-fit: fill !important; /* Görseli sıfıra sıfır ekrana yayar */
-    z-index: 1 !important;
 }
 
-/* 1. ÜST ARMA ALANI (Seçilen Logonun Durduğu Yer) */
+/* Üst Kısım: Seçilen Takım Logosu */
 .selected-team-shield-area {
     position: absolute !important;
     top: 31% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 32% !important;
+    width: 30% !important;
     height: 18% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    z-index: 5 !important;
-    pointer-events: none !important;
+    z-index: 10 !important;
 }
 
 .selected-team-shield-area img {
-    max-width: 85% !important;
-    max-height: 85% !important;
+    max-width: 90% !important;
+    max-height: 90% !important;
     object-fit: contain !important;
 }
 
-/* 2. DİKDÖRTGEN KUTU İÇİNDEKİ LOGO IZGARASI */
+/* Alt Kısım: Dikdörtgen İçindeki Seçilebilir Logolar */
 .team-select-grid {
     position: absolute !important;
-    top: 61.5% !important;
+    top: 62% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 82% !important;
+    width: 80% !important;
     height: 28% !important;
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 8px !important;
+    gap: 10px !important;
     justify-content: center !important;
     align-content: flex-start !important;
     overflow-y: auto !important;
-    padding: 6px 4px !important;
-    z-index: 5 !important;
+    padding: 6px !important;
+    z-index: 10 !important;
 }
 
-/* Scrollbar Gizleme */
-.team-select-grid::-webkit-scrollbar {
-    width: 3px;
-}
-.team-select-grid::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Yuvarlak Logo Butonları */
 .big-team-logo-btn {
-    width: 48px !important;
-    height: 48px !important;
+    width: 50px !important;
+    height: 50px !important;
     border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease, border-color 0.15s ease !important;
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
     padding: 2px !important;
     flex-shrink: 0 !important;
     display: flex !important;
@@ -1494,25 +1476,19 @@ body { ... }
     justify-content: center !important;
 }
 
-.big-team-logo-btn:hover {
-    transform: scale(1.08) !important;
-}
-
 .big-team-logo-btn.active {
     border-color: #2ecc71 !important;
-    box-shadow: 0 0 10px rgba(46, 204, 113, 0.8) !important;
-    transform: scale(1.1) !important;
-    background: rgba(46, 204, 113, 0.2) !important;
+    box-shadow: 0 0 12px #2ecc71 !important;
+    background: rgba(46, 204, 113, 0.25) !important;
 }
 
 .big-team-logo-btn img {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    border-radius: 50% !important;
 }
 
-/* 3. EN ALTTAKİ ANA MENÜ BUTONU */
+/* En Alt: Ana Menü Butonu */
 .team-select-main-menu-btn {
     position: absolute !important;
     bottom: 2% !important;
@@ -1520,16 +1496,7 @@ body { ... }
     transform: translateX(-50%) !important;
     width: 45% !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease !important;
     z-index: 10 !important;
-}
-
-.team-select-main-menu-btn:hover {
-    transform: translateX(-50%) scale(1.05) !important;
-}
-
-.team-select-main-menu-btn:active {
-    transform: translateX(-50%) scale(0.95) !important;
 }
 
 .team-select-main-menu-btn img {
