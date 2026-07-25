@@ -1988,14 +1988,19 @@ function playSound(type) {
     
     // 2. MP3 GOL SESİ
     if (type === 'goal') {
-        goalSound.currentTime = 0;
-        // cloneNode kullanımı üst üste binen seslerde ve hızlı yüklemelerde kilitlenmeyi önler
-        const goalClone = goalSound.cloneNode();
-        goalClone.play().catch(err => {
-            console.error('❌ Gol sesi çalınamadı. Dosya yolu doğru mu? Error:', err);
-        });
-        return;
-    }
+       // Gol sesi objen
+const goalSound = new Audio('gol-sesi.mp3');
+
+function playGoalSound() {
+    // Sesi başa sar (Eğer zaten çalıyorsa veya bittiyse sıfırlar)
+    goalSound.currentTime = 0; 
+    
+    // Sesi çal
+    goalSound.play().catch(error => {
+        console.log("Ses oynatma engellendi:", error);
+    });
+}
+
 
     // 3. HAFİF VURUŞ SESİ (Synth)
     if (type === 'kick') {
