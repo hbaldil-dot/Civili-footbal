@@ -1470,8 +1470,8 @@ body { ... }
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
-    max-height: 38% !important;
-    min-height: 25% !important;
+    max-height: 44% !important;
+    min-height: 29% !important;
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
