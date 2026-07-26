@@ -773,7 +773,6 @@ function openOnlineLobby() {
         return; 
     }
     
-    // Socket bağlantısını kontrol et
     if (!socket.connected) {
         alert("Sunucuya bağlanılamıyor. Lütfen daha sonra tekrar deneyin.");
         return;
@@ -783,18 +782,70 @@ function openOnlineLobby() {
     const playerData = getPlayerData();
     console.log('📤 Lobiye katılıyor:', playerData);
     
-    socket.emit("join-lobby", playerData);
+    // Ana menüyü gizle
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+        menu.style.visibility = 'hidden';
+        menu.style.opacity = '0';
+        menu.style.pointerEvents = 'none'; // YENİ
+    }
     
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'block';
+    // Online lobiyi göster
+    const lobby = document.getElementById('online-lobby');
+    if (lobby) {
+        lobby.style.display = 'block';
+        lobby.style.visibility = 'visible';
+        lobby.style.opacity = '1';
+        lobby.style.pointerEvents = 'auto'; // YENİ
+    }
+    
+    // Lobiye katıl
+    socket.emit("join-lobby", playerData);
 }
 
 function closeOnlineLobby() {
     console.log('🌐 Online menü kapatılıyor...');
+    
+    // Davetleri temizle
     pendingInvites = [];
-    if (socket) socket.emit("leave-lobby");
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    
+    // Socket'ten ayrıl
+    if (socket) {
+        socket.emit("leave-lobby");
+    }
+    
+    // Online lobiyi gizle
+    const lobby = document.getElementById('online-lobby');
+    if (lobby) {
+        lobby.style.display = 'none';
+        lobby.style.visibility = 'hidden';
+        lobby.style.opacity = '0';
+    }
+    
+    // Ana menüyü göster - TÜM STİLLERİ SIFIRLA
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+        menu.style.visibility = 'visible';
+        menu.style.opacity = '1';
+        menu.style.pointerEvents = 'auto'; // YENİ
+        menu.style.zIndex = '100'; // YENİ
+    }
+    
+    // Tüm menü butonlarının tıklanabilir olduğundan emin ol
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+        btn.style.pointerEvents = 'auto';
+        btn.style.display = 'block';
+        btn.style.visibility = 'visible';
+        btn.style.opacity = '1';
+    });
+    
+    // Oyun modunu sıfırla
+    gameMode = 'local';
+    currentPhase = 'menu';
+    
+    console.log('✅ Ana menüye dönüldü');
 }
 
 function startSetupPhase() {
