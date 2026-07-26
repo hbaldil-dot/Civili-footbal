@@ -1963,3 +1963,88 @@ body { ... }
         max-width: 60px !important;
     }
 }
+/* ============================================================
+   2 KİŞİLİK - SÜRE SEÇİM BUTONLARI (YENİ)
+   ============================================================ */
+
+.local-time-selector {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    padding: 5px 12px !important;
+    border-radius: 30px !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+}
+
+.local-time-selector span {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    letter-spacing: 2px !important;
+    margin-right: 4px !important;
+}
+
+.local-time-btn {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-size: 10px !important;
+    font-family: 'Courier New', monospace !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-weight: bold !important;
+    letter-spacing: 0.5px !important;
+}
+
+.local-time-btn:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.local-time-btn:active {
+    transform: scale(0.92) !important;
+}
+
+.local-time-btn.active {
+    background: rgba(46, 204, 113, 0.25) !important;
+    border-color: #2ecc71 !important;
+    color: #2ecc71 !important;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.1) !important;
+}
+
+/* Mobil Uyum */
+@media (max-width: 420px) {
+    .local-time-selector {
+        padding: 4px 8px !important;
+        gap: 4px !important;
+        max-width: 260px !important;
+        flex-wrap: wrap !important;
+    }
+    .local-time-btn {
+        font-size: 8px !important;
+        padding: 3px 6px !important;
+    }
+    .local-time-selector span {
+        font-size: 8px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .local-time-selector {
+        max-width: 220px !important;
+        gap: 3px !important;
+    }
+    .local-time-btn {
+        font-size: 7px !important;
+        padding: 2px 5px !important;
+    }
+}
