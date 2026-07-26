@@ -1442,7 +1442,7 @@ body { ... }
 /* Seçilen Takım Armor Alanı */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 25% !important;
+    top: 27% !important;
     left: 50% !important;
     transform: translate(calc(-50% + 7px), -50%) !important;
     width: 20% !important;
@@ -1462,7 +1462,7 @@ body { ... }
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    transform: scale(1.15) !important;
+    transform: scale(1.32) !important;
     transform-origin: center center !important;
     border-radius: 50% !important;
 }
@@ -1470,7 +1470,7 @@ body { ... }
 /* Takım Logo Gridi */
 .team-select-grid {
     position: absolute !important;
-    top: 55% !important;
+    top: 60% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 82% !important;
