@@ -760,12 +760,7 @@ function startLocalGame(mode, level) {
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
     showField();
-    
-    // *** BURASI EKLENDİ: Sıra göstergesini başlangıçta ayarla ***
-    turn = 1; // Her zaman oyuncu başlasın
-    updateHUDTurn();
-    
-    startSetupPhase();
+    startSetupPhase(); // Burada zaten updateHUDTurn çağrılıyor
 }
 }
 
@@ -1306,6 +1301,7 @@ canvas.addEventListener('touchcancel', (e) => {
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
+
 function openAILevelMenu() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
@@ -1316,14 +1312,120 @@ function closeAILevelMenu() {
     document.getElementById('menu').style.display = 'block';
 }
 
-function selectColor(team, color) {
-    alert('🎨 Artık takım logoları kullanılıyor. Forma rengi seçimine gerek yok!');
+function openLocalTeamSelect() {
+    document.getElementById('local-team-select').style.display = 'flex';
+    localP1Selected = false;
+    localP2Selected = false;
+    localPlayer1Logo = '';
+    localPlayer2Logo = '';
+    document.getElementById('local-p1-shield-img').style.display = 'none';
+    document.getElementById('local-p2-shield-img').style.display = 'none';
+    loadLocalTeamLogos();
 }
 
-function selectFieldColor(color) {
-    console.log('🟩 Saha rengi seçimi devre dışı - resim kullanılıyor');
+function closeLocalTeamSelect() {
+    document.getElementById('local-team-select').style.display = 'none';
 }
 
+function openOnlineLobby() {
+    if (!socket) { 
+        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
+        return; 
+    }
+    gameMode = 'online';
+    const playerData = getPlayerData();
+    socket.emit("join-lobby", playerData);
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'flex';
+}
+
+function closeOnlineLobby() {
+    if (socket) socket.emit("leave-lobby");
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+}
+
+function openSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'flex';
+    }
+}
+
+function closeSettingsPopup() {
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+}
+
+function openTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    const grid = document.getElementById('team-select-grid');
+    const shieldImg = document.getElementById('popup-selected-team-img');
+    
+    if (!popup || !grid) return;
+    
+    popup.style.display = 'block';
+    
+    if (shieldImg) {
+        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
+            shieldImg.src = 'takimlar/' + selectedTeamLogo;
+            shieldImg.style.display = 'block';
+        } else {
+            const defaultTeam = teamLogos[0];
+            if (defaultTeam) {
+                selectedTeamLogo = defaultTeam.file;
+                shieldImg.src = 'takimlar/' + defaultTeam.file;
+                shieldImg.style.display = 'block';
+                const menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + defaultTeam.file;
+                }
+            }
+        }
+    }
+    
+    grid.innerHTML = '';
+    teamLogos.forEach((team) => {
+        const btn = document.createElement('div');
+        btn.className = 'big-team-logo-btn';
+        if (selectedTeamLogo && selectedTeamLogo === team.file) {
+            btn.classList.add('active');
+        }
+        const img = document.createElement('img');
+        img.src = 'takimlar/' + team.file;
+        img.alt = team.name;
+        btn.appendChild(img);
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedTeamLogo = team.file;
+            if (shieldImg) {
+                shieldImg.src = 'takimlar/' + team.file;
+                shieldImg.style.display = 'block';
+            }
+            const menuOverlay = document.getElementById('selected-team-logo-display');
+            if (menuOverlay) {
+                menuOverlay.src = 'takimlar/' + team.file;
+            }
+            loadTeamLogoImage(team.file);
+            selectRandomAITeam();
+            updateScoreLogos();
+        };
+        grid.appendChild(btn);
+    });
+}
+
+function closeTeamSelectPopup() {
+    const popup = document.getElementById('team-select-popup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+}
 // ============================================================
 // TAKIM LOGO FONKSİYONLARI
 // ============================================================
