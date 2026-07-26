@@ -778,6 +778,7 @@ function openOnlineLobby() {
 
 function closeOnlineLobby() {
     console.log('🌐 Online menü kapatılıyor...');
+    pendingInvites = [];
     if (socket) socket.emit("leave-lobby");
     document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
@@ -1827,45 +1828,57 @@ function getPlayerData() {
 function setupSocketListeners() {
     if (!socket) return;
     
-    socket.on("update-lobby-players", (players) => {
-        const listContainer = document.getElementById('lobby-list');
-        if (!listContainer) return;
-        listContainer.innerHTML = "";
-        let count = 0;
-        players.forEach(p => {
-            if (p.id !== socket.id) {
-                count++;
-                const item = document.createElement('div');
-                item.className = 'player-item';
-                
-                const infoSpan = document.createElement('span');
-                const logoImg = document.createElement('img');
-                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
-                logoImg.className = 'lobby-logo';
-                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
-                infoSpan.appendChild(logoImg);
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = ` ${p.name}`;
-                infoSpan.appendChild(nameSpan);
-                
-                const btn = document.createElement('button');
-                btn.className = 'status';
-                btn.innerText = 'Davet Et';
-                btn.onclick = () => {
-                    btn.innerText = "Bekleniyor...";
-                    btn.style.background = "#e67e22";
-                    socket.emit("send-invite", p.id);
-                };
-                item.appendChild(infoSpan);
-                item.appendChild(btn);
-                listContainer.appendChild(item);
-            }
-        });
-        if (count === 0) {
-            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
+ socket.on("update-lobby-players", (players) => {
+    const listContainer = document.getElementById('lobby-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+    let count = 0;
+    players.forEach(p => {
+        if (p.id !== socket.id) {
+            count++;
+            const item = document.createElement('div');
+            item.className = 'online-player-item';
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'online-player-info';
+            
+            const logoImg = document.createElement('img');
+            logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+            logoImg.className = 'online-player-logo';
+            logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'online-player-name';
+            nameSpan.textContent = p.name;
+            
+            infoDiv.appendChild(logoImg);
+            infoDiv.appendChild(nameSpan);
+            
+            const btn = document.createElement('button');
+            btn.className = 'online-btn online-btn-invite';
+            const btnImg = document.createElement('img');
+            btnImg.src = 'menu/online/davetet.webp';
+            btnImg.alt = 'Davet Et';
+            btn.appendChild(btnImg);
+            btn.onclick = () => {
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+                socket.emit("send-invite", p.id);
+                setTimeout(() => {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }, 3000);
+            };
+            
+            item.appendChild(infoDiv);
+            item.appendChild(btn);
+            listContainer.appendChild(item);
         }
     });
+    if (count === 0) {
+        listContainer.innerHTML = "<div class='online-empty'>Havuzda kimse yok</div>";
+    }
+});
     
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
@@ -2466,3 +2479,94 @@ function setLocalShotDuration(seconds) {
         }
     }
 }
+// soket davet
+// Gelen davetleri saklamak için
+let pendingInvites = [];
+
+socket.on("receive-invite", (data) => {
+    // Daveti listeye ekle
+    pendingInvites.push({
+        fromId: data.fromId,
+        fromName: data.fromName,
+        fromLogo: data.fromLogo || 'default.png'
+    });
+    updateInviteList();
+});
+
+// Davet reddedildiğinde
+socket.on("invite-rejected", (data) => {
+    pendingInvites = pendingInvites.filter(invite => invite.fromId !== data.fromId);
+    updateInviteList();
+});
+
+// Davet kabul edildiğinde
+socket.on("invite-accepted", (data) => {
+    pendingInvites = pendingInvites.filter(invite => invite.fromId !== data.fromId);
+    updateInviteList();
+});
+function updateInviteList() {
+    const container = document.getElementById('invite-list');
+    if (!container) return;
+    
+    container.innerHTML = "";
+    
+    if (pendingInvites.length === 0) {
+        container.innerHTML = "<div class='online-empty'>Bekleyen davet yok</div>";
+        return;
+    }
+    
+    pendingInvites.forEach(invite => {
+        const item = document.createElement('div');
+        item.className = 'online-invite-item';
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'online-player-info';
+        
+        const logoImg = document.createElement('img');
+        logoImg.src = `takimlar/${invite.fromLogo || 'default.png'}`;
+        logoImg.className = 'online-player-logo';
+        logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'online-player-name';
+        nameSpan.textContent = invite.fromName;
+        
+        infoDiv.appendChild(logoImg);
+        infoDiv.appendChild(nameSpan);
+        
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'online-invite-actions';
+        
+        // Kabul Et butonu
+        const acceptBtn = document.createElement('button');
+        acceptBtn.className = 'online-btn online-btn-accept';
+        const acceptImg = document.createElement('img');
+        acceptImg.src = 'menu/online/kabulet.webp';
+        acceptImg.alt = 'Kabul Et';
+        acceptBtn.appendChild(acceptImg);
+        acceptBtn.onclick = () => {
+            socket.emit("accept-invite", invite.fromId);
+        };
+        
+        // Reddet butonu
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'online-btn online-btn-reject';
+        const rejectImg = document.createElement('img');
+        rejectImg.src = 'menu/online/redet.webp';
+        rejectImg.alt = 'Reddet';
+        rejectBtn.appendChild(rejectImg);
+        rejectBtn.onclick = () => {
+            socket.emit("reject-invite", invite.fromId);
+            pendingInvites = pendingInvites.filter(inv => inv.fromId !== invite.fromId);
+            updateInviteList();
+        };
+        
+        actionsDiv.appendChild(acceptBtn);
+        actionsDiv.appendChild(rejectBtn);
+        
+        item.appendChild(infoDiv);
+        item.appendChild(actionsDiv);
+        container.appendChild(item);
+    });
+}
+
