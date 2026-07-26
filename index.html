@@ -187,41 +187,42 @@
     </div>
 
    <!-- ============================================================
-         2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
-         ============================================================ -->
-    <div id="local-team-select" style="display: none;">
-        <div class="local-team-container">
-            <!-- Arka Fon Görseli -->
-            <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
-            
-            <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
-            <div class="local-selected-area p1-selected-area">
-                <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
-            </div>
-            <div class="local-selected-area p2-selected-area">
-                <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
-            </div>
+     2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
+     ============================================================ -->
+<div id="local-team-select" style="display: none;">
+    <div class="local-team-container">
+        <!-- Arka Fon Görseli -->
+        <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
+        
+        <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
+        <div class="local-selected-area p1-selected-area">
+            <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
+            <div class="local-player-name" id="local-p1-name">Oyuncu 1</div>
+        </div>
+        <div class="local-selected-area p2-selected-area">
+            <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+            <div class="local-player-name" id="local-p2-name">Oyuncu 2</div>
+        </div>
 
-            <!-- Takım Seçim Izgaraları -->
-            <div class="local-team-body">
-                <div class="local-player-section">
-                    <div class="team-logo-options" id="local-player1-logos"></div>
-                </div>
-                <div class="local-player-section">
-                    <div class="team-logo-options" id="local-player2-logos"></div>
-                </div>
+        <!-- Takım Seçim Izgaraları -->
+        <div class="local-team-body">
+            <div class="local-player-section" data-player="Oyuncu 1">
+                <div class="team-logo-options" id="local-player1-logos"></div>
             </div>
+            <div class="local-player-section" data-player="Oyuncu 2">
+                <div class="team-logo-options" id="local-player2-logos"></div>
+            </div>
+        </div>
 
-            <!-- Alt Butonlar -->
-            <div class="local-action-buttons">
-                <button class="local-start-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
-                <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
-                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
-                </div>
+        <!-- Alt Butonlar -->
+        <div class="local-action-buttons">
+            <button class="local-start-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
+            <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
             </div>
         </div>
     </div>
-
+</div>
     <!-- ============================================================
          OYUN EKRANI
          ============================================================ -->
