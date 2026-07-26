@@ -1963,3 +1963,221 @@ body { ... }
         max-width: 60px !important;
     }
 }
+/* ============================================================
+   2 KİŞİLİK EKRAN MENÜSÜ - AYARLAR BÖLÜMÜ
+   ============================================================ */
+
+/* Ayarlar Alanı */
+.local-settings-area {
+    position: absolute !important;
+    bottom: 18% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10 !important;
+    width: 80% !important;
+    max-width: 320px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Her Bir Ayar Öğesi */
+.local-setting-item {
+    flex: 1 !important;
+    cursor: pointer !important;
+    position: relative !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.local-setting-label {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 4px 6px !important;
+    border-radius: 6px !important;
+    transition: background 0.2s ease !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.local-setting-label:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.local-setting-label span:first-child {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+}
+
+.local-setting-value {
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    padding: 2px 10px !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    font-family: 'Courier New', monospace !important;
+}
+
+/* Açılır Seçenekler */
+.local-setting-options {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 20 !important;
+    min-width: 80px !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.local-setting-options.show {
+    display: flex !important;
+}
+
+.local-setting-option {
+    padding: 4px 12px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    font-family: 'Courier New', monospace !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+
+.local-setting-option:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+}
+
+.local-setting-option.active {
+    background: rgba(46, 204, 113, 0.15) !important;
+    color: #2ecc71 !important;
+    border: 1px solid rgba(46, 204, 113, 0.2) !important;
+}
+
+.local-setting-option:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================================
+   ALT AKSİYON BUTONLARI - KONUM GÜNCELLEMESİ
+   ============================================================ */
+
+.local-action-buttons {
+    position: absolute !important;
+    bottom: 3% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+    z-index: 10 !important;
+    width: 90% !important;
+    max-width: 340px !important;
+}
+
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .local-settings-area {
+        width: 85% !important;
+        padding: 6px 8px !important;
+        bottom: 16% !important;
+        gap: 6px !important;
+    }
+    
+    .local-setting-label span:first-child {
+        font-size: 8px !important;
+    }
+    
+    .local-setting-value {
+        font-size: 12px !important;
+        padding: 1px 8px !important;
+    }
+    
+    .local-setting-options {
+        min-width: 70px !important;
+    }
+    
+    .local-setting-option {
+        font-size: 10px !important;
+        padding: 3px 8px !important;
+    }
+    
+    .local-action-buttons {
+        bottom: 2% !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .local-settings-area {
+        width: 90% !important;
+        padding: 4px 6px !important;
+        bottom: 15% !important;
+        gap: 4px !important;
+    }
+    
+    .local-setting-label span:first-child {
+        font-size: 7px !important;
+    }
+    
+    .local-setting-value {
+        font-size: 10px !important;
+        padding: 1px 6px !important;
+    }
+    
+    .local-setting-options {
+        min-width: 60px !important;
+    }
+    
+    .local-setting-option {
+        font-size: 9px !important;
+        padding: 2px 6px !important;
+    }
+}
+
+/* Yatay mod */
+@media (max-height: 500px) and (orientation: landscape) {
+    .local-settings-area {
+        bottom: 20% !important;
+        padding: 4px 10px !important;
+    }
+    
+    .local-setting-label span:first-child {
+        font-size: 7px !important;
+    }
+    
+    .local-setting-value {
+        font-size: 10px !important;
+        padding: 1px 6px !important;
+    }
+}
