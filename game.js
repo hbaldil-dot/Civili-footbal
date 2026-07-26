@@ -1618,9 +1618,17 @@ function startLocalGameWithTeams() {
     gameMode = 'local';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
+    
+    // Güncel süreleri kullan
     matchSecondsLeft = MATCH_DURATION;
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
+    // Shot süresini güncelle
+    const shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) {
+        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+    }
     
     showField();
     
@@ -1632,6 +1640,7 @@ function startLocalGameWithTeams() {
     updateHUDTurn();
     
     startSetupPhase();
+}
 }
 function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
