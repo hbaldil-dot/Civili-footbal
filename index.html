@@ -25,30 +25,28 @@
             </div>
         </div>
 
-       <!-- TAKIM SEÇ BUTONU -->
+        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
 <button class="menu-btn" onclick="openTeamSelectPopup()">
     <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
 </button>
 
-<!-- BİLGİSAYARA KARŞI -->
-<button class="menu-btn" onclick="openAILevelMenu()">
-    <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
-</button>
+        <button class="menu-btn" onclick="openAILevelMenu()">
+            <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openLocalTeamSelect()">
+            <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" class="menu-btn-img">
+        </button>
+        
+        <button class="menu-btn" onclick="openOnlineLobby()">
+            <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
+        </button>
 
-<!-- 2 KİŞİLİK AYNI EKRAN -->
-<button class="menu-btn" onclick="openLocalTeamSelect()">
-    <img src="butonlar/2kisi-ayni-ekran.webp" alt="2 KİŞİLİK AYNI EKRAN" class="menu-btn-img">
-</button>
+        <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
+            <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
+        </button>
 
-<!-- ONLINE MAÇ -->
-<button class="menu-btn" onclick="openOnlineLobby()">
-    <img src="butonlar/online-mac.png" alt="ONLINE MAÇ" class="menu-btn-img">
-</button>
-
-<!-- AYARLAR -->
-<button class="menu-btn settings-btn" onclick="openSettingsPopup()">
-    <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
-</button>
+    </div>
 <!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
 
        <!-- ============================================================
@@ -188,7 +186,7 @@
         </div>
     </div>
 
-<!-- ============================================================
+ <!-- ============================================================
      2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
      ============================================================ -->
 <div id="local-team-select" style="display: none;">
@@ -211,36 +209,6 @@
             </div>
             <div class="local-player-section">
                 <div class="team-logo-options" id="local-player2-logos"></div>
-            </div>
-        </div>
-
-        <!-- ===== AYARLAR BÖLÜMÜ - YENİ EKLENDİ ===== -->
-        <div class="local-settings-area">
-            <!-- Maç Süresi -->
-            <div class="local-setting-item" onclick="toggleLocalMatchOptions()">
-                <div class="local-setting-label">
-                    <span>⏱️ Maç Süresi</span>
-                    <span class="local-setting-value" id="local-match-duration-display">90sn</span>
-                </div>
-                <div class="local-setting-options" id="local-match-duration-options" style="display: none;">
-                    <button class="local-setting-option" data-duration="60" onclick="setLocalMatchDuration(60)">60sn</button>
-                    <button class="local-setting-option active" data-duration="90" onclick="setLocalMatchDuration(90)">90sn</button>
-                    <button class="local-setting-option" data-duration="120" onclick="setLocalMatchDuration(120)">120sn</button>
-                    <button class="local-setting-option" data-duration="150" onclick="setLocalMatchDuration(150)">150sn</button>
-                </div>
-            </div>
-
-            <!-- Vuruş Süresi -->
-            <div class="local-setting-item" onclick="toggleLocalShotOptions()">
-                <div class="local-setting-label">
-                    <span>🎯 Vuruş Süresi</span>
-                    <span class="local-setting-value" id="local-shot-duration-display">5sn</span>
-                </div>
-                <div class="local-setting-options" id="local-shot-duration-options" style="display: none;">
-                    <button class="local-setting-option" data-shot-duration="3" onclick="setLocalShotDuration(3)">3sn</button>
-                    <button class="local-setting-option active" data-shot-duration="5" onclick="setLocalShotDuration(5)">5sn</button>
-                    <button class="local-setting-option" data-shot-duration="7" onclick="setLocalShotDuration(7)">7sn</button>
-                </div>
             </div>
         </div>
 

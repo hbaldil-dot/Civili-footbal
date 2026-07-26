@@ -1618,17 +1618,9 @@ function startLocalGameWithTeams() {
     gameMode = 'local';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
-    
-    // Güncel süreleri kullan
     matchSecondsLeft = MATCH_DURATION;
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
-    
-    // Shot süresini güncelle
-    const shotTimer = document.getElementById('shot-timer');
-    if (shotTimer) {
-        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
-    }
     
     showField();
     
@@ -1640,7 +1632,6 @@ function startLocalGameWithTeams() {
     updateHUDTurn();
     
     startSetupPhase();
-}
 }
 function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
@@ -2145,100 +2136,34 @@ function playSound(type) {
 }
 
 // ============================================================
-// 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ FONKSİYONLARI
+// 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
 // ============================================================
-
-function loadLocalTeamLogos() {
-    console.log('🔄 2 Kişilik logo listesi yükleniyor...');
-    const container1 = document.getElementById('local-player1-logos');
-    const container2 = document.getElementById('local-player2-logos');
-    
-    if (!container1 || !container2) {
-        console.warn('⚠️ Logo containerları bulunamadı!');
+function openLocalTeamSelect() {
+    console.log('👥 2 Kişilik takım seç açılıyor...');
+    const popup = document.getElementById('local-team-select');
+    if (!popup) {
+        console.error('❌ local-team-select pop-up bulunamadı!');
         return;
     }
+    popup.style.display = 'flex';
+    localP1Selected = false;
+    localP2Selected = false;
+    localPlayer1Logo = '';
+    localPlayer2Logo = '';
     
-    container1.innerHTML = '';
-    container2.innerHTML = '';
+    // İsim etiketlerini güncelle (HTML'de bu elementler olmalı)
+    const p1Name = document.getElementById('local-p1-name');
+    const p2Name = document.getElementById('local-p2-name');
+    if (p1Name) { p1Name.textContent = 'Oyuncu 1'; p1Name.style.color = '#3498db'; }
+    if (p2Name) { p2Name.textContent = 'Oyuncu 2'; p2Name.style.color = '#e74c3c'; }
     
-    teamLogos.forEach((logo) => {
-        // Oyuncu 1 için buton
-        const btn1 = document.createElement('button');
-        btn1.className = 'team-logo-btn';
-        btn1.title = logo.name;
-        btn1.dataset.logo = logo.file;
-        const img1 = document.createElement('img');
-        img1.src = `takimlar/${logo.file}`;
-        img1.alt = logo.name;
-        img1.onerror = function() { this.src = 'takimlar/default.png'; };
-        btn1.appendChild(img1);
-        btn1.onclick = function() { selectLocalTeam(1, logo.file); };
-        container1.appendChild(btn1);
-        
-        // Oyuncu 2 için buton
-        const btn2 = document.createElement('button');
-        btn2.className = 'team-logo-btn';
-        btn2.title = logo.name;
-        btn2.dataset.logo = logo.file;
-        const img2 = document.createElement('img');
-        img2.src = `takimlar/${logo.file}`;
-        img2.alt = logo.name;
-        img2.onerror = function() { this.src = 'takimlar/default.png'; };
-        btn2.appendChild(img2);
-        btn2.onclick = function() { selectLocalTeam(2, logo.file); };
-        container2.appendChild(btn2);
-    });
+    // Shield'ları temizle
+    const shield1 = document.getElementById('local-p1-shield-img');
+    const shield2 = document.getElementById('local-p2-shield-img');
+    if (shield1) { shield1.style.display = 'none'; shield1.src = ''; }
+    if (shield2) { shield2.style.display = 'none'; shield2.src = ''; }
     
-    console.log('✅ 2 Kişilik logolar yüklendi');
-}
-
-function selectLocalTeam(player, logoFile) {
-    console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
-    
-    if (player === 1) {
-        if (logoFile === localPlayer2Logo && localP2Selected) {
-            alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
-            return;
-        }
-        localPlayer1Logo = logoFile;
-        localP1Selected = true;
-        
-        document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
-            btn.classList.remove('active', 'active-p1');
-            if (btn.dataset.logo === logoFile) {
-                btn.classList.add('active', 'active-p1');
-            }
-        });
-        
-        const shield = document.getElementById('local-p1-shield-img');
-        if (shield) {
-            shield.src = `takimlar/${logoFile}`;
-            shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
-        }
-        
-    } else if (player === 2) {
-        if (logoFile === localPlayer1Logo && localP1Selected) {
-            alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
-            return;
-        }
-        localPlayer2Logo = logoFile;
-        localP2Selected = true;
-        
-        document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
-            btn.classList.remove('active', 'active-p2');
-            if (btn.dataset.logo === logoFile) {
-                btn.classList.add('active', 'active-p2');
-            }
-        });
-        
-        const shield = document.getElementById('local-p2-shield-img');
-        if (shield) {
-            shield.src = `takimlar/${logoFile}`;
-            shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
-        }
-    }
+    loadLocalTeamLogos();
 }
 
 function loadLocalTeamLogos() {
@@ -2355,11 +2280,6 @@ function selectLocalTeam(player, logoFile) {
 // TAKIM SEÇİM POP-UP MANTIĞI
 // ============================================================
 
-// ============================================================
-// MENÜ FONKSİYONLARI - TAM DÜZELTİLMİŞ HALİ
-// ============================================================
-
-// TAKIM SEÇ POP-UP
 function openTeamSelectPopup() {
     console.log('🏆 Takım seçim pop-up açılıyor...');
     
@@ -2377,20 +2297,25 @@ function openTeamSelectPopup() {
         return;
     }
 
+    // Pop-up'ı göster
     popup.style.display = 'block';
     popup.style.visibility = 'visible';
     popup.style.opacity = '1';
 
+    // Mevcut seçili takımı armaya yerleştir
     if (shieldImg) {
         if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
+            console.log('🛡️ Seçili takım arması gösteriliyor:', selectedTeamLogo);
         } else {
+            // Varsayılan takım seç
             const defaultTeam = teamLogos[0];
             if (defaultTeam) {
                 selectedTeamLogo = defaultTeam.file;
                 shieldImg.src = 'takimlar/' + defaultTeam.file;
                 shieldImg.style.display = 'block';
+                // Ana menüdeki logo overlay'ı güncelle
                 const menuOverlay = document.getElementById('selected-team-logo-display');
                 if (menuOverlay) {
                     menuOverlay.src = 'takimlar/' + defaultTeam.file;
@@ -2400,9 +2325,12 @@ function openTeamSelectPopup() {
         }
     }
 
+    // Logo grid'ini temizle ve doldur
     grid.innerHTML = '';
     
     if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos) && teamLogos.length > 0) {
+        console.log('📋 Takım logoları yükleniyor, toplam:', teamLogos.length);
+        
         teamLogos.forEach((team) => {
             const btn = document.createElement('div');
             btn.className = 'big-team-logo-btn';
@@ -2415,6 +2343,7 @@ function openTeamSelectPopup() {
             img.src = 'takimlar/' + team.file;
             img.alt = team.name || team.file;
             img.onerror = function() {
+                console.warn('⚠️ Logo yüklenemedi:', team.file);
                 this.src = 'takimlar/default.png';
             };
             btn.appendChild(img);
@@ -2422,18 +2351,28 @@ function openTeamSelectPopup() {
             btn.onclick = function(e) {
                 e.stopPropagation();
                 
+                // Tüm butonlardan active sınıfını kaldır
                 document.querySelectorAll('.big-team-logo-btn').forEach(b => {
                     b.classList.remove('active');
                 });
                 
+                // Bu butonu active yap
                 btn.classList.add('active');
-                selectedTeamLogo = team.file;
                 
+                // Takımı seç
+                selectedTeamLogo = team.file;
+                console.log('🏆 Takım seçildi:', team.file);
+                
+                // Shield'ı güncelle
                 if (shieldImg) {
                     shieldImg.src = 'takimlar/' + team.file;
                     shieldImg.style.display = 'block';
+                    shieldImg.onerror = function() {
+                        this.src = 'takimlar/default.png';
+                    };
                 }
                 
+                // Ana menüdeki logo overlay'ı güncelle
                 const menuOverlay = document.getElementById('selected-team-logo-display');
                 if (menuOverlay) {
                     menuOverlay.src = 'takimlar/' + team.file;
@@ -2441,14 +2380,22 @@ function openTeamSelectPopup() {
                     menuOverlay.style.opacity = '1';
                 }
                 
+                // Logoyu yükle
                 loadTeamLogoImage(team.file);
+                
+                // AI takımını güncelle
                 selectRandomAITeam();
+                
+                // Skor logosunu güncelle
                 updateScoreLogos();
             };
             
             grid.appendChild(btn);
         });
+        
+        console.log('✅ Takım logoları grid\'e eklendi');
     } else {
+        console.error('❌ teamLogos tanımlı değil veya boş!');
         grid.innerHTML = '<div style="color:white;padding:20px;">Takım logosu bulunamadı</div>';
     }
 }
@@ -2460,242 +2407,10 @@ function closeTeamSelectPopup() {
         popup.style.display = 'none';
         popup.style.visibility = 'hidden';
         popup.style.opacity = '0';
+        console.log('✅ Takım seçim pop-up kapatıldı');
     }
+    
+    // Seçili takımı ana menüye yansıt
     updateTeamLogoDisplay();
     updateSelectedTeamName();
-}
-
-// AI ZORLUK MENÜSÜ
-function openAILevelMenu() {
-    console.log('🎯 AI zorluk menüsü açılıyor...');
-    const menu = document.getElementById('menu');
-    const aiMenu = document.getElementById('ai-level-menu');
-    if (menu) menu.style.display = 'none';
-    if (aiMenu) aiMenu.style.display = 'flex';
-}
-
-function closeAILevelMenu() {
-    console.log('🎯 AI zorluk menüsü kapatılıyor...');
-    const menu = document.getElementById('menu');
-    const aiMenu = document.getElementById('ai-level-menu');
-    if (aiMenu) aiMenu.style.display = 'none';
-    if (menu) menu.style.display = 'block';
-}
-
-function selectDifficulty(level) {
-    console.log('🎯 Zorluk seçildi:', level);
-    closeAILevelMenu();
-    startLocalGame('ai', level);
-}
-
-// 2 KİŞİLİK AYNI EKRAN
-function openLocalTeamSelect() {
-    console.log('👥 2 Kişilik takım seç açılıyor...');
-    const popup = document.getElementById('local-team-select');
-    if (!popup) {
-        console.error('❌ local-team-select pop-up bulunamadı!');
-        return;
-    }
-    popup.style.display = 'flex';
-    localP1Selected = false;
-    localP2Selected = false;
-    localPlayer1Logo = '';
-    localPlayer2Logo = '';
-    
-    // Shield'ları temizle
-    const shield1 = document.getElementById('local-p1-shield-img');
-    const shield2 = document.getElementById('local-p2-shield-img');
-    if (shield1) { shield1.style.display = 'none'; shield1.src = ''; }
-    if (shield2) { shield2.style.display = 'none'; shield2.src = ''; }
-    
-    loadLocalTeamLogos();
-}
-
-function closeLocalTeamSelect() {
-    console.log('👥 2 Kişilik takım seç kapatılıyor...');
-    const popup = document.getElementById('local-team-select');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-}
-
-// ONLINE LOBI
-function openOnlineLobby() {
-    if (!socket) { 
-        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
-        return; 
-    }
-    console.log('🌐 Online lobi açılıyor...');
-    gameMode = 'online';
-    const playerData = getPlayerData();
-    socket.emit("join-lobby", playerData);
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'flex';
-}
-
-function closeOnlineLobby() {
-    console.log('🌐 Online lobi kapatılıyor...');
-    if (socket) socket.emit("leave-lobby");
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
-}
-
-// AYARLAR
-function openSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü açılıyor...');
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'flex';
-        popup.style.visibility = 'visible';
-        popup.style.opacity = '1';
-    }
-}
-
-function closeSettingsPopup() {
-    console.log('⚙️ Ayarlar menüsü kapatılıyor...');
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'none';
-        popup.style.visibility = 'hidden';
-        popup.style.opacity = '0';
-    }
-}
-// ============================================================
-// 2 KİŞİLİK MENÜ - MAÇ SÜRESİ AYARLARI
-// ============================================================
-
-function toggleLocalMatchOptions() {
-    const options = document.getElementById('local-match-duration-options');
-    if (!options) return;
-    
-    const shotOptions = document.getElementById('local-shot-duration-options');
-    if (shotOptions) {
-        shotOptions.style.display = 'none';
-        shotOptions.classList.remove('show');
-    }
-    
-    if (options.style.display === 'none' || options.style.display === '') {
-        options.style.display = 'flex';
-        options.classList.add('show');
-    } else {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-}
-
-function setLocalMatchDuration(seconds) {
-    console.log('⏱️ 2 Kişilik maç süresi seçildi:', seconds, 'saniye');
-    
-    const display = document.getElementById('local-match-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('#local-match-duration-options .local-setting-option').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.duration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    MATCH_DURATION = seconds;
-    
-    const options = document.getElementById('local-match-duration-options');
-    if (options) {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-}
-
-function toggleLocalShotOptions() {
-    const options = document.getElementById('local-shot-duration-options');
-    if (!options) return;
-    
-    const matchOptions = document.getElementById('local-match-duration-options');
-    if (matchOptions) {
-        matchOptions.style.display = 'none';
-        matchOptions.classList.remove('show');
-    }
-    
-    if (options.style.display === 'none' || options.style.display === '') {
-        options.style.display = 'flex';
-        options.classList.add('show');
-    } else {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-}
-
-function setLocalShotDuration(seconds) {
-    console.log('🎯 2 Kişilik vuruş süresi seçildi:', seconds, 'saniye');
-    
-    const display = document.getElementById('local-shot-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('#local-shot-duration-options .local-setting-option').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.shotDuration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    SHOT_DURATION = seconds;
-    
-    const options = document.getElementById('local-shot-duration-options');
-    if (options) {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-}
-// ============================================================
-// 2 KİŞİLİK MENÜ - VURUŞ SÜRESİ AYARLARI
-// ============================================================
-
-function toggleLocalShotOptions() {
-    const options = document.getElementById('local-shot-duration-options');
-    if (!options) return;
-    
-    // Diğer açık menüyü kapat
-    const matchOptions = document.getElementById('local-match-duration-options');
-    if (matchOptions) {
-        matchOptions.style.display = 'none';
-        matchOptions.classList.remove('show');
-    }
-    
-    if (options.style.display === 'none' || options.style.display === '') {
-        options.style.display = 'flex';
-        options.classList.add('show');
-    } else {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-}
-
-function setLocalShotDuration(seconds) {
-    console.log('🎯 2 Kişilik vuruş süresi seçildi:', seconds, 'saniye');
-    
-    const display = document.getElementById('local-shot-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('#local-shot-duration-options .local-setting-option').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.shotDuration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    // Global değişkeni güncelle
-    SHOT_DURATION = seconds;
-    
-    const options = document.getElementById('local-shot-duration-options');
-    if (options) {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-    
-    console.log('✅ 2 Kişilik vuruş süresi güncellendi:', seconds, 'sn');
 }
