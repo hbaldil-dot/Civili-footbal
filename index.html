@@ -186,7 +186,7 @@
         </div>
     </div>
 
- <!-- ============================================================
+<!-- ============================================================
      2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
      ============================================================ -->
 <div id="local-team-select" style="display: none;">
@@ -209,6 +209,36 @@
             </div>
             <div class="local-player-section">
                 <div class="team-logo-options" id="local-player2-logos"></div>
+            </div>
+        </div>
+
+        <!-- ===== AYARLAR BÖLÜMÜ - YENİ EKLENDİ ===== -->
+        <div class="local-settings-area">
+            <!-- Maç Süresi -->
+            <div class="local-setting-item" onclick="toggleLocalMatchOptions()">
+                <div class="local-setting-label">
+                    <span>⏱️ Maç Süresi</span>
+                    <span class="local-setting-value" id="local-match-duration-display">90sn</span>
+                </div>
+                <div class="local-setting-options" id="local-match-duration-options" style="display: none;">
+                    <button class="local-setting-option" data-duration="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                    <button class="local-setting-option active" data-duration="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                    <button class="local-setting-option" data-duration="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                    <button class="local-setting-option" data-duration="150" onclick="setLocalMatchDuration(150)">150sn</button>
+                </div>
+            </div>
+
+            <!-- Vuruş Süresi -->
+            <div class="local-setting-item" onclick="toggleLocalShotOptions()">
+                <div class="local-setting-label">
+                    <span>🎯 Vuruş Süresi</span>
+                    <span class="local-setting-value" id="local-shot-duration-display">5sn</span>
+                </div>
+                <div class="local-setting-options" id="local-shot-duration-options" style="display: none;">
+                    <button class="local-setting-option" data-shot-duration="3" onclick="setLocalShotDuration(3)">3sn</button>
+                    <button class="local-setting-option active" data-shot-duration="5" onclick="setLocalShotDuration(5)">5sn</button>
+                    <button class="local-setting-option" data-shot-duration="7" onclick="setLocalShotDuration(7)">7sn</button>
+                </div>
             </div>
         </div>
 
