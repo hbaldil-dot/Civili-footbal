@@ -1458,10 +1458,15 @@ function loadLocalTeamLogos() {
         return;
     }
     
+    // Container'ların üst kısmına oyuncu etiketi EKLEME - KALDIRILDI
+    // container1.parentElement.setAttribute('data-player', '👤 Oyuncu 1');  // ← BUNU KALDIR
+    // container2.parentElement.setAttribute('data-player', '👤 Oyuncu 2');  // ← BUNU KALDIR
+    
     container1.innerHTML = '';
     container2.innerHTML = '';
     
     teamLogos.forEach((logo) => {
+        // Oyuncu 1 için buton
         const btn1 = document.createElement('button');
         btn1.className = 'team-logo-btn';
         btn1.title = logo.name;
@@ -1474,6 +1479,7 @@ function loadLocalTeamLogos() {
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
         
+        // Oyuncu 2 için buton
         const btn2 = document.createElement('button');
         btn2.className = 'team-logo-btn';
         btn2.title = logo.name;
@@ -1487,7 +1493,6 @@ function loadLocalTeamLogos() {
         container2.appendChild(btn2);
     });
 }
-
 function selectLocalTeam(player, logoFile) {
     console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
     
