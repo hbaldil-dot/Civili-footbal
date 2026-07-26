@@ -2138,3 +2138,14 @@ function closeTeamSelectPopup() {
         popup.style.display = 'none';
     }
 }
+// Ana menüdeki "İki Kişilik (Aynı Ekran)" butonuna basıldığında
+function openLocalTeamSelect() {
+    // Diğer normal takım seçimi açık kalmışsa kapat
+    closeTeamSelect();
+    
+    // Oyun modunu 'iki kişilik' yap
+    gameMode = 'local_2p'; // Sizin değişken adınız neyse
+    
+    // 2 Kişilik menüyü aç
+    document.getElementById('local-team-select').style.display = 'block';
+}
