@@ -1854,8 +1854,7 @@ body { ... }
     border: none !important;
     padding: 0 !important;
     
-    /* YENİ: 5px aşağı kaydırma */
-    margin-top: 30px !important;
+   transform: translateY(30px);
 }
 
 .local-start-btn:active {
