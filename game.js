@@ -2568,7 +2568,6 @@ function toggleLocalMatchOptions() {
     const options = document.getElementById('local-match-duration-options');
     if (!options) return;
     
-    // Diğer açık menüyü kapat
     const shotOptions = document.getElementById('local-shot-duration-options');
     if (shotOptions) {
         shotOptions.style.display = 'none';
@@ -2599,7 +2598,6 @@ function setLocalMatchDuration(seconds) {
         }
     });
     
-    // Global değişkeni güncelle
     MATCH_DURATION = seconds;
     
     const options = document.getElementById('local-match-duration-options');
@@ -2607,10 +2605,50 @@ function setLocalMatchDuration(seconds) {
         options.style.display = 'none';
         options.classList.remove('show');
     }
-    
-    console.log('✅ 2 Kişilik maç süresi güncellendi:', seconds, 'sn');
 }
 
+function toggleLocalShotOptions() {
+    const options = document.getElementById('local-shot-duration-options');
+    if (!options) return;
+    
+    const matchOptions = document.getElementById('local-match-duration-options');
+    if (matchOptions) {
+        matchOptions.style.display = 'none';
+        matchOptions.classList.remove('show');
+    }
+    
+    if (options.style.display === 'none' || options.style.display === '') {
+        options.style.display = 'flex';
+        options.classList.add('show');
+    } else {
+        options.style.display = 'none';
+        options.classList.remove('show');
+    }
+}
+
+function setLocalShotDuration(seconds) {
+    console.log('🎯 2 Kişilik vuruş süresi seçildi:', seconds, 'saniye');
+    
+    const display = document.getElementById('local-shot-duration-display');
+    if (display) {
+        display.textContent = seconds + 'sn';
+    }
+    
+    document.querySelectorAll('#local-shot-duration-options .local-setting-option').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.shotDuration) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    SHOT_DURATION = seconds;
+    
+    const options = document.getElementById('local-shot-duration-options');
+    if (options) {
+        options.style.display = 'none';
+        options.classList.remove('show');
+    }
+}
 // ============================================================
 // 2 KİŞİLİK MENÜ - VURUŞ SÜRESİ AYARLARI
 // ============================================================
