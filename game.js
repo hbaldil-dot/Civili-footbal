@@ -955,6 +955,7 @@ function updateHUDTurn() {
     if (!indicator) return;
     
     if (gameMode === 'online') {
+        // Online mod
         if (turn === myTeamNumber) {
             indicator.innerText = "🔥 SIRA SİZDE";
             indicator.style.borderColor = "#2ecc71";
@@ -965,28 +966,28 @@ function updateHUDTurn() {
             indicator.style.color = "#e74c3c";
         }
     } else if (gameMode === 'local') {
-        // 2 Kişilik oyun için özel gösterim
+        // 2 Kişilik mod - Takım ismi veya oyuncu numarası göster
+        const playerNames = {
+            1: localPlayer1Logo ? teamLogos.find(l => l.file === localPlayer1Logo)?.name.replace('⚽ ', '') || 'Oyuncu 1' : 'Oyuncu 1',
+            2: localPlayer2Logo ? teamLogos.find(l => l.file === localPlayer2Logo)?.name.replace('⚽ ', '') || 'Oyuncu 2' : 'Oyuncu 2'
+        };
+        
         if (turn === 1) {
-            // Oyuncu 1'in takım adını veya "Oyuncu 1" yaz
-            const player1Name = getLocalPlayerName(1);
-            indicator.innerText = `🎯 ${player1Name}`;
+            indicator.innerText = `🎯 ${playerNames[1]}`;
             indicator.style.borderColor = "#3498db";
             indicator.style.color = "#3498db";
         } else {
-            // Oyuncu 2'nin takım adını veya "Oyuncu 2" yaz
-            const player2Name = getLocalPlayerName(2);
-            indicator.innerText = `🎯 ${player2Name}`;
+            indicator.innerText = `🎯 ${playerNames[2]}`;
             indicator.style.borderColor = "#e74c3c";
             indicator.style.color = "#e74c3c";
         }
     } else if (gameMode === 'ai') {
-        // AI modu için mevcut haliyle kalabilir
+        // AI modu
         indicator.innerText = turn === 1 ? "🔵 SİZ" : "🔴 BİLGİSAYAR";
         indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
         indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
     }
 }
-
 // Yeni yardımcı fonksiyon - Oyuncu ismini al
 function getLocalPlayerName(playerNumber) {
     if (playerNumber === 1) {
@@ -1627,9 +1628,12 @@ function startLocalGameWithTeams() {
         updateScoreLogos();
     }, 100);
     
+    // Sıra göstergesini ayarla - Oyuncu 1 başlar
+    turn = 1;
+    updateHUDTurn();
+    
     startSetupPhase();
 }
-
 function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
     
