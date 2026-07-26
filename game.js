@@ -955,18 +955,9 @@ function updateHUDTurn() {
     if (!indicator) return;
     
     if (gameMode === 'online') {
-        // Online mod
-        if (turn === myTeamNumber) {
-            indicator.innerText = "🔥 SIRA SİZDE";
-            indicator.style.borderColor = "#2ecc71";
-            indicator.style.color = "#2ecc71";
-        } else {
-            indicator.innerText = "⏳ RAKİPTE";
-            indicator.style.borderColor = "#e74c3c";
-            indicator.style.color = "#e74c3c";
-        }
+        // ... online kodu
     } else if (gameMode === 'local') {
-        // 2 Kişilik mod - Takım ismi veya oyuncu numarası göster
+        // 2 Kişilik mod - Takım adını göster
         const playerNames = {
             1: localPlayer1Logo ? teamLogos.find(l => l.file === localPlayer1Logo)?.name.replace('⚽ ', '') || 'Oyuncu 1' : 'Oyuncu 1',
             2: localPlayer2Logo ? teamLogos.find(l => l.file === localPlayer2Logo)?.name.replace('⚽ ', '') || 'Oyuncu 2' : 'Oyuncu 2'
@@ -982,10 +973,7 @@ function updateHUDTurn() {
             indicator.style.color = "#e74c3c";
         }
     } else if (gameMode === 'ai') {
-        // AI modu
-        indicator.innerText = turn === 1 ? "🔵 SİZ" : "🔴 BİLGİSAYAR";
-        indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
-        indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
+        // ... AI kodu
     }
 }
 // Yeni yardımcı fonksiyon - Oyuncu ismini al
