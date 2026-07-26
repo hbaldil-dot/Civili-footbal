@@ -1628,7 +1628,6 @@ function startLocalGameWithTeams() {
         updateScoreLogos();
     }, 100);
     
-    // Sıra göstergesini ayarla - Oyuncu 1 başlar
     turn = 1;
     updateHUDTurn();
     
