@@ -760,8 +760,7 @@ function startLocalGame(mode, level) {
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
     showField();
-    startSetupPhase(); // Burada zaten updateHUDTurn çağrılıyor
-}
+    startSetupPhase();
 }
 
 function openOnlineLobby() {
@@ -794,8 +793,12 @@ function startSetupPhase() {
     startBtn.style.opacity = '1';
     startBtn.disabled = false;
 
-    // *** BURASI GÜNCELLENDİ: updateHUDTurn() çağrılıyor ***
-    updateHUDTurn(); // Bu fonksiyon artık setup aşamasını kontrol edecek
+    const indicator = document.getElementById('turn-indicator');
+    if (indicator) {
+        indicator.innerText = "🏆 Takım Taktik Ayarla";
+        indicator.style.borderColor = "#f1c40f";
+        indicator.style.color = "#f1c40f";
+    }
 
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) {
@@ -804,9 +807,6 @@ function startSetupPhase() {
     }
 
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
-
-    // ... devam eden pin oluşturma kodu ...
-}
 
     pins = [
         { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: false },
@@ -864,7 +864,6 @@ function confirmFormationsAndStart() {
             shotTimer.style.display = 'block';
             shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
         }
-        // *** BURASI GÜNCELLENDİ: Oyun başladığında sıra gösterimi ***
         updateHUDTurn();
         startMatchTimer();
         resetShotTimer();
@@ -955,26 +954,10 @@ function updateHUDTurn() {
     const indicator = document.getElementById('turn-indicator');
     if (!indicator) return;
     
-    // Eğer setup aşamasındaysak özel mesaj göster
-    if (currentPhase === 'setup') {
-        indicator.innerText = "🏆 Takım Taktik Ayarla";
-        indicator.style.borderColor = "#f1c40f";
-        indicator.style.color = "#f1c40f";
-        return;
-    }
-    
-    // Oyun aşamasındaysak normal sıra gösterimi
     if (gameMode === 'online') {
-        if (turn === myTeamNumber) {
-            indicator.innerText = "🔥 SIRA SİZDE";
-            indicator.style.borderColor = "#2ecc71";
-            indicator.style.color = "#2ecc71";
-        } else {
-            indicator.innerText = "⏳ RAKİPTE";
-            indicator.style.borderColor = "#e74c3c";
-            indicator.style.color = "#e74c3c";
-        }
+        // ... online kodu
     } else if (gameMode === 'local') {
+        // 2 Kişilik mod - Takım adını göster
         const playerNames = {
             1: localPlayer1Logo ? teamLogos.find(l => l.file === localPlayer1Logo)?.name.replace('⚽ ', '') || 'Oyuncu 1' : 'Oyuncu 1',
             2: localPlayer2Logo ? teamLogos.find(l => l.file === localPlayer2Logo)?.name.replace('⚽ ', '') || 'Oyuncu 2' : 'Oyuncu 2'
@@ -990,15 +973,7 @@ function updateHUDTurn() {
             indicator.style.color = "#e74c3c";
         }
     } else if (gameMode === 'ai') {
-        if (turn === 1) {
-            indicator.innerText = "🔵 SİZ";
-            indicator.style.borderColor = "#3498db";
-            indicator.style.color = "#3498db";
-        } else {
-            indicator.innerText = "🔴 BİLGİSAYAR";
-            indicator.style.borderColor = "#e74c3c";
-            indicator.style.color = "#e74c3c";
-        }
+        // ... AI kodu
     }
 }
 // Yeni yardımcı fonksiyon - Oyuncu ismini al
@@ -1301,7 +1276,6 @@ canvas.addEventListener('touchcancel', (e) => {
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
-
 function openAILevelMenu() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('ai-level-menu').style.display = 'flex';
@@ -1312,120 +1286,14 @@ function closeAILevelMenu() {
     document.getElementById('menu').style.display = 'block';
 }
 
-function openLocalTeamSelect() {
-    document.getElementById('local-team-select').style.display = 'flex';
-    localP1Selected = false;
-    localP2Selected = false;
-    localPlayer1Logo = '';
-    localPlayer2Logo = '';
-    document.getElementById('local-p1-shield-img').style.display = 'none';
-    document.getElementById('local-p2-shield-img').style.display = 'none';
-    loadLocalTeamLogos();
+function selectColor(team, color) {
+    alert('🎨 Artık takım logoları kullanılıyor. Forma rengi seçimine gerek yok!');
 }
 
-function closeLocalTeamSelect() {
-    document.getElementById('local-team-select').style.display = 'none';
+function selectFieldColor(color) {
+    console.log('🟩 Saha rengi seçimi devre dışı - resim kullanılıyor');
 }
 
-function openOnlineLobby() {
-    if (!socket) { 
-        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
-        return; 
-    }
-    gameMode = 'online';
-    const playerData = getPlayerData();
-    socket.emit("join-lobby", playerData);
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'flex';
-}
-
-function closeOnlineLobby() {
-    if (socket) socket.emit("leave-lobby");
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
-}
-
-function openSettingsPopup() {
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'flex';
-    }
-}
-
-function closeSettingsPopup() {
-    const popup = document.getElementById('settings-popup');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-}
-
-function openTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    const grid = document.getElementById('team-select-grid');
-    const shieldImg = document.getElementById('popup-selected-team-img');
-    
-    if (!popup || !grid) return;
-    
-    popup.style.display = 'block';
-    
-    if (shieldImg) {
-        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
-            shieldImg.src = 'takimlar/' + selectedTeamLogo;
-            shieldImg.style.display = 'block';
-        } else {
-            const defaultTeam = teamLogos[0];
-            if (defaultTeam) {
-                selectedTeamLogo = defaultTeam.file;
-                shieldImg.src = 'takimlar/' + defaultTeam.file;
-                shieldImg.style.display = 'block';
-                const menuOverlay = document.getElementById('selected-team-logo-display');
-                if (menuOverlay) {
-                    menuOverlay.src = 'takimlar/' + defaultTeam.file;
-                }
-            }
-        }
-    }
-    
-    grid.innerHTML = '';
-    teamLogos.forEach((team) => {
-        const btn = document.createElement('div');
-        btn.className = 'big-team-logo-btn';
-        if (selectedTeamLogo && selectedTeamLogo === team.file) {
-            btn.classList.add('active');
-        }
-        const img = document.createElement('img');
-        img.src = 'takimlar/' + team.file;
-        img.alt = team.name;
-        btn.appendChild(img);
-        btn.onclick = function(e) {
-            e.stopPropagation();
-            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            selectedTeamLogo = team.file;
-            if (shieldImg) {
-                shieldImg.src = 'takimlar/' + team.file;
-                shieldImg.style.display = 'block';
-            }
-            const menuOverlay = document.getElementById('selected-team-logo-display');
-            if (menuOverlay) {
-                menuOverlay.src = 'takimlar/' + team.file;
-            }
-            loadTeamLogoImage(team.file);
-            selectRandomAITeam();
-            updateScoreLogos();
-        };
-        grid.appendChild(btn);
-    });
-}
-
-function closeTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    if (popup) {
-        popup.style.display = 'none';
-    }
-    updateTeamLogoDisplay();
-    updateSelectedTeamName();
-}
 // ============================================================
 // TAKIM LOGO FONKSİYONLARI
 // ============================================================
