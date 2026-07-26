@@ -186,7 +186,7 @@
         </div>
     </div>
 
- <!-- ============================================================
+<!-- ============================================================
      2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
      ============================================================ -->
 <div id="local-team-select" style="display: none;">
@@ -212,12 +212,32 @@
             </div>
         </div>
 
-        <!-- Alt Butonlar -->
+        <!-- Alt Butonlar + SÜRE SEÇİMLERİ (YENİ) -->
         <div class="local-action-buttons">
-            <!-- MAÇA BAŞLA BUTONU - RESİM OLARAK DEĞİŞTİRİLDİ -->
+            
+            <!-- *** YENİ: MAÇ SÜRESİ SEÇİMİ *** -->
+            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 4px; width: 100%;">
+                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">MAÇ</span>
+                <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+            </div>
+
+            <!-- *** YENİ: VURUŞ SÜRESİ SEÇİMİ *** -->
+            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 6px; width: 100%;">
+                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">VURUŞ</span>
+                <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
+                <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
+                <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+            </div>
+
+            <!-- MAÇA BAŞLA BUTONU -->
             <div class="local-start-btn" onclick="startLocalGameWithTeams()">
                 <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
             </div>
+            
+            <!-- Ana Menü Butonu -->
             <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
                 <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
             </div>
