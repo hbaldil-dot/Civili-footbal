@@ -1854,7 +1854,7 @@ body { ... }
     border: none !important;
     padding: 0 !important;
     
-   transform: translateY(25px);
+   transform: translateY(30px);
 }
 
 .local-start-btn:active {
