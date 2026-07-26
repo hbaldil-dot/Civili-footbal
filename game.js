@@ -764,7 +764,10 @@ function startLocalGame(mode, level) {
 }
 
 function openOnlineLobby() {
-    if (!socket) { alert("Şu anda bir sunucuya bağlı değilsiniz!"); return; }
+    if (!socket) { 
+        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
+        return; 
+    }
     gameMode = 'online';
     const playerData = getPlayerData();
     socket.emit("join-lobby", playerData);
