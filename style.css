@@ -1854,7 +1854,7 @@ body { ... }
     border: none !important;
     padding: 0 !important;
     
-   transform: translateY(30px);
+   transform: translateY(25px);
 }
 
 .local-start-btn:active {
@@ -1988,7 +1988,7 @@ body { ... }
     max-width: 320px !important;
     margin: 0 auto !important;
 
-    transform: translateY(12px);
+    transform: translateY(25px);
 }
 
 .local-time-selector span {
