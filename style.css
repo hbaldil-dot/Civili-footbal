@@ -1710,7 +1710,7 @@ body { ... }
 /* Seçilen Takım Shield Alanları */
 .local-selected-area {
     position: absolute !important;
-    top: 25% !important;
+    top: 35% !important;
     width: 65px !important;
     height: 65px !important;
     z-index: 10 !important;
@@ -1722,8 +1722,8 @@ body { ... }
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-.p1-selected-area { left: 50% !important; transform: translateX(-120%) !important; }
-.p2-selected-area { right: 50% !important; transform: translateX(120%) !important; }
+.p1-selected-area { left: 40% !important; transform: translateX(-120%) !important; }
+.p2-selected-area { right: 40% !important; transform: translateX(120%) !important; }
 
 .local-selected-area img {
     width: 100% !important;
