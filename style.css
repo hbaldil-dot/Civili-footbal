@@ -1875,3 +1875,91 @@ body { ... }
     width: 100% !important;
     display: block !important;
 }
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .local-team-body { 
+        top: 52% !important; 
+        width: 96% !important;
+        gap: 8px !important;
+    }
+    .local-player-section {
+        padding: 8px 5px !important;
+        max-height: 180px !important;
+    }
+    .team-logo-btn {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 2px !important;
+    }
+    .local-selected-area {
+        width: 50px !important;
+        height: 50px !important;
+        top: 10% !important;
+    }
+    .p1-selected-area { transform: translateX(-110%) !important; }
+    .p2-selected-area { transform: translateX(110%) !important; }
+    
+    .local-start-btn {
+        max-width: 240px !important;
+    }
+    .local-main-menu-btn {
+        width: 30% !important;
+        max-width: 80px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .local-team-body { top: 50% !important; }
+    .local-player-section { max-height: 150px !important; }
+    .team-logo-btn {
+        width: 28px !important;
+        height: 28px !important;
+        padding: 2px !important;
+    }
+    .local-selected-area {
+        width: 42px !important;
+        height: 42px !important;
+        top: 8% !important;
+    }
+    
+    .local-start-btn {
+        max-width: 200px !important;
+    }
+    .local-main-menu-btn {
+        width: 25% !important;
+        max-width: 70px !important;
+    }
+}
+
+/* Yatay mod */
+@media (max-height: 500px) and (orientation: landscape) {
+    .local-team-body {
+        top: 55% !important;
+        width: 85% !important;
+    }
+    .local-player-section {
+        max-height: 140px !important;
+        padding: 6px 4px !important;
+    }
+    .team-logo-btn {
+        width: 26px !important;
+        height: 26px !important;
+        padding: 1px !important;
+    }
+    .local-selected-area {
+        width: 40px !important;
+        height: 40px !important;
+        top: 8% !important;
+    }
+    
+    .local-start-btn {
+        max-width: 180px !important;
+    }
+    .local-main-menu-btn {
+        width: 20% !important;
+        max-width: 60px !important;
+    }
+}
