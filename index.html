@@ -168,23 +168,42 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         ONLINE LOBI POP-UP
-         ============================================================ -->
-    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>ONLINE HAVUZ</h2>
-                <button class="popup-close" onclick="closeOnlineLobby()">✕</button>
-            </div>
-            <div class="popup-body">
-                <p style="font-size: 11px; color: #ccc; margin-bottom: 10px;">Maç yapmak istediğiniz kişiye tıklayarak davet gönderin</p>
-                <div class="player-list" id="lobby-list">
-                    <div style="padding:15px;color:#888;text-align:center;">Havuz güncelleniyor...</div>
-                </div>
+  <!-- ============================================================
+     ONLINE MENÜ - TAM EKRAN
+     ============================================================ -->
+<div id="online-lobby" style="display: none;">
+    <div class="online-container">
+        <!-- Arka Fon -->
+        <img src="menu/online/onlinearkafon.webp" alt="Online Menü" class="online-bg">
+        
+        <!-- Başlık -->
+        <div class="online-header">
+            <span class="online-title">ONLINE FUTBOL</span>
+            <span class="online-subtitle">MAÇ YAPMAK İSTEDİĞİNİZ KİŞİYE TIKLAYARAK DAVET GÖNDERİN</span>
+        </div>
+
+        <!-- Çevrimiçi Oyuncular Listesi -->
+        <div class="online-section">
+            <div class="online-section-title">ÇEVRİMİÇİ OYUNCULAR</div>
+            <div class="online-player-list" id="lobby-list">
+                <div class="online-empty">Havuz güncelleniyor...</div>
             </div>
         </div>
+
+        <!-- Bekleyen Davetler -->
+        <div class="online-section">
+            <div class="online-section-title">BEKLEYEN DAVETLER</div>
+            <div class="online-invite-list" id="invite-list">
+                <div class="online-empty">Bekleyen davet yok</div>
+            </div>
+        </div>
+
+        <!-- Ana Menü Butonu -->
+        <div class="online-main-menu-btn" onclick="closeOnlineLobby()">
+            <img src="menu/online/anamenu.webp" alt="Ana Menü">
+        </div>
     </div>
+</div>
 
 <!-- ============================================================
      2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
