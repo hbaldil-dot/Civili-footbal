@@ -953,6 +953,7 @@ function endMatch() {
 function updateHUDTurn() {
     const indicator = document.getElementById('turn-indicator');
     if (!indicator) return;
+    
     if (gameMode === 'online') {
         if (turn === myTeamNumber) {
             indicator.innerText = "🔥 SIRA SİZDE";
@@ -963,13 +964,45 @@ function updateHUDTurn() {
             indicator.style.borderColor = "#e74c3c";
             indicator.style.color = "#e74c3c";
         }
-    } else {
+    } else if (gameMode === 'local') {
+        // 2 Kişilik oyun için özel gösterim
+        if (turn === 1) {
+            // Oyuncu 1'in takım adını veya "Oyuncu 1" yaz
+            const player1Name = getLocalPlayerName(1);
+            indicator.innerText = `🎯 ${player1Name}`;
+            indicator.style.borderColor = "#3498db";
+            indicator.style.color = "#3498db";
+        } else {
+            // Oyuncu 2'nin takım adını veya "Oyuncu 2" yaz
+            const player2Name = getLocalPlayerName(2);
+            indicator.innerText = `🎯 ${player2Name}`;
+            indicator.style.borderColor = "#e74c3c";
+            indicator.style.color = "#e74c3c";
+        }
+    } else if (gameMode === 'ai') {
+        // AI modu için mevcut haliyle kalabilir
         indicator.innerText = turn === 1 ? "🔵 SİZ" : "🔴 BİLGİSAYAR";
         indicator.style.borderColor = turn === 1 ? "#3498db" : "#e74c3c";
         indicator.style.color = turn === 1 ? "#3498db" : "#e74c3c";
     }
 }
 
+// Yeni yardımcı fonksiyon - Oyuncu ismini al
+function getLocalPlayerName(playerNumber) {
+    if (playerNumber === 1) {
+        if (localPlayer1Logo) {
+            const logo = teamLogos.find(l => l.file === localPlayer1Logo);
+            return logo ? `Oyuncu 1 (${logo.name.replace('⚽ ', '')})` : 'Oyuncu 1';
+        }
+        return 'Oyuncu 1';
+    } else {
+        if (localPlayer2Logo) {
+            const logo = teamLogos.find(l => l.file === localPlayer2Logo);
+            return logo ? `Oyuncu 2 (${logo.name.replace('⚽ ', '')})` : 'Oyuncu 2';
+        }
+        return 'Oyuncu 2';
+    }
+}
 function applyShotPhysics(shotData) {
     cap.vx = 0; cap.vy = 0;
     const dx = shotData.startX - shotData.endX;
