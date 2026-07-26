@@ -2414,3 +2414,58 @@ function closeTeamSelectPopup() {
     updateTeamLogoDisplay();
     updateSelectedTeamName();
 }
+// ============================================================
+// 2 KİŞİLİK MOD - SÜRE AYARLARI (YENİ)
+// ============================================================
+
+// Maç süresini değiştir (2 kişilik mod için)
+function setLocalMatchDuration(seconds) {
+    console.log('⏱️ 2 Kişilik Maç Süresi Seçildi:', seconds, 'sn');
+    
+    MATCH_DURATION = seconds;
+    
+    // Aktif butonu güncelle
+    document.querySelectorAll('.local-time-btn[data-time]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.time) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Eğer oyun açıksa zamanı güncelle
+    if (currentPhase === 'playing' || currentPhase === 'setup') {
+        matchSecondsLeft = seconds;
+        const timeBoard = document.getElementById('time-board');
+        if (timeBoard) {
+            timeBoard.innerText = seconds + 's';
+        }
+    }
+}
+
+// Vuruş süresini değiştir (2 kişilik mod için)
+function setLocalShotDuration(seconds) {
+    console.log('🎯 2 Kişilik Vuruş Süresi Seçildi:', seconds, 'sn');
+    
+    SHOT_DURATION = seconds;
+    
+    // Aktif butonu güncelle
+    document.querySelectorAll('.local-time-btn[data-shot]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.shot) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Eğer oyun açıksa shot timer'ı güncelle
+    if (currentPhase === 'playing') {
+        const shotTimer = document.getElementById('shot-timer');
+        if (shotTimer) {
+            shotTimer.innerText = 'ŞUT: ' + seconds + 's';
+        }
+        // Mevcut shot timer'ı sıfırla
+        if (shotTimerInterval) {
+            clearInterval(shotTimerInterval);
+            resetShotTimer();
+        }
+    }
+}
