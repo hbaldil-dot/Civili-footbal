@@ -1660,7 +1660,7 @@ body { ... }
     }
 }
 /* ============================================================
-   2 KİŞİLİK EKRAN MENÜSÜ (TAM EKRAN ARKA FON UYARLAMA)
+   2 KİŞİLİK EKRAN MENÜSÜ - GÜNCELLENMİŞ
    ============================================================ */
 
 #local-team-select {
@@ -1707,7 +1707,7 @@ body { ... }
     z-index: 1 !important;
 }
 
-/* ===== SEÇİLEN TAKIM SHIELD ALANLARI (ÜSTTE) ===== */
+/* Seçilen Takım Shield Alanları */
 .local-selected-area {
     position: absolute !important;
     top: 12% !important;
@@ -1733,17 +1733,17 @@ body { ... }
     border-radius: 50% !important;
 }
 
-/* ===== TAKIM LOGO LİSTELERİ (ALTTA) ===== */
+/* Takım Logo Listeleri */
 .local-team-body {
     position: absolute !important;
-    top: 55% !important; /* Yukarıdan biraz aşağıya */
+    top: 55% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 92% !important;
     max-width: 440px !important;
     z-index: 10 !important;
     display: flex !important;
-    flex-direction: row !important; /* Yan yana iki sütun */
+    flex-direction: row !important;
     gap: 12px !important;
     justify-content: center !important;
 }
@@ -1763,17 +1763,11 @@ body { ... }
     align-items: center !important;
 }
 
-/* Her oyuncu bölümünün başlığı (P1 / P2) */
-.local-player-section::before {
+/* Oyuncu etiketi KALDIRILDI - ::before pseudo-element kullanma */
+/* .local-player-section::before {
     content: attr(data-player);
-    display: block !important;
-    font-size: 13px !important;
-    font-weight: 900 !important;
-    letter-spacing: 2px !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    margin-bottom: 6px !important;
-    text-transform: uppercase !important;
-}
+    ...
+} */
 
 /* Logo Izgarası */
 .team-logo-options {
@@ -1827,17 +1821,10 @@ body { ... }
     background: rgba(255, 255, 255, 0.02) !important;
 }
 
-/* ===== OYUNCU İSİMLERİ (Shield altında) ===== */
-.local-player-name {
-    text-align: center !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    margin-top: 4px !important;
-    letter-spacing: 1px !important;
-}
+/* Oyuncu ismi KALDIRILDI */
+/* .local-player-name { ... } */
 
-/* ===== ALT AKSİYON BUTONLARI ===== */
+/* Alt Aksiyon Butonları */
 .local-action-buttons {
     position: absolute !important;
     bottom: 5% !important;
@@ -1883,80 +1870,4 @@ body { ... }
 .local-main-menu-btn img {
     width: 100% !important;
     display: block !important;
-}
-
-/* ============================================================
-   MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 420px) {
-    .local-team-body { 
-        top: 52% !important; 
-        width: 96% !important;
-        gap: 8px !important;
-    }
-    .local-player-section {
-        padding: 8px 5px !important;
-        max-height: 180px !important;
-    }
-    .team-logo-btn {
-        width: 32px !important;
-        height: 32px !important;
-        padding: 2px !important;
-    }
-    .local-selected-area {
-        width: 50px !important;
-        height: 50px !important;
-        top: 10% !important;
-    }
-    .p1-selected-area { transform: translateX(-110%) !important; }
-    .p2-selected-area { transform: translateX(110%) !important; }
-    .local-start-btn {
-        font-size: 15px !important;
-        padding: 10px !important;
-    }
-}
-
-@media (max-width: 360px) {
-    .local-team-body { top: 50% !important; }
-    .local-player-section { max-height: 150px !important; }
-    .team-logo-btn {
-        width: 28px !important;
-        height: 28px !important;
-        padding: 2px !important;
-    }
-    .local-selected-area {
-        width: 42px !important;
-        height: 42px !important;
-        top: 8% !important;
-    }
-    .local-start-btn {
-        font-size: 13px !important;
-        padding: 8px !important;
-    }
-}
-
-/* Yatay mod */
-@media (max-height: 500px) and (orientation: landscape) {
-    .local-team-body {
-        top: 55% !important;
-        width: 85% !important;
-    }
-    .local-player-section {
-        max-height: 140px !important;
-        padding: 6px 4px !important;
-    }
-    .team-logo-btn {
-        width: 26px !important;
-        height: 26px !important;
-        padding: 1px !important;
-    }
-    .local-selected-area {
-        width: 40px !important;
-        height: 40px !important;
-        top: 8% !important;
-    }
-    .local-action-buttons {
-        bottom: 3% !important;
-    }
 }
