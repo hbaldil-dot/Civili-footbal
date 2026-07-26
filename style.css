@@ -53,25 +53,22 @@ body::before {
    ============================================================ */
 
 #menu {
-    position: absolute !important;
+    position: absolute;
     border: none !important;
     border-radius: 0 !important;
-    padding: 2vh 2vw 2vh 2vw !important;
-    text-align: center !important;
-    z-index: 100 !important;
-    width: 92% !important;
-    max-width: 400px !important;
+    padding: 2vh 2vw 2vh 2vw;
+    text-align: center;
+    z-index: 100;
+    width: 92%;
+    max-width: 400px;
     box-shadow: none !important;
-    display: block !important;
+    display: block;
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    bottom: 3vh !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    
-    /* YENİ: Tıklamaları aktif et */
-    pointer-events: auto !important;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 #menu * {
@@ -80,16 +77,12 @@ body::before {
     border: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    
-    /* YENİ: Tıklamaları aktif et */
-    pointer-events: auto !important;
 }
 
 /* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
     margin-bottom: 1.2vh;
     text-align: center;
-    pointer-events: auto !important;
 }
 
 .input-wrapper {
@@ -102,7 +95,6 @@ body::before {
     gap: 4px;
     background: transparent !important;
     flex-direction: row;
-    pointer-events: auto !important;
 }
 
 .logo-container {
@@ -177,21 +169,16 @@ body::before {
 
 /* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
-    display: block !important;
-    width: 100% !important;
-    max-width: 320px !important;
-    margin: 0 auto 0.6vh auto !important;
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 0.6vh auto;
     background: transparent !important;
     border: none !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-    transition: transform 0.2s ease !important;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease;
     box-shadow: none !important;
-    
-    /* YENİ: Tıklamaları aktif et */
-    pointer-events: auto !important;
-    z-index: 101 !important;
-    position: relative !important;
 }
 
 .menu-btn:active {
@@ -203,7 +190,6 @@ body::before {
     display: block;
     opacity: 0.9;
     transition: opacity 0.3s ease;
-    pointer-events: none !important; /* Resmin kendi tıklamayı engellememesi için */
 }
 
 .menu-btn:hover .menu-btn-img {
@@ -2068,359 +2054,5 @@ body { ... }
     .local-time-btn {
         font-size: 7px !important;
         padding: 2px 5px !important;
-    }
-}
-/* ============================================================
-   ONLINE MENÜ - TAM EKRAN
-   ============================================================ */
-
-#online-lobby {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100vh !important;
-    min-height: -webkit-fill-available !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #000000 !important;
-    z-index: 999999 !important;
-    display: none !important;
-    overflow: hidden !important;
-    
-    /* YENİ: Tıklamaları aktif et */
-    pointer-events: auto !important;
-}
-
-#online-lobby[style*="display: flex"],
-#online-lobby[style*="display: block"] {
-    display: block !important;
-}
-
-.online-container {
-    position: relative !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    pointer-events: auto !important; /* YENİ */
-}
-
-.online-bg {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
-    z-index: 1 !important;
-    pointer-events: none !important; /* Arka plan tıklamayı engellemesin */
-}
-
-/* Ana menü butonu */
-.online-main-menu-btn {
-    position: absolute !important;
-    bottom: 4% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 28% !important;
-    max-width: 110px !important;
-    cursor: pointer !important;
-    z-index: 10 !important;
-    transition: transform 0.15s ease !important;
-    pointer-events: auto !important; /* YENİ */
-}
-
-.online-main-menu-btn:active {
-    transform: translateX(-50%) scale(0.92) !important;
-}
-
-.online-main-menu-btn img {
-    width: 100% !important;
-    display: block !important;
-    pointer-events: none !important; /* Resmin kendi tıklamayı engellememesi için */
-}
-
-/* ===== BAŞLIK ===== */
-.online-header {
-    position: absolute !important;
-    top: 5% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    text-align: center !important;
-    z-index: 10 !important;
-    width: 92% !important;
-    max-width: 450px !important;
-}
-
-.online-title {
-    display: block !important;
-    font-size: clamp(28px, 6vw, 44px) !important;
-    font-weight: 900 !important;
-    color: #ffffff !important;
-    letter-spacing: 8px !important;
-    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.9) !important;
-    font-family: 'Arial Black', 'Impact', sans-serif !important;
-    line-height: 1.2 !important;
-}
-
-.online-subtitle {
-    display: block !important;
-    font-size: clamp(10px, 1.6vw, 14px) !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    margin-top: 6px !important;
-    letter-spacing: 3px !important;
-    font-weight: 400 !important;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* ===== BÖLÜM BAŞLIKLARI ===== */
-.online-section {
-    position: absolute !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 90% !important;
-    max-width: 420px !important;
-    z-index: 10 !important;
-}
-
-.online-players-section {
-    top: 22% !important;
-}
-
-.online-invites-section {
-    top: 55% !important;
-}
-
-.online-section-title {
-    color: rgba(255, 255, 255, 0.4) !important;
-    font-size: clamp(10px, 1.4vw, 13px) !important;
-    letter-spacing: 4px !important;
-    font-weight: 700 !important;
-    margin-bottom: 6px !important;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6) !important;
-    text-align: left !important;
-    padding-left: 4px !important;
-}
-
-/* ===== OYUNCU LİSTESİ ===== */
-.online-player-list,
-.online-invite-list {
-    background: rgba(0, 0, 0, 0.5) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    padding: 4px 0 !important;
-    max-height: 140px !important;
-    overflow-y: auto !important;
-    min-height: 50px !important;
-}
-
-.online-player-list::-webkit-scrollbar,
-.online-invite-list::-webkit-scrollbar {
-    width: 3px !important;
-}
-
-.online-player-list::-webkit-scrollbar-track,
-.online-invite-list::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-
-.online-player-list::-webkit-scrollbar-thumb,
-.online-invite-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-radius: 4px !important;
-}
-
-/* ===== LİSTE ÖĞELERİ ===== */
-.online-player-item,
-.online-invite-item {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 8px 14px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-}
-
-.online-player-item:last-child,
-.online-invite-item:last-child {
-    border-bottom: none !important;
-}
-
-.online-player-info {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    flex: 1 !important;
-    min-width: 0 !important;
-}
-
-.online-player-logo {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    flex-shrink: 0 !important;
-}
-
-.online-player-name {
-    color: rgba(255, 255, 255, 0.85) !important;
-    font-size: clamp(12px, 1.6vw, 15px) !important;
-    font-weight: 500 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-/* ===== BUTONLAR ===== */
-.online-btn {
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-    transition: transform 0.15s ease, opacity 0.2s ease !important;
-    flex-shrink: 0 !important;
-}
-
-.online-btn:active {
-    transform: scale(0.90) !important;
-}
-
-.online-btn img {
-    display: block !important;
-    height: auto !important;
-    max-height: 28px !important;
-    width: auto !important;
-}
-
-.online-btn-invite img {
-    max-height: 26px !important;
-}
-
-.online-btn-accept img {
-    max-height: 26px !important;
-}
-
-.online-btn-reject img {
-    max-height: 26px !important;
-}
-
-.online-invite-actions {
-    display: flex !important;
-    gap: 6px !important;
-    align-items: center !important;
-    flex-shrink: 0 !important;
-}
-
-/* ===== BOŞ DURUM ===== */
-.online-empty {
-    color: rgba(255, 255, 255, 0.15) !important;
-    text-align: center !important;
-    padding: 16px !important;
-    font-size: 12px !important;
-    letter-spacing: 2px !important;
-}
-
-/* ===== ANA MENÜ BUTONU ===== */
-.online-main-menu-btn {
-    position: absolute !important;
-    bottom: 4% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 28% !important;
-    max-width: 110px !important;
-    cursor: pointer !important;
-    z-index: 10 !important;
-    transition: transform 0.15s ease !important;
-}
-
-.online-main-menu-btn:active {
-    transform: translateX(-50%) scale(0.92) !important;
-}
-
-.online-main-menu-btn img {
-    width: 100% !important;
-    display: block !important;
-}
-
-/* ============================================================
-   ONLINE MENÜ - MOBİL UYUM
-   ============================================================ */
-
-@media (max-width: 420px) {
-    .online-players-section {
-        top: 20% !important;
-    }
-    .online-invites-section {
-        top: 52% !important;
-    }
-    .online-player-list,
-    .online-invite-list {
-        max-height: 100px !important;
-        min-height: 40px !important;
-    }
-    .online-player-item,
-    .online-invite-item {
-        padding: 5px 10px !important;
-    }
-    .online-player-logo {
-        width: 22px !important;
-        height: 22px !important;
-    }
-    .online-btn img {
-        max-height: 22px !important;
-    }
-    .online-main-menu-btn {
-        width: 30% !important;
-        max-width: 80px !important;
-    }
-}
-
-@media (max-width: 360px) {
-    .online-players-section {
-        top: 18% !important;
-    }
-    .online-invites-section {
-        top: 50% !important;
-    }
-    .online-player-list,
-    .online-invite-list {
-        max-height: 80px !important;
-        min-height: 35px !important;
-    }
-    .online-btn img {
-        max-height: 18px !important;
-    }
-    .online-main-menu-btn {
-        width: 25% !important;
-        max-width: 70px !important;
-    }
-}
-
-@media (max-height: 600px) {
-    .online-players-section {
-        top: 16% !important;
-    }
-    .online-invites-section {
-        top: 48% !important;
-    }
-    .online-player-list,
-    .online-invite-list {
-        max-height: 70px !important;
-        min-height: 30px !important;
-    }
-    .online-header {
-        top: 3% !important;
-    }
-    .online-title {
-        font-size: clamp(18px, 3vw, 26px) !important;
-    }
-    .online-subtitle {
-        font-size: clamp(7px, 1.2vw, 10px) !important;
     }
 }
