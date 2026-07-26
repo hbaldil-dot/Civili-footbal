@@ -1850,7 +1850,8 @@ body { ... }
     border: none !important;
     padding: 0 !important;
 }
-
+  /* YENİ: 5px aşağı kaydırma */
+    margin-top: 5px !important;
 .local-start-btn:active {
     transform: scale(0.95) !important;
 }
