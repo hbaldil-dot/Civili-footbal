@@ -1597,6 +1597,10 @@ function selectLocalTeam(player, logoFile) {
 function startLocalGameWithTeams() {
     console.log('🚀 2 Kişilik maç başlatılıyor...');
     
+    // ---- YENİ KONTROL: Varsayılan süreleri ata (eğer seçilmediyse) ----
+    if (!MATCH_DURATION) MATCH_DURATION = 90;
+    if (!SHOT_DURATION) SHOT_DURATION = 5;
+    
     if (!localP1Selected || !localP2Selected) {
         alert('⚠️ Lütfen her iki oyuncu için de takım seçin!');
         return;
