@@ -1711,8 +1711,8 @@ body { ... }
 .local-selected-area {
     position: absolute !important;
     top: 30% !important;
-    width: 65px !important;
-    height: 65px !important;
+    width: 60px !important;
+    height: 60px !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
