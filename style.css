@@ -1750,7 +1750,7 @@ body { ... }
 
 .local-player-section {
     flex: 1 !important;
-    background: rgba(0, 0, 0, 0.5) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
     border-radius: 14px !important;
     padding: 10px 8px !important;
     backdrop-filter: blur(6px) !important;
