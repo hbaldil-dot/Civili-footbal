@@ -186,43 +186,42 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         2 KİŞİLİK AYNI EKRAN TAKIM SEÇ POP-UP (TAM EKRAN)
+   <!-- ============================================================
+         2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
          ============================================================ -->
     <div id="local-team-select" style="display: none;">
         <div class="local-team-container">
-            <!-- Arka fon resmi veya kaplaması -->
-            <div class="local-team-header-title">2 KİŞİLİK MAÇ - TAKIM SEÇİMİ</div>
+            <!-- Arka Fon Görseli -->
+            <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
             
-            <div class="local-players-wrapper">
-                <!-- OYUNCU 1 SEÇİM ALANI -->
-                <div class="player-team-card p1-card">
-                    <h3 class="p1-title">OYUNCU 1</h3>
-                    <div class="selected-team-preview">
-                        <img id="local-p1-preview-img" src="takimlar/default.png" alt="P1 Takım">
-                    </div>
-                    <div class="team-logo-options local-grid" id="local-player1-logos"></div>
+            <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
+            <div class="local-selected-area p1-selected-area">
+                <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
+            </div>
+            <div class="local-selected-area p2-selected-area">
+                <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+            </div>
+
+            <!-- Takım Seçim Izgaraları -->
+            <div class="local-team-body">
+                <div class="local-player-section">
+                    <div class="team-logo-options" id="local-player1-logos"></div>
                 </div>
-
-                <div class="vs-divider">VS</div>
-
-                <!-- OYUNCU 2 SEÇİM ALANI -->
-                <div class="player-team-card p2-card">
-                    <h3 class="p2-title">OYUNCU 2</h3>
-                    <div class="selected-team-preview">
-                        <img id="local-p2-preview-img" src="takimlar/default.png" alt="P2 Takım">
-                    </div>
-                    <div class="team-logo-options local-grid" id="local-player2-logos"></div>
+                <div class="local-player-section">
+                    <div class="team-logo-options" id="local-player2-logos"></div>
                 </div>
             </div>
 
-            <!-- ALT BUTONLAR -->
-            <div class="local-popup-footer">
-                <button class="local-btn start-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
-                <button class="local-btn cancel-btn" onclick="closeLocalTeamSelect()">ANA MENÜ</button>
+            <!-- Alt Butonlar -->
+            <div class="local-action-buttons">
+                <button class="local-start-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
+                <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+                </div>
             </div>
         </div>
     </div>
+
     <!-- ============================================================
          OYUN EKRANI
          ============================================================ -->
