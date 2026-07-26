@@ -2211,3 +2211,141 @@ function selectLocalTeam(player, logoFile) {
         }
     }
 }
+// ============================================================
+// TAKIM SEÇİM POP-UP MANTIĞI
+// ============================================================
+
+function openTeamSelectPopup() {
+    console.log('🏆 Takım seçim pop-up açılıyor...');
+    
+    const popup = document.getElementById('team-select-popup');
+    const grid = document.getElementById('team-select-grid');
+    const shieldImg = document.getElementById('popup-selected-team-img');
+    
+    if (!popup) {
+        console.error('❌ team-select-popup bulunamadı!');
+        return;
+    }
+    
+    if (!grid) {
+        console.error('❌ team-select-grid bulunamadı!');
+        return;
+    }
+
+    // Pop-up'ı göster
+    popup.style.display = 'block';
+    popup.style.visibility = 'visible';
+    popup.style.opacity = '1';
+
+    // Mevcut seçili takımı armaya yerleştir
+    if (shieldImg) {
+        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
+            shieldImg.src = 'takimlar/' + selectedTeamLogo;
+            shieldImg.style.display = 'block';
+            console.log('🛡️ Seçili takım arması gösteriliyor:', selectedTeamLogo);
+        } else {
+            // Varsayılan takım seç
+            const defaultTeam = teamLogos[0];
+            if (defaultTeam) {
+                selectedTeamLogo = defaultTeam.file;
+                shieldImg.src = 'takimlar/' + defaultTeam.file;
+                shieldImg.style.display = 'block';
+                // Ana menüdeki logo overlay'ı güncelle
+                const menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + defaultTeam.file;
+                }
+                loadTeamLogoImage(defaultTeam.file);
+            }
+        }
+    }
+
+    // Logo grid'ini temizle ve doldur
+    grid.innerHTML = '';
+    
+    if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos) && teamLogos.length > 0) {
+        console.log('📋 Takım logoları yükleniyor, toplam:', teamLogos.length);
+        
+        teamLogos.forEach((team) => {
+            const btn = document.createElement('div');
+            btn.className = 'big-team-logo-btn';
+            
+            if (selectedTeamLogo && selectedTeamLogo === team.file) {
+                btn.classList.add('active');
+            }
+            
+            const img = document.createElement('img');
+            img.src = 'takimlar/' + team.file;
+            img.alt = team.name || team.file;
+            img.onerror = function() {
+                console.warn('⚠️ Logo yüklenemedi:', team.file);
+                this.src = 'takimlar/default.png';
+            };
+            btn.appendChild(img);
+            
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                
+                // Tüm butonlardan active sınıfını kaldır
+                document.querySelectorAll('.big-team-logo-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Bu butonu active yap
+                btn.classList.add('active');
+                
+                // Takımı seç
+                selectedTeamLogo = team.file;
+                console.log('🏆 Takım seçildi:', team.file);
+                
+                // Shield'ı güncelle
+                if (shieldImg) {
+                    shieldImg.src = 'takimlar/' + team.file;
+                    shieldImg.style.display = 'block';
+                    shieldImg.onerror = function() {
+                        this.src = 'takimlar/default.png';
+                    };
+                }
+                
+                // Ana menüdeki logo overlay'ı güncelle
+                const menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + team.file;
+                    menuOverlay.style.display = 'block';
+                    menuOverlay.style.opacity = '1';
+                }
+                
+                // Logoyu yükle
+                loadTeamLogoImage(team.file);
+                
+                // AI takımını güncelle
+                selectRandomAITeam();
+                
+                // Skor logosunu güncelle
+                updateScoreLogos();
+            };
+            
+            grid.appendChild(btn);
+        });
+        
+        console.log('✅ Takım logoları grid\'e eklendi');
+    } else {
+        console.error('❌ teamLogos tanımlı değil veya boş!');
+        grid.innerHTML = '<div style="color:white;padding:20px;">Takım logosu bulunamadı</div>';
+    }
+}
+
+function closeTeamSelectPopup() {
+    console.log('🏆 Takım seçim pop-up kapatılıyor...');
+    const popup = document.getElementById('team-select-popup');
+    if (popup) {
+        popup.style.display = 'none';
+        popup.style.visibility = 'hidden';
+        popup.style.opacity = '0';
+        console.log('✅ Takım seçim pop-up kapatıldı');
+    }
+    
+    // Seçili takımı ana menüye yansıt
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+}
