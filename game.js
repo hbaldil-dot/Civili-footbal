@@ -760,7 +760,13 @@ function startLocalGame(mode, level) {
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
     
     showField();
+    
+    // *** BURASI EKLENDİ: Sıra göstergesini başlangıçta ayarla ***
+    turn = 1; // Her zaman oyuncu başlasın
+    updateHUDTurn();
+    
     startSetupPhase();
+}
 }
 
 function openOnlineLobby() {
@@ -793,12 +799,8 @@ function startSetupPhase() {
     startBtn.style.opacity = '1';
     startBtn.disabled = false;
 
-    const indicator = document.getElementById('turn-indicator');
-    if (indicator) {
-        indicator.innerText = "🏆 Takım Taktik Ayarla";
-        indicator.style.borderColor = "#f1c40f";
-        indicator.style.color = "#f1c40f";
-    }
+    // *** BURASI GÜNCELLENDİ: updateHUDTurn() çağrılıyor ***
+    updateHUDTurn(); // Bu fonksiyon artık setup aşamasını kontrol edecek
 
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) {
@@ -807,6 +809,9 @@ function startSetupPhase() {
     }
 
     editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
+
+    // ... devam eden pin oluşturma kodu ...
+}
 
     pins = [
         { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: false },
@@ -864,6 +869,7 @@ function confirmFormationsAndStart() {
             shotTimer.style.display = 'block';
             shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
         }
+        // *** BURASI GÜNCELLENDİ: Oyun başladığında sıra gösterimi ***
         updateHUDTurn();
         startMatchTimer();
         resetShotTimer();
@@ -954,10 +960,26 @@ function updateHUDTurn() {
     const indicator = document.getElementById('turn-indicator');
     if (!indicator) return;
     
+    // Eğer setup aşamasındaysak özel mesaj göster
+    if (currentPhase === 'setup') {
+        indicator.innerText = "🏆 Takım Taktik Ayarla";
+        indicator.style.borderColor = "#f1c40f";
+        indicator.style.color = "#f1c40f";
+        return;
+    }
+    
+    // Oyun aşamasındaysak normal sıra gösterimi
     if (gameMode === 'online') {
-        // ... online kodu
+        if (turn === myTeamNumber) {
+            indicator.innerText = "🔥 SIRA SİZDE";
+            indicator.style.borderColor = "#2ecc71";
+            indicator.style.color = "#2ecc71";
+        } else {
+            indicator.innerText = "⏳ RAKİPTE";
+            indicator.style.borderColor = "#e74c3c";
+            indicator.style.color = "#e74c3c";
+        }
     } else if (gameMode === 'local') {
-        // 2 Kişilik mod - Takım adını göster
         const playerNames = {
             1: localPlayer1Logo ? teamLogos.find(l => l.file === localPlayer1Logo)?.name.replace('⚽ ', '') || 'Oyuncu 1' : 'Oyuncu 1',
             2: localPlayer2Logo ? teamLogos.find(l => l.file === localPlayer2Logo)?.name.replace('⚽ ', '') || 'Oyuncu 2' : 'Oyuncu 2'
@@ -973,7 +995,15 @@ function updateHUDTurn() {
             indicator.style.color = "#e74c3c";
         }
     } else if (gameMode === 'ai') {
-        // ... AI kodu
+        if (turn === 1) {
+            indicator.innerText = "🔵 SİZ";
+            indicator.style.borderColor = "#3498db";
+            indicator.style.color = "#3498db";
+        } else {
+            indicator.innerText = "🔴 BİLGİSAYAR";
+            indicator.style.borderColor = "#e74c3c";
+            indicator.style.color = "#e74c3c";
+        }
     }
 }
 // Yeni yardımcı fonksiyon - Oyuncu ismini al
