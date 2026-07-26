@@ -1442,7 +1442,7 @@ body { ... }
 /* Seçilen Takım Armor Alanı */
 .selected-team-shield-area {
     position: absolute !important;
-    top: 31% !important;
+    top: 29% !important;
     left: 50% !important;
     transform: translate(calc(-50% + 7px), -50%) !important;
     width: 20% !important;
