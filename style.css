@@ -2090,6 +2090,9 @@ body { ... }
     z-index: 999999 !important;
     display: none !important;
     overflow: hidden !important;
+    
+    /* YENİ: Tıklamaları aktif et */
+    pointer-events: auto !important;
 }
 
 #online-lobby[style*="display: flex"],
@@ -2102,6 +2105,7 @@ body { ... }
     width: 100% !important;
     height: 100% !important;
     overflow: hidden !important;
+    pointer-events: auto !important; /* YENİ */
 }
 
 .online-bg {
@@ -2113,6 +2117,31 @@ body { ... }
     object-fit: cover !important;
     object-position: center !important;
     z-index: 1 !important;
+    pointer-events: none !important; /* Arka plan tıklamayı engellemesin */
+}
+
+/* Ana menü butonu */
+.online-main-menu-btn {
+    position: absolute !important;
+    bottom: 4% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 28% !important;
+    max-width: 110px !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    transition: transform 0.15s ease !important;
+    pointer-events: auto !important; /* YENİ */
+}
+
+.online-main-menu-btn:active {
+    transform: translateX(-50%) scale(0.92) !important;
+}
+
+.online-main-menu-btn img {
+    width: 100% !important;
+    display: block !important;
+    pointer-events: none !important; /* Resmin kendi tıklamayı engellememesi için */
 }
 
 /* ===== BAŞLIK ===== */
