@@ -1711,3 +1711,175 @@ body { ... }
         height: 27px !important; /* 24px → 27px (%12 büyüdü) */
     }
 }
+/* ============================================================
+   2 KİŞİLİK AYNI EKRAN POP-UP (TAM EKRAN)
+   ============================================================ */
+
+#local-team-select {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important; /* Mobil uyumlu yükseklik */
+    background: rgba(5, 10, 5, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 999999 !important;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+}
+
+#local-team-select[style*="display: flex"],
+#local-team-select[style*="display: block"] {
+    display: flex !important;
+}
+
+.local-team-container {
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.local-team-header-title {
+    font-size: clamp(16px, 4vw, 24px);
+    font-weight: 900;
+    color: #f1c40f;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+    margin-top: 5px;
+    text-align: center;
+}
+
+.local-players-wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 75%;
+    align-items: center;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.player-team-card {
+    flex: 1;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.p1-card { border-color: rgba(52, 152, 219, 0.4); }
+.p2-card { border-color: rgba(231, 76, 60, 0.4); }
+
+.p1-title { color: #3498db; font-size: 16px; margin-bottom: 5px; letter-spacing: 1px; }
+.p2-title { color: #e74c3c; font-size: 16px; margin-bottom: 5px; letter-spacing: 1px; }
+
+.selected-team-preview {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.selected-team-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.local-grid {
+    width: 100%;
+    overflow-y: auto;
+    max-height: 250px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 5px;
+}
+
+.vs-divider {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    font-style: italic;
+    opacity: 0.6;
+}
+
+/* BUTONLAR */
+.local-popup-footer {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+}
+
+.local-btn {
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.start-btn {
+    background: #2ecc71;
+    color: #000;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+}
+
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.local-btn:active { transform: scale(0.95); }
+
+/* MOBİL DİK EKRAN UYUMU */
+@media (max-width: 600px) {
+    .local-players-wrapper {
+        flex-direction: column;
+        height: 80%;
+    }
+    .vs-divider {
+        font-size: 14px;
+        margin: -4px 0;
+    }
+    .player-team-card {
+        width: 100%;
+        height: 48%;
+    }
+    .selected-team-preview {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 4px;
+    }
+    .local-grid {
+        max-height: 120px;
+    }
+}
