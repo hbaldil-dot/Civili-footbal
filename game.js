@@ -2145,34 +2145,100 @@ function playSound(type) {
 }
 
 // ============================================================
-// 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
+// 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ FONKSİYONLARI
 // ============================================================
-function openLocalTeamSelect() {
-    console.log('👥 2 Kişilik takım seç açılıyor...');
-    const popup = document.getElementById('local-team-select');
-    if (!popup) {
-        console.error('❌ local-team-select pop-up bulunamadı!');
+
+function loadLocalTeamLogos() {
+    console.log('🔄 2 Kişilik logo listesi yükleniyor...');
+    const container1 = document.getElementById('local-player1-logos');
+    const container2 = document.getElementById('local-player2-logos');
+    
+    if (!container1 || !container2) {
+        console.warn('⚠️ Logo containerları bulunamadı!');
         return;
     }
-    popup.style.display = 'flex';
-    localP1Selected = false;
-    localP2Selected = false;
-    localPlayer1Logo = '';
-    localPlayer2Logo = '';
     
-    // İsim etiketlerini güncelle (HTML'de bu elementler olmalı)
-    const p1Name = document.getElementById('local-p1-name');
-    const p2Name = document.getElementById('local-p2-name');
-    if (p1Name) { p1Name.textContent = 'Oyuncu 1'; p1Name.style.color = '#3498db'; }
-    if (p2Name) { p2Name.textContent = 'Oyuncu 2'; p2Name.style.color = '#e74c3c'; }
+    container1.innerHTML = '';
+    container2.innerHTML = '';
     
-    // Shield'ları temizle
-    const shield1 = document.getElementById('local-p1-shield-img');
-    const shield2 = document.getElementById('local-p2-shield-img');
-    if (shield1) { shield1.style.display = 'none'; shield1.src = ''; }
-    if (shield2) { shield2.style.display = 'none'; shield2.src = ''; }
+    teamLogos.forEach((logo) => {
+        // Oyuncu 1 için buton
+        const btn1 = document.createElement('button');
+        btn1.className = 'team-logo-btn';
+        btn1.title = logo.name;
+        btn1.dataset.logo = logo.file;
+        const img1 = document.createElement('img');
+        img1.src = `takimlar/${logo.file}`;
+        img1.alt = logo.name;
+        img1.onerror = function() { this.src = 'takimlar/default.png'; };
+        btn1.appendChild(img1);
+        btn1.onclick = function() { selectLocalTeam(1, logo.file); };
+        container1.appendChild(btn1);
+        
+        // Oyuncu 2 için buton
+        const btn2 = document.createElement('button');
+        btn2.className = 'team-logo-btn';
+        btn2.title = logo.name;
+        btn2.dataset.logo = logo.file;
+        const img2 = document.createElement('img');
+        img2.src = `takimlar/${logo.file}`;
+        img2.alt = logo.name;
+        img2.onerror = function() { this.src = 'takimlar/default.png'; };
+        btn2.appendChild(img2);
+        btn2.onclick = function() { selectLocalTeam(2, logo.file); };
+        container2.appendChild(btn2);
+    });
     
-    loadLocalTeamLogos();
+    console.log('✅ 2 Kişilik logolar yüklendi');
+}
+
+function selectLocalTeam(player, logoFile) {
+    console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
+    
+    if (player === 1) {
+        if (logoFile === localPlayer2Logo && localP2Selected) {
+            alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
+            return;
+        }
+        localPlayer1Logo = logoFile;
+        localP1Selected = true;
+        
+        document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
+            btn.classList.remove('active', 'active-p1');
+            if (btn.dataset.logo === logoFile) {
+                btn.classList.add('active', 'active-p1');
+            }
+        });
+        
+        const shield = document.getElementById('local-p1-shield-img');
+        if (shield) {
+            shield.src = `takimlar/${logoFile}`;
+            shield.style.display = 'block';
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+        }
+        
+    } else if (player === 2) {
+        if (logoFile === localPlayer1Logo && localP1Selected) {
+            alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
+            return;
+        }
+        localPlayer2Logo = logoFile;
+        localP2Selected = true;
+        
+        document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
+            btn.classList.remove('active', 'active-p2');
+            if (btn.dataset.logo === logoFile) {
+                btn.classList.add('active', 'active-p2');
+            }
+        });
+        
+        const shield = document.getElementById('local-p2-shield-img');
+        if (shield) {
+            shield.src = `takimlar/${logoFile}`;
+            shield.style.display = 'block';
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+        }
+    }
 }
 
 function loadLocalTeamLogos() {
