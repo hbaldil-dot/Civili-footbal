@@ -1710,7 +1710,7 @@ body { ... }
 /* Seçilen Takım Shield Alanları */
 .local-selected-area {
     position: absolute !important;
-    top: 12% !important;
+    top: 25% !important;
     width: 65px !important;
     height: 65px !important;
     z-index: 10 !important;
