@@ -2056,3 +2056,320 @@ body { ... }
         padding: 2px 5px !important;
     }
 }
+/* ============================================================
+   ONLINE MENÜ - TAM EKRAN
+   ============================================================ */
+
+#online-lobby {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #000000 !important;
+    z-index: 999999 !important;
+    display: none !important;
+    overflow: hidden !important;
+}
+
+#online-lobby[style*="display: flex"],
+#online-lobby[style*="display: block"] {
+    display: block !important;
+}
+
+.online-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+.online-bg {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    z-index: 1 !important;
+}
+
+/* ===== BAŞLIK ===== */
+.online-header {
+    position: absolute !important;
+    top: 6% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+    z-index: 10 !important;
+    width: 90% !important;
+}
+
+.online-title {
+    display: block !important;
+    font-size: clamp(22px, 5vw, 36px) !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    letter-spacing: 6px !important;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8) !important;
+    font-family: 'Arial Black', 'Impact', sans-serif !important;
+}
+
+.online-subtitle {
+    display: block !important;
+    font-size: clamp(9px, 1.8vw, 14px) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin-top: 4px !important;
+    letter-spacing: 2px !important;
+    font-weight: 300 !important;
+}
+
+/* ===== BÖLÜM BAŞLIKLARI ===== */
+.online-section {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 88% !important;
+    max-width: 420px !important;
+    z-index: 10 !important;
+}
+
+.online-section:first-of-type {
+    top: 22% !important;
+}
+
+.online-section:last-of-type {
+    top: 55% !important;
+}
+
+.online-section-title {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: clamp(10px, 1.6vw, 14px) !important;
+    letter-spacing: 3px !important;
+    font-weight: bold !important;
+    margin-bottom: 6px !important;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ===== OYUNCU LİSTESİ ===== */
+.online-player-list,
+.online-invite-list {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 6px 0 !important;
+    max-height: 130px !important;
+    overflow-y: auto !important;
+    min-height: 50px !important;
+}
+
+.online-player-list::-webkit-scrollbar,
+.online-invite-list::-webkit-scrollbar {
+    width: 3px !important;
+}
+
+.online-player-list::-webkit-scrollbar-track,
+.online-invite-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 4px !important;
+}
+
+.online-player-list::-webkit-scrollbar-thumb,
+.online-invite-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== LİSTE ÖĞELERİ ===== */
+.online-player-item,
+.online-invite-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.online-player-item:last-child,
+.online-invite-item:last-child {
+    border-bottom: none !important;
+}
+
+.online-player-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.online-player-logo {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.online-player-name {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: clamp(11px, 1.6vw, 14px) !important;
+    font-weight: 500 !important;
+}
+
+/* ===== BUTONLAR ===== */
+.online-btn {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    transition: transform 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.online-btn:active {
+    transform: scale(0.92) !important;
+}
+
+.online-btn img {
+    display: block !important;
+    height: auto !important;
+    max-height: 28px !important;
+    width: auto !important;
+}
+
+.online-btn-invite img {
+    max-height: 26px !important;
+}
+
+.online-btn-accept img {
+    max-height: 24px !important;
+}
+
+.online-btn-reject img {
+    max-height: 24px !important;
+}
+
+.online-invite-actions {
+    display: flex !important;
+    gap: 4px !important;
+    align-items: center !important;
+}
+
+/* ===== BOŞ DURUM ===== */
+.online-empty {
+    color: rgba(255, 255, 255, 0.2) !important;
+    text-align: center !important;
+    padding: 16px !important;
+    font-size: 12px !important;
+    letter-spacing: 2px !important;
+}
+
+/* ===== ANA MENÜ BUTONU ===== */
+.online-main-menu-btn {
+    position: absolute !important;
+    bottom: 4% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 25% !important;
+    max-width: 100px !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    transition: transform 0.15s ease !important;
+}
+
+.online-main-menu-btn:active {
+    transform: translateX(-50%) scale(0.92) !important;
+}
+
+.online-main-menu-btn img {
+    width: 100% !important;
+    display: block !important;
+}
+
+/* ============================================================
+   ONLINE MENÜ - MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .online-section:first-of-type {
+        top: 20% !important;
+    }
+    .online-section:last-of-type {
+        top: 52% !important;
+    }
+    .online-player-list,
+    .online-invite-list {
+        max-height: 100px !important;
+        min-height: 40px !important;
+        padding: 4px 0 !important;
+    }
+    .online-player-item,
+    .online-invite-item {
+        padding: 4px 8px !important;
+    }
+    .online-player-logo {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    .online-btn img {
+        max-height: 22px !important;
+    }
+    .online-main-menu-btn {
+        width: 30% !important;
+        max-width: 80px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .online-section:first-of-type {
+        top: 18% !important;
+    }
+    .online-section:last-of-type {
+        top: 50% !important;
+    }
+    .online-player-list,
+    .online-invite-list {
+        max-height: 80px !important;
+        min-height: 35px !important;
+    }
+    .online-btn img {
+        max-height: 18px !important;
+    }
+    .online-main-menu-btn {
+        width: 25% !important;
+        max-width: 70px !important;
+    }
+}
+
+@media (max-height: 600px) {
+    .online-section:first-of-type {
+        top: 16% !important;
+    }
+    .online-section:last-of-type {
+        top: 48% !important;
+    }
+    .online-player-list,
+    .online-invite-list {
+        max-height: 70px !important;
+        min-height: 30px !important;
+    }
+    .online-header {
+        top: 3% !important;
+    }
+    .online-title {
+        font-size: clamp(16px, 3vw, 24px) !important;
+    }
+    .online-subtitle {
+        font-size: clamp(7px, 1.2vw, 10px) !important;
+    }
+}
