@@ -1839,7 +1839,11 @@ body { ... }
     max-width: 340px !important;
 }
 
-/* MAÇA BAŞLA - RESİM BUTONU */
+
+/* ============================================================
+   2 KİŞİLİK - MAÇA BAŞLA BUTONU (5px AŞAĞI)
+   ============================================================ */
+
 .local-start-btn {
     width: 100% !important;
     max-width: 280px !important;
@@ -1849,9 +1853,11 @@ body { ... }
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
+    
+    /* YENİ: 5px aşağı kaydırma */
+    margin-top: 30px !important;
 }
-  /* YENİ: 5px aşağı kaydırma */
-    margin-top: 60px !important;
+
 .local-start-btn:active {
     transform: scale(0.95) !important;
 }
