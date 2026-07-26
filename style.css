@@ -1804,48 +1804,42 @@ body { ... }
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)) !important;
 }
 
-/* Alt Aksiyon Butonları */
+/* Alt Butonlar Konteyneri */
 .local-action-buttons {
-    position: absolute !important;
-    bottom: 3% !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 10px !important;
-    z-index: 10 !important;
-    width: 100% !important;
+    position: absolute;
+    bottom: 25px; /* İhtiyaca göre yüksekliği ayarlayabilirsiniz */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
 }
 
+/* Ana Menü ve Maça Başla Buton Görsel Stilleri */
+.local-main-menu-btn,
 .local-start-btn {
-    padding: 10px 30px !important;
-    background: #2ecc71 !important;
-    color: #ffffff !important;
-    border: 2px solid #27ae60 !important;
-    border-radius: 25px !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-    font-family: inherit !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4) !important;
-    letter-spacing: 2px !important;
-    transition: transform 0.2s ease !important;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.local-start-btn:active {
-    transform: scale(0.95) !important;
+.local-main-menu-btn img,
+.local-start-btn img {
+    width: 100%;
+    max-width: 180px; /* Butonların büyüklüğüne göre ayarlayabilirsiniz */
+    height: auto;
+    display: block;
+    transition: transform 0.2s ease;
 }
 
-.local-main-menu-btn {
-    width: 30% !important;
-    max-width: 110px !important;
-    cursor: pointer !important;
-}
-
-.local-main-menu-btn img {
-    width: 100% !important;
-    display: block !important;
+.local-main-menu-btn:active img,
+.local-start-btn:active img {
+    transform: scale(0.95);
 }
 
 /* Mobil Ekran Düzeltmeleri */
