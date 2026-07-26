@@ -764,15 +764,20 @@ function startLocalGame(mode, level) {
 }
 
 function openOnlineLobby() {
-    if (!socket) { alert("Şu anda bir sunucuya bağlı değilsiniz!"); return; }
+    console.log('🌐 Online menü açılıyor...');
+    if (!socket) { 
+        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
+        return; 
+    }
     gameMode = 'online';
     const playerData = getPlayerData();
     socket.emit("join-lobby", playerData);
     document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'flex';
+    document.getElementById('online-lobby').style.display = 'block';
 }
 
 function closeOnlineLobby() {
+    console.log('🌐 Online menü kapatılıyor...');
     if (socket) socket.emit("leave-lobby");
     document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
