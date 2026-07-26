@@ -186,31 +186,38 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         2 KİŞİLİK TAKIM SEÇ POP-UP
+   <!-- ============================================================
+         2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
          ============================================================ -->
-    <div id="local-team-select" style="display: none;" onclick="if(event.target===this) closeLocalTeamSelect()">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h2>TAKIM SEÇİMİ</h2>
-                <button class="popup-close" onclick="closeLocalTeamSelect()">✕</button>
+    <div id="local-team-select" style="display: none;">
+        <div class="local-team-container">
+            <!-- Arka Fon Görseli -->
+            <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
+            
+            <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
+            <div class="local-selected-area p1-selected-area">
+                <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
             </div>
-            <div class="popup-body">
-                <div class="player-team-select">
-                    <h3 style="color: #3498db;">Oyuncu 1</h3>
+            <div class="local-selected-area p2-selected-area">
+                <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+            </div>
+
+            <!-- Takım Seçim Izgaraları -->
+            <div class="local-team-body">
+                <div class="local-player-section">
                     <div class="team-logo-options" id="local-player1-logos"></div>
                 </div>
-                <div style="border-top: 1px solid #333; margin: 12px 0;"></div>
-                <div class="player-team-select">
-                    <h3 style="color: #e74c3c;">Oyuncu 2</h3>
+                <div class="local-player-section">
                     <div class="team-logo-options" id="local-player2-logos"></div>
                 </div>
-                <div style="margin-top: 12px; text-align: center; font-size: 12px; color: #888;">
-                    Seçili: <span id="local-p1-name" style="color: #3498db; font-weight: bold;">Seçilmedi</span> vs <span id="local-p2-name" style="color: #e74c3c; font-weight: bold;">Seçilmedi</span>
-                </div>
             </div>
-            <div class="popup-footer">
-                <button class="popup-close-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
+
+            <!-- Alt Butonlar -->
+            <div class="local-action-buttons">
+                <button class="local-start-btn" onclick="startLocalGameWithTeams()">MAÇA BAŞLA</button>
+                <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+                </div>
             </div>
         </div>
     </div>
