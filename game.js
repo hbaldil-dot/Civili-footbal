@@ -2074,62 +2074,50 @@ function playSound(type) {
 // TAKIM SEÇİM POP-UP MANTIĞI
 // ============================================================
 
-function openTeamSelectPopup() {
-    const popup = document.getElementById('team-select-popup');
-    const grid = document.getElementById('team-select-grid');
-    const shieldImg = document.getElementById('popup-selected-team-img');
+// 1. ANA MENÜDEKİ "TAKIM SEÇ" / "BİLGİSAYARA KARŞI" BUTONU
+function openTeamSelect() {
+    // ÖNCE DİĞER AÇIK MENÜLERİ GİZLE
+    closeLocalTeamSelect(); // 2 kişilik menü açıksa kapatır
     
-    if (!popup || !grid) return;
+    // Oyun modunu sıfırla / tek kişilik yap
+    // (Projenizde oyun modu değişkeni neyse onu yazın)
+    isLocal2Player = false; 
 
-    // Mevcut seçili takımı armaya yerleştir
-    if (shieldImg && typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo) {
-        shieldImg.src = 'takimlar/' + selectedTeamLogo;
-        shieldImg.style.display = 'block';
+    // Takım seçme penceresini görünür yap
+    const teamSelectPopup = document.getElementById('team-select-popup'); // Kendi ID'niz
+    if (teamSelectPopup) {
+        teamSelectPopup.style.display = 'flex'; // veya 'block'
     }
+}
 
-    grid.innerHTML = '';
+// 2. ANA MENÜDEKİ "2 KİŞİLİK (AYNI EKRAN)" BUTONU
+function openLocalTeamSelect() {
+    // ÖNCE NORMAL TAKIM SEÇİM MENÜSÜNÜ GİZLE
+    closeTeamSelect(); // Tek kişilik takım seçim menüsü açıksa kapatır
     
-    if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos)) {
-        teamLogos.forEach(team => {
-            const btn = document.createElement('div');
-            btn.className = 'big-team-logo-btn';
-            
-            if (typeof selectedTeamLogo !== 'undefined' && selectedTeamLogo === team.file) {
-                btn.classList.add('active');
-            }
-            
-            const img = document.createElement('img');
-            img.src = 'takimlar/' + team.file;
-            img.alt = team.name;
-            btn.appendChild(img);
-            
-            btn.onclick = () => {
-                document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                selectedTeamLogo = team.file;
-                
-                if (shieldImg) {
-                    shieldImg.src = 'takimlar/' + team.file;
-                    shieldImg.style.display = 'block';
-                }
-                
-                const menuOverlay = document.getElementById('selected-team-logo-display');
-                if (menuOverlay) {
-                    menuOverlay.src = 'takimlar/' + team.file;
-                }
-                
-                if (typeof loadTeamLogoImage === 'function') {
-                    loadTeamLogoImage(team.file);
-                }
-            };
-            
-            grid.appendChild(btn);
-        });
-    }
+    // Oyun modunu 2 kişilik yap
+    isLocal2Player = true;
 
-    // Ekranı tam blok olarak kaplatıyoruz
-    popup.style.display = 'block';
+    // 2 Kişilik menüyü görünür yap
+    const localPopup = document.getElementById('local-team-select');
+    if (localPopup) {
+        localPopup.style.display = 'flex'; // veya 'block'
+    }
+}
+
+// 3. MENÜ KAPATMA FONKSİYONLARI (Her menü kapanırken birbirini çakıştırmamalı)
+function closeTeamSelect() {
+    const teamSelectPopup = document.getElementById('team-select-popup');
+    if (teamSelectPopup) {
+        teamSelectPopup.style.display = 'none';
+    }
+}
+
+function closeLocalTeamSelect() {
+    const localPopup = document.getElementById('local-team-select');
+    if (localPopup) {
+        localPopup.style.display = 'none';
+    }
 }
 
 function closeTeamSelectPopup() {
