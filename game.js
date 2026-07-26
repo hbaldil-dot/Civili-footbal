@@ -1,3 +1,5 @@
+let pendingInvites = [];
+
 // ============================================================
 // SABİT SÜRELER
 // ============================================================
@@ -765,13 +767,24 @@ function startLocalGame(mode, level) {
 
 function openOnlineLobby() {
     console.log('🌐 Online menü açılıyor...');
+    
     if (!socket) { 
         alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
         return; 
     }
+    
+    // Socket bağlantısını kontrol et
+    if (!socket.connected) {
+        alert("Sunucuya bağlanılamıyor. Lütfen daha sonra tekrar deneyin.");
+        return;
+    }
+    
     gameMode = 'online';
     const playerData = getPlayerData();
+    console.log('📤 Lobiye katılıyor:', playerData);
+    
     socket.emit("join-lobby", playerData);
+    
     document.getElementById('menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'block';
 }
@@ -1829,52 +1842,68 @@ function setupSocketListeners() {
     if (!socket) return;
     
  socket.on("update-lobby-players", (players) => {
+    console.log('📋 Lobi oyuncuları güncellendi:', players);
     const listContainer = document.getElementById('lobby-list');
     if (!listContainer) return;
+    
     listContainer.innerHTML = "";
-    let count = 0;
-    players.forEach(p => {
-        if (p.id !== socket.id) {
-            count++;
-            const item = document.createElement('div');
-            item.className = 'online-player-item';
-            
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'online-player-info';
-            
-            const logoImg = document.createElement('img');
-            logoImg.src = `takimlar/${p.logo || 'default.png'}`;
-            logoImg.className = 'online-player-logo';
-            logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'online-player-name';
-            nameSpan.textContent = p.name;
-            
-            infoDiv.appendChild(logoImg);
-            infoDiv.appendChild(nameSpan);
-            
-            const btn = document.createElement('button');
-            btn.className = 'online-btn online-btn-invite';
-            const btnImg = document.createElement('img');
-            btnImg.src = 'menu/online/davetet.webp';
-            btnImg.alt = 'Davet Et';
-            btn.appendChild(btnImg);
-            btn.onclick = () => {
-                btn.style.opacity = '0.5';
-                btn.style.pointerEvents = 'none';
-                socket.emit("send-invite", p.id);
-                setTimeout(() => {
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                }, 3000);
-            };
-            
-            item.appendChild(infoDiv);
-            item.appendChild(btn);
-            listContainer.appendChild(item);
-        }
+    
+    // Socket ID'sini al
+    const myId = socket.id;
+    
+    // Diğer oyuncuları filtrele
+    const otherPlayers = players.filter(p => p.id !== myId);
+    
+    if (otherPlayers.length === 0) {
+        listContainer.innerHTML = "<div class='online-empty'>Havuzda kimse yok</div>";
+        return;
+    }
+    
+    otherPlayers.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'online-player-item';
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'online-player-info';
+        
+        const logoImg = document.createElement('img');
+        logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+        logoImg.className = 'online-player-logo';
+        logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'online-player-name';
+        nameSpan.textContent = p.name || 'Oyuncu';
+        
+        infoDiv.appendChild(logoImg);
+        infoDiv.appendChild(nameSpan);
+        
+        const btn = document.createElement('button');
+        btn.className = 'online-btn online-btn-invite';
+        const btnImg = document.createElement('img');
+        btnImg.src = 'menu/online/davetet.webp';
+        btnImg.alt = 'Davet Et';
+        btn.appendChild(btnImg);
+        
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            console.log('📨 Davet gönderiliyor:', p.id);
+            this.style.opacity = '0.4';
+            this.style.pointerEvents = 'none';
+            socket.emit("send-invite", p.id);
+            setTimeout(() => {
+                this.style.opacity = '1';
+                this.style.pointerEvents = 'auto';
+            }, 3000);
+        };
+        
+        item.appendChild(infoDiv);
+        item.appendChild(btn);
+        listContainer.appendChild(item);
     });
+    
+    console.log('✅ Lobi güncellendi,', otherPlayers.length, 'oyuncu gösteriliyor');
+});
     if (count === 0) {
         listContainer.innerHTML = "<div class='online-empty'>Havuzda kimse yok</div>";
     }
@@ -2483,25 +2512,33 @@ function setLocalShotDuration(seconds) {
 // Gelen davetleri saklamak için
 let pendingInvites = [];
 
+// Gelen davetler
 socket.on("receive-invite", (data) => {
-    // Daveti listeye ekle
-    pendingInvites.push({
-        fromId: data.fromId,
-        fromName: data.fromName,
-        fromLogo: data.fromLogo || 'default.png'
-    });
-    updateInviteList();
+    console.log('📨 Davet alındı:', data);
+    
+    // Zaten listede var mı kontrol et
+    const exists = pendingInvites.some(inv => inv.fromId === data.fromId);
+    if (!exists) {
+        pendingInvites.push({
+            fromId: data.fromId,
+            fromName: data.fromName || 'Oyuncu',
+            fromLogo: data.fromLogo || 'default.png'
+        });
+        updateInviteList();
+    }
 });
 
-// Davet reddedildiğinde
+// Davet reddedildi
 socket.on("invite-rejected", (data) => {
-    pendingInvites = pendingInvites.filter(invite => invite.fromId !== data.fromId);
+    console.log('❌ Davet reddedildi:', data);
+    pendingInvites = pendingInvites.filter(inv => inv.fromId !== data.fromId);
     updateInviteList();
 });
 
-// Davet kabul edildiğinde
+// Davet kabul edildi
 socket.on("invite-accepted", (data) => {
-    pendingInvites = pendingInvites.filter(invite => invite.fromId !== data.fromId);
+    console.log('✅ Davet kabul edildi:', data);
+    pendingInvites = pendingInvites.filter(inv => inv.fromId !== data.fromId);
     updateInviteList();
 });
 function updateInviteList() {
@@ -2537,25 +2574,29 @@ function updateInviteList() {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'online-invite-actions';
         
-        // Kabul Et butonu
+        // Kabul Et
         const acceptBtn = document.createElement('button');
         acceptBtn.className = 'online-btn online-btn-accept';
         const acceptImg = document.createElement('img');
         acceptImg.src = 'menu/online/kabulet.webp';
         acceptImg.alt = 'Kabul Et';
         acceptBtn.appendChild(acceptImg);
-        acceptBtn.onclick = () => {
+        acceptBtn.onclick = function(e) {
+            e.stopPropagation();
+            console.log('✅ Davet kabul ediliyor:', invite.fromId);
             socket.emit("accept-invite", invite.fromId);
         };
         
-        // Reddet butonu
+        // Reddet
         const rejectBtn = document.createElement('button');
         rejectBtn.className = 'online-btn online-btn-reject';
         const rejectImg = document.createElement('img');
         rejectImg.src = 'menu/online/redet.webp';
         rejectImg.alt = 'Reddet';
         rejectBtn.appendChild(rejectImg);
-        rejectBtn.onclick = () => {
+        rejectBtn.onclick = function(e) {
+            e.stopPropagation();
+            console.log('❌ Davet reddediliyor:', invite.fromId);
             socket.emit("reject-invite", invite.fromId);
             pendingInvites = pendingInvites.filter(inv => inv.fromId !== invite.fromId);
             updateInviteList();
