@@ -1807,7 +1807,7 @@ body { ... }
 /* Alt Butonlar Konteyneri */
 .local-action-buttons {
     position: absolute;
-    bottom: 25px; /* İhtiyaca göre yüksekliği ayarlayabilirsiniz */
+    bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     width: 85%;
@@ -1818,9 +1818,13 @@ body { ... }
     z-index: 10;
 }
 
-/* Ana Menü ve Maça Başla Buton Görsel Stilleri */
+/* Tıklanabilir Alanlar */
 .local-main-menu-btn,
 .local-start-btn {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
     cursor: pointer;
     flex: 1;
     display: flex;
@@ -1828,23 +1832,19 @@ body { ... }
     align-items: center;
 }
 
+/* Buton İçindeki Görseller */
 .local-main-menu-btn img,
 .local-start-btn img {
     width: 100%;
-    max-width: 180px; /* Butonların büyüklüğüne göre ayarlayabilirsiniz */
+    max-width: 180px;
     height: auto;
     display: block;
-    transition: transform 0.2s ease;
+    pointer-events: none; /* Tıklama olayının görsele değil butona gitmesini sağlar */
+    transition: transform 0.15s ease;
 }
 
+/* Tıklama Efekti */
 .local-main-menu-btn:active img,
 .local-start-btn:active img {
-    transform: scale(0.95);
-}
-
-/* Mobil Ekran Düzeltmeleri */
-@media (max-width: 420px) {
-    .local-team-body { top: 48% !important; width: 92% !important; }
-    .local-selected-area { width: 55px !important; height: 55px !important; top: 16% !important; }
-    .local-start-btn { font-size: 14px !important; padding: 8px 24px !important; }
+    transform: scale(0.93);
 }
