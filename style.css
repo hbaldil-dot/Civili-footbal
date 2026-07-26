@@ -53,22 +53,25 @@ body::before {
    ============================================================ */
 
 #menu {
-    position: absolute;
+    position: absolute !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 2vh 2vw 2vh 2vw;
-    text-align: center;
-    z-index: 100;
-    width: 92%;
-    max-width: 400px;
+    padding: 2vh 2vw 2vh 2vw !important;
+    text-align: center !important;
+    z-index: 100 !important;
+    width: 92% !important;
+    max-width: 400px !important;
     box-shadow: none !important;
-    display: block;
+    display: block !important;
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    bottom: 3vh;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 3vh !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    
+    /* YENİ: Tıklamaları aktif et */
+    pointer-events: auto !important;
 }
 
 #menu * {
@@ -77,12 +80,16 @@ body::before {
     border: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    
+    /* YENİ: Tıklamaları aktif et */
+    pointer-events: auto !important;
 }
 
 /* ===== İSMİNİ GİR + LOGO ===== */
 .input-group {
     margin-bottom: 1.2vh;
     text-align: center;
+    pointer-events: auto !important;
 }
 
 .input-wrapper {
@@ -95,6 +102,7 @@ body::before {
     gap: 4px;
     background: transparent !important;
     flex-direction: row;
+    pointer-events: auto !important;
 }
 
 .logo-container {
@@ -169,16 +177,21 @@ body::before {
 
 /* ===== MENÜ BUTONLARI ===== */
 .menu-btn {
-    display: block;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto 0.6vh auto;
+    display: block !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto 0.6vh auto !important;
     background: transparent !important;
     border: none !important;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.2s ease;
+    cursor: pointer !important;
+    padding: 0 !important;
+    transition: transform 0.2s ease !important;
     box-shadow: none !important;
+    
+    /* YENİ: Tıklamaları aktif et */
+    pointer-events: auto !important;
+    z-index: 101 !important;
+    position: relative !important;
 }
 
 .menu-btn:active {
@@ -190,6 +203,7 @@ body::before {
     display: block;
     opacity: 0.9;
     transition: opacity 0.3s ease;
+    pointer-events: none !important; /* Resmin kendi tıklamayı engellememesi için */
 }
 
 .menu-btn:hover .menu-btn-img {
