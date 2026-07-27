@@ -1672,73 +1672,99 @@ function closeSettingsPopup() {
 }
 
 // ============================================================
-// MAÇ SÜRESİ FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
+// MAÇ SÜRESİ FONKSİYONLARI (Düzeltildi)
 // ============================================================
 function toggleMatchDurationOptions() {
     const options = document.getElementById('match-duration-options');
     const shotOptions = document.getElementById('shot-duration-options');
     const stadiumOptions = document.getElementById('stadium-options');
 
-    // Diğer açık olan menüleri kapat
-    if (shotOptions) shotOptions.style.display = 'none';
-    if (stadiumOptions) stadiumOptions.style.display = 'none';
+    // 1. Diğer açık olan menüleri BÜTÜNÜYLE kapat
+    if (shotOptions) {
+        shotOptions.style.display = 'none';
+        shotOptions.classList.remove('show');
+    }
+    if (stadiumOptions) {
+        stadiumOptions.style.display = 'none';
+        stadiumOptions.classList.remove('show');
+    }
 
-    // Kendi menüsünü aç/kapat
+    // 2. Kendi menüsünü aç/kapat
     if (options) {
-        if (options.style.display === 'none' || options.style.display === '') {
+        const isHidden = window.getComputedStyle(options).display === 'none';
+        if (isHidden) {
             options.style.display = 'flex';
             options.classList.add('show');
             console.log('📋 Maç süresi seçenekleri açıldı');
         } else {
             options.style.display = 'none';
+            options.classList.remove('show');
             console.log('📋 Maç süresi seçenekleri kapatıldı');
         }
     }
 }
 
 // ============================================================
-// VURUŞ SÜRESİ FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
+// VURUŞ SÜRESİ FONKSİYONLARI (Düzeltildi)
 // ============================================================
 function toggleShotDurationOptions() {
     const optionsDiv = document.getElementById('shot-duration-options');
     const matchOptions = document.getElementById('match-duration-options');
     const stadiumOptions = document.getElementById('stadium-options');
 
-    // Diğer açık olan menüleri kapat
-    if (matchOptions) matchOptions.style.display = 'none';
-    if (stadiumOptions) stadiumOptions.style.display = 'none';
+    // 1. Diğer açık olan menüleri BÜTÜNÜYLE kapat
+    if (matchOptions) {
+        matchOptions.style.display = 'none';
+        matchOptions.classList.remove('show');
+    }
+    if (stadiumOptions) {
+        stadiumOptions.style.display = 'none';
+        stadiumOptions.classList.remove('show');
+    }
 
-    // Kendi menüsünü aç/kapat
+    // 2. Kendi menüsünü aç/kapat
     if (optionsDiv) {
-        if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
+        const isHidden = window.getComputedStyle(optionsDiv).display === 'none';
+        if (isHidden) {
             optionsDiv.style.display = 'flex';
+            optionsDiv.classList.add('show');
             console.log('📋 Vuruş süresi seçenekleri açıldı');
         } else {
             optionsDiv.style.display = 'none';
+            optionsDiv.classList.remove('show');
             console.log('📋 Vuruş süresi seçenekleri kapatıldı');
         }
     }
 }
 
 // ============================================================
-// STADYUM FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
+// STADYUM FONKSİYONLARI (Düzeltildi)
 // ============================================================
 function toggleStadiumOptions() {
     const optionsDiv = document.getElementById('stadium-options');
     const matchOptions = document.getElementById('match-duration-options');
     const shotOptions = document.getElementById('shot-duration-options');
 
-    // Diğer açık olan menüleri kapat
-    if (matchOptions) matchOptions.style.display = 'none';
-    if (shotOptions) shotOptions.style.display = 'none';
+    // 1. Diğer açık olan menüleri BÜTÜNÜYLE kapat
+    if (matchOptions) {
+        matchOptions.style.display = 'none';
+        matchOptions.classList.remove('show');
+    }
+    if (shotOptions) {
+        shotOptions.style.display = 'none';
+        shotOptions.classList.remove('show');
+    }
 
-    // Kendi menüsünü aç/kapat
+    // 2. Kendi menüsünü aç/kapat
     if (optionsDiv) {
-        if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
+        const isHidden = window.getComputedStyle(optionsDiv).display === 'none';
+        if (isHidden) {
             optionsDiv.style.display = 'flex';
+            optionsDiv.classList.add('show');
             console.log('📋 Stadyum seçenekleri açıldı');
         } else {
             optionsDiv.style.display = 'none';
+            optionsDiv.classList.remove('show');
             console.log('📋 Stadyum seçenekleri kapatıldı');
         }
     }
