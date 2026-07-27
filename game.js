@@ -2544,37 +2544,116 @@ function setLocalShotDuration(seconds) {
 // ==========================================
 // DOSYANIN EN SONUNA EKLENEN YENİ FONKSİYON:
 // ==========================================
-function calculateAIShot(aiPin, ball, targetGoal, difficulty) {
-    let dx = targetGoal.x - ball.x;
-    let dy = targetGoal.y - ball.y;
-    let baseAngle = Math.atan2(dy, dx);
+// ==========================================
+// GELİŞMİŞ ZORLUK & SEKTİRME HESAPLAMA SİSTEMİ
+// ==========================================
 
-    let errorMargin = 0;
+function calculateAIShot(aiPin, ball, targetGoal, difficulty, pitchBounds, obstacles = []) {
+    let chosenAngle = 0;
     let powerFactor = 1.0;
 
     switch (difficulty) {
         case 'kolay':
-            errorMargin = (Math.random() - 0.5) * (Math.PI / 6);
-            powerFactor = 0.5 + Math.random() * 0.5;
+            // Sadece düz kaleye bakar + Yüksek rastgele sapma
+            chosenAngle = getDirectAngle(ball, targetGoal) + (Math.random() - 0.5) * 0.6; // ~35 derece sapma
+            powerFactor = 0.5 + Math.random() * 0.4;
             break;
+
         case 'orta':
-            errorMargin = (Math.random() - 0.5) * (Math.PI / 18);
-            powerFactor = 0.8;
+            // Düz kaleye bakar + Hafif sapma
+            chosenAngle = getDirectAngle(ball, targetGoal) + (Math.random() - 0.5) * 0.2; // ~11 derece sapma
+            powerFactor = 0.75 + Math.random() * 0.2;
             break;
+
         case 'zor':
-            errorMargin = (Math.random() - 0.5) * (Math.PI / 45);
+            // Doğrudan açı tıkalıysa köşeleri hedefler + Çok az sapma
+            chosenAngle = getDirectAngle(ball, targetGoal) + (Math.random() - 0.5) * 0.05;
             powerFactor = 0.95;
             break;
+
         case 'usta':
-            errorMargin = 0;
-            powerFactor = 1.0;
+            // 🧠 AKILLI SEÇİM: Doğrudan mi, Duvar mı, Çivi Sekmesi mi?
+            chosenAngle = calculateMasterShot(aiPin, ball, targetGoal, pitchBounds, obstacles);
+            powerFactor = 1.0; // Kusursuz güç
             break;
     }
 
-    let finalAngle = baseAngle + errorMargin;
-
     return {
-        vx: Math.cos(finalAngle) * powerFactor,
-        vy: Math.sin(finalAngle) * powerFactor
+        vx: Math.cos(chosenAngle) * powerFactor,
+        vy: Math.sin(chosenAngle) * powerFactor
     };
+}
+
+// 1. Doğrudan Açı Hesaplama
+function getDirectAngle(ball, target) {
+    return Math.atan2(target.y - ball.y, target.x - ball.x);
+}
+
+// 2. USTA AI: Sekme ve Yansıma Simülasyonu
+function calculateMasterShot(aiPin, ball, targetGoal, pitch, obstacles) {
+    // A) Doğrudan şut yolu açık mı?
+    if (!isPathBlocked(ball, targetGoal, obstacles)) {
+        return getDirectAngle(ball, targetGoal); // Doğrudan gol at!
+    }
+
+    // B) DUVAR SEKMESİ (Aynalama Yöntemi / Virtual Goal)
+    // Üst duvardan sekme hesabı için sanal kale noktası
+    let topVirtualGoal = { x: targetGoal.x, y: -targetGoal.y };
+    let topBounceAngle = Math.atan2(topVirtualGoal.y - ball.y, topVirtualGoal.x - ball.x);
+
+    // Alt duvardan sekme hesabı için sanal kale noktası
+    let pitchHeight = pitch.bottom - pitch.top;
+    let bottomVirtualGoal = { x: targetGoal.x, y: pitch.bottom + (pitch.bottom - targetGoal.y) };
+    let bottomBounceAngle = Math.atan2(bottomVirtualGoal.y - ball.y, bottomVirtualGoal.x - ball.x);
+
+    // Duvar sekmelerinin önü kapalı mı kontrol et
+    if (!isPathBlocked(ball, topVirtualGoal, obstacles)) {
+        return topBounceAngle; // Üst duvardan sektir!
+    }
+    
+    if (!isPathBlocked(ball, bottomVirtualGoal, obstacles)) {
+        return bottomBounceAngle; // Alt duvardan sektir!
+    }
+
+    // C) ÇİVİ/OYUNCU SEKMESİ (Açısı uygun bir çiviye çarptırarak gole fırlatma)
+    for (let obs of obstacles) {
+        // Eğer engel çivisi top ile kale arasındaysa, o çivinin kenarına çarptırma açısını hesapla
+        let angleToObs = Math.atan2(obs.y - ball.y, obs.x - ball.x);
+        let distToObs = Math.hypot(obs.x - ball.x, obs.y - ball.y);
+        
+        // Çivinin sol veya sağ kenarına çarparak sekme açısı
+        if (distToObs < 200) { 
+            let tangentOffset = (ball.x < targetGoal.x) ? 0.3 : -0.3; // Sekme açısı ofseti
+            return angleToObs + tangentOffset;
+        }
+    }
+
+    // Hiçbiri olmuyorsa mecburen doğrudan kaleye şansını dene
+    return getDirectAngle(ball, targetGoal);
+}
+
+// Yolda Engel var mı Kontrol Eden Yardımcı Fonksiyon (Line-Obstacle Collision)
+function isPathBlocked(start, end, obstacles) {
+    const rayDx = end.x - start.x;
+    const rayDy = end.y - start.y;
+    const rayLen = Math.hypot(rayDx, rayDy);
+
+    for (let obs of obstacles) {
+        // Başlangıç veya bitiş noktasının kendisini engel sayma
+        if (obs.x === start.x && obs.y === start.y) continue;
+
+        // Noktanın doğru parçasına olan en yakın mesafesi (Projection)
+        let u = ((obs.x - start.x) * rayDx + (obs.y - start.y) * rayDy) / (rayLen * rayLen);
+        if (u >= 0 && u <= 1) {
+            let closeX = start.x + u * rayDx;
+            let closeY = start.y + u * rayDy;
+            let dist = Math.hypot(obs.x - closeX, obs.y - closeY);
+            
+            // Eğer engel doğru çizgisine çivi yarıçapından daha yakınsa yol kapalıdır
+            if (dist < (obs.radius || 15) + 5) {
+                return true; 
+            }
+        }
+    }
+    return false;
 }
