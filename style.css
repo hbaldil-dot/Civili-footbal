@@ -2152,7 +2152,7 @@ body { ... }
 
 #online-lobby .popup-body {
     padding: 5px 10px !important;
-    margin-top: 57px !important; /* YENİ: 57px aşağı kaydırma */ 
+    margin-top: 157px !important; /* YENİ: 57px aşağı kaydırma */ 
 }
 
 /* Kaydırma çubuğu */
