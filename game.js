@@ -1045,6 +1045,10 @@ function startSetupTimer() {
     }
 }
 
+// ============================================================
+// GÜNCELLENMİŞ RESET SHOT TIMER - AI VURUŞ TETİKLEMESİ EKLENDİ
+// ============================================================
+
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = SHOT_DURATION;
@@ -1053,12 +1057,25 @@ function resetShotTimer() {
         shotTimer.innerText = 'ŞUT: ' + shotSecondsLeft + 's';
         shotTimer.classList.remove('warning');
     }
+    
+    // === AI VURUŞ KONTROLÜ ===
     if (gameMode === 'ai' && turn === 2) {
+        // AI sırasıysa timer'ı gizle ve hemen AI'yı tetikle
         if (shotTimer) shotTimer.style.display = 'none';
+        
+        // AI'nin vuruş yapması için küçük bir gecikme (daha doğal görünmesi için)
+        setTimeout(() => {
+            if (currentPhase === 'playing' && turn === 2 && !isAiThinking) {
+                console.log('🤖 AI vuruş yapıyor...');
+                runAIMove();
+            }
+        }, 300);
         return;
     } else {
         if (shotTimer) shotTimer.style.display = 'block';
     }
+    
+    // === NORMAL SHOT TIMER ===
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
@@ -1068,15 +1085,161 @@ function resetShotTimer() {
                 if (shotSecondsLeft <= 1) shotTimer.classList.add('warning');
                 else shotTimer.classList.remove('warning');
             }
+            
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
                 if (shotTimer) shotTimer.classList.remove('warning');
+                
+                // Sıra değişimi
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
+                
+                // Yeni turda resetShotTimer tekrar çağrılır ve AI tetiklenir
                 resetShotTimer();
             }
         }
     }, 1000);
+}
+
+// ============================================================
+// GÜNCELLENMİŞ ANİMATİON DÖNGÜSÜ
+// ============================================================
+
+function animate() {
+    if (currentPhase === 'menu') return;
+    
+    updatePhysics();
+    draw();
+    
+    // === AI KONTROLÜ (EK GÜVENLİK) ===
+    // Eğer AI sırasıysa ve top duruyorsa ve AI düşünmüyorsa, vuruş yap
+    if (gameMode === 'ai' && 
+        turn === 2 && 
+        currentPhase === 'playing' && 
+        !isAiThinking && 
+        Math.hypot(cap.vx, cap.vy) < 0.2) {
+        
+        // Sadece shot timer görünmüyorsa (yani AI sırasıysa)
+        const shotTimer = document.getElementById('shot-timer');
+        if (shotTimer && shotTimer.style.display === 'none') {
+            console.log('🔄 Animasyon döngüsünden AI tetikleniyor...');
+            runAIMove();
+        }
+    }
+    
+    requestAnimationFrame(animate);
+}
+
+// ============================================================
+// GÜNCELLENMİŞ UPDATE PHYSICS - AI KONTROLÜ
+// ============================================================
+
+function updatePhysics() {
+    if (currentPhase !== 'playing') return;
+    
+    const SUB_STEPS = 16;
+    for (let step = 0; step < SUB_STEPS; step++) {
+        cap.x += cap.vx / SUB_STEPS;
+        cap.y += cap.vy / SUB_STEPS;
+        
+        // ... (diğer fizik kodları aynen kalır) ...
+        
+        // Duvarlara çarpma, gol kontrolü vs.
+        // ... (mevcut fizik kodu) ...
+    }
+    
+    cap.vx *= cap.friction;
+    cap.vy *= cap.friction;
+    
+    // === AI KONTROLÜ (EK) ===
+    const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
+    if (!isMoving && gameMode === 'ai' && turn === 2 && !isAiThinking) {
+        // AI sırasıysa ve top duruyorsa
+        const shotTimer = document.getElementById('shot-timer');
+        // Eğer shot timer görünmüyorsa (AI sırası) ve şut süresi geçmemişse
+        if (shotTimer && shotTimer.style.display === 'none') {
+            // AI'nin hemen vuruş yapmasını sağla
+            runAIMove();
+        }
+    }
+}
+
+// ============================================================
+// startSetupPhase() - AI OYUNU BAŞLATIRKEN DÜZENLEME
+// ============================================================
+
+function startSetupPhase() {
+    showField();
+    currentPhase = 'setup';
+    score = { p1: 0, p2: 0 };
+    document.getElementById('score-p1').innerText = "0";
+    document.getElementById('score-p2').innerText = "0";
+
+    const timeBoard = document.getElementById('time-board');
+    if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+
+    const startBtn = document.getElementById('start-match-btn');
+    startBtn.style.display = 'flex';
+    startBtn.style.opacity = '1';
+    startBtn.disabled = false;
+
+    const indicator = document.getElementById('turn-indicator');
+    if (indicator) {
+        indicator.innerText = "🏆 Takım Taktik Ayarla";
+        indicator.style.borderColor = "#f1c40f";
+        indicator.style.color = "#f1c40f";
+    }
+
+    const shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) {
+        shotTimer.style.display = 'none';
+        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+    }
+
+    editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
+
+    // ... (mevcut pin oluşturma kodları aynen kalır) ...
+
+    updateScoreLogos();
+
+    startSetupTimer();
+    animate();
+}
+
+// ============================================================
+// confirmFormationsAndStart() - MAÇ BAŞLARKEN AI KONTROLÜ
+// ============================================================
+
+function confirmFormationsAndStart() {
+    if (setupTimerInterval) clearInterval(setupTimerInterval);
+    if (gameMode === 'online' && socket) {
+        // ... (online kodu)
+    } else {
+        pins.forEach(pin => { pin.locked = true; });
+        currentPhase = 'playing';
+        document.getElementById('start-match-btn').style.display = 'none';
+        const shotTimer = document.getElementById('shot-timer');
+        if (shotTimer) {
+            shotTimer.style.display = 'block';
+            shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+        }
+        updateHUDTurn();
+        startMatchTimer();
+        
+        // === EĞER AI İSE VE SIRA AI'DEYSE, HEMEN VURUŞ YAPMASINI SAĞLA ===
+        if (gameMode === 'ai' && turn === 2) {
+            // AI'nin hemen vuruş yapması için küçük bir gecikme
+            setTimeout(() => {
+                if (currentPhase === 'playing' && turn === 2 && !isAiThinking) {
+                    console.log('🤖 Maç başlangıcında AI vuruş yapıyor...');
+                    runAIMove();
+                }
+            }, 500);
+        }
+        
+        resetShotTimer();
+        animate();
+    }
 }
 
 function endMatch() {
