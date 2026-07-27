@@ -681,9 +681,32 @@ function runAIMove() {
     if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
     if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
     isAiThinking = true;
+
     const params = getAIParameters();
-    const target = calculateAITarget(params);
-    executeAIShot(target, params);
+    const targetGoal = { x: width / 2, y: height - goalHeight };
+    const pitchBounds = { top: goalHeight, bottom: height - goalHeight, left: 0, right: width };
+    
+    // Engeller: Postlar ve tüm oyuncu çivileri
+    const obstacles = pins.map(p => ({ x: p.x, y: p.y, radius: p.isPost ? 4 : 11 }));
+
+    // Gelişmiş AI hesaplamasını çağır
+    const shotVector = calculateAIShot(null, cap, targetGoal, aiLevel, pitchBounds, obstacles);
+
+    setTimeout(() => {
+        isDraggingBall = false;
+        isAiThinking = false;
+        playSound('kick');
+
+        // Şut gücü katsayısı (örneğin MAX güç için 12-15 arası çarpan)
+        const shotPower = 7; 
+        cap.vx = shotVector.vx * shotPower;
+        cap.vy = shotVector.vy * shotPower;
+
+        turn = 1;
+        updateHUDTurn();
+        resetShotTimer();
+    }, params.reactionDelay);
+}
 }
 
 function calculateAITarget(params) {
