@@ -877,22 +877,25 @@ body { ... }
     transform: scale(1.55) !important;
 }
 
-/* ===== EN ALTAKİ BUTON (GERİ/ANA MENÜ) - %40 KÜÇÜK ===== */
+/* ===== EN ALTAKİ BUTON (GERİ / ANA MENÜ) ===== */
 .settings-btn-img:last-child {
-    transform: scale(0.60) !important; /* %40 küçük (1.0 - 0.40 = 0.60) */
-    margin-top: 4px !important;
+    transform: scale(0.95) !important; /* Daireye ve hizaya tam oturan doğal ölçek */
+    margin-top: 6px !important;
+    opacity: 0.9 !important;
+    transform-origin: center center !important;
 }
 
 .settings-btn-img:last-child:hover {
-    transform: scale(0.65) !important;
+    transform: scale(1.02) !important;
+    opacity: 1 !important;
 }
 
 .settings-btn-img:last-child:active {
-    transform: scale(0.55) !important;
+    transform: scale(0.90) !important;
 }
 
 /* ============================================================
-   AYARLAR POP-UP - MOBİL UYUM
+   AYARLAR POP-UP - MOBİL UYUM (REVİZE EDİLDİ)
    ============================================================ */
 
 @media (max-width: 420px) {
@@ -903,10 +906,12 @@ body { ... }
         transform: translate(-50%, -50%) translateY(15px) !important;
     }
     .settings-btn-img {
-        transform: scale(0.80) !important;
+        transform: scale(0.85) !important;
     }
+    /* Daire içindeki ana menü butonunun mobilde küçülüp kaymasını engeller */
     .settings-btn-img:last-child {
-        transform: scale(0.30) !important;
+        transform: scale(0.80) !important;
+        margin-top: 4px !important;
     }
 }
 
@@ -921,7 +926,7 @@ body { ... }
         transform: scale(0.80) !important;
     }
     .settings-btn-img:last-child {
-        transform: scale(0.28) !important;
+        transform: scale(0.75) !important;
     }
 }
 
@@ -936,11 +941,10 @@ body { ... }
         transform: scale(0.80) !important;
     }
     .settings-btn-img:last-child {
-        transform: scale(0.30) !important;
-        max-height: 20px !important;
+        transform: scale(0.75) !important;
+        max-height: 28px !important;
     }
 }
-
 
 /* ============================================================
    MAÇ SÜRESİ - SATIR DÜZENİ (DOSYA SONUNA EKLE)
