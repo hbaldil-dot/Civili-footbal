@@ -936,13 +936,13 @@ body { ... }
         transform: translate(-50%, -50%) translateY(10px) !important;
     }
     .settings-btn-img {
-        max-height: 45px !important;
+        max-height: 61px !important;
         width: auto !important;
         transform: scale(0.80) !important;
     }
     .settings-btn-img:last-child {
         transform: scale(0.75) !important;
-        max-height: 45px !important;
+        max-height: 61px !important;
     }
 }
 
