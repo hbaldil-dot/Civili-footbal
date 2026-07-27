@@ -1672,10 +1672,18 @@ function closeSettingsPopup() {
 }
 
 // ============================================================
-// MAÇ SÜRESİ FONKSİYONLARI
+// MAÇ SÜRESİ FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
 // ============================================================
 function toggleMatchDurationOptions() {
     const options = document.getElementById('match-duration-options');
+    const shotOptions = document.getElementById('shot-duration-options');
+    const stadiumOptions = document.getElementById('stadium-options');
+
+    // Diğer açık olan menüleri kapat
+    if (shotOptions) shotOptions.style.display = 'none';
+    if (stadiumOptions) stadiumOptions.style.display = 'none';
+
+    // Kendi menüsünü aç/kapat
     if (options) {
         if (options.style.display === 'none' || options.style.display === '') {
             options.style.display = 'flex';
@@ -1689,128 +1697,53 @@ function toggleMatchDurationOptions() {
     }
 }
 
-function setMatchDuration(seconds) {
-    console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
-    
-    const display = document.getElementById('match-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.duration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    MATCH_DURATION = seconds;
-    
-    const options = document.getElementById('match-duration-options');
-    if (options) {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-    
-    if (currentPhase === 'playing' || currentPhase === 'setup') {
-        matchSecondsLeft = seconds;
-        const timeBoard = document.getElementById('time-board');
-        if (timeBoard) {
-            timeBoard.innerText = seconds + 's';
-        }
-    }
-    
-    console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
-}
-
 // ============================================================
-// VURUŞ SÜRESİ FONKSİYONLARI
+// VURUŞ SÜRESİ FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
 // ============================================================
 function toggleShotDurationOptions() {
     const optionsDiv = document.getElementById('shot-duration-options');
-    if (!optionsDiv) return;
-    
-    if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
-        optionsDiv.style.display = 'flex';
-        console.log('📋 Vuruş süresi seçenekleri açıldı');
-    } else {
-        optionsDiv.style.display = 'none';
-        console.log('📋 Vuruş süresi seçenekleri kapatıldı');
-    }
-}
+    const matchOptions = document.getElementById('match-duration-options');
+    const stadiumOptions = document.getElementById('stadium-options');
 
-function setShotDuration(seconds) {
-    console.log('🎯 Vuruş süresi seçildi:', seconds, 'saniye');
-    
-    SHOT_DURATION = seconds;
-    
-    const display = document.getElementById('shot-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('.settings-option[data-shot-duration]').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.shotDuration) === seconds) {
-            btn.classList.add('active');
+    // Diğer açık olan menüleri kapat
+    if (matchOptions) matchOptions.style.display = 'none';
+    if (stadiumOptions) stadiumOptions.style.display = 'none';
+
+    // Kendi menüsünü aç/kapat
+    if (optionsDiv) {
+        if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
+            optionsDiv.style.display = 'flex';
+            console.log('📋 Vuruş süresi seçenekleri açıldı');
+        } else {
+            optionsDiv.style.display = 'none';
+            console.log('📋 Vuruş süresi seçenekleri kapatıldı');
         }
-    });
-    
-    const options = document.getElementById('shot-duration-options');
-    if (options) {
-        options.style.display = 'none';
     }
-    
-    console.log('✅ Vuruş süresi güncellendi:', seconds, 'sn');
 }
 
 // ============================================================
-// STADYUM FONKSİYONLARI
+// STADYUM FONKSİYONLARI (Akordeon Mantığı Entegre Edildi)
 // ============================================================
 function toggleStadiumOptions() {
     const optionsDiv = document.getElementById('stadium-options');
-    if (!optionsDiv) return;
+    const matchOptions = document.getElementById('match-duration-options');
+    const shotOptions = document.getElementById('shot-duration-options');
 
-    if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
-        optionsDiv.style.display = 'flex';
-        console.log('📋 Stadyum seçenekleri açıldı');
-    } else {
-        optionsDiv.style.display = 'none';
-        console.log('📋 Stadyum seçenekleri kapatıldı');
-    }
-}
+    // Diğer açık olan menüleri kapat
+    if (matchOptions) matchOptions.style.display = 'none';
+    if (shotOptions) shotOptions.style.display = 'none';
 
-function selectStadium(stadiumKey, texturePath) {
-    console.log('🏟️ Stadyum seçildi:', stadiumKey);
-    
-    currentStadiumTexture = texturePath;
-
-    const previewImg = document.getElementById('selected-stadium-preview');
-    if (previewImg) {
-        previewImg.src = `menu/ayarlar/stat/${stadiumKey}.webp`;
-    }
-
-    const cards = document.querySelectorAll('.stadium-option-card');
-    cards.forEach(card => {
-        const img = card.querySelector('img');
-        if (img && img.src && img.src.includes(`${stadiumKey}.webp`)) {
-            card.classList.add('active');
+    // Kendi menüsünü aç/kapat
+    if (optionsDiv) {
+        if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
+            optionsDiv.style.display = 'flex';
+            console.log('📋 Stadyum seçenekleri açıldı');
         } else {
-            card.classList.remove('active');
+            optionsDiv.style.display = 'none';
+            console.log('📋 Stadyum seçenekleri kapatıldı');
         }
-    });
-
-    const optionsDiv = document.getElementById('stadium-options');
-    if (optionsDiv) optionsDiv.style.display = 'none';
-
-    loadFieldImage(texturePath);
-    if (currentPhase !== 'menu') {
-        showField();
     }
-    
-    console.log('✅ Stadyum güncellendi:', texturePath);
 }
-
 // ============================================================
 // SOCKET OLAY DİNLEYİCİLERİ
 // ============================================================
@@ -2464,35 +2397,3 @@ function setLocalShotDuration(seconds) {
         }
     }
 }
-// ===== TEK MENÜ AÇIK KALSIN (AKORDEON MANTIĞI) =====
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Tüm alt seçenek gruplarını bul (Süre, Vuruş ve Stadyum kapsayıcıları)
-    const allSubPanels = document.querySelectorAll(
-        '.settings-options, .time-options, .stadium-options, [class*="sub-"], [class*="-options"]'
-    );
-
-    // 2. Tıklama olayını tüm belgeye dinlet
-    document.addEventListener('click', (event) => {
-        // Tıklanan elemanın bir ayar başlığı/butonu olup olmadığını kontrol et
-        const clickedHeader = event.target.closest(
-            '.setting-item, .setting-card, .settings-row, [class*="setting"]'
-        );
-
-        if (clickedHeader) {
-            // Tıklanan kartın içindeki alt paneli bul
-            const currentPanel = clickedHeader.querySelector(
-                '.settings-options, .time-options, .stadium-options, [class*="sub-"], [class*="-options"]'
-            ) || clickedHeader.nextElementSibling;
-
-            if (currentPanel) {
-                // Diğer tüm alt panelleri kapat
-                allSubPanels.forEach(panel => {
-                    if (panel !== currentPanel) {
-                        panel.classList.remove('active', 'show', 'open');
-                        panel.style.display = 'none'; // Güvenlik önlemi olarak direkt gizle
-                    }
-                });
-            }
-        }
-    });
-});
