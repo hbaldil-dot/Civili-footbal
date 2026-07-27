@@ -1691,7 +1691,6 @@ function toggleMatchDurationOptions() {
             console.log('📋 Maç süresi seçenekleri açıldı');
         } else {
             options.style.display = 'none';
-            options.classList.remove('show');
             console.log('📋 Maç süresi seçenekleri kapatıldı');
         }
     }
