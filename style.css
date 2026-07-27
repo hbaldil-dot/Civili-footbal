@@ -879,7 +879,7 @@ body { ... }
 
 /* ===== EN ALTAKİ BUTON (GERİ / ANA MENÜ) ===== */
 .settings-btn-img:last-child {
-    transform: scale(0.95) !important; /* Daireye ve hizaya tam oturan doğal ölçek */
+    transform: scale(1.95) !important; /* Daireye ve hizaya tam oturan doğal ölçek */
     margin-top: 6px !important;
     opacity: 0.9 !important;
     transform-origin: center center !important;
@@ -910,7 +910,7 @@ body { ... }
     }
     /* Daire içindeki ana menü butonunun mobilde küçülüp kaymasını engeller */
     .settings-btn-img:last-child {
-        transform: scale(0.80) !important;
+        transform: scale(1.80) !important;
         margin-top: 4px !important;
     }
 }
