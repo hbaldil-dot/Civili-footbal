@@ -857,6 +857,113 @@ body { ... }
     pointer-events: none !important;
 }
 
+/* ===== TÜM BUTONLAR ===== */
+.settings-btn-img {
+    width: 100% !important;
+    display: block !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    opacity: 0.9 !important;
+    pointer-events: auto !important;
+    transform: scale(1.55) !important;
+}
+
+.settings-btn-img:hover {
+    transform: scale(1.70) !important;
+    opacity: 1 !important;
+}
+
+.settings-btn-img:active {
+    transform: scale(1.55) !important;
+}
+
+/* ===== EN ALTAKİ BUTON (ANA MENÜ) - DÜZELTİLDİ ===== */
+.settings-btn-img:last-child {
+    transform: scale(1.0) !important; /* scale kaldırıldı, normal boyut */
+    margin-top: 4px !important;
+    max-width: 120px !important; /* Maksimum genişlik sınırı */
+    width: 50% !important; /* Diğer butonlara göre daha küçük */
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.settings-btn-img:last-child:hover {
+    transform: scale(1.02) !important;
+}
+
+.settings-btn-img:last-child:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================================
+   AYARLAR POP-UP - MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .settings-buttons-container {
+        width: 70% !important;
+        max-width: 200px !important;
+        gap: 8px !important;
+        transform: translate(-50%, -50%) translateY(15px) !important;
+    }
+    .settings-btn-img {
+        transform: scale(0.80) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(1.0) !important;
+        width: 45% !important;
+        max-width: 80px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .settings-buttons-container {
+        width: 75% !important;
+        max-width: 170px !important;
+        gap: 6px !important;
+        transform: translate(-50%, -50%) translateY(12px) !important;
+    }
+    .settings-btn-img {
+        transform: scale(0.80) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(1.0) !important;
+        width: 40% !important;
+        max-width: 70px !important;
+    }
+}
+
+@media (max-height: 700px) {
+    .settings-buttons-container {
+        gap: 6px !important;
+        transform: translate(-50%, -50%) translateY(10px) !important;
+    }
+    .settings-btn-img {
+        max-height: 45px !important;
+        width: auto !important;
+        transform: scale(0.80) !important;
+    }
+    .settings-btn-img:last-child {
+        transform: scale(1.0) !important;
+        max-height: 30px !important;
+        width: 40% !important;
+    }
+}
+/* ===== BUTON KONTEYNERİ ===== */
+.settings-buttons-container {
+    position: absolute !important;
+    top: 66% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) translateY(20px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 65% !important;
+    max-width: 260px !important;
+    pointer-events: none !important;
+}
+
 /* ===== TÜM BUTONLAR - %65 BÜYÜK ===== */
 .settings-btn-img {
     width: 100% !important;
