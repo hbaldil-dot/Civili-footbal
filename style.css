@@ -882,7 +882,7 @@ body { ... }
     transform: scale(2.0) !important; /* scale kaldırıldı, normal boyut */
     margin-top: 4px !important;
     max-width: 120px !important; /* Maksimum genişlik sınırı */
-    width: 50% !important; /* Diğer butonlara göre daha küçük */
+    width: 100% !important; /* Diğer butonlara göre daha küçük */
     margin-left: auto !important;
     margin-right: auto !important;
 }
@@ -892,7 +892,7 @@ body { ... }
 }
 
 .settings-btn-img:last-child:active {
-    transform: scale(0.95) !important;
+    transform: scale(1.95) !important;
 }
 /* ============================================================
    AYARLAR POP-UP - MOBİL UYUM
