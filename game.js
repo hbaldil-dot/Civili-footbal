@@ -666,52 +666,191 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// AI SİSTEMİ
+// GÜNCELLENMİŞ AI SİSTEMİ
 // ============================================================
+
+// AI parametrelerini daha detaylı hale getirelim
 function getAIParameters() {
     switch (aiLevel) {
-        case 'kolay': return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02 };
-        case 'zor': return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15 };
-        case 'usta': return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25 };
-        default: return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08 };
+        case 'kolay':
+            return {
+                accuracy: 0.3,
+                power: 0.07,
+                reactionDelay: 700,
+                pullDistance: 55,
+                fakeChance: 0.01,
+                // Yeni: Hedef seçim stratejisi
+                targetStrategy: 'random_zone',
+                // Yeni: Hata payı
+                errorMargin: 30
+            };
+        case 'orta':
+            return {
+                accuracy: 0.65,
+                power: 0.11,
+                reactionDelay: 500,
+                pullDistance: 70,
+                fakeChance: 0.08,
+                targetStrategy: 'find_gap',
+                errorMargin: 20
+            };
+        case 'zor':
+            return {
+                accuracy: 0.85,
+                power: 0.14,
+                reactionDelay: 350,
+                pullDistance: 85,
+                fakeChance: 0.18,
+                targetStrategy: 'calculate_angle',
+                errorMargin: 12
+            };
+        case 'usta':
+            return {
+                accuracy: 0.93,
+                power: 0.16,
+                reactionDelay: 200,
+                pullDistance: 90,
+                fakeChance: 0.28,
+                targetStrategy: 'predict_and_fake',
+                errorMargin: 8
+            };
+        default:
+            return {
+                accuracy: 0.5,
+                power: 0.09,
+                reactionDelay: 600,
+                pullDistance: 60,
+                fakeChance: 0.05,
+                targetStrategy: 'find_gap',
+                errorMargin: 25
+            };
     }
 }
 
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
-    isAiThinking = true;
-    const params = getAIParameters();
-    const target = calculateAITarget(params);
-    executeAIShot(target, params);
-}
-
+// Gelişmiş hedef hesaplama
 function calculateAITarget(params) {
     const goalY = height - goalHeight;
     const goalCenterX = width / 2;
     const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
     let bestTarget = { x: goalCenterX, y: goalY };
     let bestScore = -Infinity;
-    for (let i = 0; i < 5; i++) {
-        const offsetX = (Math.random() - 0.5) * 60;
-        const testX = goalCenterX + offsetX;
-        const testY = goalY;
-        let minDist = Infinity;
-        enemyPlayers.forEach(p => {
-            const dist = Math.hypot(testX - p.x, testY - p.y);
-            if (dist < minDist) minDist = dist;
-        });
-        const score = (60 - Math.abs(offsetX)) + minDist * 2;
-        if (score > bestScore) { bestScore = score; bestTarget = { x: testX, y: testY }; }
+
+    switch (params.targetStrategy) {
+        case 'random_zone':
+            // 1. SEVİYE: Belirli bölgelere odaklan (sol köşe, sağ köşe, orta)
+            const zones = [
+                { x: goalCenterX - goalWidth * 0.3, y: goalY },
+                { x: goalCenterX + goalWidth * 0.3, y: goalY },
+                { x: goalCenterX, y: goalY }
+            ];
+            const randomZone = zones[Math.floor(Math.random() * zones.length)];
+            bestTarget = {
+                x: randomZone.x + (Math.random() - 0.5) * 15,
+                y: randomZone.y + (Math.random() - 0.5) * 5
+            };
+            break;
+
+        case 'find_gap':
+            // 2. SEVİYE: Savunmadaki en büyük boşluğu bul
+            let gaps = [];
+            const sortedEnemies = [...enemyPlayers].sort((a, b) => a.x - b.x);
+            
+            // Kalenin solundan başlayarak boşlukları hesapla
+            let lastX = goalCenterX - goalWidth / 2;
+            for (let enemy of sortedEnemies) {
+                if (enemy.y > goalY - 40 && enemy.y < goalY + 10) {
+                    const gapSize = enemy.x - lastX;
+                    if (gapSize > 10) {
+                        gaps.push({ x: lastX + gapSize / 2, y: goalY, size: gapSize });
+                    }
+                    lastX = enemy.x;
+                }
+            }
+            // Kalan boşluk (soldan sağa)
+            const finalGap = goalCenterX + goalWidth / 2 - lastX;
+            if (finalGap > 10) {
+                gaps.push({ x: lastX + finalGap / 2, y: goalY, size: finalGap });
+            }
+
+            // En büyük boşluğu seç
+            if (gaps.length > 0) {
+                gaps.sort((a, b) => b.size - a.size);
+                bestTarget = gaps[0];
+                // Hedefe küçük bir rastgelelik ekle
+                bestTarget.x += (Math.random() - 0.5) * 10;
+            } else {
+                // Hiç boşluk yoksa rastgele ata
+                bestTarget = { 
+                    x: goalCenterX + (Math.random() - 0.5) * goalWidth * 0.4,
+                    y: goalY + (Math.random() - 0.5) * 10
+                };
+            }
+            break;
+
+        case 'calculate_angle':
+        case 'predict_and_fake':
+            // 3. ve 4. SEVİYE: Açı ve hız hesaplama
+            // Mevcut top pozisyonundan hedefe olan açıyı hesapla
+            const targetX = goalCenterX + (Math.random() - 0.5) * goalWidth * 0.5;
+            const targetY = goalY;
+            
+            // Açıyı hesapla
+            const dx = targetX - cap.x;
+            const dy = targetY - cap.y;
+            let angle = Math.atan2(dy, dx);
+            
+            // Usta seviyesi için gelişmiş stratejiler
+            if (params.targetStrategy === 'predict_and_fake') {
+                // 4. SEVİYE: Sahte hareket ve tahmin
+                const fakeChance = params.fakeChance;
+                if (Math.random() < fakeChance) {
+                    // Sahte hareket: Ani bir yön değişikliği yap
+                    angle += (Math.random() - 0.5) * 1.2;
+                }
+                
+                // Topun ve rakiplerin hareketini tahmin et
+                const ballSpeed = Math.hypot(cap.vx, cap.vy);
+                if (ballSpeed > 0.5) {
+                    // Top hareket ediyorsa, hedefe ek bir kayma ekle
+                    const predictionOffset = cap.vx * 0.1;
+                    bestTarget = {
+                        x: targetX + predictionOffset,
+                        y: targetY + Math.abs(cap.vy) * 0.1
+                    };
+                } else {
+                    bestTarget = { x: targetX, y: targetY };
+                }
+            } else {
+                // 3. SEVİYE: Açı hesaplama ile hedef belirle
+                bestTarget = { 
+                    x: targetX + Math.cos(angle) * 5,
+                    y: targetY + Math.sin(angle) * 5
+                };
+            }
+            break;
     }
-    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
-    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
-    return { x: bestTarget.x + errorX, y: bestTarget.y + errorY };
+
+    // Hata payını uygula (Zorluk seviyesine göre)
+    const errorX = (Math.random() - 0.5) * params.errorMargin * (1 - params.accuracy);
+    const errorY = (Math.random() - 0.5) * params.errorMargin * 0.5 * (1 - params.accuracy);
+    
+    return {
+        x: Math.min(Math.max(bestTarget.x, 20), width - 20),
+        y: Math.min(Math.max(bestTarget.y, goalHeight + 10), height - goalHeight - 10)
+    };
 }
 
+// executeAIShot fonksiyonuna küçük bir iyileştirme
 function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    const pullDistance = Math.min(params.pullDistance * (0.8 + Math.random() * 0.4), MAX_DRAG_DIST);
+    // Vuruş gücünü zorluk seviyesine göre biraz daha optimize et
+    let pullDistance = Math.min(params.pullDistance * (0.7 + Math.random() * 0.6), MAX_DRAG_DIST);
+    
+    // Usta seviyesinde daha sert ve isabetli vuruş
+    if (aiLevel === 'usta') {
+        pullDistance *= 1.1;
+    }
+
     setTimeout(() => {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
