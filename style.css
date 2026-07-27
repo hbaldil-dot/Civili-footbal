@@ -869,7 +869,7 @@ body { ... }
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.70) !important;
+    transform: scale(1.55) !important;
     opacity: 1 !important;
 }
 
@@ -906,11 +906,11 @@ body { ... }
         transform: translate(-50%, -50%) translateY(15px) !important;
     }
     .settings-btn-img {
-        transform: scale(1.85) !important;
+        transform: scale(1.78) !important;
     }
     /* Daire içindeki ana menü butonunun mobilde küçülüp kaymasını engeller */
     .settings-btn-img:last-child {
-        transform: scale(1.80) !important;
+        transform: scale(1.78) !important;
         margin-top: 4px !important;
     }
 }
@@ -923,10 +923,10 @@ body { ... }
         transform: translate(-50%, -50%) translateY(12px) !important;
     }
     .settings-btn-img {
-        transform: scale(1.80) !important;
+        transform: scale(1.78) !important;
     }
     .settings-btn-img:last-child {
-        transform: scale(1.75) !important;
+        transform: scale(1.78) !important;
     }
 }
 
