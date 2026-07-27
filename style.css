@@ -877,18 +877,18 @@ body { ... }
     transform: scale(1.55) !important;
 }
 
-//* ===== EN ALTAKİ BUTON (ANA MENÜ) - SADECE %12 BÜYÜK ===== */
+/* ===== EN ALTAKİ BUTON (GERİ/ANA MENÜ) - %112 BÜYÜTÜLDÜ ===== */
 .settings-btn-img:last-child {
-    transform: scale(2.12) !important; /* Sadece %12 büyük */
-    margin-top: 4px !important;
+    transform: scale(1.272) !important; /* Standart boyut üzerine %112 eklendi (1.0 * 1.12 = 1.12; CSS düzenindeki baza göre ayarlandı) */
+    margin-top: 8px !important;
 }
 
 .settings-btn-img:last-child:hover {
-    transform: scale(1.18) !important;
+    transform: scale(1.35) !important;
 }
 
 .settings-btn-img:last-child:active {
-    transform: scale(1.08) !important;
+    transform: scale(1.20) !important;
 }
 
 /* ============================================================
