@@ -1704,6 +1704,45 @@ function toggleMatchDurationOptions() {
     }
 }
 
+function setMatchDuration(seconds) {
+    console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
+    
+    // 1. Buton üzerindeki yazıyı güncelle
+    const display = document.getElementById('match-duration-display');
+    if (display) {
+        display.textContent = seconds + 'sn';
+    }
+    
+    // 2. Seçenek butonlarını güncelle (active sınıfını değiştir)
+    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.duration) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // 3. Global değişkeni güncelle
+    MATCH_DURATION = seconds;
+    
+    // 4. Eğer oyun açıksa süreyi güncelle
+    if (currentPhase === 'playing' || currentPhase === 'setup') {
+        matchSecondsLeft = seconds;
+        const timeBoard = document.getElementById('time-board');
+        if (timeBoard) {
+            timeBoard.innerText = seconds + 's';
+        }
+    }
+    
+    // 5. Menüyü otomatik kapat
+    const options = document.getElementById('match-duration-options');
+    if (options) {
+        options.style.display = 'none';
+        options.classList.remove('show');
+    }
+    
+    console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
+}
+
 // ============================================================
 // VURUŞ SÜRESİ FONKSİYONLARI
 // ============================================================
@@ -1737,6 +1776,48 @@ function toggleShotDurationOptions() {
     }
 }
 
+function setShotDuration(seconds) {
+    console.log('🎯 Vuruş süresi seçildi:', seconds, 'saniye');
+    
+    // 1. Buton üzerindeki yazıyı güncelle
+    const display = document.getElementById('shot-duration-display');
+    if (display) {
+        display.textContent = seconds + 'sn';
+    }
+    
+    // 2. Seçenek butonlarını güncelle (active sınıfını değiştir)
+    document.querySelectorAll('.settings-option[data-shot-duration]').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.shotDuration) === seconds) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // 3. Global değişkeni güncelle
+    SHOT_DURATION = seconds;
+    
+    // 4. Eğer oyun açıksa shot timer'ı güncelle
+    if (currentPhase === 'playing') {
+        const shotTimer = document.getElementById('shot-timer');
+        if (shotTimer) {
+            shotTimer.innerText = 'ŞUT: ' + seconds + 's';
+        }
+        if (shotTimerInterval) {
+            clearInterval(shotTimerInterval);
+            resetShotTimer();
+        }
+    }
+    
+    // 5. Menüyü otomatik kapat
+    const options = document.getElementById('shot-duration-options');
+    if (options) {
+        options.style.display = 'none';
+        options.classList.remove('show');
+    }
+    
+    console.log('✅ Vuruş süresi güncellendi:', seconds, 'sn');
+}
+
 // ============================================================
 // STADYUM FONKSİYONLARI
 // ============================================================
@@ -1768,6 +1849,43 @@ function toggleStadiumOptions() {
         optionsDiv.classList.remove('show');
         console.log('📋 Stadyum seçenekleri kapatıldı');
     }
+}
+
+function selectStadium(stadiumKey, texturePath) {
+    console.log('🏟️ Stadyum seçildi:', stadiumKey);
+    
+    // 1. Önizleme görselini güncelle
+    const previewImg = document.getElementById('selected-stadium-preview');
+    if (previewImg) {
+        previewImg.src = `menu/ayarlar/stat/${stadiumKey}.webp`;
+    }
+
+    // 2. Seçenek kartlarını güncelle (active sınıfını değiştir)
+    const cards = document.querySelectorAll('.stadium-option-card');
+    cards.forEach(card => {
+        const img = card.querySelector('img');
+        if (img && img.src && img.src.includes(`${stadiumKey}.webp`)) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+
+    // 3. Saha görselini güncelle
+    currentStadiumTexture = texturePath;
+    loadFieldImage(texturePath);
+    if (currentPhase !== 'menu') {
+        showField();
+    }
+    
+    // 4. Menüyü otomatik kapat
+    const optionsDiv = document.getElementById('stadium-options');
+    if (optionsDiv) {
+        optionsDiv.style.display = 'none';
+        optionsDiv.classList.remove('show');
+    }
+    
+    console.log('✅ Stadyum güncellendi:', texturePath);
 }
 
 // ============================================================
