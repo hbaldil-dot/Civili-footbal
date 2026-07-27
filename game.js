@@ -2464,3 +2464,35 @@ function setLocalShotDuration(seconds) {
         }
     }
 }
+// ===== TEK MENÜ AÇIK KALSIN (AKORDEON MANTIĞI) =====
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tüm alt seçenek gruplarını bul (Süre, Vuruş ve Stadyum kapsayıcıları)
+    const allSubPanels = document.querySelectorAll(
+        '.settings-options, .time-options, .stadium-options, [class*="sub-"], [class*="-options"]'
+    );
+
+    // 2. Tıklama olayını tüm belgeye dinlet
+    document.addEventListener('click', (event) => {
+        // Tıklanan elemanın bir ayar başlığı/butonu olup olmadığını kontrol et
+        const clickedHeader = event.target.closest(
+            '.setting-item, .setting-card, .settings-row, [class*="setting"]'
+        );
+
+        if (clickedHeader) {
+            // Tıklanan kartın içindeki alt paneli bul
+            const currentPanel = clickedHeader.querySelector(
+                '.settings-options, .time-options, .stadium-options, [class*="sub-"], [class*="-options"]'
+            ) || clickedHeader.nextElementSibling;
+
+            if (currentPanel) {
+                // Diğer tüm alt panelleri kapat
+                allSubPanels.forEach(panel => {
+                    if (panel !== currentPanel) {
+                        panel.classList.remove('active', 'show', 'open');
+                        panel.style.display = 'none'; // Güvenlik önlemi olarak direkt gizle
+                    }
+                });
+            }
+        }
+    });
+});
