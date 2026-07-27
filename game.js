@@ -670,10 +670,66 @@ function getCanvasTouchPos(e) {
 // ============================================================
 function getAIParameters() {
     switch (aiLevel) {
-        case 'kolay': return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02 };
-        case 'zor': return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15 };
-        case 'usta': return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25 };
-        default: return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08 };
+        case 'kolay': 
+            return { 
+                reactionDelay: 800, 
+                pullDistanceMin: 20, 
+                pullDistanceMax: 50, 
+                errorMargin: 25, 
+                powerError: 0.20,
+                fakeChance: 0.02,
+                targetZones: 3,      // Kaç bölgeye bakacağı
+                analyzeOpponents: false,
+                analyzeWalls: false
+            };
+        case 'orta': 
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 70, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false
+            };
+        case 'zor': 
+            return { 
+                reactionDelay: 400, 
+                pullDistanceMin: 50, 
+                pullDistanceMax: 85, 
+                errorMargin: 6, 
+                powerError: 0.05,
+                fakeChance: 0.15,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: true
+            };
+        case 'usta': 
+            return { 
+                reactionDelay: 250, 
+                pullDistanceMin: 60, 
+                pullDistanceMax: 90, 
+                errorMargin: 2, 
+                powerError: 0.02,
+                fakeChance: 0.25,
+                targetZones: 7,
+                analyzeOpponents: true,
+                analyzeWalls: true
+            };
+        default: 
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 65, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false
+            };
     }
 }
 
@@ -681,65 +737,223 @@ function runAIMove() {
     if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
     if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
     isAiThinking = true;
+    
     const params = getAIParameters();
+    
+    // Vuruş süresine göre acil durum kontrolü
+    if (shotSecondsLeft < 2) {
+        // Hızlı vuruş yap
+        params.reactionDelay = Math.min(params.reactionDelay, 200);
+        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
+        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
+    }
+    
+    // Hedef seç (rakip ve duvar analizi ile)
     const target = calculateAITarget(params);
-    executeAIShot(target, params);
+    
+    // Sahte vuruş kontrolü
+    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
+        executeFakeShot(target, params);
+    } else {
+        executeAIShot(target, params);
+    }
 }
 
 function calculateAITarget(params) {
     const goalY = height - goalHeight;
     const goalCenterX = width / 2;
-    const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
-    let bestTarget = { x: goalCenterX, y: goalY };
-    let bestScore = -Infinity;
-    for (let i = 0; i < 5; i++) {
-        const offsetX = (Math.random() - 0.5) * 60;
-        const testX = goalCenterX + offsetX;
+    const goalLeft = (width - goalWidth) / 2;
+    const goalRight = (width + goalWidth) / 2;
+    
+    // Rakip oyuncular (takım 1) ve kaleciler (post)
+    const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
+    const posts = pins.filter(p => p.isPost);
+    
+    // Hedef bölgeleri oluştur
+    const zones = [];
+    const numZones = params.targetZones || 5;
+    const zoneWidth = (goalRight - goalLeft) / numZones;
+    
+    for (let i = 0; i < numZones; i++) {
+        const zoneCenterX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+        const testX = zoneCenterX;
         const testY = goalY;
-        let minDist = Infinity;
-        enemyPlayers.forEach(p => {
-            const dist = Math.hypot(testX - p.x, testY - p.y);
-            if (dist < minDist) minDist = dist;
-        });
-        const score = (60 - Math.abs(offsetX)) + minDist * 2;
-        if (score > bestScore) { bestScore = score; bestTarget = { x: testX, y: testY }; }
+        
+        let score = 0;
+        
+        // 1. Merkeze yakınlık puanı (ortadaki bölgeler daha avantajlı)
+        const centerDist = Math.abs(testX - goalCenterX);
+        score += (60 - centerDist) * 1.5;
+        
+        // 2. Rakip oyuncu analizi (eğer aktifse)
+        if (params.analyzeOpponents) {
+            let minDistToOpponent = Infinity;
+            opponentPins.forEach(p => {
+                const dist = Math.hypot(testX - p.x, testY - p.y);
+                if (dist < minDistToOpponent) minDistToOpponent = dist;
+            });
+            
+            // Usta seviyesinde 20px ekstra güvenlik mesafesi
+            const safetyMargin = (aiLevel === 'usta') ? 20 : 10;
+            if (minDistToOpponent < safetyMargin) {
+                score -= (safetyMargin - minDistToOpponent) * 3;
+            } else {
+                score += minDistToOpponent * 2;
+            }
+        }
+        
+        // 3. Duvar analizi (eğer aktifse)
+        if (params.analyzeWalls) {
+            // Topun hedefe giderken duvara çarpma ihtimali
+            const angleToTarget = Math.atan2(testY - cap.y, testX - cap.x);
+            const distToTarget = Math.hypot(testX - cap.x, testY - cap.y);
+            
+            // Sağ ve sol duvarlara olan mesafe
+            const wallLeftDist = cap.x;
+            const wallRightDist = width - cap.x;
+            
+            // Eğer açı dar ve duvara yakınsa, riskli
+            const angleToWallLeft = Math.abs(angleToTarget - Math.PI);
+            const angleToWallRight = Math.abs(angleToTarget);
+            
+            if (angleToWallLeft < 0.3 && cap.x < 50) {
+                score -= 20;
+            }
+            if (angleToWallRight < 0.3 && (width - cap.x) < 50) {
+                score -= 20;
+            }
+            
+            // Üst duvar (kale bölgesi) - topun kaleye gitme ihtimali
+            const distToGoal = Math.abs(testY - cap.y);
+            if (distToGoal < 50) {
+                score += 10; // Yakın hedef avantajlı
+            }
+        }
+        
+        zones.push({ x: testX, y: testY, score: score });
     }
-    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
-    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
-    return { x: bestTarget.x + errorX, y: bestTarget.y + errorY };
+    
+    // En yüksek skorlu bölgeyi seç
+    let bestZone = zones.reduce((a, b) => a.score > b.score ? a : b);
+    
+    // Hata payı ekle (sadece zorluk seviyesine göre)
+    const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+    const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+    
+    // Hedefi sınırlar içinde tut
+    let targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
+    let targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
+    
+    return { x: targetX, y: targetY };
 }
 
 function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    const pullDistance = Math.min(params.pullDistance * (0.8 + Math.random() * 0.4), MAX_DRAG_DIST);
+    
+    // Hedef mesafesine göre çekiş mesafesini hesapla
+    const distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
+    let pullDistance;
+    
+    if (aiLevel === 'usta') {
+        // Usta: Hedefe olan mesafeye göre dinamik güç
+        const normalizedDist = Math.min(distanceToTarget / 300, 1);
+        pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
+    } else {
+        // Diğer seviyeler: Rastgele aralıkta
+        pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
+    }
+    
+    // Güç hata payı ekle
+    const powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
+    pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
+    
+    // Vuruş süresi kontrolü (eğer süre azsa daha hızlı vur)
+    let extraDelay = 150;
+    if (shotSecondsLeft < 2) {
+        extraDelay = 50; // Hızlı vuruş
+    }
+    
     setTimeout(() => {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
         dragCurrent = { x: cap.x, y: cap.y };
+        
         let stepCount = 0;
-        const totalSteps = 8;
+        const totalSteps = Math.max(4, Math.min(10, Math.floor(pullDistance / 10)));
+        
         const pullInterval = setInterval(() => {
             stepCount++;
             const ratio = stepCount / totalSteps;
             const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
-            dragCurrent = { x: cap.x - Math.cos(angle) * currentPull, y: cap.y - Math.sin(angle) * currentPull };
+            dragCurrent = { 
+                x: cap.x - Math.cos(angle) * currentPull, 
+                y: cap.y - Math.sin(angle) * currentPull 
+            };
+            
             if (stepCount >= totalSteps) {
                 clearInterval(pullInterval);
                 setTimeout(() => {
                     isDraggingBall = false;
                     isAiThinking = false;
                     playSound('kick');
-                    cap.vx = (dragStart.x - dragCurrent.x) * 0.13;
-                    cap.vy = (dragStart.y - dragCurrent.y) * 0.13;
+                    
+                    // Vuruş katsayısı: Hedefe olan mesafeye göre hafif ayar
+                    const powerMultiplier = 0.13 * (0.9 + Math.random() * 0.2);
+                    cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
+                    cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
+                    
                     turn = 1;
                     updateHUDTurn();
                     resetShotTimer();
-                }, 150);
+                }, extraDelay);
             }
         }, 30);
     }, params.reactionDelay);
 }
-
+function executeFakeShot(target, params) {
+    // Sahte vuruş: Önce farklı bir açıya çek, sonra hedefe vur
+    const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
+    const realAngle = Math.atan2(target.y - cap.y, target.x - cap.x);
+    
+    const pullDistance = Math.min(
+        params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin),
+        MAX_DRAG_DIST
+    );
+    
+    // 1. Sahte çekiş (300ms)
+    setTimeout(() => {
+        isDraggingBall = true;
+        dragStart = { x: cap.x, y: cap.y };
+        dragCurrent = { 
+            x: cap.x - Math.cos(fakeAngle) * pullDistance * 0.6,
+            y: cap.y - Math.sin(fakeAngle) * pullDistance * 0.6
+        };
+        
+        // Kısa süre bekle ve gerçek vuruşa geç
+        setTimeout(() => {
+            // 2. Gerçek vuruş (yön değiştir)
+            const realPullDistance = Math.min(pullDistance * 0.8, MAX_DRAG_DIST);
+            dragCurrent = {
+                x: cap.x - Math.cos(realAngle) * realPullDistance,
+                y: cap.y - Math.sin(realAngle) * realPullDistance
+            };
+            
+            setTimeout(() => {
+                isDraggingBall = false;
+                isAiThinking = false;
+                playSound('kick');
+                
+                const powerMultiplier = 0.13 * (0.8 + Math.random() * 0.4);
+                cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
+                cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
+                
+                turn = 1;
+                updateHUDTurn();
+                resetShotTimer();
+            }, 150);
+        }, 200);
+    }, params.reactionDelay * 0.6);
+}
 // ============================================================
 // OYUN FONKSİYONLARI
 // ============================================================
