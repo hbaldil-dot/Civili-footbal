@@ -666,191 +666,52 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// GÜNCELLENMİŞ AI SİSTEMİ
+// AI SİSTEMİ
 // ============================================================
-
-// AI parametrelerini daha detaylı hale getirelim
 function getAIParameters() {
     switch (aiLevel) {
-        case 'kolay':
-            return {
-                accuracy: 0.3,
-                power: 0.07,
-                reactionDelay: 700,
-                pullDistance: 55,
-                fakeChance: 0.01,
-                // Yeni: Hedef seçim stratejisi
-                targetStrategy: 'random_zone',
-                // Yeni: Hata payı
-                errorMargin: 30
-            };
-        case 'orta':
-            return {
-                accuracy: 0.65,
-                power: 0.11,
-                reactionDelay: 500,
-                pullDistance: 70,
-                fakeChance: 0.08,
-                targetStrategy: 'find_gap',
-                errorMargin: 20
-            };
-        case 'zor':
-            return {
-                accuracy: 0.85,
-                power: 0.14,
-                reactionDelay: 350,
-                pullDistance: 85,
-                fakeChance: 0.18,
-                targetStrategy: 'calculate_angle',
-                errorMargin: 12
-            };
-        case 'usta':
-            return {
-                accuracy: 0.93,
-                power: 0.16,
-                reactionDelay: 200,
-                pullDistance: 90,
-                fakeChance: 0.28,
-                targetStrategy: 'predict_and_fake',
-                errorMargin: 8
-            };
-        default:
-            return {
-                accuracy: 0.5,
-                power: 0.09,
-                reactionDelay: 600,
-                pullDistance: 60,
-                fakeChance: 0.05,
-                targetStrategy: 'find_gap',
-                errorMargin: 25
-            };
+        case 'kolay': return { accuracy: 0.4, power: 0.06, reactionDelay: 800, pullDistance: 50, fakeChance: 0.02 };
+        case 'zor': return { accuracy: 0.85, power: 0.13, reactionDelay: 400, pullDistance: 80, fakeChance: 0.15 };
+        case 'usta': return { accuracy: 0.95, power: 0.15, reactionDelay: 250, pullDistance: 90, fakeChance: 0.25 };
+        default: return { accuracy: 0.65, power: 0.10, reactionDelay: 600, pullDistance: 65, fakeChance: 0.08 };
     }
 }
 
-// Gelişmiş hedef hesaplama
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
+    isAiThinking = true;
+    const params = getAIParameters();
+    const target = calculateAITarget(params);
+    executeAIShot(target, params);
+}
+
 function calculateAITarget(params) {
     const goalY = height - goalHeight;
     const goalCenterX = width / 2;
     const enemyPlayers = pins.filter(p => p.team === 1 && !p.isPost);
     let bestTarget = { x: goalCenterX, y: goalY };
     let bestScore = -Infinity;
-
-    switch (params.targetStrategy) {
-        case 'random_zone':
-            // 1. SEVİYE: Belirli bölgelere odaklan (sol köşe, sağ köşe, orta)
-            const zones = [
-                { x: goalCenterX - goalWidth * 0.3, y: goalY },
-                { x: goalCenterX + goalWidth * 0.3, y: goalY },
-                { x: goalCenterX, y: goalY }
-            ];
-            const randomZone = zones[Math.floor(Math.random() * zones.length)];
-            bestTarget = {
-                x: randomZone.x + (Math.random() - 0.5) * 15,
-                y: randomZone.y + (Math.random() - 0.5) * 5
-            };
-            break;
-
-        case 'find_gap':
-            // 2. SEVİYE: Savunmadaki en büyük boşluğu bul
-            let gaps = [];
-            const sortedEnemies = [...enemyPlayers].sort((a, b) => a.x - b.x);
-            
-            // Kalenin solundan başlayarak boşlukları hesapla
-            let lastX = goalCenterX - goalWidth / 2;
-            for (let enemy of sortedEnemies) {
-                if (enemy.y > goalY - 40 && enemy.y < goalY + 10) {
-                    const gapSize = enemy.x - lastX;
-                    if (gapSize > 10) {
-                        gaps.push({ x: lastX + gapSize / 2, y: goalY, size: gapSize });
-                    }
-                    lastX = enemy.x;
-                }
-            }
-            // Kalan boşluk (soldan sağa)
-            const finalGap = goalCenterX + goalWidth / 2 - lastX;
-            if (finalGap > 10) {
-                gaps.push({ x: lastX + finalGap / 2, y: goalY, size: finalGap });
-            }
-
-            // En büyük boşluğu seç
-            if (gaps.length > 0) {
-                gaps.sort((a, b) => b.size - a.size);
-                bestTarget = gaps[0];
-                // Hedefe küçük bir rastgelelik ekle
-                bestTarget.x += (Math.random() - 0.5) * 10;
-            } else {
-                // Hiç boşluk yoksa rastgele ata
-                bestTarget = { 
-                    x: goalCenterX + (Math.random() - 0.5) * goalWidth * 0.4,
-                    y: goalY + (Math.random() - 0.5) * 10
-                };
-            }
-            break;
-
-        case 'calculate_angle':
-        case 'predict_and_fake':
-            // 3. ve 4. SEVİYE: Açı ve hız hesaplama
-            // Mevcut top pozisyonundan hedefe olan açıyı hesapla
-            const targetX = goalCenterX + (Math.random() - 0.5) * goalWidth * 0.5;
-            const targetY = goalY;
-            
-            // Açıyı hesapla
-            const dx = targetX - cap.x;
-            const dy = targetY - cap.y;
-            let angle = Math.atan2(dy, dx);
-            
-            // Usta seviyesi için gelişmiş stratejiler
-            if (params.targetStrategy === 'predict_and_fake') {
-                // 4. SEVİYE: Sahte hareket ve tahmin
-                const fakeChance = params.fakeChance;
-                if (Math.random() < fakeChance) {
-                    // Sahte hareket: Ani bir yön değişikliği yap
-                    angle += (Math.random() - 0.5) * 1.2;
-                }
-                
-                // Topun ve rakiplerin hareketini tahmin et
-                const ballSpeed = Math.hypot(cap.vx, cap.vy);
-                if (ballSpeed > 0.5) {
-                    // Top hareket ediyorsa, hedefe ek bir kayma ekle
-                    const predictionOffset = cap.vx * 0.1;
-                    bestTarget = {
-                        x: targetX + predictionOffset,
-                        y: targetY + Math.abs(cap.vy) * 0.1
-                    };
-                } else {
-                    bestTarget = { x: targetX, y: targetY };
-                }
-            } else {
-                // 3. SEVİYE: Açı hesaplama ile hedef belirle
-                bestTarget = { 
-                    x: targetX + Math.cos(angle) * 5,
-                    y: targetY + Math.sin(angle) * 5
-                };
-            }
-            break;
+    for (let i = 0; i < 5; i++) {
+        const offsetX = (Math.random() - 0.5) * 60;
+        const testX = goalCenterX + offsetX;
+        const testY = goalY;
+        let minDist = Infinity;
+        enemyPlayers.forEach(p => {
+            const dist = Math.hypot(testX - p.x, testY - p.y);
+            if (dist < minDist) minDist = dist;
+        });
+        const score = (60 - Math.abs(offsetX)) + minDist * 2;
+        if (score > bestScore) { bestScore = score; bestTarget = { x: testX, y: testY }; }
     }
-
-    // Hata payını uygula (Zorluk seviyesine göre)
-    const errorX = (Math.random() - 0.5) * params.errorMargin * (1 - params.accuracy);
-    const errorY = (Math.random() - 0.5) * params.errorMargin * 0.5 * (1 - params.accuracy);
-    
-    return {
-        x: Math.min(Math.max(bestTarget.x, 20), width - 20),
-        y: Math.min(Math.max(bestTarget.y, goalHeight + 10), height - goalHeight - 10)
-    };
+    const errorX = (Math.random() - 0.5) * 30 * (1 - params.accuracy);
+    const errorY = (Math.random() - 0.5) * 20 * (1 - params.accuracy);
+    return { x: bestTarget.x + errorX, y: bestTarget.y + errorY };
 }
 
-// executeAIShot fonksiyonuna küçük bir iyileştirme
 function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    // Vuruş gücünü zorluk seviyesine göre biraz daha optimize et
-    let pullDistance = Math.min(params.pullDistance * (0.7 + Math.random() * 0.6), MAX_DRAG_DIST);
-    
-    // Usta seviyesinde daha sert ve isabetli vuruş
-    if (aiLevel === 'usta') {
-        pullDistance *= 1.1;
-    }
-
+    const pullDistance = Math.min(params.pullDistance * (0.8 + Math.random() * 0.4), MAX_DRAG_DIST);
     setTimeout(() => {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
@@ -1045,10 +906,6 @@ function startSetupTimer() {
     }
 }
 
-// ============================================================
-// GÜNCELLENMİŞ RESET SHOT TIMER - AI VURUŞ TETİKLEMESİ EKLENDİ
-// ============================================================
-
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = SHOT_DURATION;
@@ -1057,25 +914,12 @@ function resetShotTimer() {
         shotTimer.innerText = 'ŞUT: ' + shotSecondsLeft + 's';
         shotTimer.classList.remove('warning');
     }
-    
-    // === AI VURUŞ KONTROLÜ ===
     if (gameMode === 'ai' && turn === 2) {
-        // AI sırasıysa timer'ı gizle ve hemen AI'yı tetikle
         if (shotTimer) shotTimer.style.display = 'none';
-        
-        // AI'nin vuruş yapması için küçük bir gecikme (daha doğal görünmesi için)
-        setTimeout(() => {
-            if (currentPhase === 'playing' && turn === 2 && !isAiThinking) {
-                console.log('🤖 AI vuruş yapıyor...');
-                runAIMove();
-            }
-        }, 300);
         return;
     } else {
         if (shotTimer) shotTimer.style.display = 'block';
     }
-    
-    // === NORMAL SHOT TIMER ===
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
@@ -1085,161 +929,15 @@ function resetShotTimer() {
                 if (shotSecondsLeft <= 1) shotTimer.classList.add('warning');
                 else shotTimer.classList.remove('warning');
             }
-            
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
                 if (shotTimer) shotTimer.classList.remove('warning');
-                
-                // Sıra değişimi
                 turn = turn === 1 ? 2 : 1;
                 updateHUDTurn();
-                
-                // Yeni turda resetShotTimer tekrar çağrılır ve AI tetiklenir
                 resetShotTimer();
             }
         }
     }, 1000);
-}
-
-// ============================================================
-// GÜNCELLENMİŞ ANİMATİON DÖNGÜSÜ
-// ============================================================
-
-function animate() {
-    if (currentPhase === 'menu') return;
-    
-    updatePhysics();
-    draw();
-    
-    // === AI KONTROLÜ (EK GÜVENLİK) ===
-    // Eğer AI sırasıysa ve top duruyorsa ve AI düşünmüyorsa, vuruş yap
-    if (gameMode === 'ai' && 
-        turn === 2 && 
-        currentPhase === 'playing' && 
-        !isAiThinking && 
-        Math.hypot(cap.vx, cap.vy) < 0.2) {
-        
-        // Sadece shot timer görünmüyorsa (yani AI sırasıysa)
-        const shotTimer = document.getElementById('shot-timer');
-        if (shotTimer && shotTimer.style.display === 'none') {
-            console.log('🔄 Animasyon döngüsünden AI tetikleniyor...');
-            runAIMove();
-        }
-    }
-    
-    requestAnimationFrame(animate);
-}
-
-// ============================================================
-// GÜNCELLENMİŞ UPDATE PHYSICS - AI KONTROLÜ
-// ============================================================
-
-function updatePhysics() {
-    if (currentPhase !== 'playing') return;
-    
-    const SUB_STEPS = 16;
-    for (let step = 0; step < SUB_STEPS; step++) {
-        cap.x += cap.vx / SUB_STEPS;
-        cap.y += cap.vy / SUB_STEPS;
-        
-        // ... (diğer fizik kodları aynen kalır) ...
-        
-        // Duvarlara çarpma, gol kontrolü vs.
-        // ... (mevcut fizik kodu) ...
-    }
-    
-    cap.vx *= cap.friction;
-    cap.vy *= cap.friction;
-    
-    // === AI KONTROLÜ (EK) ===
-    const isMoving = Math.hypot(cap.vx, cap.vy) > 0.15;
-    if (!isMoving && gameMode === 'ai' && turn === 2 && !isAiThinking) {
-        // AI sırasıysa ve top duruyorsa
-        const shotTimer = document.getElementById('shot-timer');
-        // Eğer shot timer görünmüyorsa (AI sırası) ve şut süresi geçmemişse
-        if (shotTimer && shotTimer.style.display === 'none') {
-            // AI'nin hemen vuruş yapmasını sağla
-            runAIMove();
-        }
-    }
-}
-
-// ============================================================
-// startSetupPhase() - AI OYUNU BAŞLATIRKEN DÜZENLEME
-// ============================================================
-
-function startSetupPhase() {
-    showField();
-    currentPhase = 'setup';
-    score = { p1: 0, p2: 0 };
-    document.getElementById('score-p1').innerText = "0";
-    document.getElementById('score-p2').innerText = "0";
-
-    const timeBoard = document.getElementById('time-board');
-    if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
-
-    const startBtn = document.getElementById('start-match-btn');
-    startBtn.style.display = 'flex';
-    startBtn.style.opacity = '1';
-    startBtn.disabled = false;
-
-    const indicator = document.getElementById('turn-indicator');
-    if (indicator) {
-        indicator.innerText = "🏆 Takım Taktik Ayarla";
-        indicator.style.borderColor = "#f1c40f";
-        indicator.style.color = "#f1c40f";
-    }
-
-    const shotTimer = document.getElementById('shot-timer');
-    if (shotTimer) {
-        shotTimer.style.display = 'none';
-        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
-    }
-
-    editableTeam = (gameMode === 'online') ? myTeamNumber : 1;
-
-    // ... (mevcut pin oluşturma kodları aynen kalır) ...
-
-    updateScoreLogos();
-
-    startSetupTimer();
-    animate();
-}
-
-// ============================================================
-// confirmFormationsAndStart() - MAÇ BAŞLARKEN AI KONTROLÜ
-// ============================================================
-
-function confirmFormationsAndStart() {
-    if (setupTimerInterval) clearInterval(setupTimerInterval);
-    if (gameMode === 'online' && socket) {
-        // ... (online kodu)
-    } else {
-        pins.forEach(pin => { pin.locked = true; });
-        currentPhase = 'playing';
-        document.getElementById('start-match-btn').style.display = 'none';
-        const shotTimer = document.getElementById('shot-timer');
-        if (shotTimer) {
-            shotTimer.style.display = 'block';
-            shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
-        }
-        updateHUDTurn();
-        startMatchTimer();
-        
-        // === EĞER AI İSE VE SIRA AI'DEYSE, HEMEN VURUŞ YAPMASINI SAĞLA ===
-        if (gameMode === 'ai' && turn === 2) {
-            // AI'nin hemen vuruş yapması için küçük bir gecikme
-            setTimeout(() => {
-                if (currentPhase === 'playing' && turn === 2 && !isAiThinking) {
-                    console.log('🤖 Maç başlangıcında AI vuruş yapıyor...');
-                    runAIMove();
-                }
-            }, 500);
-        }
-        
-        resetShotTimer();
-        animate();
-    }
 }
 
 function endMatch() {
