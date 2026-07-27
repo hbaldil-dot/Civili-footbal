@@ -1674,8 +1674,23 @@ function closeSettingsPopup() {
 // ============================================================
 // MAÇ SÜRESİ FONKSİYONLARI
 // ============================================================
+
 function toggleMatchDurationOptions() {
     const options = document.getElementById('match-duration-options');
+    const shotOptions = document.getElementById('shot-duration-options');
+    const stadiumOptions = document.getElementById('stadium-options');
+    
+    // Vuruş süresi ve stadyum seçeneklerini kapat
+    if (shotOptions) {
+        shotOptions.style.display = 'none';
+        shotOptions.classList.remove('show');
+    }
+    if (stadiumOptions) {
+        stadiumOptions.style.display = 'none';
+        stadiumOptions.classList.remove('show');
+    }
+    
+    // Maç süresi seçeneklerini aç/kapat
     if (options) {
         if (options.style.display === 'none' || options.style.display === '') {
             options.style.display = 'flex';
@@ -1689,126 +1704,70 @@ function toggleMatchDurationOptions() {
     }
 }
 
-function setMatchDuration(seconds) {
-    console.log('⏱️ Maç süresi seçildi:', seconds, 'saniye');
-    
-    const display = document.getElementById('match-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('.settings-option[data-duration]').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.duration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    MATCH_DURATION = seconds;
-    
-    const options = document.getElementById('match-duration-options');
-    if (options) {
-        options.style.display = 'none';
-        options.classList.remove('show');
-    }
-    
-    if (currentPhase === 'playing' || currentPhase === 'setup') {
-        matchSecondsLeft = seconds;
-        const timeBoard = document.getElementById('time-board');
-        if (timeBoard) {
-            timeBoard.innerText = seconds + 's';
-        }
-    }
-    
-    console.log('✅ Maç süresi güncellendi:', seconds, 'sn');
-}
-
 // ============================================================
 // VURUŞ SÜRESİ FONKSİYONLARI
 // ============================================================
+
 function toggleShotDurationOptions() {
     const optionsDiv = document.getElementById('shot-duration-options');
+    const matchOptions = document.getElementById('match-duration-options');
+    const stadiumOptions = document.getElementById('stadium-options');
+    
+    // Maç süresi ve stadyum seçeneklerini kapat
+    if (matchOptions) {
+        matchOptions.style.display = 'none';
+        matchOptions.classList.remove('show');
+    }
+    if (stadiumOptions) {
+        stadiumOptions.style.display = 'none';
+        stadiumOptions.classList.remove('show');
+    }
+    
+    // Vuruş süresi seçeneklerini aç/kapat
     if (!optionsDiv) return;
     
     if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
         optionsDiv.style.display = 'flex';
+        optionsDiv.classList.add('show');
         console.log('📋 Vuruş süresi seçenekleri açıldı');
     } else {
         optionsDiv.style.display = 'none';
+        optionsDiv.classList.remove('show');
         console.log('📋 Vuruş süresi seçenekleri kapatıldı');
     }
-}
-
-function setShotDuration(seconds) {
-    console.log('🎯 Vuruş süresi seçildi:', seconds, 'saniye');
-    
-    SHOT_DURATION = seconds;
-    
-    const display = document.getElementById('shot-duration-display');
-    if (display) {
-        display.textContent = seconds + 'sn';
-    }
-    
-    document.querySelectorAll('.settings-option[data-shot-duration]').forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.shotDuration) === seconds) {
-            btn.classList.add('active');
-        }
-    });
-    
-    const options = document.getElementById('shot-duration-options');
-    if (options) {
-        options.style.display = 'none';
-    }
-    
-    console.log('✅ Vuruş süresi güncellendi:', seconds, 'sn');
 }
 
 // ============================================================
 // STADYUM FONKSİYONLARI
 // ============================================================
+
 function toggleStadiumOptions() {
     const optionsDiv = document.getElementById('stadium-options');
+    const matchOptions = document.getElementById('match-duration-options');
+    const shotOptions = document.getElementById('shot-duration-options');
+    
+    // Maç süresi ve vuruş süresi seçeneklerini kapat
+    if (matchOptions) {
+        matchOptions.style.display = 'none';
+        matchOptions.classList.remove('show');
+    }
+    if (shotOptions) {
+        shotOptions.style.display = 'none';
+        shotOptions.classList.remove('show');
+    }
+    
+    // Stadyum seçeneklerini aç/kapat
     if (!optionsDiv) return;
 
     if (optionsDiv.style.display === 'none' || optionsDiv.style.display === '') {
         optionsDiv.style.display = 'flex';
+        optionsDiv.classList.add('show');
         console.log('📋 Stadyum seçenekleri açıldı');
     } else {
         optionsDiv.style.display = 'none';
+        optionsDiv.classList.remove('show');
         console.log('📋 Stadyum seçenekleri kapatıldı');
     }
-}
-
-function selectStadium(stadiumKey, texturePath) {
-    console.log('🏟️ Stadyum seçildi:', stadiumKey);
-    
-    currentStadiumTexture = texturePath;
-
-    const previewImg = document.getElementById('selected-stadium-preview');
-    if (previewImg) {
-        previewImg.src = `menu/ayarlar/stat/${stadiumKey}.webp`;
-    }
-
-    const cards = document.querySelectorAll('.stadium-option-card');
-    cards.forEach(card => {
-        const img = card.querySelector('img');
-        if (img && img.src && img.src.includes(`${stadiumKey}.webp`)) {
-            card.classList.add('active');
-        } else {
-            card.classList.remove('active');
-        }
-    });
-
-    const optionsDiv = document.getElementById('stadium-options');
-    if (optionsDiv) optionsDiv.style.display = 'none';
-
-    loadFieldImage(texturePath);
-    if (currentPhase !== 'menu') {
-        showField();
-    }
-    
-    console.log('✅ Stadyum güncellendi:', texturePath);
 }
 
 // ============================================================
