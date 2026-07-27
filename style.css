@@ -879,7 +879,7 @@ body { ... }
 
 /* ===== EN ALTAKİ BUTON (ANA MENÜ) - DÜZELTİLDİ ===== */
 .settings-btn-img:last-child {
-    transform: scale(1.0) !important; /* scale kaldırıldı, normal boyut */
+    transform: scale(2.0) !important; /* scale kaldırıldı, normal boyut */
     margin-top: 4px !important;
     max-width: 120px !important; /* Maksimum genişlik sınırı */
     width: 50% !important; /* Diğer butonlara göre daha küçük */
@@ -888,7 +888,7 @@ body { ... }
 }
 
 .settings-btn-img:last-child:hover {
-    transform: scale(1.02) !important;
+    transform: scale(2.5) !important;
 }
 
 .settings-btn-img:last-child:active {
