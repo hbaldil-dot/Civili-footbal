@@ -666,124 +666,11 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// AI SİSTEMİ
+// AI SİSTEMİ - GELİŞMİŞ VERSİYON
 // ============================================================
-function getAIParameters() {
-    switch (aiLevel) {
-        case 'kolay': 
-            return { 
-                reactionDelay: 800, 
-                pullDistanceMin: 20, 
-                pullDistanceMax: 50, 
-                errorMargin: 25, 
-                powerError: 0.20,
-                fakeChance: 0.02,
-                targetZones: 3,
-                analyzeOpponents: false,
-                analyzeWalls: false,
-                useBankShots: false,
-                useDoubleBank: false,
-                bankShotChance: 0
-            };
-        case 'orta': 
-            return { 
-                reactionDelay: 600, 
-                pullDistanceMin: 30, 
-                pullDistanceMax: 70, 
-                errorMargin: 12, 
-                powerError: 0.10,
-                fakeChance: 0.08,
-                targetZones: 5,
-                analyzeOpponents: true,
-                analyzeWalls: false,
-                useBankShots: false,
-                useDoubleBank: false,
-                bankShotChance: 0
-            };
-        case 'zor': 
-            return { 
-                reactionDelay: 400, 
-                pullDistanceMin: 50, 
-                pullDistanceMax: 85, 
-                errorMargin: 6, 
-                powerError: 0.05,
-                fakeChance: 0.15,
-                targetZones: 5,
-                analyzeOpponents: true,
-                analyzeWalls: true,
-                useBankShots: false,
-                useDoubleBank: false,
-                bankShotChance: 0
-            };
-        case 'usta': 
-            return { 
-                reactionDelay: 200, 
-                pullDistanceMin: 50, 
-                pullDistanceMax: 90, 
-                errorMargin: 2, 
-                powerError: 0.02,
-                fakeChance: 0.30,
-                targetZones: 7,
-                analyzeOpponents: true,
-                analyzeWalls: true,
-                useBankShots: true,
-                useDoubleBank: true,
-                bankShotChance: 0.40
-            };
-        default: 
-            return { 
-                reactionDelay: 600, 
-                pullDistanceMin: 30, 
-                pullDistanceMax: 65, 
-                errorMargin: 12, 
-                powerError: 0.10,
-                fakeChance: 0.08,
-                targetZones: 5,
-                analyzeOpponents: true,
-                analyzeWalls: false,
-                useBankShots: false,
-                useDoubleBank: false,
-                bankShotChance: 0
-            };
-    }
-}
 
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
-    isAiThinking = true;
-    
-    const params = getAIParameters();
-    
-    // Vuruş süresine göre acil durum kontrolü
-    if (shotSecondsLeft < 2) {
-        params.reactionDelay = Math.min(params.reactionDelay, 200);
-        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
-        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
-    }
-    
-    const target = calculateAITarget(params);
-    
-    // Sahte vuruş kontrolü (sadece Usta)
-    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
-        executeFakeShot(target, params);
-    } else {
-        executeAIShot(target, params);
-    }
-}
-    
-    // Hedef seç (rakip ve duvar analizi ile)
-    const target = calculateAITarget(params);
-    
-    // Sahte vuruş kontrolü
-    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
-        executeFakeShot(target, params);
-    } else {
-        executeAIShot(target, params);
-    }
-}
 // ============================================================
-// YENİ: Vuruş Değerlendirme Sistemi (Usta AI için)
+// 1. VURUŞ DEĞERLENDİRME SİSTEMİ (USTA AI İÇİN)
 // ============================================================
 function evaluateShot(targetX, targetY, opponentPins, shotType, ballX, ballY) {
     let score = 0;
@@ -853,96 +740,9 @@ function evaluateShot(targetX, targetY, opponentPins, shotType, ballX, ballY) {
     
     return score;
 }
-function calculateAITarget(params) {
-    const goalY = height - goalHeight;
-    const goalLeft = (width - goalWidth) / 2;
-    const goalRight = (width + goalWidth) / 2;
-    
-    // Rakip oyuncular
-    const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
-    const posts = pins.filter(p => p.isPost);
-    
-    // === USTA SEVİYESİ ÖZEL HEDEF SEÇİMİ ===
-    if (aiLevel === 'usta' && params.useBankShots) {
-        const expertTarget = calculateExpertTarget(opponentPins, posts);
-        if (expertTarget) {
-            // Hata payı ekle (çok az)
-            const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
-            const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
-            
-            return {
-                x: expertTarget.x + errorX,
-                y: expertTarget.y + errorY,
-                type: expertTarget.type || 'direct',
-                actualTarget: expertTarget.actualTarget || null
-            };
-        }
-    }
-    
-    // === DİĞER SEVİYELER İÇİN MEVCUT MANTIK (Geliştirilmiş) ===
-    const zones = [];
-    const numZones = params.targetZones || 5;
-    const zoneWidth = (goalRight - goalLeft) / numZones;
-    
-    for (let i = 0; i < numZones; i++) {
-        const zoneCenterX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
-        const testX = zoneCenterX;
-        const testY = goalY;
-        
-        let score = 0;
-        const centerDist = Math.abs(testX - (width / 2));
-        score += (60 - centerDist) * 1.5;
-        
-        // Rakip analizi (Orta ve üzeri)
-        if (params.analyzeOpponents) {
-            let minDistToOpponent = Infinity;
-            opponentPins.forEach(p => {
-                const dist = Math.hypot(testX - p.x, testY - p.y);
-                if (dist < minDistToOpponent) minDistToOpponent = dist;
-            });
-            
-            const safetyMargin = (aiLevel === 'zor' || aiLevel === 'usta') ? 20 : 10;
-            if (minDistToOpponent < safetyMargin) {
-                score -= (safetyMargin - minDistToOpponent) * 3;
-            } else {
-                score += minDistToOpponent * 2;
-            }
-        }
-        
-        // Duvar analizi (Zor ve Usta)
-        if (params.analyzeWalls) {
-            const angleToTarget = Math.atan2(testY - cap.y, testX - cap.x);
-            const angleToWallLeft = Math.abs(angleToTarget - Math.PI);
-            const angleToWallRight = Math.abs(angleToTarget);
-            
-            if (angleToWallLeft < 0.3 && cap.x < 50) {
-                score -= 20;
-            }
-            if (angleToWallRight < 0.3 && (width - cap.x) < 50) {
-                score -= 20;
-            }
-            
-            const distToGoal = Math.abs(testY - cap.y);
-            if (distToGoal < 50) {
-                score += 10;
-            }
-        }
-        
-        zones.push({ x: testX, y: testY, score: score });
-    }
-    
-    let bestZone = zones.reduce((a, b) => a.score > b.score ? a : b);
-    
-    const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
-    const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
-    
-    let targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
-    let targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
-    
-    return { x: targetX, y: targetY, type: 'direct', actualTarget: null };
-}
+
 // ============================================================
-// YENİ: USTA AI - Gelişmiş Hedef Seçimi (Bank Shot + Double Bank)
+// 2. USTA AI - GELİŞMİŞ HEDEF SEÇİMİ (Bank Shot + Double Bank)
 // ============================================================
 function calculateExpertTarget(opponentPins, posts) {
     const goalY = height - goalHeight;
@@ -1029,6 +829,185 @@ function calculateExpertTarget(opponentPins, posts) {
     
     return bestShot;
 }
+
+// ============================================================
+// 3. AI PARAMETRELERİ - GELİŞMİŞ VERSİYON
+// ============================================================
+function getAIParameters() {
+    switch (aiLevel) {
+        case 'kolay': 
+            return { 
+                reactionDelay: 800, 
+                pullDistanceMin: 20, 
+                pullDistanceMax: 50, 
+                errorMargin: 25, 
+                powerError: 0.20,
+                fakeChance: 0.02,
+                targetZones: 3,
+                analyzeOpponents: false,
+                analyzeWalls: false,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0
+            };
+        case 'orta': 
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 70, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0
+            };
+        case 'zor': 
+            return { 
+                reactionDelay: 400, 
+                pullDistanceMin: 50, 
+                pullDistanceMax: 85, 
+                errorMargin: 6, 
+                powerError: 0.05,
+                fakeChance: 0.15,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: true,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0
+            };
+        case 'usta': 
+            return { 
+                reactionDelay: 200, 
+                pullDistanceMin: 50, 
+                pullDistanceMax: 90, 
+                errorMargin: 2, 
+                powerError: 0.02,
+                fakeChance: 0.30,
+                targetZones: 7,
+                analyzeOpponents: true,
+                analyzeWalls: true,
+                useBankShots: true,
+                useDoubleBank: true,
+                bankShotChance: 0.40
+            };
+        default: 
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 65, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0
+            };
+    }
+}
+
+// ============================================================
+// 4. AI HEDEF SEÇİMİ - GELİŞMİŞ VERSİYON
+// ============================================================
+function calculateAITarget(params) {
+    const goalY = height - goalHeight;
+    const goalLeft = (width - goalWidth) / 2;
+    const goalRight = (width + goalWidth) / 2;
+    
+    // Rakip oyuncular
+    const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
+    const posts = pins.filter(p => p.isPost);
+    
+    // === USTA SEVİYESİ ÖZEL HEDEF SEÇİMİ ===
+    if (aiLevel === 'usta' && params.useBankShots) {
+        const expertTarget = calculateExpertTarget(opponentPins, posts);
+        if (expertTarget) {
+            // Hata payı ekle (çok az)
+            const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+            const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+            
+            return {
+                x: expertTarget.x + errorX,
+                y: expertTarget.y + errorY,
+                type: expertTarget.type || 'direct',
+                actualTarget: expertTarget.actualTarget || null
+            };
+        }
+    }
+    
+    // === DİĞER SEVİYELER İÇİN GELİŞMİŞ MANTIK ===
+    const zones = [];
+    const numZones = params.targetZones || 5;
+    const zoneWidth = (goalRight - goalLeft) / numZones;
+    
+    for (let i = 0; i < numZones; i++) {
+        const zoneCenterX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+        const testX = zoneCenterX;
+        const testY = goalY;
+        
+        let score = 0;
+        const centerDist = Math.abs(testX - (width / 2));
+        score += (60 - centerDist) * 1.5;
+        
+        // Rakip analizi (Orta ve üzeri)
+        if (params.analyzeOpponents) {
+            let minDistToOpponent = Infinity;
+            opponentPins.forEach(p => {
+                const dist = Math.hypot(testX - p.x, testY - p.y);
+                if (dist < minDistToOpponent) minDistToOpponent = dist;
+            });
+            
+            const safetyMargin = (aiLevel === 'zor' || aiLevel === 'usta') ? 20 : 10;
+            if (minDistToOpponent < safetyMargin) {
+                score -= (safetyMargin - minDistToOpponent) * 3;
+            } else {
+                score += minDistToOpponent * 2;
+            }
+        }
+        
+        // Duvar analizi (Zor ve Usta)
+        if (params.analyzeWalls) {
+            const angleToTarget = Math.atan2(testY - cap.y, testX - cap.x);
+            const angleToWallLeft = Math.abs(angleToTarget - Math.PI);
+            const angleToWallRight = Math.abs(angleToTarget);
+            
+            if (angleToWallLeft < 0.3 && cap.x < 50) {
+                score -= 20;
+            }
+            if (angleToWallRight < 0.3 && (width - cap.x) < 50) {
+                score -= 20;
+            }
+            
+            const distToGoal = Math.abs(testY - cap.y);
+            if (distToGoal < 50) {
+                score += 10;
+            }
+        }
+        
+        zones.push({ x: testX, y: testY, score: score });
+    }
+    
+    let bestZone = zones.reduce((a, b) => a.score > b.score ? a : b);
+    
+    const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+    const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+    
+    let targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
+    let targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
+    
+    return { x: targetX, y: targetY, type: 'direct', actualTarget: null };
+}
+
+// ============================================================
+// 5. AI VURUŞ FONKSİYONU - GELİŞMİŞ VERSİYON (BANK SHOT DESTEKLİ)
+// ============================================================
 function executeAIShot(target, params) {
     let angle;
     let pullDistance;
@@ -1120,56 +1099,9 @@ function executeAIShot(target, params) {
         }, 30);
     }, params.reactionDelay);
 }
-    
-    // Güç hata payı ekle
-    const powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
-    pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
-    
-    // Vuruş süresi kontrolü (eğer süre azsa daha hızlı vur)
-    let extraDelay = 150;
-    if (shotSecondsLeft < 2) {
-        extraDelay = 50; // Hızlı vuruş
-    }
-    
-    setTimeout(() => {
-        isDraggingBall = true;
-        dragStart = { x: cap.x, y: cap.y };
-        dragCurrent = { x: cap.x, y: cap.y };
-        
-        let stepCount = 0;
-        const totalSteps = Math.max(4, Math.min(10, Math.floor(pullDistance / 10)));
-        
-        const pullInterval = setInterval(() => {
-            stepCount++;
-            const ratio = stepCount / totalSteps;
-            const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
-            dragCurrent = { 
-                x: cap.x - Math.cos(angle) * currentPull, 
-                y: cap.y - Math.sin(angle) * currentPull 
-            };
-            
-            if (stepCount >= totalSteps) {
-                clearInterval(pullInterval);
-                setTimeout(() => {
-                    isDraggingBall = false;
-                    isAiThinking = false;
-                    playSound('kick');
-                    
-                    // Vuruş katsayısı: Hedefe olan mesafeye göre hafif ayar
-                    const powerMultiplier = 0.13 * (0.9 + Math.random() * 0.2);
-                    cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
-                    cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
-                    
-                    turn = 1;
-                    updateHUDTurn();
-                    resetShotTimer();
-                }, extraDelay);
-            }
-        }, 30);
-    }, params.reactionDelay);
-}
+
 // ============================================================
-// YENİ: Sahte Vuruş (Fake Shot) - Sadece Usta
+// 6. SAHTE VURUŞ (FAKE SHOT) - SADECE USTA
 // ============================================================
 function executeFakeShot(target, params) {
     const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
@@ -1213,6 +1145,34 @@ function executeFakeShot(target, params) {
         }, 200);
     }, params.reactionDelay * 0.6);
 }
+
+// ============================================================
+// 7. AI HAREKET BAŞLATICI - GÜNCELLENMİŞ
+// ============================================================
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
+    isAiThinking = true;
+    
+    const params = getAIParameters();
+    
+    // Vuruş süresine göre acil durum kontrolü
+    if (shotSecondsLeft < 2) {
+        params.reactionDelay = Math.min(params.reactionDelay, 200);
+        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
+        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
+    }
+    
+    const target = calculateAITarget(params);
+    
+    // Sahte vuruş kontrolü (sadece Usta)
+    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
+        executeFakeShot(target, params);
+    } else {
+        executeAIShot(target, params);
+    }
+}
+
 // ============================================================
 // OYUN FONKSİYONLARI
 // ============================================================
@@ -1492,25 +1452,107 @@ function broadcastMyPinMove(pin) {
 }
 
 function exitToMenu() {
+    console.log('🔙 Ana menüye dönülüyor...');
+    
+    // Tüm timer'ları temizle
     if (timerInterval) clearInterval(timerInterval);
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     if (setupTimerInterval) clearInterval(setupTimerInterval);
     if (syncInterval) clearInterval(syncInterval);
+    
+    // Online bağlantıyı temizle
     if (socket && gameMode === 'online') {
-        if (currentRoomId) { socket.emit('leave-room', currentRoomId); currentRoomId = null; }
-        else { socket.emit("leave-lobby"); }
+        if (currentRoomId) { 
+            socket.emit('leave-room', currentRoomId); 
+            currentRoomId = null; 
+        } else { 
+            socket.emit("leave-lobby"); 
+        }
     }
+    
+    // Oyun durumunu sıfırla
     currentPhase = 'menu';
     gameMode = 'local';
-    document.getElementById('menu').style.display = 'block';
-    document.getElementById('top-bar').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('start-match-btn').style.display = 'none';
     isAiThinking = false;
     isDraggingBall = false;
     
+    // TÜM POP-UP'LARI KAPAT
+    document.querySelectorAll('[id$="-popup"], [id$="-lobby"], [id$="-select"], [id$="-menu"]').forEach(el => {
+        if (el) {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+        }
+    });
+    
+    // AYARLAR POP-UP'INI ÖZELLİKLE KAPAT
+    const settingsPopup = document.getElementById('settings-popup');
+    if (settingsPopup) {
+        settingsPopup.style.display = 'none';
+        settingsPopup.style.visibility = 'hidden';
+        settingsPopup.style.opacity = '0';
+        settingsPopup.style.pointerEvents = 'none';
+    }
+    
+    // TEAM SELECT POP-UP'INI KAPAT
+    const teamSelectPopup = document.getElementById('team-select-popup');
+    if (teamSelectPopup) {
+        teamSelectPopup.style.display = 'none';
+        teamSelectPopup.style.visibility = 'hidden';
+        teamSelectPopup.style.opacity = '0';
+        teamSelectPopup.style.pointerEvents = 'none';
+    }
+    
+    // 2 KİŞİLİK POP-UP'INI KAPAT
+    const localTeamSelect = document.getElementById('local-team-select');
+    if (localTeamSelect) {
+        localTeamSelect.style.display = 'none';
+        localTeamSelect.style.visibility = 'hidden';
+        localTeamSelect.style.opacity = '0';
+        localTeamSelect.style.pointerEvents = 'none';
+    }
+    
+    // ONLINE LOBI'Yİ KAPAT
+    const onlineLobby = document.getElementById('online-lobby');
+    if (onlineLobby) {
+        onlineLobby.style.display = 'none';
+        onlineLobby.style.visibility = 'hidden';
+        onlineLobby.style.opacity = '0';
+        onlineLobby.style.pointerEvents = 'none';
+    }
+    
+    // AI LEVEL MENU'YÜ KAPAT
+    const aiLevelMenu = document.getElementById('ai-level-menu');
+    if (aiLevelMenu) {
+        aiLevelMenu.style.display = 'none';
+        aiLevelMenu.style.visibility = 'hidden';
+        aiLevelMenu.style.opacity = '0';
+        aiLevelMenu.style.pointerEvents = 'none';
+    }
+    
+    // ANA MENÜYÜ GÖSTER VE AKTİF ET
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+        menu.style.visibility = 'visible';
+        menu.style.opacity = '1';
+        menu.style.pointerEvents = 'auto';
+        menu.style.zIndex = '100';
+        console.log('✅ Ana menü gösterildi ve aktif edildi');
+    } else {
+        console.error('❌ Ana menü bulunamadı!');
+    }
+    
+    // Oyun UI'larını gizle
+    document.getElementById('top-bar').style.display = 'none';
+    document.getElementById('start-match-btn').style.display = 'none';
+    
+    // Sahayı gizle
     hideField();
     drawFieldLinesOnly();
+    
+    console.log('✅ Ana menüye dönüş tamamlandı');
 }
 
 // ============================================================
@@ -2516,8 +2558,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateScoreLogos();
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
-    // SAHAYI GİZLEME - Menü açıkken saha görünmesin ama oyun başlayınca gösterilsin
-    // hideField() çağrısını kaldırdık çünkü showField zaten doğru yerde çağrılıyor
     console.log('✅ Sayfa yüklendi!');
 });
 // ============================================================
@@ -2536,8 +2576,6 @@ function toggleSound() {
         if (isSoundOn) {
             soundBtn.src = 'menu/ayarlar/ses.webp';
             console.log('🔊 Ses AÇIK');
-            // Ses açıldığında test sesi çal
-            setTimeout(() => playButtonSound(), 100);
         } else {
             soundBtn.src = 'menu/ayarlar/ses-off.webp';
             console.log('🔇 Ses KAPALI');
@@ -2601,7 +2639,6 @@ function playSound(type) {
             if (audioElements.hit) {
                 audioElements.hit.currentTime = 0;
                 audioElements.hit.play().catch(() => {
-                    // Hata durumunda yeni ses oluştur
                     const newHit = new Audio('sesler/Carpma.mp3');
                     newHit.play().catch(e => console.log('Hit ses hatası:', e));
                 });
@@ -2614,16 +2651,13 @@ function playSound(type) {
     
     if (type === 'goal') {
         try {
-            // iOS Safari'de her seferinde yeni Audio nesnesi oluştur (en güvenilir yöntem)
             const goalSound = new Audio('sesler/gol.mp3');
             goalSound.preload = 'auto';
             goalSound.volume = 1.0;
             
-            // iOS'ta sesi çalıştır
             const playPromise = goalSound.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
-                    // Başarısız olursa AudioContext ile sentezle
                     try {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
@@ -2641,7 +2675,6 @@ function playSound(type) {
                 });
             }
         } catch (error) {
-            // Sentezleyici ile yedek ses
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -2696,13 +2729,11 @@ function openLocalTeamSelect() {
     localPlayer1Logo = '';
     localPlayer2Logo = '';
     
-    // İsim etiketlerini güncelle (HTML'de bu elementler olmalı)
     const p1Name = document.getElementById('local-p1-name');
     const p2Name = document.getElementById('local-p2-name');
     if (p1Name) { p1Name.textContent = 'Oyuncu 1'; p1Name.style.color = '#3498db'; }
     if (p2Name) { p2Name.textContent = 'Oyuncu 2'; p2Name.style.color = '#e74c3c'; }
     
-    // Shield'ları temizle
     const shield1 = document.getElementById('local-p1-shield-img');
     const shield2 = document.getElementById('local-p2-shield-img');
     if (shield1) { shield1.style.display = 'none'; shield1.src = ''; }
@@ -2720,7 +2751,6 @@ function loadLocalTeamLogos() {
         return;
     }
     
-    // Container'ların üst kısmına oyuncu etiketi eklemek için data-player kullan
     container1.parentElement.setAttribute('data-player', '👤 Oyuncu 1');
     container2.parentElement.setAttribute('data-player', '👤 Oyuncu 2');
     
@@ -2728,7 +2758,6 @@ function loadLocalTeamLogos() {
     container2.innerHTML = '';
     
     teamLogos.forEach((logo) => {
-        // Oyuncu 1 için buton
         const btn1 = document.createElement('button');
         btn1.className = 'team-logo-btn';
         btn1.title = logo.name;
@@ -2741,7 +2770,6 @@ function loadLocalTeamLogos() {
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
         
-        // Oyuncu 2 için buton
         const btn2 = document.createElement('button');
         btn2.className = 'team-logo-btn';
         btn2.title = logo.name;
@@ -2767,7 +2795,6 @@ function selectLocalTeam(player, logoFile) {
         localPlayer1Logo = logoFile;
         localP1Selected = true;
         
-        // Butonları işaretle
         document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p1');
             if (btn.dataset.logo === logoFile) {
@@ -2775,7 +2802,6 @@ function selectLocalTeam(player, logoFile) {
             }
         });
         
-        // Shield'ı güncelle
         const shield = document.getElementById('local-p1-shield-img');
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
@@ -2783,7 +2809,6 @@ function selectLocalTeam(player, logoFile) {
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
-        // İsmi güncelle
         const nameEl = document.getElementById('local-p1-name');
         if (nameEl) {
             const logo = teamLogos.find(l => l.file === logoFile);
@@ -2821,6 +2846,7 @@ function selectLocalTeam(player, logoFile) {
         }
     }
 }
+
 // ============================================================
 // TAKIM SEÇİM POP-UP MANTIĞI
 // ============================================================
@@ -2842,25 +2868,21 @@ function openTeamSelectPopup() {
         return;
     }
 
-    // Pop-up'ı göster
     popup.style.display = 'block';
     popup.style.visibility = 'visible';
     popup.style.opacity = '1';
 
-    // Mevcut seçili takımı armaya yerleştir
     if (shieldImg) {
         if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
             console.log('🛡️ Seçili takım arması gösteriliyor:', selectedTeamLogo);
         } else {
-            // Varsayılan takım seç
             const defaultTeam = teamLogos[0];
             if (defaultTeam) {
                 selectedTeamLogo = defaultTeam.file;
                 shieldImg.src = 'takimlar/' + defaultTeam.file;
                 shieldImg.style.display = 'block';
-                // Ana menüdeki logo overlay'ı güncelle
                 const menuOverlay = document.getElementById('selected-team-logo-display');
                 if (menuOverlay) {
                     menuOverlay.src = 'takimlar/' + defaultTeam.file;
@@ -2870,7 +2892,6 @@ function openTeamSelectPopup() {
         }
     }
 
-    // Logo grid'ini temizle ve doldur
     grid.innerHTML = '';
     
     if (typeof teamLogos !== 'undefined' && Array.isArray(teamLogos) && teamLogos.length > 0) {
@@ -2896,19 +2917,15 @@ function openTeamSelectPopup() {
             btn.onclick = function(e) {
                 e.stopPropagation();
                 
-                // Tüm butonlardan active sınıfını kaldır
                 document.querySelectorAll('.big-team-logo-btn').forEach(b => {
                     b.classList.remove('active');
                 });
                 
-                // Bu butonu active yap
                 btn.classList.add('active');
                 
-                // Takımı seç
                 selectedTeamLogo = team.file;
                 console.log('🏆 Takım seçildi:', team.file);
                 
-                // Shield'ı güncelle
                 if (shieldImg) {
                     shieldImg.src = 'takimlar/' + team.file;
                     shieldImg.style.display = 'block';
@@ -2917,7 +2934,6 @@ function openTeamSelectPopup() {
                     };
                 }
                 
-                // Ana menüdeki logo overlay'ı güncelle
                 const menuOverlay = document.getElementById('selected-team-logo-display');
                 if (menuOverlay) {
                     menuOverlay.src = 'takimlar/' + team.file;
@@ -2925,13 +2941,8 @@ function openTeamSelectPopup() {
                     menuOverlay.style.opacity = '1';
                 }
                 
-                // Logoyu yükle
                 loadTeamLogoImage(team.file);
-                
-                // AI takımını güncelle
                 selectRandomAITeam();
-                
-                // Skor logosunu güncelle
                 updateScoreLogos();
             };
             
@@ -2955,21 +2966,19 @@ function closeTeamSelectPopup() {
         console.log('✅ Takım seçim pop-up kapatıldı');
     }
     
-    // Seçili takımı ana menüye yansıt
     updateTeamLogoDisplay();
     updateSelectedTeamName();
 }
+
 // ============================================================
-// 2 KİŞİLİK MOD - SÜRE AYARLARI (YENİ)
+// 2 KİŞİLİK MOD - SÜRE AYARLARI
 // ============================================================
 
-// Maç süresini değiştir (2 kişilik mod için)
 function setLocalMatchDuration(seconds) {
     console.log('⏱️ 2 Kişilik Maç Süresi Seçildi:', seconds, 'sn');
     
     MATCH_DURATION = seconds;
     
-    // Aktif butonu güncelle
     document.querySelectorAll('.local-time-btn[data-time]').forEach(btn => {
         btn.classList.remove('active');
         if (parseInt(btn.dataset.time) === seconds) {
@@ -2977,7 +2986,6 @@ function setLocalMatchDuration(seconds) {
         }
     });
     
-    // Eğer oyun açıksa zamanı güncelle
     if (currentPhase === 'playing' || currentPhase === 'setup') {
         matchSecondsLeft = seconds;
         const timeBoard = document.getElementById('time-board');
@@ -2987,13 +2995,11 @@ function setLocalMatchDuration(seconds) {
     }
 }
 
-// Vuruş süresini değiştir (2 kişilik mod için)
 function setLocalShotDuration(seconds) {
     console.log('🎯 2 Kişilik Vuruş Süresi Seçildi:', seconds, 'sn');
     
     SHOT_DURATION = seconds;
     
-    // Aktif butonu güncelle
     document.querySelectorAll('.local-time-btn[data-shot]').forEach(btn => {
         btn.classList.remove('active');
         if (parseInt(btn.dataset.shot) === seconds) {
@@ -3001,13 +3007,11 @@ function setLocalShotDuration(seconds) {
         }
     });
     
-    // Eğer oyun açıksa shot timer'ı güncelle
     if (currentPhase === 'playing') {
         const shotTimer = document.getElementById('shot-timer');
         if (shotTimer) {
             shotTimer.innerText = 'ŞUT: ' + seconds + 's';
         }
-        // Mevcut shot timer'ı sıfırla
         if (shotTimerInterval) {
             clearInterval(shotTimerInterval);
             resetShotTimer();
