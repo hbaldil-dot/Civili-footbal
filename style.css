@@ -877,27 +877,24 @@ body { ... }
     transform: scale(1.55) !important;
 }
 
-/* ===== EN ALTAKİ BUTON (ANA MENÜ) - DÜZELTİLDİ ===== */
+//* ===== EN ALTAKİ BUTON (ANA MENÜ) - SADECE %12 BÜYÜK ===== */
 .settings-btn-img:last-child {
-    transform: scale(1.0) !important; /* scale kaldırıldı, normal boyut */
+    transform: scale(2.12) !important; /* Sadece %12 büyük */
     margin-top: 4px !important;
-    max-width: 120px !important; /* Maksimum genişlik sınırı */
-    width: 50% !important; /* Diğer butonlara göre daha küçük */
-    margin-left: auto !important;
-    margin-right: auto !important;
 }
 
 .settings-btn-img:last-child:hover {
-    transform: scale(1.02) !important;
+    transform: scale(1.18) !important;
 }
 
 .settings-btn-img:last-child:active {
-    transform: scale(0.95) !important;
+    transform: scale(1.08) !important;
 }
 
 /* ============================================================
    AYARLAR POP-UP - MOBİL UYUM
    ============================================================ */
+
 
 @media (max-width: 420px) {
     .settings-buttons-container {
@@ -910,9 +907,7 @@ body { ... }
         transform: scale(0.80) !important;
     }
     .settings-btn-img:last-child {
-        transform: scale(1.0) !important;
-        width: 45% !important;
-        max-width: 80px !important;
+        transform: scale(2.12) !important; /* %12 büyük korundu */
     }
 }
 
