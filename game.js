@@ -2541,3 +2541,51 @@ function setLocalShotDuration(seconds) {
         }
     }
 }
+// AI Vuruş Hesaplama Fonksiyonu
+function calculateAIShot(aiPin, ball, targetGoal, difficulty) {
+    // 1. Temel Açı (Top ile Kale Arası)
+    let dx = targetGoal.x - ball.x;
+    let dy = targetGoal.y - ball.y;
+    let baseAngle = Math.atan2(dy, dx);
+
+    // 2. Zorluk Seviyesine Göre Sapma (Error Margin) ve İyileştirme
+    let errorMargin = 0; // Radyan cinsinden sapma
+    let powerFactor = 1.0;
+
+    switch (difficulty) {
+        case 'kolay':
+            // Yüksek sapma (yaklaşık +-15 derece) ve rastgele güç
+            errorMargin = (Math.random() - 0.5) * (Math.PI / 6);
+            powerFactor = 0.5 + Math.random() * 0.5;
+            break;
+
+        case 'orta':
+            // Düşük sapma (yaklaşık +-5 derece)
+            errorMargin = (Math.random() - 0.5) * (Math.PI / 18);
+            powerFactor = 0.8;
+            break;
+
+        case 'zor':
+            // Çok az sapma, köşeleri hedefleme
+            errorMargin = (Math.random() - 0.5) * (Math.PI / 45);
+            // Doğrudan merkeze değil, kale direği köşelerine yönelme
+            baseAngle = calculateBestGoalCornerAngle(ball, targetGoal);
+            powerFactor = 0.95;
+            break;
+
+        case 'usta':
+            // Sıfır sapma + En açık hedef açısını bulma
+            errorMargin = 0;
+            baseAngle = calculatePerfectShotAngle(aiPin, ball, targetGoal);
+            powerFactor = 1.0; // Tam mesafe/güç optimizasyonu
+            break;
+    }
+
+    // Nihai Açı ve Vektör Hesaplama
+    let finalAngle = baseAngle + errorMargin;
+    
+    return {
+        vx: Math.cos(finalAngle) * powerFactor,
+        vy: Math.sin(finalAngle) * powerFactor
+    };
+}
