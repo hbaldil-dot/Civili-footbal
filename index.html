@@ -8,12 +8,10 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="game.js" defer></script>
 </head>
-    
 <body>
 
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
-
         <div class="input-group">
             <div class="input-wrapper">
                 <div class="logo-container">
@@ -25,10 +23,9 @@
             </div>
         </div>
 
-        <!-- TAKIM SEÇ BUTONU (GÜNCELLENDİ) -->
-<button class="menu-btn" onclick="openTeamSelectPopup()">
-    <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
-</button>
+        <button class="menu-btn" onclick="openTeamSelectPopup()">
+            <img src="butonlar/takim-sec.webp" alt="TAKIM SEÇ" class="menu-btn-img">
+        </button>
 
         <button class="menu-btn" onclick="openAILevelMenu()">
             <img src="butonlar/bilgisayara-karsi.webp" alt="BİLGİSAYARA KARŞI" class="menu-btn-img">
@@ -45,224 +42,192 @@
         <button class="menu-btn settings-btn" onclick="openSettingsPopup()">
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
-
     </div>
-<!-- Diğer tüm oyun kodlarınız, ana menünüz, canvas'ınız vb. burada -->
 
-       <!-- ============================================================
-         AYARLAR POP-UP
-         ============================================================ -->
+    <!-- ===== AYARLAR POP-UP ===== -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
             <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
             <div class="settings-buttons-container">
                 
-                <!-- MAÇ SÜRESİ (AKTİF) -->
-<div class="settings-row">
-    <div class="settings-match-container">
-        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
-            <div class="settings-match-wrapper">
-                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
-                <span class="settings-selected-value" id="match-duration-display">90sn</span>
-            </div>
-            <span class="settings-arrow">▼</span>
-        </div>
-        <div class="settings-match-options" id="match-duration-options" style="display: none;">
-            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
-            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
-            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
-            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
-        </div>
-    </div>
-</div>
-               <!-- VURUŞ SÜRESİ (AKTİF) -->
-<div class="settings-row">
-    <div class="settings-shot-container settings-match-container">
-        <div class="settings-match-header" onclick="toggleShotDurationOptions()">
-            <div class="settings-match-wrapper settings-shot-wrapper">
-                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
-                <span class="settings-selected-value" id="shot-duration-display">5sn</span>
-            </div>
-            <span class="settings-arrow">▼</span>
-        </div>
-        <div class="settings-match-options" id="shot-duration-options" style="display: none;">
-            <button class="settings-option" data-shot-duration="3" onclick="setShotDuration(3)">3sn</button>
-            <button class="settings-option active" data-shot-duration="5" onclick="setShotDuration(5)">5sn</button>
-            <button class="settings-option" data-shot-duration="7" onclick="setShotDuration(7)">7sn</button>
-        </div>
-    </div>
-</div>
+                <!-- MAÇ SÜRESİ -->
+                <div class="settings-row">
+                    <div class="settings-match-container">
+                        <div class="settings-match-header" onclick="toggleMatchDurationOptions()">
+                            <div class="settings-match-wrapper">
+                                <img src="menu/ayarlar/mac suresi.webp" alt="Maç Süresi" class="settings-btn-img">
+                                <span class="settings-selected-value" id="match-duration-display">90sn</span>
+                            </div>
+                            <span class="settings-arrow">▼</span>
+                        </div>
+                        <div class="settings-match-options" id="match-duration-options" style="display: none;">
+                            <button class="settings-option" data-duration="60" onclick="setMatchDuration(60)">60sn</button>
+                            <button class="settings-option active" data-duration="90" onclick="setMatchDuration(90)">90sn</button>
+                            <button class="settings-option" data-duration="120" onclick="setMatchDuration(120)">120sn</button>
+                            <button class="settings-option" data-duration="150" onclick="setMatchDuration(150)">150sn</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VURUŞ SÜRESİ -->
+                <div class="settings-row">
+                    <div class="settings-shot-container settings-match-container">
+                        <div class="settings-match-header" onclick="toggleShotDurationOptions()">
+                            <div class="settings-match-wrapper settings-shot-wrapper">
+                                <img src="menu/ayarlar/vurus suresi.webp" alt="Vuruş Süresi" class="settings-btn-img">
+                                <span class="settings-selected-value" id="shot-duration-display">5sn</span>
+                            </div>
+                            <span class="settings-arrow">▼</span>
+                        </div>
+                        <div class="settings-match-options" id="shot-duration-options" style="display: none;">
+                            <button class="settings-option" data-shot-duration="3" onclick="setShotDuration(3)">3sn</button>
+                            <button class="settings-option active" data-shot-duration="5" onclick="setShotDuration(5)">5sn</button>
+                            <button class="settings-option" data-shot-duration="7" onclick="setShotDuration(7)">7sn</button>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- STADYUM SEÇİMİ -->
-<div class="settings-row">
-    <div class="settings-match-container">
-        <!-- Ana Buton & Seçili Görsel Önizlemesi -->
-        <div class="settings-match-header" onclick="toggleStadiumOptions()">
-            <div class="settings-match-wrapper">
-                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum Seç" class="settings-btn-img">
-                <!-- Seçilen görsel butonun yanında mini önizleme olarak görünecek -->
-                <img src="menu/ayarlar/stat/z1.webp" id="selected-stadium-preview" class="stadium-preview-icon" alt="Seçili Zemin">
-            </div>
-            <span class="settings-arrow">▼</span>
-        </div>
+                <div class="settings-row">
+                    <div class="settings-match-container">
+                        <div class="settings-match-header" onclick="toggleStadiumOptions()">
+                            <div class="settings-match-wrapper">
+                                <img src="menu/ayarlar/stadyum.webp" alt="Stadyum Seç" class="settings-btn-img">
+                                <img src="menu/ayarlar/stat/z1.webp" id="selected-stadium-preview" class="stadium-preview-icon" alt="Seçili Zemin">
+                            </div>
+                            <span class="settings-arrow">▼</span>
+                        </div>
 
-        <!-- Seçenekler Menüsü (Tıklanınca Açılan Ufak Resim Dizilimi) -->
-        <div class="settings-match-options stadium-options-grid" id="stadium-options" style="display: none;">
-            <div class="stadium-option-card active" onclick="selectStadium('z1', 'menu/ayarlar/stat/texure/z1-t.webp')">
-                <img src="menu/ayarlar/stat/z1.webp" alt="Zemin 1">
-            </div>
-            <div class="stadium-option-card" onclick="selectStadium('z2', 'menu/ayarlar/stat/texure/z2-t.webp')">
-                <img src="menu/ayarlar/stat/z2.webp" alt="Zemin 2">
-            </div>
-            <div class="stadium-option-card" onclick="selectStadium('z3', 'menu/ayarlar/stat/texure/z3-t.webp')">
-                <img src="menu/ayarlar/stat/z3.webp" alt="Zemin 3">
-            </div>
-            <div class="stadium-option-card" onclick="selectStadium('z4', 'menu/ayarlar/stat/texure/z4-t.webp')">
-                <img src="menu/ayarlar/stat/z4.webp" alt="Zemin 4">
-            </div>
-            <div class="stadium-option-card" onclick="selectStadium('z5', 'menu/ayarlar/stat/texure/z5-t.webp')">
-                <img src="menu/ayarlar/stat/z5.webp" alt="Zemin 5">
-            </div>
-        </div>
-    </div>
-</div>
+                        <div class="settings-match-options stadium-options-grid" id="stadium-options" style="display: none;">
+                            <div class="stadium-option-card active" onclick="selectStadium('z1', 'menu/ayarlar/stat/texure/z1-t.webp')">
+                                <img src="menu/ayarlar/stat/z1.webp" alt="Zemin 1">
+                            </div>
+                            <div class="stadium-option-card" onclick="selectStadium('z2', 'menu/ayarlar/stat/texure/z2-t.webp')">
+                                <img src="menu/ayarlar/stat/z2.webp" alt="Zemin 2">
+                            </div>
+                            <div class="stadium-option-card" onclick="selectStadium('z3', 'menu/ayarlar/stat/texure/z3-t.webp')">
+                                <img src="menu/ayarlar/stat/z3.webp" alt="Zemin 3">
+                            </div>
+                            <div class="stadium-option-card" onclick="selectStadium('z4', 'menu/ayarlar/stat/texure/z4-t.webp')">
+                                <img src="menu/ayarlar/stat/z4.webp" alt="Zemin 4">
+                            </div>
+                            <div class="stadium-option-card" onclick="selectStadium('z5', 'menu/ayarlar/stat/texure/z5-t.webp')">
+                                <img src="menu/ayarlar/stat/z5.webp" alt="Zemin 5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-           <!-- SES (AKTİF) -->
-<img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img" id="sound-toggle-btn" onclick="toggleSound()" style="cursor:pointer;">
+                <!-- SES -->
+                <img src="menu/ayarlar/ses.webp" alt="Ses" class="settings-btn-img" id="sound-toggle-btn" onclick="toggleSound()" style="cursor:pointer;">
                          
                 <!-- ANA MENÜ -->
                 <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" class="settings-btn-img" onclick="closeSettingsPopup()">
-                
             </div>
         </div>
     </div>
 
-    <!-- ============================================================
-         AI ZORLUK POP-UP
-         ============================================================ -->
+    <!-- ===== AI ZORLUK POP-UP ===== -->
     <div id="ai-level-menu" style="display: none;">
         <div class="popup-content difficulty-popup">
             <div class="difficulty-container">
                 <img src="menu/zorluk/zorluk-secimi.webp" alt="Zorluk Seçimi" class="difficulty-bg">
                 
                 <div class="difficulty-btn-area" style="position:absolute; top:40%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('kolay')">
-                    <img src="menu/zorluk/kolay.webp" alt="Kolay" style="width:100%; display:block; pointer-events:none;">
+                    <img src="menu/zorluk/kolay.webp" alt="Kolay">
                 </div>
                 
                 <div class="difficulty-btn-area" style="position:absolute; top:52%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('orta')">
-                    <img src="menu/zorluk/orta.webp" alt="Orta" style="width:100%; display:block; pointer-events:none;">
+                    <img src="menu/zorluk/orta.webp" alt="Orta">
                 </div>
                 
                 <div class="difficulty-btn-area" style="position:absolute; top:64%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('zor')">
-                    <img src="menu/zorluk/zor.webp" alt="Zor" style="width:100%; display:block; pointer-events:none;">
+                    <img src="menu/zorluk/zor.webp" alt="Zor">
                 </div>
                 
                 <div class="difficulty-btn-area" style="position:absolute; top:76%; left:50%; transform:translateX(-50%); width:60%; cursor:pointer;" onclick="selectDifficulty('usta')">
-                    <img src="menu/zorluk/usta.webp" alt="Usta" style="width:100%; display:block; pointer-events:none;">
+                    <img src="menu/zorluk/usta.webp" alt="Usta">
                 </div>
                 
                 <div class="difficulty-btn-area" style="position:absolute; bottom:1%; left:50%; transform:translateX(-50%); width:35%; cursor:pointer;" onclick="closeAILevelMenu()">
-                    <img src="menu/zorluk/ana menu.webp" alt="Geri" style="width:100%; display:block; pointer-events:none;">
+                    <img src="menu/zorluk/ana menu.webp" alt="Geri">
                 </div>
             </div>
         </div>
     </div>
 
-   <!-- ============================================================
-     ONLINE LOBI POP-UP (SADECE ARKA FON DEĞİŞTİRİLDİ)
-     ============================================================ -->
-<div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
-    <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
-        <!-- ARKA FON GÖRSELİ -->
-        <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
-        
-        <!-- İÇERİK - ARKA FON ÜZERİNE BİNDİRİLDİ -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
-            
-            <div class="popup-header" style="border-bottom: none; background: transparent; padding: 5px 5px 10px 5px;">
-                <h2 style="color: rgba(255,255,255,0.9); font-size: 18px; letter-spacing: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">ONLINE FUTBOL</h2>
-                <button class="popup-close" onclick="closeOnlineLobby()" style="color: rgba(255,255,255,0.5); font-size: 24px;">✕</button>
-            </div>
-            
-            <div class="popup-body" style="flex: 1; padding: 5px 5px 10px 5px; overflow-y: auto;">
-                <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-align: center; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.5);">
-                    MAÇ YAPMAK İSTEDİĞİNİZ KİŞİYE TIKLAYARAK DAVET GÖNDERİN
-                </p>
-                <div class="player-list" id="lobby-list" style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 8px; max-height: 200px; overflow-y: auto;">
-                    <div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">Havuz güncelleniyor...</div>
+    <!-- ===== ONLINE LOBBY POP-UP ===== -->
+    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
+        <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
+            <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
+                <div class="popup-header" style="border-bottom: none; background: transparent; padding: 5px 5px 10px 5px;">
+                    <h2 style="color: rgba(255,255,255,0.9); font-size: 18px; letter-spacing: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">ONLINE FUTBOL</h2>
+                    <button class="popup-close" onclick="closeOnlineLobby()" style="color: rgba(255,255,255,0.5); font-size: 24px;">✕</button>
+                </div>
+                <div class="popup-body" style="flex: 1; padding: 5px 5px 10px 5px; overflow-y: auto;">
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-align: center; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.5);">
+                        MAÇ YAPMAK İSTEDİĞİNİZ KİŞİYE TIKLAYARAK DAVET GÖNDERİN
+                    </p>
+                    <div class="player-list" id="lobby-list" style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 8px; max-height: 200px; overflow-y: auto;">
+                        <div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">Havuz güncelleniyor...</div>
+                    </div>
+                </div>
+                <div style="text-align: center; padding: 10px 0 5px 0;">
+                    <img src="menu/online/ana-menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" style="cursor: pointer; max-width: 120px; width: 35%; display: inline-block; transition: transform 0.15s ease;">
                 </div>
             </div>
-            
-            <!-- ANA MENÜ BUTONU (ARKA FON DOSYASINI KULLAN) -->
-            <div style="text-align: center; padding: 10px 0 5px 0;">
-                <img src="menu/online/ana-menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" style="cursor: pointer; max-width: 120px; width: 35%; display: inline-block; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'">
-            </div>
-            
         </div>
     </div>
-</div>
 
-<!-- ============================================================
-     2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
-     ============================================================ -->
-<div id="local-team-select" style="display: none;">
-    <div class="local-team-container">
-        <!-- Arka Fon Görseli -->
-        <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
-        
-        <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
-        <div class="local-selected-area p1-selected-area">
-            <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
-        </div>
-        <div class="local-selected-area p2-selected-area">
-            <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
-        </div>
-
-        <!-- Takım Seçim Izgaraları -->
-        <div class="local-team-body">
-            <div class="local-player-section">
-                <div class="team-logo-options" id="local-player1-logos"></div>
+    <!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+    <div id="local-team-select" style="display: none;">
+        <div class="local-team-container">
+            <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
+            <div class="local-selected-area p1-selected-area">
+                <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
             </div>
-            <div class="local-player-section">
-                <div class="team-logo-options" id="local-player2-logos"></div>
-            </div>
-        </div>
-
-        <!-- Alt Butonlar + SÜRE SEÇİMLERİ (YENİ) -->
-        <div class="local-action-buttons">
-            
-            <!-- *** YENİ: MAÇ SÜRESİ SEÇİMİ *** -->
-            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 4px; width: 100%;">
-                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">MAÇ</span>
-                <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
-                <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
-                <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
-                <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+            <div class="local-selected-area p2-selected-area">
+                <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
             </div>
 
-            <!-- *** YENİ: VURUŞ SÜRESİ SEÇİMİ *** -->
-            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 6px; width: 100%;">
-                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">VURUŞ</span>
-                <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
-                <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
-                <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+            <div class="local-team-body">
+                <div class="local-player-section">
+                    <div class="team-logo-options" id="local-player1-logos"></div>
+                </div>
+                <div class="local-player-section">
+                    <div class="team-logo-options" id="local-player2-logos"></div>
+                </div>
             </div>
 
-            <!-- MAÇA BAŞLA BUTONU -->
-            <div class="local-start-btn" onclick="startLocalGameWithTeams()">
-                <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
-            </div>
-            
-            <!-- Ana Menü Butonu -->
-            <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
-                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            <div class="local-action-buttons">
+                <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 4px; width: 100%;">
+                    <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">MAÇ</span>
+                    <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                    <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                    <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                    <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+                </div>
+
+                <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 6px; width: 100%;">
+                    <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">VURUŞ</span>
+                    <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
+                    <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
+                    <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+                </div>
+
+                <div class="local-start-btn" onclick="startLocalGameWithTeams()">
+                    <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
+                </div>
+                
+                <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+                </div>
             </div>
         </div>
     </div>
-</div>
-    <!-- ============================================================
-         OYUN EKRANI
-         ============================================================ -->
+
+    <!-- ===== OYUN EKRANI ===== -->
     <div id="top-bar" style="display: none;">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
@@ -285,59 +250,42 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         CANVAS VE BUTON
-         ============================================================ -->
+    <!-- ===== CANVAS VE BUTON ===== -->
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
-    <!-- ============================================================
-         GÜÇ GÖSTERGESİ
-         ============================================================ -->
+    <!-- ===== GÜÇ GÖSTERGESİ ===== -->
     <div id="power-bar-container">
         <div id="power-bar"></div>
     </div>
 
-</body><!-- Ana menü, butonlar, input alanları vs. hepsi burada bitti -->
-        
-    </div> <!-- Varsa ana container kapanışı -->
-
-   <!-- ============================================================
-     TAKIM SEÇİM POP-UP (HER ŞEYİN DIŞINDA VE EN ALTTA OLMALI)
-     ============================================================ -->
-<div id="team-select-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000;">
-    <div class="team-select-container">
-        <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
-        <div class="selected-team-shield-area">
-            <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
-        </div>
-        <div class="team-select-grid" id="team-select-grid"></div>
-        <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
-            <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+    <!-- ===== TAKIM SEÇİM POP-UP ===== -->
+    <div id="team-select-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000;">
+        <div class="team-select-container">
+            <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
+            <div class="selected-team-shield-area">
+                <img id="popup-selected-team-img" src="" alt="Seçilen Takım" style="display: none;">
+            </div>
+            <div class="team-select-grid" id="team-select-grid"></div>
+            <div class="team-select-main-menu-btn" onclick="closeTeamSelectPopup()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            </div>
         </div>
     </div>
-</div>
-    <!-- ... Diğer mevcut HTML elementlerin, canvas, menüler vs. ... -->
 
-    <!-- ========================================================= -->
-    <!-- OYUNCU KAYIT VE PROFİL MODALI (Buraya Ekliyoruz)         -->
-    <!-- ========================================================= -->
+    <!-- ===== OYUNCU PROFİLİ MODAL ===== -->
     <div id="player-profile-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>👤 OYUNCU PROFİLİ</h2>
-            
             <div class="profile-avatar-container">
                 <img id="profile-team-logo" src="takimlar/default.png" alt="Takım Amblemi">
             </div>
-
             <div class="profile-input-group">
                 <label for="profile-username">Oyuncu Adı:</label>
                 <input type="text" id="profile-username" maxlength="15" placeholder="Kullanıcı Adı Girin">
             </div>
-
-            <!-- OYUNCU İSTATİSTİKLERİ -->
             <div class="stats-container">
                 <div class="stat-box">
                     <span class="stat-title">Toplam Maç</span>
@@ -352,7 +300,6 @@
                     <span id="stat-losses" class="stat-value">0</span>
                 </div>
             </div>
-
             <div class="profile-actions">
                 <button class="save-btn" onclick="savePlayerProfile()">KAYDET</button>
                 <button class="reset-btn" onclick="resetPlayerData()">VERİLERİ SIFIRLA</button>
@@ -361,82 +308,70 @@
         </div>
     </div>
 
-     <!-- Profil Modalı HTML Kodları -->
-    <div id="player-profile-modal" class="modal-overlay" style="display: none;">
-        ...
-    </div>
+    <!-- ===== GİRİŞ & KAYIT PENCERESİ ===== -->
+    <div id="auth-modal-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <button id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">GİRİŞ YAP</button>
+                <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">KAYIT OL</button>
+            </div>
 
-    <!-- Sadece game.js bağlı olacak -->
-    <script src="game.js"></script>
-<!-- İLK GİRİŞ & KAYIT PENCERESİ -->
-<div id="auth-modal-overlay" class="auth-overlay">
-    <div class="auth-card">
-        <!-- SEKMELER (Giriş Yap / Kayıt Ol) -->
-        <div class="auth-tabs">
-            <button id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">GİRİŞ YAP</button>
-            <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">KAYIT OL</button>
+            <!-- 1. GİRİŞ YAP FORMU -->
+            <form id="form-login" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
+                <h2>HOŞ GELDİN!</h2>
+                <div class="auth-input-group">
+                    <label for="login-email">E-Posta Adresi</label>
+                    <input type="email" id="login-email" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="login-password">Şifre</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <div class="auth-forgot">
+                    <a href="#" onclick="switchAuthTab('forgot'); return false;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="auth-btn">GİRİŞ YAP</button>
+            </form>
+
+            <!-- 2. KAYIT OL FORMU -->
+            <form id="form-register" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
+                <h2>KAYIT OL</h2>
+                <div class="auth-input-group">
+                    <label for="reg-username">Oyuncu Adı</label>
+                    <input type="text" id="reg-username" placeholder="Oyuncu_123" maxlength="15" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="reg-email">E-Posta Adresi</label>
+                    <input type="email" id="reg-email" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="reg-password">Şifre</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="auth-btn">KAYDOL VE BAŞLA</button>
+            </form>
+
+            <!-- 3. ŞİFREMİ UNUTTUM FORMU -->
+            <form id="form-forgot" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'forgot')">
+                <h2>ŞİFRE SIFIRLAMA</h2>
+                <p class="auth-desc">Kayıtlı e-posta adresinizi girin, şifre sıfırlama bağlantısını gönderelim.</p>
+                <div class="auth-input-group">
+                    <label for="forgot-email">E-Posta Adresi</label>
+                    <input type="email" id="forgot-email" placeholder="ornek@mail.com" required>
+                </div>
+                <button type="submit" class="auth-btn">ŞİFREYİ E-POSTA İLE GÖNDER</button>
+                <div class="auth-back">
+                    <a href="#" onclick="switchAuthTab('login'); return false;">← Giriş Ekranına Dön</a>
+                </div>
+            </form>
+
+            <div class="guest-container">
+                <div class="auth-divider"><span>VEYA</span></div>
+                <button type="button" class="guest-btn" onclick="continueAsGuest()">
+                    🎮 MİSAFİR OLARAK DEVAM ET
+                </button>
+            </div>
         </div>
-
-        <!-- 1. GİRİŞ YAP FORMU -->
-        <form id="form-login" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
-            <h2>HOŞ GELDİN!</h2>
-            <div class="auth-input-group">
-                <label for="login-email">E-Posta Adresi</label>
-                <input type="email" id="login-email" placeholder="ornek@mail.com" required>
-            </div>
-            <div class="auth-input-group">
-                <label for="login-password">Şifre</label>
-                <input type="password" id="login-password" placeholder="••••••••" required>
-            </div>
-            <div class="auth-forgot">
-                <a href="#" onclick="switchAuthTab('forgot'); return false;">Şifremi Unuttum?</a>
-            </div>
-            <button type="submit" class="auth-btn">GİRİŞ YAP</button>
-        </form>
-
-        <!-- 2. KAYIT OL FORMU -->
-        <form id="form-register" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
-            <h2>KAYIT OL</h2>
-            <div class="auth-input-group">
-                <label for="reg-username">Oyuncu Adı</label>
-                <input type="text" id="reg-username" placeholder="Oyuncu_123" maxlength="15" required>
-            </div>
-            <div class="auth-input-group">
-                <label for="reg-email">E-Posta Adresi</label>
-                <input type="email" id="reg-email" placeholder="ornek@mail.com" required>
-            </div>
-            <div class="auth-input-group">
-                <label for="reg-password">Şifre</label>
-                <input type="password" id="reg-password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="auth-btn">KAYDOL VE BAŞLA</button>
-        </form>
-
-        <!-- 3. ŞİFREMİ UNUTTUM FORMU -->
-        <form id="form-forgot" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'forgot')">
-            <h2>ŞİFRE SIFIRLAMA</h2>
-            <p class="auth-desc">Kayıtlı e-posta adresinizi girin, şifre sıfırlama bağlantısını gönderelim.</p>
-            <div class="auth-input-group">
-                <label for="forgot-email">E-Posta Adresi</label>
-                <input type="email" id="forgot-email" placeholder="ornek@mail.com" required>
-            </div>
-            <button type="submit" class="auth-btn">ŞİFREYİ E-POSTA İLE GÖNDER</button>
-            <div class="auth-back">
-                <a href="#" onclick="switchAuthTab('login'); return false;">← Giriş Ekranına Dön</a>
-            </div>
-        </form>
-
-        <!-- MİSAFİR OLARAK DEVAM ET BUTONU (Tüm Sekmelerin Altında Yer Alır) -->
-        <div class="guest-container">
-            <div class="auth-divider"><span>VEYA</span></div>
-            <button type="button" class="guest-btn" onclick="continueAsGuest()">
-                🎮 MİSAFİR OLARAK DEVAM ET
-            </button>
-        </div>
-
     </div>
-</div>
 </body>
 </html>
-
-</
