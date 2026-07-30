@@ -2978,37 +2978,47 @@ if (typeof socket !== 'undefined' && socket) {
         // response.success FALSE ise modal KAPANMAZ, oyuncu kayıt/giriş ekranında kalır!
     });
 }
+// ============================================================
+// MİSAFİR GİRİŞİ VE MODAL KAPATMA
+// ============================================================
+
+// Auth Modalı kapatma fonksiyonu
+function closeAuthModal() {
+    const modal = document.getElementById('auth-modal'); // Giriş modalınızın ID'si
+    if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+    }
+}
+
 // Misafir Olarak Oyuna Başlama Fonksiyonu
 function continueAsGuest() {
-    // Rastgele bir Misafir ID oluştur (Örn: Misafir_5832)
-   const guestBtn = document.getElementById('guest-btn'); // Misafir butonunun ID'si
+    // 1. Rastgele Misafir Kullanıcı Adı Oluştur
+    const guestUsername = "Misafir_" + Math.floor(1000 + Math.random() * 9000);
+    
+    if (typeof playerProfile !== 'undefined') {
+        playerProfile.username = guestUsername;
+    }
 
-if (guestBtn) {
-    // iPhone / Safari için 'pointerdown' ve 'click' desteği
-    ['click', 'pointerdown'].forEach(evt => {
-        guestBtn.addEventListener(evt, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+    // 2. Misafir butonunun görsel olarak tetiklendiğini belirt
+    const guestBtn = document.getElementById('guest-btn');
+    if (guestBtn) {
+        guestBtn.disabled = true;
+        guestBtn.innerText = "Giriş yapılıyor...";
+    }
 
-            // Misafir ismi atayalım
-            const nameInput = document.getElementById('player-name-input');
-            if (nameInput) nameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
-
-            // Ekranı Kapat ve Menüyü Aç
-            const authOverlay = document.querySelector('.auth-overlay');
-            if (authOverlay) {
-                authOverlay.style.display = 'none';
-                authOverlay.classList.add('hidden');
-            }
-
-            const mainMenu = document.getElementById('menu');
-            if (mainMenu) {
-                mainMenu.style.display = 'block';
-                mainMenu.classList.remove('hidden');
-            }
-        }, { once: true }); // Çift tetiklenmeyi engeller
-    });
+    // 3. Giriş Modalını Kapat ve Oyuna Devam Et
+    setTimeout(() => {
+        closeAuthModal();
+        if (guestBtn) {
+            guestBtn.disabled = false;
+            guestBtn.innerText = "Misafir Olarak Oyna";
+        }
+        console.log("✅ Misafir girişi başarılı:", guestUsername);
+    }, 300);
 }
+
 
 // ============================================================
 // AKTİF KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ (SOCKET.IO ENTEGRASYONU)
