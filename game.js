@@ -870,45 +870,23 @@ function executeAIShot(target, params) {
     // Vuruş süresi kontrolü (eğer süre azsa daha hızlı vur)
     let extraDelay = 150;
     if (shotSecondsLeft < 2) {
-        extraDelay = 50; // Hızlı vuruş
+        extraDelay = 50; // Süre azaldığında gecikmeyi düşür
     }
-    
+
     setTimeout(() => {
-        isDraggingBall = true;
-        dragStart = { x: cap.x, y: cap.y };
-        dragCurrent = { x: cap.x, y: cap.y };
+        // AI Vuruş Fiziğini Uygula
+        const force = pullDistance * 0.15;
+        cap.vx = Math.cos(angle) * force;
+        cap.vy = Math.sin(angle) * force;
         
-        let stepCount = 0;
-        const totalSteps = Math.max(4, Math.min(10, Math.floor(pullDistance / 10)));
+        isAiThinking = false;
         
-        const pullInterval = setInterval(() => {
-            stepCount++;
-            const ratio = stepCount / totalSteps;
-            const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
-            dragCurrent = { 
-                x: cap.x - Math.cos(angle) * currentPull, 
-                y: cap.y - Math.sin(angle) * currentPull 
-            };
-            
-            if (stepCount >= totalSteps) {
-                clearInterval(pullInterval);
-                setTimeout(() => {
-                    isDraggingBall = false;
-                    isAiThinking = false;
-                    playSound('kick');
-                    
-                    // Vuruş katsayısı: Hedefe olan mesafeye göre hafif ayar
-                    const powerMultiplier = 0.13 * (0.9 + Math.random() * 0.2);
-                    cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
-                    cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
-                    
-                    turn = 1;
-                    updateHUDTurn();
-                    resetShotTimer();
-                }, extraDelay);
-            }
-        }, 30);
-    }, params.reactionDelay);
+        // Sırayı diğer oyuncuya devret veya oyun akışını güncelle
+        if (typeof switchTurn === 'function') {
+            switchTurn();
+        }
+    }, params.reactionDelay + extraDelay);
+}
 }
 function executeFakeShot(target, params) {
     // Sahte vuruş: Önce farklı bir açıya çek, sonra hedefe vur
