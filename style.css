@@ -2208,3 +2208,136 @@ body { ... }
         padding: 3px 8px !important;
     }
 }
+/* ============================================================
+   KAYIT & GİRİŞ MODALI STİLLERİ
+   ============================================================ */
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65); /* Arka planı hafif gösterir */
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* En üstte durur */
+}
+
+.auth-card {
+    background: rgba(20, 20, 20, 0.92);
+    border: 2px solid #2ecc71;
+    border-radius: 12px;
+    padding: 25px;
+    width: 90%;
+    max-width: 380px;
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.4);
+    color: #fff;
+    font-family: 'Courier New', monospace;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #333;
+    color: #888;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.auth-tab.active {
+    background: #2ecc71;
+    color: #000;
+    border-color: #2ecc71;
+}
+
+.auth-form h2 {
+    font-size: 18px;
+    color: #2ecc71;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.auth-desc {
+    font-size: 12px;
+    color: #aaa;
+    text-align: center;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.auth-input-group {
+    margin-bottom: 12px;
+}
+
+.auth-input-group label {
+    display: block;
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 4px;
+}
+
+.auth-input-group input {
+    width: 100%;
+    padding: 10px;
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.auth-input-group input:focus {
+    outline: none;
+    border-color: #2ecc71;
+}
+
+.auth-forgot, .auth-back {
+    text-align: right;
+    margin-bottom: 15px;
+}
+
+.auth-forgot a, .auth-back a {
+    color: #f1c40f;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.auth-back {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2ecc71;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #27ae60;
+}
+
+.hidden {
+    display: none !important;
+}
