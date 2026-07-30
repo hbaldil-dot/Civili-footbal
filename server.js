@@ -20,7 +20,7 @@ const io = new Server(server, {
 
 // !! BU URL'Yİ KENDİ MONGODB ATLAS BAĞLANTI URL'İNİZLE DEĞİŞTİRİN !!
 // Doğru format: mongodb+srv://<kullanici_adi>:<sifre>@<cluster_adı>.mongodb.net/<veritabani_adi>?retryWrites=true&w=majority
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/futbol?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI ||"mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
 
 // Bağlantı seçenekleri - MongoDB driver 6.x için güncel
 const mongooseOptions = {
