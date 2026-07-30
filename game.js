@@ -2771,10 +2771,19 @@ let playerProfile = {
     }
 };
 
-// Sayfa ilk yüklendiğinde verileri getir
-document.addEventListener("DOMContentLoaded", function () {
-    loadPlayerData();
+// Eski DOMContentLoaded bloğu yerine bunu kullanın:
+window.addEventListener('load', () => {
+    // 1. Profil verilerini yerelden yükle
+    if (typeof loadPlayerData === 'function') {
+        loadPlayerData();
+    }
+    
+    // 2. Eğer socket bağlantı fonksiyonun varsa onu çağır (Örn: initSocket veya connectServer)
+    if (typeof connectToServer === 'function') {
+        connectToServer();
+    }
 });
+
 
 // Veriyi LocalStorage'dan Yükle
 function loadPlayerData() {
