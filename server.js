@@ -18,34 +18,32 @@ const io = new Server(server, {
 // MONGODB BAĞLANTISI - DÜZELTİLMİŞ
 // ============================================================
 
-// !! BU URL'Yİ KENDİ MONGODB ATLAS BAĞLANTI URL'İNİZLE DEĞİŞTİRİN !!
-// Doğru format: mongodb+srv://<kullanici_adi>:<sifre>@<cluster_adı>.mongodb.net/<veritabani_adi>?retryWrites=true&w=majority
-const MONGODB_URI = process.env.MONGODB_URI ||"mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
 
-// Bağlantı seçenekleri - MongoDB driver 6.x için güncel
-const mongooseOptions = {
-    serverSelectionTimeoutMS: 5000, // 5 saniye timeout
-    socketTimeoutMS: 45000,
-    family: 4, // IPv4 kullan
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    retryWrites: true,
-    retryReads: true
-};
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://hbaldil_db_user:<db_password>@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
 
-// MongoDB'ye bağlan
-async function connectDB() {
-    try {
-        await mongoose.connect(MONGODB_URI, mongooseOptions);
-        console.log('✅ MongoDB bağlantısı başarıyla kuruldu!');
-        console.log(`📁 Veritabanı: ${mongoose.connection.name}`);
-        console.log(`🔄 Bağlantı durumu: ${mongoose.connection.readyState}`);
-    } catch (error) {
-        console.error('❌ MongoDB bağlantı hatası:', error.message);
-        console.log('🔄 5 saniye sonra yeniden bağlanmayı dene...');
-        setTimeout(connectDB, 5000);
-    }
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
 }
+run().catch(console.dir);
 
 // Bağlantı olaylarını dinle
 mongoose.connection.on('connected', () => {
