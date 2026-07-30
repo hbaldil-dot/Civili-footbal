@@ -19,25 +19,91 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// BELLEK (MEMORY) VERİ ALANLARI
 let lobbyPlayers = [];
 let activeRooms = {};
+const registeredUsers = {};
 
 io.on('connection', (socket) => {
-    console.log(`Yeni bağlantı: ${socket.id}`);
+    console.log(`⚡ Yeni bağlantı: ${socket.id}`);
 
-    // --- LOBİ İŞLEMLERİ ---
+    // ============================================================
+    // AUTH (GİRİŞ, KAYIT, ŞİFRE) İŞLEMLERİ
+    // ============================================================
+    socket.on('registerUser', (data) => {
+        const { username, email, password } = data;
+
+        if (registeredUsers[email]) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresi zaten kayıtlı!' });
+            return;
+        }
+
+        registeredUsers[email] = { username, password };
+        console.log(`✅ Yeni Kayıt: ${username} (${email})`);
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'register',
+            username: username,
+            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+        });
+    });
+
+    socket.on('loginUser', (data) => {
+        const { email, password } = data;
+        const user = registeredUsers[email];
+
+        if (!user) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı!' });
+            return;
+        }
+
+        if (user.password !== password) {
+            socket.emit('authResponse', { success: false, message: 'Hatalı şifre girdiniz!' });
+            return;
+        }
+
+        console.log(`🔑 Giriş Başarılı: ${user.username}`);
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'login',
+            username: user.username,
+            message: 'Giriş başarılı! Yönlendiriliyorsunuz...'
+        });
+    });
+
+    socket.on('forgotPassword', (data) => {
+        const { email } = data;
+
+        if (!registeredUsers[email]) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresine ait bir hesap bulunamadı!' });
+            return;
+        }
+
+        const userPassword = registeredUsers[email].password;
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'forgot',
+            message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${userPassword})`
+        });
+    });
+
+    // ============================================================
+    // ONLINE LOBİ & MAÇ İŞLEMLERİ
+    // ============================================================
     socket.on('join-lobby', (playerData) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         lobbyPlayers.push({ 
             id: socket.id, 
-            name: playerData.name,
-            logo: playerData.logo || 'default.png'
+            name: playerData ? playerData.name : 'Oyuncu',
+            logo: (playerData && playerData.logo) || 'default.png'
         });
-        console.log(`${playerData.name} lobiye katıldı. Logo: ${playerData.logo}`);
+        console.log(`${playerData ? playerData.name : 'Oyuncu'} lobiye katıldı.`);
         broadcastLobbyUpdate();
     });
 
-    // Oyuncu bilgilerini güncelle
     socket.on('update-player', (playerData) => {
         const player = lobbyPlayers.find(p => p.id === socket.id);
         if (player) {
@@ -128,20 +194,18 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- VURUŞ BAZLI SENKRONİZASYON ---
+    // --- VURUŞ VE SENKRONİZASYON ---
     socket.on('playerShot', ({ roomId, shotData }) => {
         socket.to(roomId).emit('opponentShot', shotData);
-        console.log(`Vuruş iletildi: Oyuncu ${shotData.player}, Oda: ${roomId}`);
     });
 
-    // --- PERİYODİK SENKRONİZASYON ---
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
 
     // --- BAĞLANTI KOPMASI ---
     socket.on('disconnect', () => {
-        console.log(`Bağlantı koptu: ${socket.id}`);
+        console.log(`🔌 Bağlantı koptu: ${socket.id}`);
         handlePlayerDisconnection(socket);
     });
 });
@@ -173,82 +237,6 @@ function handlePlayerDisconnection(socket) {
         }
     }
 }
-// ... Mevcut server.js kodların (express, http server vb.) ...
 
-io.on('connection', (socket) => {
-    console.log('⚡ Bir kullanıcı bağlandı:', socket.id);
-
-    // ... Varsa mevcut online maç/oyun dinleyicilerin (joinRoom, move, vs.) ...
-
-
-    // ============================================================
-    // YENİ EKLENEN: KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ
-    // ============================================================
-    
-    // 1. KAYIT OL İŞLEMİ
-    socket.on('registerUser', (data) => {
-        const { username, email, password } = data;
-
-        if (registeredUsers[email]) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresi zaten kayıtlı!' });
-            return;
-        }
-
-        registeredUsers[email] = { username, password };
-        console.log(`✅ Yeni Kayıt: ${username} (${email})`);
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'register',
-            username: username,
-            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-        });
-    });
-
-    // 2. GİRİŞ YAP İŞLEMİ
-    socket.on('loginUser', (data) => {
-        const { email, password } = data;
-        const user = registeredUsers[email];
-
-        if (!user) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı!' });
-            return;
-        }
-
-        if (user.password !== password) {
-            socket.emit('authResponse', { success: false, message: 'Hatalı şifre girdiniz!' });
-            return;
-        }
-
-        console.log(`🔑 Giriş Başarılı: ${user.username}`);
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'login',
-            username: user.username,
-            message: 'Giriş başarılı! Yönlendiriliyorsunuz...'
-        });
-    });
-
-    // 3. ŞİFREMİ UNUTTUM İŞLEMİ
-    socket.on('forgotPassword', (data) => {
-        const { email } = data;
-
-        if (!registeredUsers[email]) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresine ait bir hesap bulunamadı!' });
-            return;
-        }
-
-        const userPassword = registeredUsers[email].password;
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'forgot',
-            message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${userPassword})`
-        });
-    });
-
-}); // <-- io.on('connection') KAPANMA PARANTEZİ
-
-// Kullanıcı hafızası objesini de io.on'un hemen üstüne veya en tepeye koyabilirsin:
-const registeredUsers = {};
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`🚀 Sunucu ${PORT} portunda dinlemede...`));
