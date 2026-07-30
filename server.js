@@ -173,7 +173,81 @@ function handlePlayerDisconnection(socket) {
         }
     }
 }
+// Basit Veritabanı / Kullanıcı Hafızası (Gerçek DB yerine RAM veya JSON kullanabilirsin)
+const registeredUsers = {}; // Key: email, Value: { username, password }
 
+io.on('connection', (socket) => {
+    console.log('⚡ Bir kullanıcı bağlandı:', socket.id);
+
+    // 1. KAYIT OL İŞLEMİ
+    socket.on('registerUser', (data) => {
+        const { username, email, password } = data;
+
+        if (registeredUsers[email]) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresi zaten kayıtlı!' });
+            return;
+        }
+
+        // Kullanıcıyı kaydet
+        registeredUsers[email] = { username, password };
+        console.log(`✅ Yeni Kayıt: ${username} (${email})`);
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'register',
+            username: username,
+            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+        });
+    });
+
+    // 2. GİRİŞ YAP İŞLEMİ
+    socket.on('loginUser', (data) => {
+        const { email, password } = data;
+
+        const user = registeredUsers[email];
+
+        if (!user) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı!' });
+            return;
+        }
+
+        if (user.password !== password) {
+            socket.emit('authResponse', { success: false, message: 'Hatalı şifre girdiniz!' });
+            return;
+        }
+
+        console.log(`🔑 Giriş Başarılı: ${user.username}`);
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'login',
+            username: user.username,
+            message: 'Giriş başarılı! Yönlendiriliyorsunuz...'
+        });
+    });
+
+    // 3. ŞİFREMİ UNUTTUM İŞLEMİ
+    socket.on('forgotPassword', (data) => {
+        const { email } = data;
+
+        if (!registeredUsers[email]) {
+            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresine ait bir hesap bulunamadı!' });
+            return;
+        }
+
+        const userPassword = registeredUsers[email].password;
+
+        // NOT: Gerçek e-posta gönderimi için NodeMailer kütüphanesi kullanılır.
+        // Şimdilik simülasyon olarak şifreyi geri döndürüyoruz:
+        console.log(`📧 ${email} adresine şifre sıfırlama simülasyonu yapıldı.`);
+
+        socket.emit('authResponse', {
+            success: true,
+            action: 'forgot',
+            message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${userPassword})`
+        });
+    });
+});
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
