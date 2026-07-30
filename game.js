@@ -2981,18 +2981,35 @@ if (typeof socket !== 'undefined' && socket) {
 // Misafir Olarak Oyuna Başlama Fonksiyonu
 function continueAsGuest() {
     // Rastgele bir Misafir ID oluştur (Örn: Misafir_5832)
-    const guestName = "Misafir_" + Math.floor(1000 + Math.random() * 9000);
-    
-    // Global oyuncu verisini güncelle
-    if (typeof playerProfile !== 'undefined') {
-        playerProfile.username = guestName;
-    }
+   const guestBtn = document.getElementById('guest-btn'); // Misafir butonunun ID'si
 
-    console.log(`👤 Oyuna misafir olarak giriş yapıldı: ${guestName}`);
-    
-    // Kayıt Penceresini Kapat
-    closeAuthModal();
+if (guestBtn) {
+    // iPhone / Safari için 'pointerdown' ve 'click' desteği
+    ['click', 'pointerdown'].forEach(evt => {
+        guestBtn.addEventListener(evt, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Misafir ismi atayalım
+            const nameInput = document.getElementById('player-name-input');
+            if (nameInput) nameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
+
+            // Ekranı Kapat ve Menüyü Aç
+            const authOverlay = document.querySelector('.auth-overlay');
+            if (authOverlay) {
+                authOverlay.style.display = 'none';
+                authOverlay.classList.add('hidden');
+            }
+
+            const mainMenu = document.getElementById('menu');
+            if (mainMenu) {
+                mainMenu.style.display = 'block';
+                mainMenu.classList.remove('hidden');
+            }
+        }, { once: true }); // Çift tetiklenmeyi engeller
+    });
 }
+
 // ============================================================
 // AKTİF KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ (SOCKET.IO ENTEGRASYONU)
 // ============================================================
