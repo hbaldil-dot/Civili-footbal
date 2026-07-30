@@ -173,12 +173,18 @@ function handlePlayerDisconnection(socket) {
         }
     }
 }
-// Basit Veritabanı / Kullanıcı Hafızası (Gerçek DB yerine RAM veya JSON kullanabilirsin)
-const registeredUsers = {}; // Key: email, Value: { username, password }
+// ... Mevcut server.js kodların (express, http server vb.) ...
 
 io.on('connection', (socket) => {
     console.log('⚡ Bir kullanıcı bağlandı:', socket.id);
 
+    // ... Varsa mevcut online maç/oyun dinleyicilerin (joinRoom, move, vs.) ...
+
+
+    // ============================================================
+    // YENİ EKLENEN: KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ
+    // ============================================================
+    
     // 1. KAYIT OL İŞLEMİ
     socket.on('registerUser', (data) => {
         const { username, email, password } = data;
@@ -188,7 +194,6 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Kullanıcıyı kaydet
         registeredUsers[email] = { username, password };
         console.log(`✅ Yeni Kayıt: ${username} (${email})`);
 
@@ -203,7 +208,6 @@ io.on('connection', (socket) => {
     // 2. GİRİŞ YAP İŞLEMİ
     socket.on('loginUser', (data) => {
         const { email, password } = data;
-
         const user = registeredUsers[email];
 
         if (!user) {
@@ -237,18 +241,14 @@ io.on('connection', (socket) => {
 
         const userPassword = registeredUsers[email].password;
 
-        // NOT: Gerçek e-posta gönderimi için NodeMailer kütüphanesi kullanılır.
-        // Şimdilik simülasyon olarak şifreyi geri döndürüyoruz:
-        console.log(`📧 ${email} adresine şifre sıfırlama simülasyonu yapıldı.`);
-
         socket.emit('authResponse', {
             success: true,
             action: 'forgot',
             message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${userPassword})`
         });
     });
-});
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Sunucu http://0.0.0.0:${PORT} portunda başarıyla çalışıyor!`);
-});
+
+}); // <-- io.on('connection') KAPANMA PARANTEZİ
+
+// Kullanıcı hafızası objesini de io.on'un hemen üstüne veya en tepeye koyabilirsin:
+const registeredUsers = {};
