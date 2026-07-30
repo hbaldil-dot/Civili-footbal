@@ -1644,7 +1644,10 @@ body::before {
 .hidden {
     display: none !important;
 }
-
+/* Giriş modalının menüyü engellememesi için gizlendiğinden emin olun */
+#auth-modal-overlay.hidden {
+    display: none !important;
+}
 /* ============================================================
    RESPONSIVE & MOBİL UYUM
    ============================================================ */
