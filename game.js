@@ -2918,31 +2918,65 @@ function switchAuthTab(tab) {
     }
 }
 
-// Form Gönderim İşlemleri (Test Mantığı)
+// ============================================================
+// FORM GÖNDERİMİ VE SUNUCU DOĞRULAMASI
+// ============================================================
+
 function handleAuthSubmit(event, type) {
-    event.preventDefault(); // Sayfanın yenilenmesini engeller
+    event.preventDefault(); // Sayfanın yenilenip formun direkt kapanmasını ENGELLER
+
+    // Sunucu bağlantı kontrolü
+    if (typeof socket === 'undefined' || !socket || !socket.connected) {
+        alert("⚠️ Sunucuya bağlı değilsiniz! Lütfen sayfanızı yenileyin veya birkaç saniye bekleyin.");
+        return;
+    }
 
     if (type === 'login') {
-        const email = document.getElementById('login-email').value;
-        alert(`Giriş Başarılı! Hoş geldin (${email})`);
-        closeAuthModal();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+
+        // Sunucuya giriş isteği at (Modalı henüz KAPATMIYORUZ)
+        socket.emit('loginUser', { email, password });
+
     } else if (type === 'register') {
-        const username = document.getElementById('reg-username').value;
-        alert(`Kayıt Başarılı! Hoş geldin ${username}`);
-        closeAuthModal();
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+
+        // Sunucuya kayıt isteği at
+        socket.emit('registerUser', { username, email, password });
+
     } else if (type === 'forgot') {
-        const email = document.getElementById('forgot-email').value;
-        alert(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Simülasyon)`);
-        switchAuthTab('login');
+        const email = document.getElementById('forgot-email').value.trim();
+        socket.emit('forgotPassword', { email });
     }
 }
 
-// Giriş Ekranını Kapatıp Oyunu Başlatma
-function closeAuthModal() {
-    const modal = document.getElementById('auth-modal-overlay');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+// SUNUCUDAN GELEN YANITLARI DİNLEME (Sadece Başarılı ise Oyun Ekranına Geçer)
+if (typeof socket !== 'undefined' && socket) {
+    
+    // Eski dinleyici varsa çakışmaması için temizleyip yeniden ekliyoruz
+    socket.off('authResponse'); 
+    
+    socket.on('authResponse', (response) => {
+        // Sunucunun döndüğü mesajı göster (Örn: "Hatalı şifre", "Kullanıcı bulunamadı" veya "Giriş Başarılı")
+        alert(response.message);
+
+        if (response.success) {
+            // SADECE sunucu 'success: true' verdiğinde kullanıcı adını tanımla ve ekranı kapat
+            if (response.action === 'login' || response.action === 'register') {
+                if (typeof playerProfile !== 'undefined') {
+                    playerProfile.username = response.username;
+                }
+                
+                // Kayıt veya Giriş BAŞARILI olduğu için modalı kapatıp oyuna izin veriyoruz
+                closeAuthModal();
+            } else if (response.action === 'forgot') {
+                switchAuthTab('login');
+            }
+        } 
+        // response.success FALSE ise modal KAPANMAZ, oyuncu kayıt/giriş ekranında kalır!
+    });
 }
 // Misafir Olarak Oyuna Başlama Fonksiyonu
 function continueAsGuest() {
