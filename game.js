@@ -2238,7 +2238,28 @@ function setupSocketListeners() {
         }
     });
 }
-if (socket) setupSocketListeners();
+function joinOnlineGame() {
+    // Socket bağlantısı kurulmuş mu kontrol et
+    if (!socket || !socket.connected) {
+        alert("Şu anda bir sunucuya bağlı değilsiniz! Lütfen birkaç saniye bekleyip tekrar deneyin.");
+        return;
+    }
+
+    // Kullanıcı adını profilden al, yoksa varsayılan yap
+    const currentUsername = (playerProfile && playerProfile.username) 
+                            ? playerProfile.username 
+                            : "Oyuncu_" + Math.floor(Math.random() * 1000);
+
+    // Sunucuya profil bilgisiyle bağlan
+    socket.emit("registerPlayer", {
+        username: currentUsername,
+        teamLogo: selectedTeamLogo || "default.png"
+    });
+
+    // Lobi / Eşleşme ekranını aç
+    showLobbyScreen(); 
+}
+
 
 // ============================================================
 // BAŞLANGIÇ
