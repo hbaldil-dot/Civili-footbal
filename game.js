@@ -2997,35 +2997,26 @@ function continueAsGuest() {
 // AKTİF KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ (SOCKET.IO ENTEGRASYONU)
 // ============================================================
 
-// Form Gönderildiğinde Sunucuya Socket Mesajı At
-function handleAuthSubmit(event, type) {
-    event.preventDefault(); // Sayfa yenilenmesini engelle
+function handleAuthSuccess(username) {
+    // 1. Kullanıcı adını input'a doldur
+    const nameInput = document.getElementById('player-name-input');
+    if (nameInput) nameInput.value = username;
 
-    // Socket bağlantısı kurulmuş mu kontrol et
-    if (typeof socket === 'undefined' || !socket.connected) {
-        alert("⚠️ Sunucuya bağlı değilsiniz! Lütfen sayfayı yenileyip tekrar deneyin.");
-        return;
+    // 2. Auth Modalı/Kutuyu tamamen gizle
+    const authOverlay = document.querySelector('.auth-overlay');
+    if (authOverlay) {
+        authOverlay.style.display = 'none';
+        authOverlay.classList.add('hidden');
     }
 
-    if (type === 'login') {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        socket.emit('loginUser', { email, password });
-
-    } else if (type === 'register') {
-        const username = document.getElementById('reg-username').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
-
-        socket.emit('registerUser', { username, email, password });
-
-    } else if (type === 'forgot') {
-        const email = document.getElementById('forgot-email').value;
-
-        socket.emit('forgotPassword', { email });
+    // 3. Ana Menüyü Aç ve görünür yap
+    const mainMenu = document.getElementById('menu');
+    if (mainMenu) {
+        mainMenu.style.display = 'block';
+        mainMenu.classList.remove('hidden');
     }
 }
+
 
 // Sunucudan Gelen Cevapları Dinle
 if (typeof socket !== 'undefined') {
