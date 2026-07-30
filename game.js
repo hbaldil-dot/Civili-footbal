@@ -2959,3 +2959,57 @@ function continueAsGuest() {
     // Kayıt Penceresini Kapat
     closeAuthModal();
 }
+// ============================================================
+// AKTİF KAYIT, GİRİŞ VE ŞİFRE YÖNETİMİ (SOCKET.IO ENTEGRASYONU)
+// ============================================================
+
+// Form Gönderildiğinde Sunucuya Socket Mesajı At
+function handleAuthSubmit(event, type) {
+    event.preventDefault(); // Sayfa yenilenmesini engelle
+
+    // Socket bağlantısı kurulmuş mu kontrol et
+    if (typeof socket === 'undefined' || !socket.connected) {
+        alert("⚠️ Sunucuya bağlı değilsiniz! Lütfen sayfayı yenileyip tekrar deneyin.");
+        return;
+    }
+
+    if (type === 'login') {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        socket.emit('loginUser', { email, password });
+
+    } else if (type === 'register') {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        socket.emit('registerUser', { username, email, password });
+
+    } else if (type === 'forgot') {
+        const email = document.getElementById('forgot-email').value;
+
+        socket.emit('forgotPassword', { email });
+    }
+}
+
+// Sunucudan Gelen Cevapları Dinle
+if (typeof socket !== 'undefined') {
+    socket.on('authResponse', (response) => {
+        alert(response.message);
+
+        if (response.success) {
+            if (response.action === 'login' || response.action === 'register') {
+                // Oyuncu ismini güncelle
+                if (typeof playerProfile !== 'undefined') {
+                    playerProfile.username = response.username;
+                }
+                // Modalı kapat ve oyuna geç
+                closeAuthModal();
+            } else if (response.action === 'forgot') {
+                // Şifre talebinden sonra giriş sekmesine dön
+                switchAuthTab('login');
+            }
+        }
+    });
+}
