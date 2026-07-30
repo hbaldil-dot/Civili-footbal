@@ -2755,3 +2755,105 @@ function setLocalShotDuration(seconds) {
         }
     }
 }
+// ============================================================
+// OYUNCU DATA YÖNETİMİ & KULLANICI PROFİLİ
+// ============================================================
+
+// Varsayılan Oyuncu Verisi Yapısı
+let playerProfile = {
+    username: "Oyuncu_" + Math.floor(Math.random() * 1000),
+    selectedTeamLogo: "default.png",
+    stats: {
+        totalMatches: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0
+    }
+};
+
+// Sayfa ilk yüklendiğinde verileri getir
+document.addEventListener("DOMContentLoaded", function () {
+    loadPlayerData();
+});
+
+// Veriyi LocalStorage'dan Yükle
+function loadPlayerData() {
+    const savedData = localStorage.getItem('fingerSoccerPlayerData');
+    if (savedData) {
+        try {
+            playerProfile = JSON.parse(savedData);
+        } catch (e) {
+            console.error("Veri okuma hatası:", e);
+        }
+    }
+    syncDataToUI();
+}
+
+// Veriyi LocalStorage'a Kaydet
+function savePlayerData() {
+    localStorage.setItem('fingerSoccerPlayerData', JSON.stringify(playerProfile));
+}
+
+// Verileri Ekrana / Modala Yansıt
+function syncDataToUI() {
+    const modalName = document.getElementById('profile-username');
+    if (modalName) modalName.value = playerProfile.username;
+
+    const totalMatchesEl = document.getElementById('stat-total-matches');
+    if (totalMatchesEl) totalMatchesEl.innerText = playerProfile.stats.totalMatches;
+
+    const winsEl = document.getElementById('stat-wins');
+    if (winsEl) winsEl.innerText = playerProfile.stats.wins;
+
+    const lossesEl = document.getElementById('stat-losses');
+    if (lossesEl) lossesEl.innerText = playerProfile.stats.losses;
+}
+
+// Modal Aç / Kapat Fonksiyonları
+function openProfileModal() {
+    syncDataToUI();
+    const modal = document.getElementById('player-profile-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeProfileModal() {
+    const modal = document.getElementById('player-profile-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Profil Kaydetme
+function savePlayerProfile() {
+    const newName = document.getElementById('profile-username').value.trim();
+    if (newName) {
+        playerProfile.username = newName;
+        savePlayerData();
+        syncDataToUI();
+        closeProfileModal();
+        alert("✅ Profil başarıyla güncellendi!");
+    } else {
+        alert("⚠️ Lütfen geçerli bir kullanıcı adı girin!");
+    }
+}
+
+// Verileri Sıfırlama
+function resetPlayerData() {
+    if (confirm("⚠️ Tüm istatistikleriniz sıfırlanacak! Emin misiniz?")) {
+        playerProfile.stats = { totalMatches: 0, wins: 0, losses: 0, draws: 0 };
+        savePlayerData();
+        syncDataToUI();
+        alert("🧹 Veriler sıfırlandı.");
+    }
+}
+
+// Maç bittiğinde istatistik güncellemek için çağıracağın fonksiyon
+function recordMatchResult(isWin, isDraw) {
+    playerProfile.stats.totalMatches++;
+    if (isDraw) {
+        playerProfile.stats.draws++;
+    } else if (isWin) {
+        playerProfile.stats.wins++;
+    } else {
+        playerProfile.stats.losses++;
+    }
+    savePlayerData();
+}
