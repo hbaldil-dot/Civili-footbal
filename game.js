@@ -3140,3 +3140,66 @@ if (socket) {
         }
     };
 }
+// ... dosyanızın mevcut son satırları ...
+
+// --- AUTH TAB & FORM YÖNETİMİ ---
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.add('hidden'));
+
+    if (tab === 'login') {
+        document.getElementById('tab-login').classList.add('active');
+        document.getElementById('form-login').classList.remove('hidden');
+    } else if (tab === 'register') {
+        document.getElementById('tab-register').classList.add('active');
+        document.getElementById('form-register').classList.remove('hidden');
+    } else if (tab === 'forgot') {
+        document.getElementById('form-forgot').classList.remove('hidden');
+    }
+}
+
+function handleAuthSubmit(event, action) {
+    event.preventDefault();
+    if (!socket) {
+        alert("Sunucu bağlantısı kurulamadı!");
+        return;
+    }
+
+    if (action === 'register') {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        socket.emit('registerUser', { username, email, password });
+    } else if (action === 'login') {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        socket.emit('loginUser', { email, password });
+    } else if (action === 'forgot') {
+        const email = document.getElementById('forgot-email').value;
+        socket.emit('forgotPassword', { email });
+    }
+}
+
+function continueAsGuest() {
+    document.getElementById('auth-modal-overlay').classList.add('hidden');
+}
+
+// --- SUNUCUDAN GELEN YANITLARI DİNLEME ---
+if (socket) {
+    socket.on('authResponse', (data) => {
+        alert(data.message);
+        if (data.success) {
+            if (data.action === 'register' || data.action === 'login') {
+                if (data.username) {
+                    const nameInput = document.getElementById('player-name');
+                    if (nameInput) nameInput.value = data.username;
+                }
+                document.getElementById('auth-modal-overlay').classList.add('hidden');
+            } else if (data.action === 'forgot') {
+                switchAuthTab('login');
+            }
+        }
+    });
+}
