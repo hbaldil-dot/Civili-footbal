@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const mongoose = require('mongoose'); // MongoDB kütüphanesi
 
 const app = express();
 const server = http.createServer(app);
@@ -13,85 +14,130 @@ const io = new Server(server, {
     }
 });
 
+// ============================================================
+// MONGODB BAĞLANTISI VE MODEL TANIMI
+// ============================================================
+// Buradaki URL'yi MongoDB Atlas'tan aldığınız URL ile değiştirin:
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://<db_username>:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil
+
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('🍃 MongoDB bağlantısı başarıyla kuruldu!'))
+    .catch((err) => console.error('❌ MongoDB bağlantı hatası:', err));
+
+// Kullanıcı Şeması (Veritabanında tutulacak yapı)
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// BELLEK (MEMORY) VERİ ALANLARI
+// BELLEK (MEMORY) VERİ ALANLARI (Maçlar ve Lobiler anlık olduğu için RAM'de kalmaya devam ediyor)
 let lobbyPlayers = [];
 let activeRooms = {};
-const registeredUsers = {};
 
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
 
     // ============================================================
-    // AUTH (GİRİŞ, KAYIT, ŞİFRE) İŞLEMLERİ
+    // AUTH (GİRİŞ, KAYIT, ŞİFRE) İŞLEMLERİ - MONGODB ENTEGRASYONLU
     // ============================================================
-    socket.on('registerUser', (data) => {
+    socket.on('registerUser', async (data) => {
         const { username, email, password } = data;
 
-        if (registeredUsers[email]) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresi zaten kayıtlı!' });
-            return;
+        try {
+            // E-posta daha önce kayıt olunmuş mu kontrol et
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) {
+                socket.emit('authResponse', { success: false, message: 'Bu e-posta adresi zaten kayıtlı!' });
+                return;
+            }
+
+            // Yeni kullanıcıyı MongoDB'ye kaydet
+            const newUser = new User({
+                username,
+                email: email.toLowerCase(),
+                password // İleride güvenlik için bcrypt ile şifreleyebilirsiniz
+            });
+
+            await newUser.save();
+            console.log(`✅ Yeni Kayıt Veritabanına Eklendi: ${username} (${email})`);
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'register',
+                username: username,
+                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+            });
+        } catch (error) {
+            console.error('Kayıt hatası:', error);
+            socket.emit('authResponse', { success: false, message: 'Kayıt sırasında bir sunucu hatası oluştu.' });
         }
-
-        registeredUsers[email] = { username, password };
-        console.log(`✅ Yeni Kayıt: ${username} (${email})`);
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'register',
-            username: username,
-            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-        });
     });
 
-    socket.on('loginUser', (data) => {
+    socket.on('loginUser', async (data) => {
         const { email, password } = data;
-        const user = registeredUsers[email];
 
-        if (!user) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı!' });
-            return;
+        try {
+            // Kullanıcıyı veritabanında ara
+            const user = await User.findOne({ email: email.toLowerCase() });
+
+            if (!user) {
+                socket.emit('authResponse', { success: false, message: 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı!' });
+                return;
+            }
+
+            if (user.password !== password) {
+                socket.emit('authResponse', { success: false, message: 'Hatalı şifre girdiniz!' });
+                return;
+            }
+
+            console.log(`🔑 Giriş Başarılı: ${user.username}`);
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'login',
+                username: user.username,
+                message: 'Giriş başarılı! Yönlendiriliyorsunuz...'
+            });
+        } catch (error) {
+            console.error('Giriş hatası:', error);
+            socket.emit('authResponse', { success: false, message: 'Giriş sırasında bir sunucu hatası oluştu.' });
         }
-
-        if (user.password !== password) {
-            socket.emit('authResponse', { success: false, message: 'Hatalı şifre girdiniz!' });
-            return;
-        }
-
-        console.log(`🔑 Giriş Başarılı: ${user.username}`);
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'login',
-            username: user.username,
-            message: 'Giriş başarılı! Yönlendiriliyorsunuz...'
-        });
     });
 
-    socket.on('forgotPassword', (data) => {
+    socket.on('forgotPassword', async (data) => {
         const { email } = data;
 
-        if (!registeredUsers[email]) {
-            socket.emit('authResponse', { success: false, message: 'Bu e-posta adresine ait bir hesap bulunamadı!' });
-            return;
+        try {
+            const user = await User.findOne({ email: email.toLowerCase() });
+
+            if (!user) {
+                socket.emit('authResponse', { success: false, message: 'Bu e-posta adresine ait bir hesap bulunamadı!' });
+                return;
+            }
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'forgot',
+                message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${user.password})`
+            });
+        } catch (error) {
+            console.error('Şifre unuttum hatası:', error);
+            socket.emit('authResponse', { success: false, message: 'İşlem sırasında hata oluştu.' });
         }
-
-        const userPassword = registeredUsers[email].password;
-
-        socket.emit('authResponse', {
-            success: true,
-            action: 'forgot',
-            message: `Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Test Şifreniz: ${userPassword})`
-        });
     });
 
     // ============================================================
-    // ONLINE LOBİ & MAÇ İŞLEMLERİ
+    // ONLINE LOBİ & MAÇ İŞLEMLERİ (Aynen Kalıyor)
     // ============================================================
     socket.on('join-lobby', (playerData) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
