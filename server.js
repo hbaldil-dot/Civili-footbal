@@ -18,7 +18,7 @@ const io = new Server(server, {
 // MONGODB BAĞLANTISI VE MODEL TANIMI
 // ============================================================
 // Buradaki URL'yi MongoDB Atlas'tan aldığınız URL ile değiştirin:
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://<db_username>:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://<hbaldil_db_user>:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
 
 
 mongoose.connect(MONGODB_URI)
