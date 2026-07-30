@@ -2341,3 +2341,55 @@ body { ... }
 .hidden {
     display: none !important;
 }
+/* ============================================================
+   MİSAFİR BUTONU VE AYIRAÇ STİLLERİ
+   ============================================================ */
+.guest-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 15px 0;
+    color: #666;
+    font-size: 11px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #333;
+}
+
+.auth-divider span {
+    padding: 0 10px;
+}
+
+.guest-btn {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.guest-btn:hover {
+    background: rgba(52, 152, 219, 0.15);
+    color: #5dedff;
+    border-color: #5dedff;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+.guest-btn:active {
+    transform: scale(0.97);
+}
