@@ -2887,3 +2887,60 @@ function recordMatchResult(isWin, isDraw) {
     }
     savePlayerData();
 }
+// ============================================================
+// GİRİŞ / KAYIT / ŞİFREMİ UNUTTUM MANTIĞI
+// ============================================================
+
+// Sekmeler Arası Geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
+function switchAuthTab(tab) {
+    const loginForm = document.getElementById('form-login');
+    const registerForm = document.getElementById('form-register');
+    const forgotForm = document.getElementById('form-forgot');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+
+    // Hepsini gizle
+    loginForm.classList.add('hidden');
+    registerForm.classList.add('hidden');
+    forgotForm.classList.add('hidden');
+
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        if (tabLogin) tabLogin.classList.add('active');
+    } else if (tab === 'register') {
+        registerForm.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.add('active');
+    } else if (tab === 'forgot') {
+        forgotForm.classList.remove('hidden');
+    }
+}
+
+// Form Gönderim İşlemleri (Test Mantığı)
+function handleAuthSubmit(event, type) {
+    event.preventDefault(); // Sayfanın yenilenmesini engeller
+
+    if (type === 'login') {
+        const email = document.getElementById('login-email').value;
+        alert(`Giriş Başarılı! Hoş geldin (${email})`);
+        closeAuthModal();
+    } else if (type === 'register') {
+        const username = document.getElementById('reg-username').value;
+        alert(`Kayıt Başarılı! Hoş geldin ${username}`);
+        closeAuthModal();
+    } else if (type === 'forgot') {
+        const email = document.getElementById('forgot-email').value;
+        alert(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi! (Simülasyon)`);
+        switchAuthTab('login');
+    }
+}
+
+// Giriş Ekranını Kapatıp Oyunu Başlatma
+function closeAuthModal() {
+    const modal = document.getElementById('auth-modal-overlay');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
