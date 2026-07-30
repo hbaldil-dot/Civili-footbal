@@ -2944,3 +2944,18 @@ function closeAuthModal() {
         modal.style.display = 'none';
     }
 }
+// Misafir Olarak Oyuna Başlama Fonksiyonu
+function continueAsGuest() {
+    // Rastgele bir Misafir ID oluştur (Örn: Misafir_5832)
+    const guestName = "Misafir_" + Math.floor(1000 + Math.random() * 9000);
+    
+    // Global oyuncu verisini güncelle
+    if (typeof playerProfile !== 'undefined') {
+        playerProfile.username = guestName;
+    }
+
+    console.log(`👤 Oyuna misafir olarak giriş yapıldı: ${guestName}`);
+    
+    // Kayıt Penceresini Kapat
+    closeAuthModal();
+}
