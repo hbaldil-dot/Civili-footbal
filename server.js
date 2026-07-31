@@ -339,23 +339,50 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('accept-invite', (hostId) => {
-        const host = lobbyPlayers.find(p => p.id === hostId);
-        const guest = lobbyPlayers.find(p => p.id === socket.id);
-        if (!host || !guest) return;
-        
-        console.log(`✅ Davet kabul: ${guest.name} -> ${host.name}`);
-        
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
-        io.emit('lobby-update', lobbyPlayers);
-        
-        let roomId;
-        let attempts = 0;
-        do {
-            roomId = `R${String(roomIdCounter++).padStart(3, '0')}`;
-            attempts++;
-        } while (activeRooms[roomId] && attempts < 100);
-        
+socket.on('accept-invite', (hostId) => {
+    const host = lobbyPlayers.find(p => p.id === hostId);
+    const guest = lobbyPlayers.find(p => p.id === socket.id);
+    if (!host || !guest) return;
+
+    console.log(`✅ Davet kabul: ${guest.name} -> ${host.name}`);
+
+    // Lobiden çıkar
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
+    io.emit('lobby-update', lobbyPlayers);
+
+    // Oda ID Oluşturma
+    let roomId;
+    let attempts = 0;
+    do {
+        roomId = `R${String(roomIdCounter++).padStart(3, '0')}`;
+        attempts++;
+    } while (activeRooms[roomId] && attempts < 100);
+
+    // ========================================================
+    // 🔥 İŞTE BURADA İKİ OYUNCUYU ORTAK SOCKET ODAYA ALIYORUZ:
+    // ========================================================
+    const hostSocket = io.sockets.sockets.get(hostId);
+    const guestSocket = socket; // Daveti kabul eden zaten bu 'socket'
+
+    if (hostSocket && guestSocket) {
+        // İkisini de aynı Socket.io odasına sokuyoruz
+        hostSocket.join(roomId);
+        guestSocket.join(roomId);
+
+        // Odayı kayıt altına alıyoruz
+        activeRooms[roomId] = {
+            host: hostId,
+            guest: guestSocket.id,
+            players: [hostId, guestSocket.id]
+        };
+
+        // Her iki oyuncuya da Maçın Başladığını ve Roller Bitiyoruz:
+        // Host (1. Oyuncu)
+        hostSocket.emit('match-start', { roomId: roomId, isHost: true, myTeamNumber: 1 });
+        // Misafir (2. Oyuncu)
+        guestSocket.emit('match-start', { roomId: roomId, isHost: false, myTeamNumber: 2 });
+    }
+});
         activeRooms[roomId] = {
             host: hostId,
             players: [
