@@ -2,10 +2,9 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-// 'public' klasörünü statik olarak dışarıya açar
-app.use(express.static(path.join(__dirname, 'public')));
 const mongoose = require('mongoose');
 
+// 1. ÖNCE express uygulamasını oluştur
 const app = express();
 const server = http.createServer(app);
 
@@ -17,7 +16,7 @@ const io = new Server(server, {
 });
 
 // ============================================================
-// MONGODB BAĞLANTISI - DÜZELTİLMİŞ
+// MONGODB BAĞLANTISI
 // ============================================================
 
 const uri = "mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/civili-futbol?retryWrites=true&w=majority&appName=hbaldil";
@@ -54,6 +53,7 @@ process.on('SIGINT', async () => {
 
 // Bağlantıyı başlat
 connectDB();
+
 // ============================================================
 // KULLANICI ŞEMASI (MODEL)
 // ============================================================
@@ -99,10 +99,11 @@ userSchema.index({ email: 1 });
 const User = mongoose.model('User', userSchema);
 
 // ============================================================
-// EXPRESS AYARLARI
+// EXPRESS AYARLARI (Hatalı satır silindi, doğru yerde bırakıldı)
 // ============================================================
 
-app.use(express.static(__dirname));
+// NOT: app.use satırları app tanımlandıktan SONRA gelmelidir.
+app.use(express.static(__dirname)); // Ana dizindeki (index.html, takimlar vb.) dosyaları sunar
 app.use(express.json()); // JSON body parser
 
 app.get('/', (req, res) => {
@@ -348,7 +349,7 @@ io.on('connection', (socket) => {
     });
 
     // ============================================================
-    // ONLINE LOBBY İŞLEMLERİ (Aynı)
+    // ONLINE LOBBY İŞLEMLERİ
     // ============================================================
     socket.on('join-lobby', (playerData) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
