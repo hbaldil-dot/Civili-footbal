@@ -102,7 +102,14 @@ io.on('connection', (socket) => {
     socket.on('ping', () => {
         socket.emit('pong');
     });
+// server.js - io.on('connection') İÇİNE:
 
+socket.on('send-goal', (data) => {
+    console.log(`⚽ Oda ${data.roomId} içinde gol atıldı!`);
+    
+    // io.to(...) kullanarak ODADAKİ HER İKİ OYUNCUYA DA golü bildiriyoruz
+    io.to(data.roomId).emit('on-goal-scored', data.goalData);
+});
     // ============================================================
     // AUTH İŞLEMLERİ
     // ============================================================
