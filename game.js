@@ -211,7 +211,25 @@ socket.on('ball-sync', (data) => {
         ball.y += (targetY - ball.y) * 0.3;
     }
 });
+// game.js - Topa veya Çiviye Vurulduğu An:
 
+function makeShot(startX, endY, startY, endX) {
+    // 1. Kendi ekranında hareketi başlat
+    // ... (kendi fizik kodlarınız)
+
+    // 2. Eğer online maçtaysak karşı tarafa HABER VER
+    if (isOnlineMatch) {
+        socket.emit('player-shot', {
+            roomId: currentRoomId, // O anki oda ID'si
+            shotData: {
+                startX: startX,
+                startY: startY,
+                endX: endX,
+                endY: endY
+            }
+        });
+    }
+}
 // Top durduğunda kesin konumu sabitle
 socket.on('ball-final-position', (pos) => {
     ball.x = pos.x * canvas.width;
@@ -1757,7 +1775,7 @@ function exitToMenu() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
     if (syncInterval) clearInterval(syncInterval);
     
-    if (isOnlineMatch) {
+    
         isOnlineMatch = false;
         if (socket && currentRoomId) {
             socket.emit('leave-room', currentRoomId);
