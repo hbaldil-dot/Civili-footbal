@@ -972,51 +972,28 @@ function startLocalGame(mode, level) {
 }
 
 // ============================================================
-// ONLINE LOBBY AÇ/KAPA (DÜZELTİLMİŞ)
+// ONLINE LOBBY FONKSİYONLARI (TEMEL)
 // ============================================================
+
 function openOnlineLobby() {
     console.log('🌐 Online lobi açılıyor...');
-    console.log('📡 Socket durumu:', socket ? (socket.connected ? 'Bağlı' : 'Bağlı değil') : 'Tanımlı değil');
     
     if (!socket) { 
-        alert("❌ Sunucuya bağlı değilsiniz! Lütfen sayfayı yenileyin.");
+        alert("❌ Sunucuya bağlı değilsiniz!");
         return; 
     }
     
     if (!socket.connected) {
-        alert("⚠️ Sunucu bağlantısı kurulamadı. Bağlanmaya çalışılıyor...");
-        socket.connect();
-        // 2 saniye bekle
-        setTimeout(() => {
-            if (socket.connected) {
-                openOnlineLobby();
-            } else {
-                alert("❌ Sunucuya bağlanılamadı! Lütfen server'ın çalıştığından emin olun.");
-            }
-        }, 2000);
+        alert("⚠️ Sunucu bağlantısı kurulamadı!");
         return;
     }
     
-    // Oyuncu verilerini al
     const playerData = getPlayerData();
-    console.log('📤 Oyuncu verileri:', playerData);
-    
-    // Lobiye katıl
     socket.emit("join-lobby", playerData);
     
-    // Menüyü gizle, lobiyi göster
-    const menu = document.getElementById('menu');
-    if (menu) menu.style.display = 'none';
-    
-    const lobby = document.getElementById('online-lobby');
-    if (lobby) {
-        lobby.style.display = 'flex';
-        lobby.style.visibility = 'visible';
-        lobby.style.opacity = '1';
-        console.log('✅ Online lobi açıldı');
-    } else {
-        console.error('❌ online-lobby elementi bulunamadı!');
-    }
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'flex';
+    console.log('✅ Online lobi açıldı');
 }
 
 function closeOnlineLobby() {
@@ -1024,22 +1001,106 @@ function closeOnlineLobby() {
     
     if (socket) {
         socket.emit("leave-lobby");
-        console.log('📤 Lobi terk edildi');
     }
     
-    const lobby = document.getElementById('online-lobby');
-    if (lobby) {
-        lobby.style.display = 'none';
-        lobby.style.visibility = 'hidden';
-        lobby.style.opacity = '0';
-    }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-    
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
     console.log('✅ Online lobi kapatıldı');
+}
+
+function getPlayerData() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "Oyuncu";
+    return {
+        name: name || "Oyuncu_" + Math.floor(Math.random() * 100),
+        logo: selectedTeamLogo || 'default.png'
+    };
+}
+
+function setupSocketListeners() {
+    if (!socket) return;
+    
+    console.log('🔄 Socket dinleyiciler kuruluyor...');
+    
+    socket.on("update-lobby-players", (players) => {
+        console.log('📋 Lobi güncellendi, oyuncu sayısı:', players.length);
+        const listContainer = document.getElementById('lobby-list');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = "";
+        let count = 0;
+        
+        players.forEach(p => {
+            if (p.id !== socket.id) {
+                count++;
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                
+                const infoSpan = document.createElement('span');
+                const logoImg = document.createElement('img');
+                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+                logoImg.className = 'lobby-logo';
+                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+                infoSpan.appendChild(logoImg);
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = ` ${p.name}`;
+                infoSpan.appendChild(nameSpan);
+                
+                const btn = document.createElement('button');
+                btn.className = 'status';
+                btn.innerText = 'Davet Et';
+                btn.onclick = () => {
+                    btn.innerText = "Bekleniyor...";
+                    btn.style.background = "#e67e22";
+                    socket.emit("send-invite", p.id);
+                };
+                
+                item.appendChild(infoSpan);
+                item.appendChild(btn);
+                listContainer.appendChild(item);
+            }
+        });
+        
+        if (count === 0) {
+            listContainer.innerHTML = `<div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">🔄 Oyuncu bekleniyor...</div>`;
+        }
+    });
+    
+    socket.on("receive-invite", (data) => {
+        console.log('📨 Davet alındı:', data);
+        if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+            socket.emit("accept-invite", data.fromId);
+        }
+    });
+    
+    socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
+        console.log('⚽ MAÇ BAŞLIYOR! Takım:', team);
+        currentRoomId = roomId;
+        myTeamNumber = team;
+        aiTeamLogo = opponentLogo || 'default.png';
+        
+        loadTeamLogoImage(aiTeamLogo);
+        document.getElementById('online-lobby').style.display = 'none';
+        document.getElementById('top-bar').style.display = 'flex';
+        
+        matchSecondsLeft = MATCH_DURATION;
+        const timeBoard = document.getElementById('time-board');
+        if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+        
+        setTimeout(() => {
+            updateScoreLogos();
+        }, 100);
+        
+        startSetupPhase();
+    });
+    
+    socket.on("opponent-disconnected", () => {
+        alert("⚠️ Rakip oyundan ayrıldı.");
+        exitToMenu();
+    });
+    
+    console.log('✅ Socket dinleyiciler kuruldu');
 }
 
 function startSetupPhase() {
