@@ -186,7 +186,57 @@
 <div id="local-team-select" style="display: none;">
     <div class="local-team-container">
         <!-- Arka Fon Görseli -->
+        <img src="menu/2kisilik/2kisilikarkafon.webp" alt="<!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+<div id="local-team-select" style="display: none;">
+    <div class="local-team-container">
         <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
+        
+        <div class="local-selected-area p1-selected-area">
+            <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
+        </div>
+        <div class="local-selected-area p2-selected-area">
+            <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+        </div>
+
+        <div class="local-team-body">
+            <div class="local-player-section">
+                <!-- Oyuncu 1 etiketi EKLENDİ -->
+                <div class="local-player-name" id="local-p1-name" style="color: #3498db; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 1</div>
+                <div class="team-logo-options" id="local-player1-logos"></div>
+            </div>
+            <div class="local-player-section">
+                <!-- Oyuncu 2 etiketi EKLENDİ -->
+                <div class="local-player-name" id="local-p2-name" style="color: #e74c3c; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 2</div>
+                <div class="team-logo-options" id="local-player2-logos"></div>
+            </div>
+        </div>
+
+        <div class="local-action-buttons">
+            <div class="local-time-selector">
+                <span>MAÇ</span>
+                <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+            </div>
+
+            <div class="local-time-selector">
+                <span>VURUŞ</span>
+                <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
+                <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
+                <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+            </div>
+
+            <div class="local-start-btn" onclick="startLocalGameWithTeams()">
+                <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
+            </div>
+            
+            <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            </div>
+        </div>
+    </div>
+</div>lik Arka Fon" class="local-team-bg">
         
         <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
         <div class="local-selected-area p1-selected-area">
