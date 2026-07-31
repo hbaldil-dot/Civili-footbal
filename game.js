@@ -1524,7 +1524,7 @@ function loadTeamLogos() {
         img.alt = logo.name;
         img.onerror = function() { 
             console.warn(`⚠️ Logo yüklenemedi: ${logo.file}`);
-            this.src = 'takimlar/default.png'; 
+            this.src = 'takimlar/fb.png'; 
         };
         btn.appendChild(img);
         
