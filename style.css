@@ -1206,47 +1206,47 @@ body::before {
     border-radius: 50% !important;
 }
 
-/* Takım Logo Listeleri */
+/* ============================================================
+   2 KİŞİLİK EKRAN MENÜSÜ - DÜZELTİLMİŞ GRID VE GENİŞLİK
+   ============================================================ */
+
+/* Ana Kapsayıcı: Sağ ve sol iki kutuyu yan yana düzgünce oturtur */
 .local-team-body {
     position: absolute !important;
-    top: 55% !important;
+    top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 92% !important;
-    max-width: 100px !important;
+    width: 95% !important;
+    max-width: 360px !important; /* 100px sınırı kaldırıldı, 360px yapıldı */
     z-index: 10 !important;
     display: flex !important;
     flex-direction: row !important;
-    gap: 12px !important;
+    gap: 16px !important;
     justify-content: center !important;
-}
-
-.local-player-section {
-    flex: 1 !important;
-    background: rgba(0, 0, 0, 0.08) !important;
-    border-radius: 14px !important;
-    padding: 10px 8px !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    max-height: 220px !important;
-    overflow-y: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
     align-items: center !important;
 }
 
-/* Oyuncu etiketi KALDIRILDI - ::before pseudo-element kullanma */
-/* .local-player-section::before {
-    content: attr(data-player);
-    ...
-} */
-
+/* Oyuncu Kutuları (Sağda 1 tane, Solda 1 tane) */
 .local-player-section {
-    flex: 1 !important;        /* Bunu değiştir */
-    max-width: 300px !important; /* Veya max-width ekle */
+    flex: 1 !important;
+    width: 48% !important;
+    max-width: 160px !important;
     min-width: 120px !important;
-}
+    background: rgba(0, 0, 0, 0.45) !important;
+    border-radius: 12px !important;
+    padding: 10px 6px !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    max-height: 220px !important;
+    overflow-y: auto !important;
+
+    /* Logoların her kutu içinde düzgün 2'li sütun (Grid) şeklinde dizilmesi için: */
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Her kutu içine tam 2 sütun */
+    gap: 8px !important;
+    justify-items: center !important;
+    align-items: center !important;
 }
 
 /* Logo Butonları */
@@ -1254,12 +1254,12 @@ body::before {
     width: 38px !important;
     height: 38px !important;
     border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     overflow: hidden !important;
-    background: rgba(0, 0, 0, 0.15) !important;
-    padding: 3px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    padding: 2px !important;
     flex-shrink: 0 !important;
 }
 
