@@ -2273,7 +2273,6 @@ function openOnlineLobby() {
     gameMode = 'online';
     const playerData = getPlayerData();
     socket.emit("join-lobby
-
 // ============================================================
 // BAŞLANGIÇ
 // ============================================================
