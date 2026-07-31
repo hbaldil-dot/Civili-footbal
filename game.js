@@ -5,29 +5,78 @@ let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 
 // ============================================================
-// SOCKET BAĞLANTISI
+// SOCKET BAĞLANTISI - TAMAMEN YENİLENDİ
 // ============================================================
-let socket = null;
-if (typeof io !== 'undefined') {
-    try {
-        const serverUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? undefined
-            : window.location.origin;
 
+let socket = null;
+let lobbyPlayers = [];
+let isConnected = false;
+
+function initSocket() {
+    try {
+        // Sunucu URL'sini belirle
+        let serverUrl = window.location.origin;
+        
+        // Eğer localhost veya 127.0.0.1 ise varsayılanı kullan
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            serverUrl = window.location.origin;
+        }
+        
+        console.log(`🔗 Sunucuya bağlanılıyor: ${serverUrl}`);
+        
         socket = io(serverUrl, {
             transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 10000
         });
 
-        socket.on('connect', () => console.log('✅ Sunucuya bağlandı!'));
-        socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
+        // Bağlantı olayları
+        socket.on('connect', () => {
+            console.log('✅ Sunucuya bağlandı! Socket ID:', socket.id);
+            isConnected = true;
+            
+            // Bağlandıktan sonra otomatik olarak lobiye katıl (eğer online modda isek)
+            if (document.getElementById('online-lobby').style.display === 'flex') {
+                console.log('🔄 Lobiye yeniden katılınıyor...');
+                const nameInput = document.getElementById('player-name');
+                const username = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "Misafir_" + Math.floor(Math.random() * 10000);
+                socket.emit("join-lobby", {
+                    name: username,
+                    logo: selectedTeamLogo || 'default.png'
+                });
+            }
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.warn('⚠️ Bağlantı hatası:', error);
+            isConnected = false;
+        });
+        
+        socket.on('disconnect', (reason) => {
+            console.log('❌ Bağlantı koptu:', reason);
+            isConnected = false;
+        });
+        
+        socket.on('reconnect', (attemptNumber) => {
+            console.log(`🔄 Yeniden bağlandı! (${attemptNumber})`);
+            isConnected = true;
+        });
+
     } catch (e) {
         console.error("❌ Socket bağlantı hatası:", e);
+        socket = null;
+        isConnected = false;
     }
 }
 
+// Sayfa yüklendiğinde socket'i başlat
+document.addEventListener('DOMContentLoaded', function() {
+    initSocket();
+    setupSocketListeners();
+});
 // ============================================================
 // SAHA GÖSTER/GİZLE
 // ============================================================
