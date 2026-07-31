@@ -2059,7 +2059,7 @@ function joinOnlineGame() {
         username: currentUsername,
         teamLogo: selectedTeamLogo || "default.png"
     });
-    showLobbyScreen(); 
+    openOnlineLobby(); // BU SATIRI EKLE
 }
 
 // ============================================================
