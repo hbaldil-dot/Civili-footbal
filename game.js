@@ -1,4 +1,33 @@
 // ============================================================
+// AUTH MODAL'INI DEVRE DIŞI BIRAK (TEST)
+// ============================================================
+// Sayfa yüklendiğinde auth modal'ını gizle ve menüyü göster
+document.addEventListener('DOMContentLoaded', function() {
+    // Auth modal'ını gizle
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.add('hidden');
+        authOverlay.style.display = 'none';
+    }
+    
+    // Menüyü göster
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    // Diğer başlangıç işlemleri
+    selectRandomTeam();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    
+    console.log('✅ Sayfa yüklendi, online mod test için hazır!');
+});
+
+// ============================================================
 // SABİT SÜRELER
 // ============================================================
 let MATCH_DURATION = 90;
