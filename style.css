@@ -1185,7 +1185,7 @@ body::before {
 /* YUKARIDA SEÇİLEN LOGOLARIN YERLEŞİMİ (Siyah Yuvarlak Yuvalar) */
 .local-selected-area {
     position: absolute !important;
-    top: 32.5% !important; /* Dairelerin tam merkezine oturtur */
+    top: 27.5% !important; /* Dairelerin tam merkezine oturtur */
     width: 68px !important;
     height: 68px !important;
     z-index: 10 !important;
