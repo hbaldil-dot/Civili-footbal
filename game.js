@@ -1800,7 +1800,6 @@ function exitToMenu() {
     isDraggingBall = false;
     hideField();
     drawFieldLinesOnly();
-}
 
 // ============================================================
 // FİZİK MOTORU
