@@ -1212,13 +1212,7 @@ body::before {
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)) !important;
     border-radius: 50% !important;
 }
-/* TAKIM İSİMLERİNİ GİZLEME */
-.local-player-section h3,
-.local-player-section span,
-.local-player-name,
-.selected-team-name {
-    display: none !important; /* Takım isim yazılarını tamamen kaldırır */
-}
+
 /* TAKIM LİSTESİ KARSAYICISI (Nokta Hatası Düzeltildi) */
 local-team-body {
     position: absolute !important;
