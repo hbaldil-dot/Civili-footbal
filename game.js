@@ -2053,8 +2053,11 @@ function setupSocketListeners() {
 }
 
 // ============================================================
-// ONLINE LOBBY - GÜNCELLENMİŞ
+// ONLINE LOBBY - TAMAMEN YENİLENDİ
 // ============================================================
+
+// Global lobby players
+let lobbyPlayers = [];
 
 function joinOnlineGame() {
     if (!socket || !socket.connected) {
@@ -2062,29 +2065,38 @@ function joinOnlineGame() {
         return;
     }
     
-    // Kullanıcı adını al (profil varsa onu kullan, yoksa misafir)
-    const currentUsername = (playerProfile && playerProfile.username) 
-                            ? playerProfile.username 
-                            : "Misafir_" + Math.floor(Math.random() * 10000);
+    // Kullanıcı adını al
+    const nameInput = document.getElementById('player-name');
+    let username = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : null;
+    
+    if (!username || username === 'Oyuncu') {
+        username = "Misafir_" + Math.floor(Math.random() * 10000);
+        if (nameInput) nameInput.value = username;
+    }
     
     // Takım logosunu al
     const teamLogo = selectedTeamLogo || "default.png";
     
-    console.log(`👤 Online giriş: ${currentUsername}, Logo: ${teamLogo}`);
+    console.log(`👤 Online giriş: ${username}, Logo: ${teamLogo}, Socket ID: ${socket.id}`);
     
-    // Sunucuya oyuncuyu kaydet
+    // ÖNCE sunucuya oyuncuyu kaydet
     socket.emit("registerPlayer", {
-        username: currentUsername,
+        username: username,
         teamLogo: teamLogo
     });
     
-    // Lobby ekranını aç
+    // HEMEN lobiye katıl
+    setTimeout(() => {
+        socket.emit("join-lobby", {
+            name: username,
+            logo: teamLogo
+        });
+        console.log("📨 join-lobby gönderildi");
+    }, 100);
+    
+    // Lobi ekranını aç
     openOnlineLobby();
 }
-
-// ============================================================
-// ONLINE LOBBY AÇ/KAPA (GÜNCELLENMİŞ)
-// ============================================================
 
 function openOnlineLobby() {
     if (!socket) { 
@@ -2092,12 +2104,7 @@ function openOnlineLobby() {
         return; 
     }
     
-    // Eğer zaten lobideyse tekrar kayıt gönderme
-    const alreadyInLobby = lobbyPlayers.some(p => p.id === socket.id);
-    if (!alreadyInLobby) {
-        const playerData = getPlayerData();
-        socket.emit("join-lobby", playerData);
-    }
+    console.log("🏟️ Lobi açılıyor... Socket ID:", socket.id);
     
     document.getElementById('menu').style.display = 'none';
     const lobbyEl = document.getElementById('online-lobby');
@@ -2107,13 +2114,37 @@ function openOnlineLobby() {
         lobbyEl.style.opacity = '1';
     }
     
-    // Lobi listesini hemen güncelle
+    // Lobi listesini hemen güncelle (eğer varsa)
     if (lobbyPlayers.length > 0) {
         updateLobbyList(lobbyPlayers);
+    } else {
+        // Boş mesajı göster
+        const listContainer = document.getElementById('lobby-list');
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:13px;">
+                    🕐 Bekleniyor...<br>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.2);">Diğer oyuncular burada görünecek.</span>
+                </div>
+            `;
+        }
     }
+    
+    // Periyodik olarak lobi durumunu kontrol et (5 saniyede bir)
+    if (window.lobbyPollInterval) clearInterval(window.lobbyPollInterval);
+    window.lobbyPollInterval = setInterval(() => {
+        if (socket && socket.connected) {
+            socket.emit("get-lobby-status");
+        }
+    }, 5000);
 }
 
 function closeOnlineLobby() {
+    if (window.lobbyPollInterval) {
+        clearInterval(window.lobbyPollInterval);
+        window.lobbyPollInterval = null;
+    }
+    
     if (socket) {
         socket.emit("leave-lobby");
     }
@@ -2124,20 +2155,38 @@ function closeOnlineLobby() {
         lobbyEl.style.opacity = '0';
     }
     document.getElementById('menu').style.display = 'block';
+    lobbyPlayers = [];
 }
-
-// ============================================================
-// LOBBY LİSTESİNİ GÜNCELLE (YENİ FONKSİYON)
-// ============================================================
 
 function updateLobbyList(players) {
     const listContainer = document.getElementById('lobby-list');
-    if (!listContainer) return;
+    if (!listContainer) {
+        console.warn("⚠️ lobby-list bulunamadı!");
+        return;
+    }
+    
+    console.log(`📋 Lobi listesi güncelleniyor: ${players ? players.length : 0} oyuncu`);
+    console.log("Oyuncular:", players);
     
     listContainer.innerHTML = "";
     
-    // Kendi socket'imizi filtrele
-    const otherPlayers = players.filter(p => p.id !== socket.id);
+    if (!players || players.length === 0) {
+        listContainer.innerHTML = `
+            <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:13px;">
+                🕐 Havuzda bekleyen oyuncu yok.<br>
+                <span style="font-size:11px;color:rgba(255,255,255,0.2);">Bir oyuncu gelince burada görünecek.</span>
+            </div>
+        `;
+        return;
+    }
+    
+    // Kendi socket'imizi bulalım
+    const mySocketId = socket ? socket.id : null;
+    
+    // Kendi oyuncumuzu filtrele (kendimizi gösterme)
+    const otherPlayers = players.filter(p => p.id !== mySocketId);
+    
+    console.log(`👥 Diğer oyuncular: ${otherPlayers.length}`);
     
     if (otherPlayers.length === 0) {
         listContainer.innerHTML = `
@@ -2152,35 +2201,74 @@ function updateLobbyList(players) {
     otherPlayers.forEach(p => {
         const item = document.createElement('div');
         item.className = 'player-item';
+        item.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.8);
+        `;
         
         // Sol: Logo + İsim
         const infoSpan = document.createElement('span');
+        infoSpan.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        `;
+        
         const logoImg = document.createElement('img');
         logoImg.src = `takimlar/${p.logo || 'default.png'}`;
         logoImg.className = 'lobby-logo';
+        logoImg.style.cssText = `
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.05);
+        `;
         logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
         infoSpan.appendChild(logoImg);
         
         const nameSpan = document.createElement('span');
         nameSpan.textContent = ` ${p.name}`;
+        nameSpan.style.color = 'rgba(255,255,255,0.8)';
         infoSpan.appendChild(nameSpan);
         
         // Sağ: Davet Et Butonu
         const btn = document.createElement('button');
         btn.className = 'status';
+        btn.style.cssText = `
+            background: rgba(46,204,113,0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46,204,113,0.15);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            letter-spacing: 1px;
+        `;
         btn.innerText = '📨 Davet Et';
         btn.onclick = () => {
             btn.innerText = "⏳ Bekleniyor...";
             btn.style.background = "#e67e22";
             btn.style.color = "#fff";
+            btn.style.borderColor = "#e67e22";
             btn.disabled = true;
+            
+            console.log(`📨 Davet gönderiliyor: ${p.id}`);
             socket.emit("send-invite", p.id);
             
             // 5 saniye sonra butonu eski haline döndür
             setTimeout(() => {
                 btn.innerText = '📨 Davet Et';
-                btn.style.background = "";
-                btn.style.color = "";
+                btn.style.background = "rgba(46,204,113,0.15)";
+                btn.style.color = "#2ecc71";
+                btn.style.borderColor = "rgba(46,204,113,0.15)";
                 btn.disabled = false;
             }, 5000);
         };
@@ -2196,31 +2284,49 @@ function updateLobbyList(players) {
 // ============================================================
 
 function setupSocketListeners() {
-    if (!socket) return;
+    if (!socket) {
+        console.warn("⚠️ Socket tanımlı değil!");
+        return;
+    }
     
     // Lobi güncelleme
     socket.on("update-lobby-players", (players) => {
-        console.log(`📋 Lobi güncellendi: ${players.length} oyuncu`);
-        // lobbyPlayers'ı güncelle (global değişken)
-        window.lobbyPlayers = players || [];
-        updateLobbyList(players);
+        console.log(`📋 Lobi güncellendi: ${players ? players.length : 0} oyuncu`);
+        lobbyPlayers = players || [];
+        updateLobbyList(lobbyPlayers);
+    });
+    
+    // Lobi durumu sorgulama cevabı
+    socket.on("lobby-status", (players) => {
+        console.log(`📊 Lobi durumu: ${players ? players.length : 0} oyuncu`);
+        lobbyPlayers = players || [];
+        updateLobbyList(lobbyPlayers);
     });
     
     // Davet alma
     socket.on("receive-invite", (data) => {
+        console.log(`📨 Davet alındı: ${data.fromName}`);
         if (confirm(`📨 ${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+            console.log(`✅ Davet kabul edildi: ${data.fromId}`);
             socket.emit("accept-invite", data.fromId);
         }
     });
     
     // Maç başlatma
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
+        console.log(`🎮 Online maç başlıyor! Takım: ${team}`);
         currentRoomId = roomId;
         myTeamNumber = team;
         aiTeamLogo = opponentLogo || 'default.png';
-        console.log(`🎮 Online maç başlıyor! Takım: ${team}, Rakip logosu: ${aiTeamLogo}`);
         
         loadTeamLogoImage(aiTeamLogo);
+        
+        // Lobi poll'u durdur
+        if (window.lobbyPollInterval) {
+            clearInterval(window.lobbyPollInterval);
+            window.lobbyPollInterval = null;
+        }
+        
         document.getElementById('online-lobby').style.display = 'none';
         document.getElementById('top-bar').style.display = 'flex';
         
@@ -2260,6 +2366,7 @@ function setupSocketListeners() {
     
     // Maç başlatma (her iki oyuncu hazır)
     socket.on("match-go", ({ pins: finalPins }) => {
+        console.log("🚀 Maç başlıyor!");
         if (setupTimerInterval) clearInterval(setupTimerInterval);
         
         pins = [
@@ -2312,7 +2419,6 @@ function setupSocketListeners() {
         }
     });
 }
-
 // ============================================================
 // GLOBAL lobbyPlayers DEĞİŞKENİ
 // ============================================================
