@@ -119,7 +119,11 @@ let activeRooms = {};
 // ============================================================
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
+// server.js içine şu olayı ekle:
 
+socket.on("get-lobby-status", () => {
+    socket.emit("lobby-status", lobbyPlayers);
+});
     // ============================================================
     // KAYIT İŞLEMİ
     // ============================================================
