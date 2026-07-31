@@ -1507,13 +1507,21 @@ function closeLocalTeamSelect() {
 function loadLocalTeamLogos() {
     const container1 = document.getElementById('local-player1-logos');
     const container2 = document.getElementById('local-player2-logos');
+    
     if (!container1 || !container2) {
         console.warn('⚠️ Logo containerları bulunamadı!');
         return;
     }
+    
+    // Container'ların üst kısmına oyuncu etiketi EKLEME - KALDIRILDI
+    // container1.parentElement.setAttribute('data-player', '👤 Oyuncu 1');  // ← BUNU KALDIR
+    // container2.parentElement.setAttribute('data-player', '👤 Oyuncu 2');  // ← BUNU KALDIR
+    
     container1.innerHTML = '';
     container2.innerHTML = '';
+    
     teamLogos.forEach((logo) => {
+        // Oyuncu 1 için buton
         const btn1 = document.createElement('button');
         btn1.className = 'team-logo-btn';
         btn1.title = logo.name;
@@ -1525,6 +1533,8 @@ function loadLocalTeamLogos() {
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
+        
+        // Oyuncu 2 için buton
         const btn2 = document.createElement('button');
         btn2.className = 'team-logo-btn';
         btn2.title = logo.name;
@@ -1538,9 +1548,9 @@ function loadLocalTeamLogos() {
         container2.appendChild(btn2);
     });
 }
-
 function selectLocalTeam(player, logoFile) {
     console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
+    
     if (player === 1) {
         if (logoFile === localPlayer2Logo && localP2Selected) {
             alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
@@ -1548,18 +1558,31 @@ function selectLocalTeam(player, logoFile) {
         }
         localPlayer1Logo = logoFile;
         localP1Selected = true;
+        
+        // Butonları işaretle
         document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p1');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p1');
             }
         });
+        
+        // Shield'ı güncelle
         const shield = document.getElementById('local-p1-shield-img');
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
+        
+        // İsmi güncelleme - KALDIRILDI
+        // const nameEl = document.getElementById('local-p1-name');
+        // if (nameEl) {
+        //     const logo = teamLogos.find(l => l.file === logoFile);
+        //     nameEl.textContent = logo ? logo.name.replace('⚽ ', '') : 'Seçildi';
+        //     nameEl.style.color = '#3498db';
+        // }
+        
     } else if (player === 2) {
         if (logoFile === localPlayer1Logo && localP1Selected) {
             alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
@@ -1567,63 +1590,87 @@ function selectLocalTeam(player, logoFile) {
         }
         localPlayer2Logo = logoFile;
         localP2Selected = true;
+        
         document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p2');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p2');
             }
         });
+        
         const shield = document.getElementById('local-p2-shield-img');
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
+        
+        // İsmi güncelleme - KALDIRILDI
+        // const nameEl = document.getElementById('local-p2-name');
+        // if (nameEl) {
+        //     const logo = teamLogos.find(l => l.file === logoFile);
+        //     nameEl.textContent = logo ? logo.name.replace('⚽ ', '') : 'Seçildi';
+        //     nameEl.style.color = '#e74c3c';
+        // }
     }
 }
 
 function startLocalGameWithTeams() {
     console.log('🚀 2 Kişilik maç başlatılıyor...');
+    
+    // ---- YENİ KONTROL: Varsayılan süreleri ata (eğer seçilmediyse) ----
     if (!MATCH_DURATION) MATCH_DURATION = 90;
     if (!SHOT_DURATION) SHOT_DURATION = 5;
+    
     if (!localP1Selected || !localP2Selected) {
         alert('⚠️ Lütfen her iki oyuncu için de takım seçin!');
         return;
     }
+    
     if (localPlayer1Logo === localPlayer2Logo) {
         alert('⚠️ İki oyuncu aynı takımı seçemez!');
         return;
     }
+    
     closeLocalTeamSelect();
+    
     selectedTeamLogo = localPlayer1Logo;
     aiTeamLogo = localPlayer2Logo;
+    
     loadTeamLogoImage(selectedTeamLogo);
     loadTeamLogoImage(aiTeamLogo);
+    
     gameMode = 'local';
     document.getElementById('menu').style.display = 'none';
     document.getElementById('top-bar').style.display = 'flex';
     matchSecondsLeft = MATCH_DURATION;
     const timeBoard = document.getElementById('time-board');
     if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
     showField();
+    
     setTimeout(() => {
         updateScoreLogos();
     }, 100);
+    
     turn = 1;
     updateHUDTurn();
+    
     startSetupPhase();
 }
-
 function selectDifficulty(level) {
     console.log('🎯 Zorluk seçildi:', level);
+    
     const menu = document.getElementById('ai-level-menu');
     if (menu) {
         menu.style.display = 'none';
     }
+    
     const mainMenu = document.getElementById('menu');
     if (mainMenu) {
         mainMenu.style.display = 'block';
     }
+    
     startLocalGame('ai', level);
 }
 
