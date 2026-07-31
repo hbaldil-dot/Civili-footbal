@@ -14,6 +14,7 @@ let isHost = false;
 let onlinePlayers = [];
 let isOnlineMatch = false;
 let isSocketReady = false;
+let opponentPinsData = null; // Rakip pinleri saklamak için
 
 function initSocket() {
     if (typeof io === 'undefined') {
@@ -80,6 +81,7 @@ function initSocket() {
 
     // Lobby güncellemeleri
     socket.on('lobby-update', (players) => {
+        console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
         onlinePlayers = players;
         updateLobbyUI();
     });
@@ -110,6 +112,7 @@ function initSocket() {
 
     // Oda güncellemesi
     socket.on('room-update', (data) => {
+        console.log('🔄 Oda güncellendi:', data);
         const countEl = document.getElementById('room-player-count');
         if (countEl) countEl.textContent = data.playerCount + '/2';
         
@@ -135,6 +138,7 @@ function initSocket() {
 
     // Rakip hazır oldu
     socket.on('opponent-ready', () => {
+        console.log('📢 Rakip hazır!');
         const statusEl = document.getElementById('opponent-status');
         if (statusEl) {
             statusEl.textContent = '✅ Hazır';
@@ -146,14 +150,19 @@ function initSocket() {
     // ONLINE SENKRONİZASYON OLAYLARI
     // ============================================================
 
-    // Karşı taraftan gelen pin hareketi (SORUN 1)
+    // SORUN 1: Karşı taraftan gelen pin hareketi
     socket.on('pin-move-sync', (data) => {
-        if (currentPhase !== 'setup') return;
+        console.log('📥 Pin hareketi alındı:', data);
+        if (currentPhase !== 'setup') {
+            console.log('⚠️ Setup aşamasında değil, pin hareketi uygulanmadı');
+            return;
+        }
         const { team, index, x, y } = data;
         let count = 0;
         for (let p of pins) {
             if (!p.isPost && p.team === team) {
                 if (count === index) {
+                    console.log('✅ Pin güncellendi:', { team, index, x, y });
                     p.x = x;
                     p.y = y;
                     break;
@@ -163,45 +172,52 @@ function initSocket() {
         }
     });
 
-    // Maç başlangıcı (SORUN 2 - güncellenmiş)
+    // SORUN 2: Maç başlangıcı - rakip pinlerini al
     socket.on('match-start', (data) => {
+        console.log('🎮 Maç başlangıç verileri:', data);
+        console.log('📊 Takım:', data.team);
+        console.log('📊 Rakip pinleri:', data.opponentPins);
+        console.log('📊 Tüm pinler:', data.allPins);
+        
         currentRoomId = data.roomId;
         myTeamNumber = data.team;
         aiTeamLogo = data.opponentLogo || 'default.png';
         isOnlineMatch = true;
         
-        console.log('🎮 Maç başlıyor, takım:', myTeamNumber);
-        console.log('📊 Rakip oyuncular:', data.opponentPins);
-        
         document.getElementById('room-waiting').style.display = 'none';
         
+        // Rakip pinlerini global değişkene kaydet
         if (data.opponentPins && data.opponentPins.length > 0) {
-            window.opponentPins = data.opponentPins;
-        }
-        if (data.allPins && data.allPins.length > 0) {
-            window.allPins = data.allPins;
+            opponentPinsData = data.opponentPins;
+            console.log('✅ Rakip pinleri kaydedildi:', opponentPinsData.length);
+        } else {
+            console.warn('⚠️ Rakip pinleri boş!');
+            opponentPinsData = [];
         }
         
         startOnlineMatch();
     });
 
-    // Karşı taraftan gelen vuruş (SORUN 3)
+    // SORUN 3: Karşı taraftan gelen vuruş
     socket.on('opponent-shot', (shotData) => {
+        console.log('📥 Vuruş alındı:', shotData);
         if (currentPhase === 'playing' && isOnlineMatch) {
-            console.log('📥 Vuruş alındı:', shotData);
+            console.log('✅ Vuruş uygulanıyor');
             cap.vx = (shotData.startX - shotData.endX) * 0.13;
             cap.vy = (shotData.startY - shotData.endY) * 0.13;
             turn = myTeamNumber;
             updateHUDTurn();
             resetShotTimer();
             playSound('kick');
+        } else {
+            console.log('⚠️ Vuruş uygulanamadı, currentPhase:', currentPhase, 'isOnlineMatch:', isOnlineMatch);
         }
     });
 
     // Karşı taraftan gelen gol
     socket.on('opponent-goal', (data) => {
+        console.log('📥 Gol alındı:', data);
         if (currentPhase === 'playing' && isOnlineMatch) {
-            console.log('📥 Gol alındı:', data);
             triggerGoalAnimation();
         }
     });
@@ -434,7 +450,9 @@ function setReady() {
         return;
     }
     console.log('✅ Hazır olduğu bildiriliyor...');
-    socket.emit('player-ready', { roomId: currentRoomId });
+    const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => ({ x: p.x, y: p.y }));
+    console.log('📊 Gönderilen pinler:', myPlacedPins);
+    socket.emit('player-ready', { roomId: currentRoomId, pins: myPlacedPins });
     const btn = document.getElementById('player-ready-btn');
     if (btn) {
         btn.disabled = true;
@@ -446,9 +464,12 @@ function setReady() {
 // ONLINE SENKRONİZASYON FONKSİYONLARI
 // ============================================================
 
-// Pin hareketini karşı tarafa bildir (SORUN 1)
+// SORUN 1: Pin hareketini karşı tarafa bildir
 function broadcastPinMove(pin) {
-    if (!socket || !currentRoomId || gameMode !== 'online') return;
+    if (!socket || !currentRoomId || gameMode !== 'online') {
+        console.log('⚠️ Pin hareketi gönderilemedi:', { socket: !!socket, currentRoomId, gameMode });
+        return;
+    }
     
     let index = -1;
     let count = 0;
@@ -459,6 +480,7 @@ function broadcastPinMove(pin) {
         }
     }
     if (index !== -1) {
+        console.log('📤 Pin hareketi gönderiliyor:', { team: myTeamNumber, index, x: pin.x, y: pin.y });
         socket.emit('sync-pin-move', {
             roomId: currentRoomId,
             team: myTeamNumber,
@@ -466,6 +488,8 @@ function broadcastPinMove(pin) {
             x: pin.x,
             y: pin.y
         });
+    } else {
+        console.log('⚠️ Pin bulunamadı, index:', index);
     }
 }
 
@@ -489,11 +513,13 @@ function startOnlineMatch() {
 }
 
 // ============================================================
-// ONLINE SETUP FONKSİYONU (SORUN 2 - GÜNCELLENMİŞ)
+// SORUN 2: ONLINE SETUP - RAKİP PİNLERİNİ EKLE
 // ============================================================
 
 function startOnlineSetupPhase() {
     console.log('⚙️ Online setup başlıyor...');
+    console.log('📊 Rakip pinleri:', opponentPinsData);
+    
     showField();
     currentPhase = 'setup';
     score = { p1: 0, p2: 0 };
@@ -542,13 +568,33 @@ function startOnlineSetupPhase() {
     ];
     teamPositions.forEach(p => pins.push({ ...p, locked: false }));
     
-    // KARŞI TAKIMI EKLE (SORUN 2 - ÇÖZÜM)
+    // SORUN 2 ÇÖZÜMÜ: KARŞI TAKIMI EKLE
     const opponentTeam = myTeamNumber === 1 ? 2 : 1;
-    if (window.opponentPins && window.opponentPins.length > 0) {
-        console.log('📊 Rakip pinleri ekleniyor:', window.opponentPins.length);
-        window.opponentPins.forEach(p => {
+    if (opponentPinsData && opponentPinsData.length > 0) {
+        console.log('📊 Rakip pinleri ekleniyor:', opponentPinsData.length);
+        opponentPinsData.forEach(p => {
             pins.push({ x: p.x, y: p.y, team: opponentTeam, locked: false });
+            console.log('✅ Rakip pin eklendi:', { x: p.x, y: p.y, team: opponentTeam });
         });
+    } else {
+        console.warn('⚠️ Rakip pinleri boş, varsayılan dizilim kullanılıyor');
+        // Varsayılan rakip dizilimi
+        const defaultOpponentPositions = opponentTeam === 1 ? [
+            { x: width * 0.50, y: height * 0.88, team: 1 }, { x: width * 0.15, y: height * 0.73, team: 1 },
+            { x: width * 0.38, y: height * 0.77, team: 1 }, { x: width * 0.62, y: height * 0.77, team: 1 },
+            { x: width * 0.85, y: height * 0.73, team: 1 }, { x: width * 0.15, y: height * 0.58, team: 1 },
+            { x: width * 0.38, y: height * 0.60, team: 1 }, { x: width * 0.62, y: height * 0.60, team: 1 },
+            { x: width * 0.85, y: height * 0.58, team: 1 }, { x: width * 0.35, y: height * 0.45, team: 1 },
+            { x: width * 0.65, y: height * 0.45, team: 1 }
+        ] : [
+            { x: width * 0.50, y: height * 0.12, team: 2 }, { x: width * 0.85, y: height * 0.27, team: 2 },
+            { x: width * 0.62, y: height * 0.23, team: 2 }, { x: width * 0.38, y: height * 0.23, team: 2 },
+            { x: width * 0.15, y: height * 0.27, team: 2 }, { x: width * 0.85, y: height * 0.42, team: 2 },
+            { x: width * 0.62, y: height * 0.40, team: 2 }, { x: width * 0.38, y: height * 0.40, team: 2 },
+            { x: width * 0.15, y: height * 0.42, team: 2 }, { x: width * 0.65, y: height * 0.55, team: 2 },
+            { x: width * 0.35, y: height * 0.55, team: 2 }
+        ];
+        defaultOpponentPositions.forEach(p => pins.push({ ...p, locked: false }));
     }
     
     cap.x = width / 2;
@@ -556,6 +602,7 @@ function startOnlineSetupPhase() {
     cap.vx = 0;
     cap.vy = 0;
     
+    console.log('📊 Toplam pin sayısı:', pins.length);
     updateScoreLogos();
     startSetupTimer();
     animate();
@@ -1397,6 +1444,7 @@ function confirmFormationsAndStart() {
         btn.innerHTML = "BEKLE";
         btn.disabled = true;
         const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => ({ x: p.x, y: p.y }));
+        console.log('📤 Hazır gönderiliyor, pinler:', myPlacedPins);
         socket.emit('player-ready', { roomId: currentRoomId, pins: myPlacedPins });
     } else {
         pins.forEach(pin => { pin.locked = true; });
@@ -1570,6 +1618,7 @@ function broadcastMyPinMove(pin) {
         }
     }
     if (index !== -1) {
+        console.log('📤 Pin hareketi (broadcastMyPinMove):', { team: myTeamNumber, index, x: pin.x, y: pin.y });
         socket.emit("sync-pin-move", { 
             roomId: currentRoomId, 
             team: myTeamNumber, 
@@ -1601,6 +1650,7 @@ function exitToMenu() {
     
     currentPhase = 'menu';
     gameMode = 'local';
+    opponentPinsData = null;
     document.getElementById('menu').style.display = 'block';
     document.getElementById('top-bar').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'none';
@@ -1636,6 +1686,7 @@ function updatePhysics() {
                 // Online gol senkronizasyonu
                 if (gameMode === 'online' && isOnlineMatch && socket && currentRoomId) {
                     const scoringTeam = 1;
+                    console.log('📤 Gol gönderiliyor (Takım 1)');
                     socket.emit('goal-scored', {
                         roomId: currentRoomId,
                         scoringTeam: scoringTeam
@@ -1666,6 +1717,7 @@ function updatePhysics() {
                 // Online gol senkronizasyonu
                 if (gameMode === 'online' && isOnlineMatch && socket && currentRoomId) {
                     const scoringTeam = 2;
+                    console.log('📤 Gol gönderiliyor (Takım 2)');
                     socket.emit('goal-scored', {
                         roomId: currentRoomId,
                         scoringTeam: scoringTeam
@@ -1786,8 +1838,7 @@ canvas.addEventListener('mousemove', (e) => {
         if (!collision) { 
             selectedPin.x = newX; 
             selectedPin.y = newY; 
-            broadcastMyPinMove(selectedPin);
-            // Online modda pin hareketini karşı tarafa bildir (SORUN 1)
+            // SORUN 1: Pin hareketini broadcast et
             if (gameMode === 'online') {
                 broadcastPinMove(selectedPin);
             }
@@ -1823,15 +1874,14 @@ window.addEventListener('mouseup', () => {
             }
         }
         if (!valid) { selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; }
-        broadcastMyPinMove(selectedPin);
-        // Online modda pin hareketini karşı tarafa bildir (SORUN 1)
+        // SORUN 1: Pin hareketini broadcast et
         if (gameMode === 'online') {
             broadcastPinMove(selectedPin);
         }
         selectedPin = null;
     }
     
-    // Vuruş gönderme (SORUN 3)
+    // SORUN 3: Vuruş gönderme
     if (currentPhase === 'playing' && isDraggingBall && gameMode === 'online' && isOnlineMatch) {
         const startX = dragStart.x;
         const startY = dragStart.y;
@@ -1839,11 +1889,11 @@ window.addEventListener('mouseup', () => {
         const endY = dragCurrent.y;
         
         if (socket && currentRoomId) {
+            console.log('📤 Vuruş gönderiliyor:', { startX, startY, endX, endY });
             socket.emit('player-shot', {
                 roomId: currentRoomId,
                 shotData: { startX, startY, endX, endY }
             });
-            console.log('📤 Vuruş gönderildi:', { startX, startY, endX, endY });
         }
     }
     
