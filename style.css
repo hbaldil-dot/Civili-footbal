@@ -1146,114 +1146,56 @@ body::before {
 }
 
 /* ============================================================
-   2 KİŞİLİK EKRAN MENÜSÜ
+   2 KİŞİLİK MENÜDE TAKIM LOGOLARINI GÖSTERME DÜZELTMESİ
    ============================================================ */
 
-#local-team-select {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100vh !important;
-    min-height: -webkit-fill-available !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #000000 !important;
-    z-index: 999999 !important;
-    display: none;
-    overflow: hidden !important;
-}
-
-#local-team-select[style*="display: flex"],
-#local-team-select[style*="display: block"] {
-    display: block !important;
-}
-
-.local-team-container {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-}
-
-.local-team-bg {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
-    z-index: 1 !important;
-}
-
-.local-selected-area {
-    position: absolute !important;
-    top: 30% !important;
-    width: 60px !important;
-    height: 60px !important;
-    z-index: 10 !important;
+/* Logoların olduğu kutuların görünür ve taşabilir olduğundan emin olalım */
+#local-player1-logos,
+#local-player2-logos {
     display: flex !important;
-    align-items: center !important;
+    flex-wrap: wrap !important;
     justify-content: center !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    width: 100% !important;
+    min-height: 100px !important; /* Logolar için yeterli alan bırak */
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.p1-selected-area { left: 35% !important; transform: translateX(-120%) !important; }
-.p2-selected-area { right: 35% !important; transform: translateX(120%) !important; }
+/* Butonların boyutunu biraz büyütelim ki seçilebilsin */
+#local-player1-logos .team-logo-btn,
+#local-player2-logos .team-logo-btn {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    padding: 2px !important;
+}
 
-.local-selected-area img {
+#local-player1-logos .team-logo-btn img,
+#local-player2-logos .team-logo-btn img {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)) !important;
     border-radius: 50% !important;
 }
 
-.local-team-body {
-    position: absolute !important;
-    top: 55% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 92% !important;
-    max-width: 440px !important;
-    z-index: 10 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 12px !important;
-    justify-content: center !important;
-}
-
-.local-player-section {
-    flex: 1 !important;
-    background: rgba(0, 0, 0, 0.2) !important;
-    border-radius: 14px !important;
-    padding: 10px 8px !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    max-height: 220px !important;
-    overflow-y: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-}
-
-.team-logo-btn.active-p1 {
+/* Seçili olanı vurgula */
+#local-player1-logos .team-logo-btn.active-p1 {
     border-color: #3498db !important;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.25) !important;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.6) !important;
+    transform: scale(1.1) !important;
 }
 
-.team-logo-btn.active-p2 {
+#local-player2-logos .team-logo-btn.active-p2 {
     border-color: #e74c3c !important;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.25) !important;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.6) !important;
+    transform: scale(1.1) !important;
 }
 
 .local-action-buttons {
