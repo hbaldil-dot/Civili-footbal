@@ -409,28 +409,28 @@ function draw() {
             ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
             ctx.fill();
         } else {
-            let logoFile = 'fb.png';
+            let logoFile = 'default.png';
             if (pin.team === 1) {
                 if (gameMode === 'local' && localPlayer1Logo) {
                     logoFile = localPlayer1Logo;
                 } else if (gameMode === 'online' && myTeamNumber === 2) {
-                    logoFile = aiTeamLogo || 'fb.png';
+                    logoFile = aiTeamLogo || 'default.png';
                 } else {
-                    logoFile = selectedTeamLogo || 'fb.png';
+                    logoFile = selectedTeamLogo || 'default.png';
                 }
             } else if (pin.team === 2) {
                 if (gameMode === 'ai') {
-                    logoFile = aiTeamLogo || 'fb.png';
+                    logoFile = aiTeamLogo || 'default.png';
                 } else if (gameMode === 'local' && localPlayer2Logo) {
                     logoFile = localPlayer2Logo;
                 } else if (gameMode === 'online') {
                     if (myTeamNumber === 1) {
-                        logoFile = aiTeamLogo || 'fb.png';
+                        logoFile = aiTeamLogo || 'default.png';
                     } else {
-                        logoFile = selectedTeamLogo || 'fb.png';
+                        logoFile = selectedTeamLogo || 'default.png';
                     }
                 } else {
-                    logoFile = 'fb.png';
+                    logoFile = 'default.png';
                 }
             }
             drawPlayerWithLogo(pin.x, pin.y, logoFile);
@@ -887,7 +887,7 @@ function executeAIShot(target, params) {
         }
     }, params.reactionDelay + extraDelay);
 }
-
+}
 function executeFakeShot(target, params) {
     // Sahte vuruş: Önce farklı bir açıya çek, sonra hedefe vur
     const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
@@ -932,7 +932,6 @@ function executeFakeShot(target, params) {
         }, 200);
     }, params.reactionDelay * 0.6);
 }
-
 // ============================================================
 // OYUN FONKSİYONLARI
 // ============================================================
@@ -1525,7 +1524,7 @@ function loadTeamLogos() {
         img.alt = logo.name;
         img.onerror = function() { 
             console.warn(`⚠️ Logo yüklenemedi: ${logo.file}`);
-            this.src = 'takimlar/fb.png'; 
+            this.src = 'takimlar/default.png'; 
         };
         btn.appendChild(img);
         
@@ -1564,17 +1563,17 @@ function selectTeamLogo(logoFile) {
 function updateTeamLogoDisplay() {
     const displayImg = document.getElementById('selected-team-logo-display');
     if (displayImg) {
-        if (selectedTeamLogo && selectedTeamLogo !== 'fb.png') {
+        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
             displayImg.src = `takimlar/${selectedTeamLogo}`;
             displayImg.style.display = 'block';
             displayImg.style.opacity = '1';
         } else {
-            displayImg.src = 'takimlar/fb.png';
+            displayImg.src = 'takimlar/default.png';
             displayImg.style.display = 'block';
             displayImg.style.opacity = '0.3';
         }
         displayImg.onerror = function() {
-            this.src = 'takimlar/fb.png';
+            this.src = 'takimlar/default.png';
             this.style.opacity = '0.3';
         };
         console.log('🔄 Takım logosu güncellendi:', selectedTeamLogo || 'default');
@@ -1597,11 +1596,11 @@ function updateScoreLogos() {
         if (gameMode === 'local' && localPlayer1Logo) {
             logoP1.src = `takimlar/${localPlayer1Logo}`;
         } else if (gameMode === 'online' && myTeamNumber === 2) {
-            logoP1.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
+            logoP1.src = `takimlar/${aiTeamLogo || 'default.png'}`;
         } else {
-            logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/fb.png';
+            logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/default.png';
         }
-        logoP1.onerror = function() { this.src = 'takimlar/fb.png'; };
+        logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
     }
     
     const logoP2 = document.getElementById('score-logo-p2');
@@ -1609,13 +1608,13 @@ function updateScoreLogos() {
         if (gameMode === 'local' && localPlayer2Logo) {
             logoP2.src = `takimlar/${localPlayer2Logo}`;
         } else if (gameMode === 'online' && myTeamNumber === 1) {
-            logoP2.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
+            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
         } else if (gameMode === 'ai') {
-            logoP2.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
+            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
         } else {
-            logoP2.src = 'takimlar/fb.png';
+            logoP2.src = 'takimlar/default.png';
         }
-        logoP2.onerror = function() { this.src = 'takimlar/fb.png'; };
+        logoP2.onerror = function() { this.src = 'takimlar/default.png'; };
     }
 }
 
@@ -1630,10 +1629,12 @@ function loadTeamLogoImage(logoFile) {
             loadedLogos[logoFile] = img;
             resolve(img);
         };
-        // DOĞRU: onerror tetiklendiğinde döngüyü engeller
         img.onerror = function() {
-            this.onerror = null; // Tekrar tekrar hata tetiklenmesini önler
-            this.src = '/takimlar/fb.png'; // veya boş bir data-URI
+            if (logoFile !== 'default.png') {
+                loadTeamLogoImage('default.png').then(resolve);
+            } else {
+                resolve(null);
+            }
         };
         img.src = `takimlar/${logoFile}`;
     });
@@ -1690,7 +1691,7 @@ function loadLocalTeamLogos() {
         const img1 = document.createElement('img');
         img1.src = `takimlar/${logo.file}`;
         img1.alt = logo.name;
-        img1.onerror = function() { this.src = 'takimlar/fb.png'; };
+        img1.onerror = function() { this.src = 'takimlar/default.png'; };
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
@@ -1703,7 +1704,7 @@ function loadLocalTeamLogos() {
         const img2 = document.createElement('img');
         img2.src = `takimlar/${logo.file}`;
         img2.alt = logo.name;
-        img2.onerror = function() { this.src = 'takimlar/fb.png'; };
+        img2.onerror = function() { this.src = 'takimlar/default.png'; };
         btn2.appendChild(img2);
         btn2.onclick = function() { selectLocalTeam(2, logo.file); };
         container2.appendChild(btn2);
@@ -1733,7 +1734,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         // İsmi güncelleme - KALDIRILDI
@@ -1763,7 +1764,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         // İsmi güncelleme - KALDIRILDI
@@ -2086,7 +2087,7 @@ function getPlayerData() {
     const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
     return {
         name: name,
-        logo: selectedTeamLogo || 'fb.png'
+        logo: selectedTeamLogo || 'default.png'
     };
 }
 
@@ -2106,9 +2107,9 @@ function setupSocketListeners() {
                 
                 const infoSpan = document.createElement('span');
                 const logoImg = document.createElement('img');
-                logoImg.src = `takimlar/${p.logo || 'fb.png'}`;
+                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
                 logoImg.className = 'lobby-logo';
-                logoImg.onerror = function() { this.src = 'takimlar/fb.png'; };
+                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
                 infoSpan.appendChild(logoImg);
                 
                 const nameSpan = document.createElement('span');
@@ -2142,7 +2143,7 @@ function setupSocketListeners() {
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
-        aiTeamLogo = opponentLogo || 'fb.png';
+        aiTeamLogo = opponentLogo || 'default.png';
         console.log('🟢 Online rakip logosu:', aiTeamLogo);
         
         loadTeamLogoImage(aiTeamLogo);
@@ -2230,7 +2231,7 @@ function joinOnlineGame() {
     // Sunucuya profil bilgisiyle bağlan
     socket.emit("registerPlayer", {
         username: currentUsername,
-        teamLogo: selectedTeamLogo || "fb.png"
+        teamLogo: selectedTeamLogo || "default.png"
     });
 
     // Lobi / Eşleşme ekranını aç
@@ -2326,12 +2327,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// playSound - iOS Safari ve Genel Düzeltme
+// playSound - iOS Safari Düzeltmesi
 // ============================================================
 function playSound(type) {
     if (!isSoundOn) return;
     
-    if (audioCtx && audioCtx.state === 'suspended') {
+    if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
     
@@ -2340,6 +2341,7 @@ function playSound(type) {
             if (audioElements.hit) {
                 audioElements.hit.currentTime = 0;
                 audioElements.hit.play().catch(() => {
+                    // Hata durumunda yeni ses oluştur
                     const newHit = new Audio('sesler/Carpma.mp3');
                     newHit.play().catch(e => console.log('Hit ses hatası:', e));
                 });
@@ -2352,56 +2354,72 @@ function playSound(type) {
     
     if (type === 'goal') {
         try {
-            const goalAudio = new Audio('sesler/gol.mp3');
-            goalAudio.preload = 'auto';
-            goalAudio.volume = 1.0;
+            // iOS Safari'de her seferinde yeni Audio nesnesi oluştur (en güvenilir yöntem)
+            const goalSound = new Audio('sesler/gol.mp3');
+            goalSound.preload = 'auto';
+            goalSound.volume = 1.0;
             
-            const playPromise = goalAudio.play();
+            // iOS'ta sesi çalıştır
+            const playPromise = goalSound.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
+                    // Başarısız olursa AudioContext ile sentezle
                     try {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
-                        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-                        osc.start();
-                        osc.stop(audioCtx.currentTime + 0.8);
-                    } catch (err) {
-                        console.log('AudioContext sentez hatası:', err);
-                    }
+                        const now = audioCtx.currentTime;
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(200, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                        osc.start(now);
+                        osc.stop(now + 0.45);
+                    } catch (e) {}
                 });
             }
-        } catch (e) {
-            console.log('Goal ses hatası:', e);
+        } catch (error) {
+            // Sentezleyici ile yedek ses
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } catch (e) {}
         }
         return;
     }
-
+    
     if (type === 'kick') {
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
-        } catch (e) {
-            console.log('Kick ses hatası:', e);
+            const now = audioCtx.currentTime;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (error) {
+            console.error('❌ Vuruş sesi hatası:', error);
         }
     }
 }
 
-// Buton sesleri için yardımcı fonksiyon
-function playButtonSound() {
-    playSound('hit');
-}
 // ============================================================
 // 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
 // ============================================================
@@ -2458,7 +2476,7 @@ function loadLocalTeamLogos() {
         const img1 = document.createElement('img');
         img1.src = `takimlar/${logo.file}`;
         img1.alt = logo.name;
-        img1.onerror = function() { this.src = 'takimlar/fb.png'; };
+        img1.onerror = function() { this.src = 'takimlar/default.png'; };
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
@@ -2471,7 +2489,7 @@ function loadLocalTeamLogos() {
         const img2 = document.createElement('img');
         img2.src = `takimlar/${logo.file}`;
         img2.alt = logo.name;
-        img2.onerror = function() { this.src = 'takimlar/fb.png'; };
+        img2.onerror = function() { this.src = 'takimlar/default.png'; };
         btn2.appendChild(img2);
         btn2.onclick = function() { selectLocalTeam(2, logo.file); };
         container2.appendChild(btn2);
@@ -2502,7 +2520,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         // İsmi güncelle
@@ -2532,7 +2550,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
+            shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         const nameEl = document.getElementById('local-p2-name');
@@ -2571,7 +2589,7 @@ function openTeamSelectPopup() {
 
     // Mevcut seçili takımı armaya yerleştir
     if (shieldImg) {
-        if (selectedTeamLogo && selectedTeamLogo !== 'fb.png') {
+        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
             console.log('🛡️ Seçili takım arması gösteriliyor:', selectedTeamLogo);
@@ -2611,7 +2629,7 @@ function openTeamSelectPopup() {
             img.alt = team.name || team.file;
             img.onerror = function() {
                 console.warn('⚠️ Logo yüklenemedi:', team.file);
-                this.src = 'takimlar/fb.png';
+                this.src = 'takimlar/default.png';
             };
             btn.appendChild(img);
             
@@ -2635,7 +2653,7 @@ function openTeamSelectPopup() {
                     shieldImg.src = 'takimlar/' + team.file;
                     shieldImg.style.display = 'block';
                     shieldImg.onerror = function() {
-                        this.src = 'takimlar/fb.png';
+                        this.src = 'takimlar/default.png';
                     };
                 }
                 
@@ -2743,7 +2761,7 @@ function setLocalShotDuration(seconds) {
 // Varsayılan Oyuncu Verisi Yapısı
 let playerProfile = {
     username: "Oyuncu_" + Math.floor(Math.random() * 1000),
-    selectedTeamLogo: "fb.png",
+    selectedTeamLogo: "default.png",
     stats: {
         totalMatches: 0,
         wins: 0,
@@ -3120,101 +3138,68 @@ if (socket) {
                 }
             }
         }
-// ============================================================
-// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ) - DÜZELTİLDİ
-// ============================================================
+    };
+}
+// ... dosyanızın mevcut son satırları ...
 
-// Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
+// --- AUTH TAB & FORM YÖNETİMİ ---
 function switchAuthTab(tab) {
-    const formLogin = document.getElementById('form-login');
-    const formRegister = document.getElementById('form-register');
-    const formForgot = document.getElementById('form-forgot');
-    const tabLogin = document.getElementById('tab-login');
-    const tabRegister = document.getElementById('tab-register');
-
-    if (!formLogin || !formRegister || !formForgot) return;
-
-    formLogin.classList.add('hidden');
-    formRegister.classList.add('hidden');
-    formForgot.classList.add('hidden');
-    
-    if (tabLogin) tabLogin.classList.remove('active');
-    if (tabRegister) tabRegister.classList.remove('active');
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.add('hidden'));
 
     if (tab === 'login') {
-        formLogin.classList.remove('hidden');
-        if (tabLogin) tabLogin.classList.add('active');
+        document.getElementById('tab-login').classList.add('active');
+        document.getElementById('form-login').classList.remove('hidden');
     } else if (tab === 'register') {
-        formRegister.classList.remove('hidden');
-        if (tabRegister) tabRegister.classList.add('active');
+        document.getElementById('tab-register').classList.add('active');
+        document.getElementById('form-register').classList.remove('hidden');
     } else if (tab === 'forgot') {
-        formForgot.classList.remove('hidden');
+        document.getElementById('form-forgot').classList.remove('hidden');
     }
 }
 
-// Form Gönderimleri (Login, Register, Forgot)
 function handleAuthSubmit(event, action) {
     event.preventDefault();
-
     if (!socket) {
-        alert("Sunucu bağlantısı kurulamadı. Lütfen tekrar deneyin.");
+        alert("Sunucu bağlantısı kurulamadı!");
         return;
     }
 
-    if (action === 'login') {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value.trim();
-        socket.emit('loginUser', { email, password });
-    } else if (action === 'register') {
-        const username = document.getElementById('reg-username').value.trim();
-        const email = document.getElementById('reg-email').value.trim();
-        const password = document.getElementById('reg-password').value.trim();
+    if (action === 'register') {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
         socket.emit('registerUser', { username, email, password });
+    } else if (action === 'login') {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        socket.emit('loginUser', { email, password });
     } else if (action === 'forgot') {
-        const email = document.getElementById('forgot-email').value.trim();
+        const email = document.getElementById('forgot-email').value;
         socket.emit('forgotPassword', { email });
     }
 }
 
-// Misafir Olarak Devam Et
 function continueAsGuest() {
-    const authOverlay = document.getElementById('auth-modal-overlay');
-    if (authOverlay) {
-        authOverlay.classList.add('hidden');
-    }
-    
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-    
-    console.log("🎮 Misafir olarak giriş yapıldı.");
+    document.getElementById('auth-modal-overlay').classList.add('hidden');
 }
 
-// Sunucudan (Socket.io) Gelen Auth Yanıtlarını Dinleme
+// --- SUNUCUDAN GELEN YANITLARI DİNLEME ---
 if (socket) {
     socket.on('authResponse', (data) => {
         alert(data.message);
-
         if (data.success) {
-            if (data.username) {
-                const playerNameInput = document.getElementById('player-name');
-                if (playerNameInput) playerNameInput.value = data.username;
-            }
-
-            if (data.action === 'login' || data.action === 'register') {
-                const authOverlay = document.getElementById('auth-modal-overlay');
-                if (authOverlay) {
-                    authOverlay.classList.add('hidden');
+            if (data.action === 'register' || data.action === 'login') {
+                if (data.username) {
+                    const nameInput = document.getElementById('player-name');
+                    if (nameInput) nameInput.value = data.username;
                 }
-                const menu = document.getElementById('menu');
-                if (menu) {
-                    menu.style.display = 'block';
-                }
+                document.getElementById('auth-modal-overlay').classList.add('hidden');
             } else if (data.action === 'forgot') {
                 switchAuthTab('login');
             }
         }
     });
 }
-              
