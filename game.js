@@ -3195,7 +3195,7 @@ function continueAsGuest() {
 if (socket) {
     socket.on('authResponse', (data) => {
         alert(data.message);
-        
+
         if (data.success) {
             if (data.username) {
                 const playerNameInput = document.getElementById('player-name');
@@ -3217,5 +3217,4 @@ if (socket) {
         }
     });
 }
-
               
