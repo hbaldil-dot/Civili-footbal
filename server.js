@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+// 'public' klasörünü statik olarak dışarıya açar
+app.use(express.static(path.join(__dirname, 'public')));
 const mongoose = require('mongoose');
 
 const app = express();
