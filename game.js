@@ -3139,9 +3139,10 @@ if (socket) {
         }
     }
 // ============================================================
-// AUTH & MİSAFİR GİRİŞİ MANTIĞI (DÜZELTİLMİŞ TEK BLOK)
+// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ)
 // ============================================================
 
+// Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
 function switchAuthTab(tab) {
     const formLogin = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
@@ -3151,12 +3152,14 @@ function switchAuthTab(tab) {
 
     if (!formLogin || !formRegister || !formForgot) return;
 
+    // Tüm formları gizle ve tablardan active sınıfını kaldır
     formLogin.classList.add('hidden');
     formRegister.classList.add('hidden');
     formForgot.classList.add('hidden');
     if (tabLogin) tabLogin.classList.remove('active');
     if (tabRegister) tabRegister.classList.remove('active');
 
+    // Seçilen sekmeyi göster ve active yap
     if (tab === 'login') {
         formLogin.classList.remove('hidden');
         if (tabLogin) tabLogin.classList.add('active');
@@ -3168,6 +3171,7 @@ function switchAuthTab(tab) {
     }
 }
 
+// Form Gönderimleri (Login, Register, Forgot)
 function handleAuthSubmit(event, action) {
     event.preventDefault();
 
@@ -3191,13 +3195,14 @@ function handleAuthSubmit(event, action) {
     }
 }
 
+// Misafir Tıklaması
 function continueAsGuest() {
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
         authOverlay.classList.add('hidden'); // Giriş ekranını tamamen kapat
     }
     
-    // Ana menüyü göster
+    // Ana menünün görünür ve tıklanabilir olduğundan emin olun
     const menu = document.getElementById('menu');
     if (menu) {
         menu.style.display = 'block';
