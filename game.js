@@ -2674,3 +2674,163 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
+// ============================================================
+// AUTH MODAL KONTROLÜ (EKSİK OLANLAR)
+// ============================================================
+
+function showAuthModal() {
+    const overlay = document.getElementById('auth-modal-overlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+    }
+}
+
+function hideAuthModal() {
+    const overlay = document.getElementById('auth-modal-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+    }
+}
+
+// ============================================================
+// OTURUM YÖNETİMİ
+// ============================================================
+
+function saveSession(userData) {
+    localStorage.setItem('fingerSoccerSession', JSON.stringify({
+        username: userData.username,
+        email: userData.email,
+        loggedIn: true,
+        timestamp: Date.now()
+    }));
+    if (userData.username) {
+        const nameInput = document.getElementById('player-name');
+        if (nameInput) nameInput.value = userData.username;
+    }
+}
+
+function clearSession() {
+    localStorage.removeItem('fingerSoccerSession');
+}
+
+function checkSession() {
+    const session = localStorage.getItem('fingerSoccerSession');
+    if (session) {
+        try {
+            const data = JSON.parse(session);
+            // 24 saat geçerli
+            if (Date.now() - data.timestamp < 86400000) {
+                return data;
+            } else {
+                clearSession();
+                return null;
+            }
+        } catch {
+            clearSession();
+            return null;
+        }
+    }
+    return null;
+}
+
+// ============================================================
+// AUTH RESPONSE DİNLEYİCİSİNİ GÜNCELLE
+// ============================================================
+
+if (socket) {
+    socket.on('authResponse', (data) => {
+        alert(data.message);
+        if (data.success) {
+            if (data.action === 'login' || data.action === 'register') {
+                // Oturumu kaydet
+                saveSession({
+                    username: data.username,
+                    email: data.email || ''
+                });
+                
+                hideAuthModal();
+                document.getElementById('menu').style.display = 'block';
+                
+                // Profili güncelle
+                if (data.username) {
+                    playerProfile.username = data.username;
+                    savePlayerData();
+                }
+            } else if (data.action === 'forgot') {
+                switchAuthTab('login');
+            }
+        }
+    });
+}
+
+// ============================================================
+// ÇIKIŞ YAP FONKSİYONU
+// ============================================================
+
+function logoutUser() {
+    if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+        clearSession();
+        hideAuthModal();
+        document.getElementById('menu').style.display = 'none';
+        showAuthModal();
+        // Lobi temizle
+        if (socket) socket.emit('leave-lobby');
+        if (currentPhase !== 'menu') exitToMenu();
+    }
+}
+
+// ============================================================
+// GİRİŞ YAPMIŞ KULLANICIYI GÖSTER (Menüye ekle)
+// ============================================================
+
+function updateUserMenu() {
+    const session = checkSession();
+    const userInfo = document.getElementById('user-info');
+    if (userInfo) {
+        if (session) {
+            userInfo.innerHTML = `
+                <span style="color: #2ecc71; font-size: 12px;">👤 ${session.username}</span>
+                <button onclick="logoutUser()" style="
+                    background: rgba(231,76,60,0.3);
+                    border: 1px solid rgba(231,76,60,0.3);
+                    color: #e74c3c;
+                    padding: 2px 10px;
+                    border-radius: 10px;
+                    font-size: 10px;
+                    cursor: pointer;
+                    font-family: inherit;
+                ">ÇIKIŞ</button>
+            `;
+            userInfo.style.display = 'flex';
+            userInfo.style.alignItems = 'center';
+            userInfo.style.gap = '8px';
+        } else {
+            userInfo.style.display = 'none';
+        }
+    }
+}
+
+// DOM YÜKLENDİĞİNDE ÇALIŞTIR
+document.addEventListener('DOMContentLoaded', function() {
+    const session = checkSession();
+    if (session) {
+        hideAuthModal();
+        document.getElementById('menu').style.display = 'block';
+        const nameInput = document.getElementById('player-name');
+        if (nameInput) nameInput.value = session.username;
+        updateUserMenu();
+    } else {
+        showAuthModal();
+        document.getElementById('menu').style.display = 'none';
+    }
+    
+    // Diğer init işlemleri...
+    selectRandomTeam();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+});
