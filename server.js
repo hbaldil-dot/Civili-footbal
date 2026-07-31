@@ -336,3 +336,13 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Sunucu ${PORT} portunda çalışıyor...`);
 });
+function getPlayerData() {
+    const session = checkSession();
+    const name = document.getElementById('player-name').value.trim() || 
+                 (session ? session.username : "Oyuncu_" + Math.floor(Math.random() * 100));
+    return {
+        name: name,
+        logo: selectedTeamLogo || 'default.png',
+        userId: session ? session.email : null
+    };
+}
