@@ -728,6 +728,8 @@ function executeAIShot(target, params) {
     const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
     const distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
     let pullDistance;
+    
+    // ... (AI güç hesaplamaları aynı kalacak) ...
     if (aiLevel === 'usta') {
         const normalizedDist = Math.min(distanceToTarget / 300, 1);
         pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
@@ -736,18 +738,27 @@ function executeAIShot(target, params) {
     }
     const powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
     pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
+    
     let extraDelay = 150;
-    if (shotSecondsLeft < 2) {
-        extraDelay = 50;
-    }
+    if (shotSecondsLeft < 2) { extraDelay = 50; }
+
+    // AI Vuruşu
     setTimeout(() => {
         const force = pullDistance * 0.15;
         cap.vx = Math.cos(angle) * force;
         cap.vy = Math.sin(angle) * force;
         isAiThinking = false;
-        if (typeof switchTurn === 'function') {
-            switchTurn();
+        
+        // ---- BURASI DEĞİŞTİRİLDİ ----
+        // AI vuruşunu yaptı, top hareket ediyor. 
+        // Sırayı direkt olarak Oyuncu 1'e (insana) veriyoruz.
+        if (gameMode === 'ai' && currentPhase === 'playing') {
+            turn = 1; 
+            updateHUDTurn();
+            resetShotTimer();
         }
+        // ----------------------------
+        
     }, params.reactionDelay + extraDelay);
 }
 
