@@ -156,29 +156,98 @@
         </div>
     </div>
 
-    <!-- ===== ONLINE LOBBY POP-UP ===== -->
-    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
-        <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
-            <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
-                <div class="popup-header" style="border-bottom: none; background: transparent; padding: 5px 5px 10px 5px;">
-                    <h2 style="color: rgba(255,255,255,0.9); font-size: 18px; letter-spacing: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">ONLINE FUTBOL</h2>
-                    <button class="popup-close" onclick="closeOnlineLobby()" style="color: rgba(255,255,255,0.5); font-size: 24px;">✕</button>
+<!-- ============================================================
+     ONLINE LOBBY POP-UP (YENİ TASARIM)
+     ============================================================ -->
+<div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
+    <div class="popup-content online-lobby-content">
+        <!-- Arka Plan -->
+        <img src="menu/online/onlinearkafon.webp" alt="Online Menü" class="online-bg">
+        
+        <div class="online-overlay">
+            <!-- Başlık -->
+            <div class="online-header">
+                <h2>🏟️ ONLINE FUTBOL</h2>
+                <span id="lobby-status" class="online-status">🔄 Bağlanıyor...</span>
+                <button class="online-close" onclick="closeOnlineLobby()">✕</button>
+            </div>
+            
+            <!-- Oyuncu Listesi -->
+            <div class="online-players-section">
+                <div class="online-section-title">👥 ÇEVRİMİÇİ OYUNCULAR</div>
+                <div id="lobby-players" class="online-players-list">
+                    <div style="color:#666;text-align:center;padding:15px;">Yükleniyor...</div>
                 </div>
-                <div class="popup-body" style="flex: 1; padding: 5px 5px 10px 5px; overflow-y: auto;">
-                    <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-align: center; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.5);">
-                        MAÇ YAPMAK İSTEDİĞİNİZ KİŞİYE TIKLAYARAK DAVET GÖNDERİN
-                    </p>
-                    <div class="player-list" id="lobby-list" style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 8px; max-height: 200px; overflow-y: auto;">
-                        <div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">Havuz güncelleniyor...</div>
+            </div>
+            
+            <!-- Oda İşlemleri -->
+            <div class="online-room-section">
+                <div class="online-room-row">
+                    <button class="online-btn primary" onclick="createRoom()">
+                        🏠 ODA OLUŞTUR
+                    </button>
+                </div>
+                
+                <div class="online-room-row join-row">
+                    <input type="text" id="room-code-input" class="online-input" placeholder="ODA KODU" maxlength="6">
+                    <button class="online-btn secondary" onclick="joinRoom()">
+                        🔗 KATIL
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Ana Menü -->
+            <div class="online-footer">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" class="online-menu-btn">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     ODA BEKLEME EKRANI
+     ============================================================ -->
+<div id="room-waiting" style="display: none;" onclick="if(event.target===this) leaveRoom()">
+    <div class="popup-content room-waiting-content">
+        <div class="room-waiting-bg">
+            <div class="room-waiting-overlay">
+                <div class="room-header">
+                    <h2>🏠 ODA</h2>
+                    <button class="room-close" onclick="leaveRoom()">✕</button>
+                </div>
+                
+                <div class="room-code-area">
+                    <span class="room-code-label">🔑 ODA KODU</span>
+                    <div class="room-code-display" id="room-code-display">------</div>
+                </div>
+                
+                <div class="room-players-area">
+                    <div class="room-players-header">
+                        <span>👥 Oyuncular</span>
+                        <span id="room-player-count">1/2</span>
+                    </div>
+                    <div id="room-player-list" class="room-players-list">
+                        <div class="room-player">Sen 👑 ✅</div>
                     </div>
                 </div>
-                <div style="text-align: center; padding: 10px 0 5px 0;">
-                    <img src="menu/online/ana-menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" style="cursor: pointer; max-width: 120px; width: 35%; display: inline-block; transition: transform 0.15s ease;">
+                
+                <div class="room-opponent-status">
+                    <span>Rakip:</span>
+                    <span id="opponent-status" style="color:#f1c40f;">⏳ Bekleniyor...</span>
+                </div>
+                
+                <div class="room-actions">
+                    <button id="player-ready-btn" class="room-ready-btn" onclick="setReady()">
+                        ✅ HAZIRIM
+                    </button>
+                    <button class="room-leave-btn" onclick="leaveRoom()">
+                        🚪 AYRIL
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
  <!-- ============================================================
      2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
