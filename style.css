@@ -1133,7 +1133,7 @@ body::before {
 }
 
 /* ============================================================
-   2 KİŞİLİK EKRAN MENÜSÜ - DÜZELTİLMİŞ
+   2 KİŞİLİK EKRAN MENÜSÜ - GÜNCELLENMİŞ
    ============================================================ */
 
 #local-team-select {
@@ -1148,29 +1148,27 @@ body::before {
     min-height: -webkit-fill-available !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: rgba(0, 0, 0, 0.95) !important; /* Tamamen siyah arka plan */
-    z-index: 999999 !important; /* En üstte */
-    display: none !important;
+    background: #000000 !important;
+    z-index: 999999 !important;
+    display: none;
     overflow: hidden !important;
 }
 
 #local-team-select[style*="display: flex"],
 #local-team-select[style*="display: block"] {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: block !important;
 }
 
 .local-team-container {
-    position: relative !important; /* absolute -> relative */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
-    max-width: 440px !important;
     height: 100% !important;
-    max-height: 780px !important;
     overflow: hidden !important;
-    margin: 0 auto !important;
 }
 
+/* Arka Fon Görseli */
 .local-team-bg {
     position: absolute !important;
     top: 0 !important;
@@ -1180,31 +1178,25 @@ body::before {
     object-fit: cover !important;
     object-position: center !important;
     z-index: 1 !important;
-    border-radius: 12px !important;
 }
 
+/* Seçilen Takım Shield Alanları */
 .local-selected-area {
     position: absolute !important;
-    top: 22% !important;
+    top: 30% !important;
     width: 60px !important;
     height: 60px !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     border-radius: 50% !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-.p1-selected-area { 
-    left: 50% !important; 
-    transform: translateX(-180%) !important; 
-}
-.p2-selected-area { 
-    right: 50% !important; 
-    transform: translateX(180%) !important; 
-}
+.p1-selected-area { left: 35% !important; transform: translateX(-120%) !important; }
+.p2-selected-area { right: 35% !important; transform: translateX(120%) !important; }
 
 .local-selected-area img {
     width: 100% !important;
@@ -1214,13 +1206,14 @@ body::before {
     border-radius: 50% !important;
 }
 
+/* Takım Logo Listeleri */
 .local-team-body {
     position: absolute !important;
     top: 55% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 92% !important;
-    max-width: 400px !important;
+    max-width: 440px !important;
     z-index: 10 !important;
     display: flex !important;
     flex-direction: row !important;
@@ -1230,100 +1223,245 @@ body::before {
 
 .local-player-section {
     flex: 1 !important;
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
     border-radius: 14px !important;
     padding: 10px 8px !important;
     backdrop-filter: blur(6px) !important;
     -webkit-backdrop-filter: blur(6px) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    max-height: 200px !important;
+    max-height: 220px !important;
     overflow-y: auto !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 4px !important;
 }
 
-/* Oyuncu etiketi (CSS ile eklenen) */
-.local-player-section::before {
+/* Oyuncu etiketi KALDIRILDI - ::before pseudo-element kullanma */
+/* .local-player-section::before {
     content: attr(data-player);
-    display: block;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
+    ...
+} */
 
-.local-player-section .team-logo-options {
+/* Logo Izgarası */
+.team-logo-options {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 4px !important;
+    gap: 6px !important;
     justify-content: center !important;
-    padding: 2px !important;
+    width: 100% !important;
 }
 
-.local-player-section .team-logo-btn {
-    width: 32px !important;
-    height: 32px !important;
+/* Logo Butonları */
+.team-logo-btn {
+    width: 38px !important;
+    height: 38px !important;
     border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
     cursor: pointer !important;
-    transition: all 0.25s ease !important;
+    transition: all 0.2s ease !important;
     overflow: hidden !important;
     background: rgba(0, 0, 0, 0.4) !important;
-    padding: 2px !important;
+    padding: 3px !important;
     flex-shrink: 0 !important;
 }
 
-.local-player-section .team-logo-btn img {
+.team-logo-btn:hover {
+    transform: scale(1.08) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.team-logo-btn.active {
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.25) !important;
+    transform: scale(1.06) !important;
+}
+
+.team-logo-btn.active-p1 {
+    border-color: #3498db !important;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.25) !important;
+}
+
+.team-logo-btn.active-p2 {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.25) !important;
+}
+
+.team-logo-btn img {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
     border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.02) !important;
 }
 
-.local-player-section .team-logo-btn.active-p1 {
-    border-color: #3498db !important;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.3) !important;
-    transform: scale(1.08) !important;
-}
+/* Oyuncu ismi KALDIRILDI */
+/* .local-player-name { ... } */
 
-.local-player-section .team-logo-btn.active-p2 {
-    border-color: #e74c3c !important;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.3) !important;
-    transform: scale(1.08) !important;
-}
-
+/* ===== ALT AKSİYON BUTONLARI ===== */
 .local-action-buttons {
     position: absolute !important;
-    bottom: 3% !important;
+    bottom: 5% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     z-index: 10 !important;
     width: 90% !important;
     max-width: 340px !important;
 }
 
+
+/* ============================================================
+   2 KİŞİLİK - MAÇA BAŞLA BUTONU (5px AŞAĞI)
+   ============================================================ */
+
+.local-start-btn {
+    width: 100% !important;
+    max-width: 280px !important;
+    cursor: pointer !important;
+    transition: transform 0.15s ease !important;
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    
+   transform: translateY(25px);
+}
+
+.local-start-btn:active {
+    transform: scale(0.95) !important;
+}
+
+.local-start-img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    pointer-events: none !important;
+}
+
+/* Ana Menü Butonu */
+.local-main-menu-btn {
+    width: 35% !important;
+    max-width: 100px !important;
+    cursor: pointer !important;
+    margin-top: 4px !important;
+    display: block !important;
+}
+
+.local-main-menu-btn img {
+    width: 100% !important;
+    display: block !important;
+}
+/* ============================================================
+   MOBİL UYUM
+   ============================================================ */
+
+@media (max-width: 420px) {
+    .local-team-body { 
+        top: 52% !important; 
+        width: 96% !important;
+        gap: 8px !important;
+    }
+    .local-player-section {
+        padding: 8px 5px !important;
+        max-height: 180px !important;
+    }
+    .team-logo-btn {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 2px !important;
+    }
+    .local-selected-area {
+        width: 50px !important;
+        height: 50px !important;
+        top: 10% !important;
+    }
+    .p1-selected-area { transform: translateX(-110%) !important; }
+    .p2-selected-area { transform: translateX(110%) !important; }
+    
+    .local-start-btn {
+        max-width: 240px !important;
+    }
+    .local-main-menu-btn {
+        width: 30% !important;
+        max-width: 80px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .local-team-body { top: 50% !important; }
+    .local-player-section { max-height: 150px !important; }
+    .team-logo-btn {
+        width: 28px !important;
+        height: 28px !important;
+        padding: 2px !important;
+    }
+    .local-selected-area {
+        width: 42px !important;
+        height: 42px !important;
+        top: 8% !important;
+    }
+    
+    .local-start-btn {
+        max-width: 200px !important;
+    }
+    .local-main-menu-btn {
+        width: 25% !important;
+        max-width: 70px !important;
+    }
+}
+
+/* Yatay mod */
+@media (max-height: 500px) and (orientation: landscape) {
+    .local-team-body {
+        top: 55% !important;
+        width: 85% !important;
+    }
+    .local-player-section {
+        max-height: 140px !important;
+        padding: 6px 4px !important;
+    }
+    .team-logo-btn {
+        width: 26px !important;
+        height: 26px !important;
+        padding: 1px !important;
+    }
+    .local-selected-area {
+        width: 40px !important;
+        height: 40px !important;
+        top: 8% !important;
+    }
+    
+    .local-start-btn {
+        max-width: 180px !important;
+    }
+    .local-main-menu-btn {
+        width: 20% !important;
+        max-width: 60px !important;
+    }
+}
+/* ============================================================
+   2 KİŞİLİK - SÜRE SEÇİM BUTONLARI (YENİ)
+   ============================================================ */
+
 .local-time-selector {
     display: flex !important;
-    gap: 6px !important;
+    gap: 8px !important;
     justify-content: center !important;
     align-items: center !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    padding: 4px 10px !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    padding: 5px 12px !important;
     border-radius: 30px !important;
     backdrop-filter: blur(6px) !important;
     -webkit-backdrop-filter: blur(6px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     width: 100% !important;
-    max-width: 300px !important;
+    max-width: 320px !important;
     margin: 0 auto !important;
+
+    transform: translateY(25px);
 }
 
 .local-time-selector span {
@@ -1331,16 +1469,16 @@ body::before {
     font-size: 10px !important;
     font-weight: bold !important;
     letter-spacing: 2px !important;
-    margin-right: 2px !important;
+    margin-right: 4px !important;
 }
 
 .local-time-btn {
     background: transparent !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    padding: 3px 8px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    padding: 4px 10px !important;
     border-radius: 20px !important;
-    font-size: 9px !important;
+    font-size: 10px !important;
     font-family: 'Courier New', monospace !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
@@ -1364,41 +1502,33 @@ body::before {
     box-shadow: 0 0 15px rgba(46, 204, 113, 0.1) !important;
 }
 
-.local-start-btn {
-    width: 100% !important;
-    max-width: 260px !important;
-    cursor: pointer !important;
-    transition: transform 0.15s ease !important;
-    display: block !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
+/* Mobil Uyum */
+@media (max-width: 420px) {
+    .local-time-selector {
+        padding: 4px 8px !important;
+        gap: 4px !important;
+        max-width: 260px !important;
+        flex-wrap: wrap !important;
+    }
+    .local-time-btn {
+        font-size: 8px !important;
+        padding: 3px 6px !important;
+    }
+    .local-time-selector span {
+        font-size: 8px !important;
+    }
 }
 
-.local-start-btn:active {
-    transform: scale(0.95) !important;
+@media (max-width: 360px) {
+    .local-time-selector {
+        max-width: 220px !important;
+        gap: 3px !important;
+    }
+    .local-time-btn {
+        font-size: 7px !important;
+        padding: 2px 5px !important;
+    }
 }
-
-.local-start-img {
-    width: 100% !important;
-    height: auto !important;
-    display: block !important;
-    pointer-events: none !important;
-}
-
-.local-main-menu-btn {
-    width: 30% !important;
-    max-width: 90px !important;
-    cursor: pointer !important;
-    display: block !important;
-    margin: 0 auto !important;
-}
-
-.local-main-menu-btn img {
-    width: 100% !important;
-    display: block !important;
-}
-
 /* ============================================================
    ONLINE LOBBY
    ============================================================ */
