@@ -949,12 +949,15 @@ function resetShotTimer() {
         shotTimer.innerText = 'ŞUT: ' + shotSecondsLeft + 's';
         shotTimer.classList.remove('warning');
     }
+    
+    // Eğer sıra AI'da ise süreyi gösterme (AI anında vuruyor, süre beklemez)
     if (gameMode === 'ai' && turn === 2) {
         if (shotTimer) shotTimer.style.display = 'none';
         return;
     } else {
         if (shotTimer) shotTimer.style.display = 'block';
     }
+
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
@@ -964,12 +967,21 @@ function resetShotTimer() {
                 if (shotSecondsLeft <= 1) shotTimer.classList.add('warning');
                 else shotTimer.classList.remove('warning');
             }
+            
+            // VURUŞ SÜRESİ BİTTİĞİNDE BURASI DEVREDE:
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
                 if (shotTimer) shotTimer.classList.remove('warning');
-                turn = turn === 1 ? 2 : 1;
+                
+                // Sıra süre bittiği için karşıya geçer:
+                turn = (turn === 1) ? 2 : 1; 
                 updateHUDTurn();
-                resetShotTimer();
+                resetShotTimer(); // Yeni süreyi başlat
+                
+                // Eğer yeni sıra AI'ya geldiyse direkt AI'yı oynat
+                if (gameMode === 'ai' && turn === 2) {
+                    setTimeout(() => runAIMove(), 300); // 300ms bekle, AI vursun
+                }
             }
         }
     }, 1000);
