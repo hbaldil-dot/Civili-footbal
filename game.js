@@ -1925,13 +1925,18 @@ function selectStadium(stadiumKey, texturePath) {
 // SOCKET OLAY DİNLEYİCİLERİ
 // ============================================================
 function getPlayerData() {
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+    const nameInput = document.getElementById('player-name');
+    const name = (nameInput && nameInput.value.trim()) 
+                 ? nameInput.value.trim() 
+                 : (playerProfile && playerProfile.username) 
+                    ? playerProfile.username 
+                    : "Misafir_" + Math.floor(Math.random() * 10000);
+    
     return {
         name: name,
         logo: selectedTeamLogo || 'default.png'
     };
 }
-
 function setupSocketListeners() {
     if (!socket) return;
     socket.on("update-lobby-players", (players) => {
