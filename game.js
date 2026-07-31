@@ -3151,14 +3151,16 @@ function switchAuthTab(tab) {
 
     if (!formLogin || !formRegister || !formForgot) return;
 
-    // Tüm formları gizle ve tablardan active sınıfını kaldır
+    // Tüm formları gizle
     formLogin.classList.add('hidden');
     formRegister.classList.add('hidden');
     formForgot.classList.add('hidden');
+    
+    // Tablardan active sınıfını kaldır
     if (tabLogin) tabLogin.classList.remove('active');
     if (tabRegister) tabRegister.classList.remove('active');
 
-    // Seçilen sekmeyi göster ve active yap
+    // Seçilen sekmeyi göster
     if (tab === 'login') {
         formLogin.classList.remove('hidden');
         if (tabLogin) tabLogin.classList.add('active');
@@ -3180,28 +3182,28 @@ function handleAuthSubmit(event, action) {
     }
 
     if (action === 'login') {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
         socket.emit('loginUser', { email, password });
     } else if (action === 'register') {
-        const username = document.getElementById('reg-username').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
         socket.emit('registerUser', { username, email, password });
     } else if (action === 'forgot') {
-        const email = document.getElementById('forgot-email').value;
+        const email = document.getElementById('forgot-email').value.trim();
         socket.emit('forgotPassword', { email });
     }
 }
 
-// Misafir Tıklaması
+// Misafir Olarak Devam Et
 function continueAsGuest() {
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
-        authOverlay.classList.add('hidden'); // Giriş ekranını tamamen kapat
+        authOverlay.classList.add('hidden'); // Giriş ekranını kapat
     }
     
-    // Ana menünün görünür ve tıklanabilir olduğundan emin olun
+    // Ana menüyü aç
     const menu = document.getElementById('menu');
     if (menu) {
         menu.style.display = 'block';
