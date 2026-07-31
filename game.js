@@ -170,7 +170,11 @@ socket.on('match-start', function(data) {
     });
 
     // VURUŞ ALMA
-    socket.on('opponent-shot', function(shotData) {
+   / Rakip vuruş yaptığında
+socket.on('opponent-shot', (shotData) => {
+    // Rakibin vuruş açı ve kuvvetini al, topa uygula
+    applyShotToBall(shotData);
+});
         console.log('📥 VURUŞ ALINDI:', shotData);
         if (currentPhase === 'playing' && isOnlineMatch) {
             cap.vx = (shotData.startX - shotData.endX) * 0.13;
@@ -189,21 +193,34 @@ socket.on('match-start', function(data) {
             triggerGoalAnimation();
         }
     });
+socket.on('ball-sync', (data) => {
+    if (!isHost) { 
+        let targetX, targetY;
 
-    // TOP SENKRONİZASYONU
-    socket.on('ball-sync', function(ballState) {
-        if (currentPhase === 'playing' && isOnlineMatch) {
-            var diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
-            if (diff > 30) {
-                cap.x = ballState.x;
-                cap.y = ballState.y;
-                cap.vx = ballState.vx;
-                cap.vy = ballState.vy;
-                turn = ballState.turn;
-                updateHUDTurn();
-            }
+        // --- SİZİN KODUNUZ BURAYA GELİYOR ---
+        if (myTeam === 2) {
+            targetX = (1.0 - data.xRatio) * canvas.width;
+            targetY = (1.0 - data.yRatio) * canvas.height;
+        } else {
+            targetX = data.xRatio * canvas.width;
+            targetY = data.yRatio * canvas.height;
         }
-    });
+        // ------------------------------------
+
+        // Pürüzsüz takip (Lerp) ile topun yerini güncelleme
+        ball.x += (targetX - ball.x) * 0.3;
+        ball.y += (targetY - ball.y) * 0.3;
+    }
+});
+
+// Top durduğunda kesin konumu sabitle
+socket.on('ball-final-position', (pos) => {
+    ball.x = pos.x * canvas.width;
+    ball.y = pos.y * canvas.height;
+    ball.vx = 0;
+    ball.vy = 0;
+    isBallMoving = false; // Sıra geçişi yapılabilir
+});
 
     // RAKİP AYRILDI
     socket.on('opponent-left', function() {
@@ -233,7 +250,27 @@ socket.on('match-start', function(data) {
         }
     });
 }
+// game.js içindeki Dönüştürücü Fonksiyonlar:
 
+// 1. Gönderirken: Kendi ekranındaki X, Y'yi 0.0 - 1.0 arasına oranla
+function getNormalizedBallState(ball, canvasWidth, canvasHeight) {
+    return {
+        xRatio: ball.x / canvasWidth,
+        yRatio: ball.y / canvasHeight,
+        vxRatio: ball.vx / canvasWidth,
+        vyRatio: ball.vy / canvasHeight
+    };
+}
+
+// 2. Alırken: Gelen oranları kendi ekran genişlik/yüksekliğinle çarp
+function setBallFromNormalized(data, canvasWidth, canvasHeight) {
+    return {
+        x: data.xRatio * canvasWidth,
+        y: data.yRatio * canvasHeight,
+        vx: data.vxRatio * canvasWidth,
+        vy: data.vyRatio * canvasHeight
+    };
+}
 function updateLobbyStatus(text, color) {
     var statusEl = document.getElementById('lobby-status');
     if (statusEl) {
