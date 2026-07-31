@@ -469,17 +469,27 @@ socket.on('player-ready', (data) => {
     // OYUN SİSTEMİ - SENKRONİZASYON
     // ============================================================
 
-    // Vuruş gönder
-    socket.on('player-shot', (data) => {
-        const { roomId, shotData } = data;
-        socket.to(roomId).emit('opponent-shot', shotData);
-    });
+// server.js - Top Hareketi ve Çivi Pozisyonlarını Doğrudan Odaya Yayınlama (Broadcast)
 
-    // Top pozisyonu senkronizasyonu
-    socket.on('sync-ball-position', (data) => {
-        const { roomId, ballState } = data;
-        socket.to(roomId).emit('ball-sync', ballState);
-    });
+// Bir oyuncu vuruş yaptığında
+socket.on('player-shot', (data) => {
+    const { roomId, shotData } = data;
+    // Vuruş bilgisini rakibe gönder
+    socket.to(roomId).emit('opponent-shot', shotData);
+});
+
+// Topun hareket halindeki pozisyon akışı (Host gönderir, Server dağıtır)
+socket.on('sync-ball-position', (data) => {
+    const { roomId, ballState } = data;
+    // Odadaki diğer oyuncuya topun güncel durumunu aktar
+    socket.to(roomId).emit('ball-sync', ballState);
+});
+
+// Top tamamen durduğunda KESİN pozisyon senkronizasyonu
+socket.on('sync-ball-stopped', (data) => {
+    const { roomId, x, y } = data;
+    io.to(roomId).emit('ball-final-position', { x, y });
+});
 
     // Gol senkronizasyonu
     socket.on('goal-scored', (data) => {
