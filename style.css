@@ -1202,7 +1202,7 @@ body::before {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)) !important;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)) !important;
     border-radius: 50% !important;
 }
 
@@ -1244,7 +1244,7 @@ body::before {
 
 .local-player-section {
     flex: 1 !important;        /* Bunu değiştir */
-    max-width: 200px !important; /* Veya max-width ekle */
+    max-width: 300px !important; /* Veya max-width ekle */
     min-width: 120px !important;
 }
 }
@@ -1258,30 +1258,30 @@ body::before {
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     overflow: hidden !important;
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
     padding: 3px !important;
     flex-shrink: 0 !important;
 }
 
 .team-logo-btn:hover {
     transform: scale(1.08) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.01) !important;
 }
 
 .team-logo-btn.active {
     border-color: #2ecc71 !important;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.25) !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.01) !important;
     transform: scale(1.06) !important;
 }
 
 .team-logo-btn.active-p1 {
     border-color: #3498db !important;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.25) !important;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.01) !important;
 }
 
 .team-logo-btn.active-p2 {
     border-color: #e74c3c !important;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.25) !important;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.01) !important;
 }
 
 .team-logo-btn img {
