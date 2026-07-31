@@ -3137,8 +3137,7 @@ if (socket) {
                 }
             }
         }
-    };
-}
+    }
 // ... dosyanızın mevcut son satırları ...
 
 // --- AUTH TAB & FORM YÖNETİMİ ---
