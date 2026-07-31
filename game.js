@@ -3138,7 +3138,7 @@ if (socket) {
             }
         }
 // ============================================================
-// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ)
+// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ) - DÜZELTİLDİ
 // ============================================================
 
 // Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
@@ -3151,16 +3151,13 @@ function switchAuthTab(tab) {
 
     if (!formLogin || !formRegister || !formForgot) return;
 
-    // Tüm formları gizle
     formLogin.classList.add('hidden');
     formRegister.classList.add('hidden');
     formForgot.classList.add('hidden');
     
-    // Tablardan active sınıfını kaldır
     if (tabLogin) tabLogin.classList.remove('active');
     if (tabRegister) tabRegister.classList.remove('active');
 
-    // Seçilen sekmeyi göster
     if (tab === 'login') {
         formLogin.classList.remove('hidden');
         if (tabLogin) tabLogin.classList.add('active');
@@ -3200,10 +3197,9 @@ function handleAuthSubmit(event, action) {
 function continueAsGuest() {
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
-        authOverlay.classList.add('hidden'); // Giriş ekranını kapat
+        authOverlay.classList.add('hidden');
     }
     
-    // Ana menüyü aç
     const menu = document.getElementById('menu');
     if (menu) {
         menu.style.display = 'block';
@@ -3218,13 +3214,11 @@ if (socket) {
         alert(data.message);
         
         if (data.success) {
-            // İsim alanını otomatik doldur
             if (data.username) {
                 const playerNameInput = document.getElementById('player-name');
                 if (playerNameInput) playerNameInput.value = data.username;
             }
 
-            // Kayıt veya Giriş başarılıysa pencereyi kapatıp ana menüyü aç
             if (data.action === 'login' || data.action === 'register') {
                 const authOverlay = document.getElementById('auth-modal-overlay');
                 if (authOverlay) {
