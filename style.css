@@ -1202,7 +1202,7 @@ body::before {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)) !important;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)) !important;
     border-radius: 50% !important;
 }
 
@@ -1213,7 +1213,7 @@ body::before {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 92% !important;
-    max-width: 440px !important;
+    max-width: 100px !important;
     z-index: 10 !important;
     display: flex !important;
     flex-direction: row !important;
@@ -1223,7 +1223,7 @@ body::before {
 
 .local-player-section {
     flex: 1 !important;
-    background: rgba(0, 0, 0, 0.2) !important;
+    background: rgba(0, 0, 0, 0.08) !important;
     border-radius: 14px !important;
     padding: 10px 8px !important;
     backdrop-filter: blur(6px) !important;
