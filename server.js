@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const app = express();
 const server = http.createServer(app);
 
-// CORS ve WebSocket ayarları - iOS Safari için optimize
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -68,7 +67,6 @@ const User = mongoose.model('User', userSchema);
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// CORS headers - iOS Safari için
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -96,11 +94,11 @@ let playerSessions = {};
 // SOCKET.IO OLAY DİNLEYİCİLERİ
 // ============================================================
 io.on('connection', (socket) => {
-    console.log(`⚡ Yeni bağlantı: ${socket.id} (${socket.handshake.address})`);
+    console.log(`⚡ Yeni bağlantı: ${socket.id}`);
     let playerName = 'Oyuncu';
     let playerLogo = 'default.png';
 
-    // iOS Safari için heartbeat
+    // Heartbeat
     socket.on('ping', () => {
         socket.emit('pong');
     });
@@ -197,9 +195,7 @@ io.on('connection', (socket) => {
         playerName = data?.name || 'Oyuncu';
         playerLogo = data?.logo || 'default.png';
         
-        // Eski kayıt varsa kaldır
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        
         lobbyPlayers.push({
             id: socket.id,
             name: playerName,
@@ -207,13 +203,8 @@ io.on('connection', (socket) => {
         });
         
         playerSessions[socket.id] = { name: playerName, logo: playerLogo };
-        
         console.log(`👤 ${playerName} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
-        
-        // Güncel lobby listesini tüm istemcilere gönder
         io.emit('lobby-update', lobbyPlayers);
-        
-        // Yeni katılan oyuncuya özel lobby listesi gönder
         socket.emit('lobby-update', lobbyPlayers);
     });
 
@@ -225,14 +216,13 @@ io.on('connection', (socket) => {
     });
 
     // ============================================================
-    // ODA İŞLEMLERİ - GÜNCELLENMİŞ
+    // ODA İŞLEMLERİ
     // ============================================================
 
     socket.on('create-room', (data) => {
         const name = data?.name || playerName || 'Oyuncu';
         const logo = data?.logo || playerLogo || 'default.png';
         
-        // Benzersiz oda kodu oluştur
         let roomId;
         let attempts = 0;
         do {
@@ -247,7 +237,8 @@ io.on('connection', (socket) => {
                 name: name,
                 logo: logo,
                 isHost: true,
-                isReady: false
+                isReady: false,
+                pins: []
             }],
             started: false,
             createdAt: Date.now()
@@ -255,14 +246,11 @@ io.on('connection', (socket) => {
         
         socket.join(roomId);
         socket.emit('room-created', { roomId });
-        
-        // Oda güncellemesini gönder
-        const roomUpdate = {
+        socket.emit('room-update', {
             roomId,
             playerCount: 1,
             players: activeRooms[roomId].players
-        };
-        socket.emit('room-update', roomUpdate);
+        });
         
         console.log(`🏠 Oda oluşturuldu: ${roomId} (${name})`);
     });
@@ -275,18 +263,14 @@ io.on('connection', (socket) => {
             socket.emit('room-join-error', { message: 'Oda bulunamadı!' });
             return;
         }
-        
         if (room.started) {
             socket.emit('room-join-error', { message: 'Maç başlamış!' });
             return;
         }
-        
         if (room.players.length >= 2) {
             socket.emit('room-join-error', { message: 'Oda dolu!' });
             return;
         }
-        
-        // Aynı oyuncu tekrar katılmaya çalışıyorsa
         if (room.players.some(p => p.id === socket.id)) {
             socket.emit('room-join-error', { message: 'Zaten odadasın!' });
             return;
@@ -300,19 +284,18 @@ io.on('connection', (socket) => {
             name: playerName,
             logo: playerLogo,
             isHost: false,
-            isReady: false
+            isReady: false,
+            pins: []
         });
         
         socket.join(roomId);
         socket.emit('room-joined', { roomId });
         
-        // Odayı güncelle - tüm odadakilere gönder
-        const roomUpdate = {
+        io.to(roomId).emit('room-update', {
             roomId,
             playerCount: room.players.length,
             players: room.players
-        };
-        io.to(roomId).emit('room-update', roomUpdate);
+        });
         
         console.log(`🚪 ${playerName} odaya katıldı: ${roomId}`);
     });
@@ -333,7 +316,6 @@ io.on('connection', (socket) => {
             delete activeRooms[roomId];
             console.log(`🗑️ Oda silindi: ${roomId}`);
         } else {
-            // Kalan oyuncuya rakip ayrıldı bilgisi ver
             io.to(roomId).emit('opponent-left');
             io.to(roomId).emit('room-update', {
                 roomId,
@@ -345,19 +327,11 @@ io.on('connection', (socket) => {
 
     socket.on('invite-player', (targetId) => {
         const sender = lobbyPlayers.find(p => p.id === socket.id);
-        if (!sender) {
-            console.warn('⚠️ Davet gönderen bulunamadı:', socket.id);
-            return;
-        }
-        
+        if (!sender) return;
         const target = lobbyPlayers.find(p => p.id === targetId);
-        if (!target) {
-            console.warn('⚠️ Davet hedefi bulunamadı:', targetId);
-            return;
-        }
+        if (!target) return;
         
-        console.log(`📨 Davet gönderiliyor: ${sender.name} -> ${target.name}`);
-        
+        console.log(`📨 Davet: ${sender.name} -> ${target.name}`);
         io.to(targetId).emit('invite-received', {
             fromId: socket.id,
             fromName: sender.name,
@@ -368,19 +342,13 @@ io.on('connection', (socket) => {
     socket.on('accept-invite', (hostId) => {
         const host = lobbyPlayers.find(p => p.id === hostId);
         const guest = lobbyPlayers.find(p => p.id === socket.id);
+        if (!host || !guest) return;
         
-        if (!host || !guest) {
-            console.warn('⚠️ Davet kabul edilemedi, oyuncu bulunamadı');
-            return;
-        }
+        console.log(`✅ Davet kabul: ${guest.name} -> ${host.name}`);
         
-        console.log(`✅ Davet kabul edildi: ${guest.name} -> ${host.name}`);
-        
-        // Lobi'den kaldır
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
         io.emit('lobby-update', lobbyPlayers);
         
-        // Oda oluştur
         let roomId;
         let attempts = 0;
         do {
@@ -391,52 +359,46 @@ io.on('connection', (socket) => {
         activeRooms[roomId] = {
             host: hostId,
             players: [
-                { id: hostId, name: host.name, logo: host.logo || 'default.png', isHost: true, isReady: false },
-                { id: socket.id, name: guest.name, logo: guest.logo || 'default.png', isHost: false, isReady: false }
+                { id: hostId, name: host.name, logo: host.logo || 'default.png', isHost: true, isReady: false, pins: [] },
+                { id: socket.id, name: guest.name, logo: guest.logo || 'default.png', isHost: false, isReady: false, pins: [] }
             ],
             started: false,
             createdAt: Date.now()
         };
         
-        // Her iki oyuncuyu da odaya ekle
         io.sockets.sockets.get(hostId)?.join(roomId);
         io.sockets.sockets.get(socket.id)?.join(roomId);
         
-        // Host'a oda oluşturuldu bilgisi
         io.to(hostId).emit('room-created', { roomId });
-        
-        // Misafire odaya katılındı bilgisi
         io.to(socket.id).emit('room-joined', { roomId });
         
-        // Oda güncellemesi
-        const roomUpdate = {
+        io.to(roomId).emit('room-update', {
             roomId,
             playerCount: 2,
             players: activeRooms[roomId].players
-        };
-        io.to(roomId).emit('room-update', roomUpdate);
+        });
         
-        console.log(`🏠 Davet ile oda oluşturuldu: ${roomId} (${host.name} & ${guest.name})`);
+        console.log(`🏠 Davet ile oda: ${roomId}`);
     });
 
     // ============================================================
-    // MAÇ HAZIRLIK - GÜNCELLENMİŞ
+    // MAÇ HAZIRLIK - SENKRONİZASYON
     // ============================================================
 
+    // Takım diziliminde değişiklik olduğunda karşı tarafa bildir
+    socket.on('sync-pin-move', (data) => {
+        const { roomId, team, index, x, y } = data;
+        socket.to(roomId).emit('pin-move-sync', { team, index, x, y });
+    });
+
+    // Oyuncu hazır olduğunda
     socket.on('player-ready', (data) => {
         const { roomId, pins } = data;
         const room = activeRooms[roomId];
-        
-        if (!room) {
-            console.warn('⚠️ Oda bulunamadı:', roomId);
-            return;
-        }
+        if (!room) return;
         
         const player = room.players.find(p => p.id === socket.id);
-        if (!player) {
-            console.warn('⚠️ Oyuncu odada bulunamadı:', socket.id);
-            return;
-        }
+        if (!player) return;
         
         player.isReady = true;
         if (pins) {
@@ -445,7 +407,7 @@ io.on('connection', (socket) => {
         
         console.log(`✅ ${player.name} hazır (${roomId})`);
         
-        // Oda güncellemesini gönder
+        // Oda güncellemesi
         io.to(roomId).emit('room-update', {
             roomId,
             playerCount: room.players.length,
@@ -456,7 +418,6 @@ io.on('connection', (socket) => {
         room.players.forEach(p => {
             if (p.id !== socket.id) {
                 io.to(p.id).emit('opponent-ready');
-                console.log(`📢 ${player.name} hazır -> ${p.name}`);
             }
         });
         
@@ -467,39 +428,58 @@ io.on('connection', (socket) => {
             const hostPlayer = room.players.find(p => p.isHost);
             const guestPlayer = room.players.find(p => !p.isHost);
             
-            console.log(`🎮 Maç başlıyor: ${roomId} (${hostPlayer?.name} vs ${guestPlayer?.name})`);
+            console.log(`🎮 Maç başlıyor: ${roomId}`);
             
-            // Her oyuncuya kendi takım numarasını ve rakip logosunu gönder
-            if (hostPlayer) {
-                io.to(hostPlayer.id).emit('match-start', {
-                    roomId,
-                    team: 1,
-                    opponentLogo: guestPlayer?.logo || 'default.png'
-                });
-            }
+            // HER İKİ OYUNCUNUN DA TÜM PIN'LERİNİ GÖNDER
+            const allPins = [];
+            room.players.forEach(p => {
+                if (p.pins && p.pins.length > 0) {
+                    p.pins.forEach(pin => {
+                        allPins.push({ x: pin.x, y: pin.y, team: p.id === hostPlayer?.id ? 1 : 2 });
+                    });
+                }
+            });
             
-            if (guestPlayer) {
-                io.to(guestPlayer.id).emit('match-start', {
-                    roomId,
-                    team: 2,
-                    opponentLogo: hostPlayer?.logo || 'default.png'
-                });
-            }
+            // Host (Takım 1)
+            io.to(hostPlayer.id).emit('match-start', {
+                roomId,
+                team: 1,
+                opponentLogo: guestPlayer?.logo || 'default.png',
+                allPins: allPins,
+                opponentPins: guestPlayer?.pins || []
+            });
+            
+            // Guest (Takım 2)
+            io.to(guestPlayer.id).emit('match-start', {
+                roomId,
+                team: 2,
+                opponentLogo: hostPlayer?.logo || 'default.png',
+                allPins: allPins,
+                opponentPins: hostPlayer?.pins || []
+            });
         }
     });
 
     // ============================================================
-    // OYUN SİSTEMİ
+    // OYUN SİSTEMİ - SENKRONİZASYON
     // ============================================================
 
+    // Vuruş gönder
     socket.on('player-shot', (data) => {
         const { roomId, shotData } = data;
         socket.to(roomId).emit('opponent-shot', shotData);
     });
 
+    // Top pozisyonu senkronizasyonu
     socket.on('sync-ball-position', (data) => {
         const { roomId, ballState } = data;
         socket.to(roomId).emit('ball-sync', ballState);
+    });
+
+    // Gol senkronizasyonu
+    socket.on('goal-scored', (data) => {
+        const { roomId, scoringTeam } = data;
+        socket.to(roomId).emit('opponent-goal', { scoringTeam });
     });
 
     // ============================================================
@@ -509,12 +489,10 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log(`🔌 Bağlantı koptu: ${socket.id}`);
         
-        // Lobi'den kaldır
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         io.emit('lobby-update', lobbyPlayers);
         delete playerSessions[socket.id];
         
-        // Aktif odalardan kaldır
         for (const roomId in activeRooms) {
             const room = activeRooms[roomId];
             const player = room.players.find(p => p.id === socket.id);
@@ -524,7 +502,7 @@ io.on('connection', (socket) => {
                 
                 if (room.players.length === 0) {
                     delete activeRooms[roomId];
-                    console.log(`🗑️ Oda silindi (disconnect): ${roomId}`);
+                    console.log(`🗑️ Oda silindi: ${roomId}`);
                 } else {
                     io.to(roomId).emit('opponent-left');
                     io.to(roomId).emit('room-update', {
@@ -540,19 +518,18 @@ io.on('connection', (socket) => {
 });
 
 // ============================================================
-// PERİYODİK TEMİZLİK (Eski odaları temizle)
+// PERİYODİK TEMİZLİK
 // ============================================================
 setInterval(() => {
     const now = Date.now();
     for (const roomId in activeRooms) {
         const room = activeRooms[roomId];
-        // 10 dakikadan eski ve başlamamış odaları temizle
         if (!room.started && (now - room.createdAt) > 600000) {
             console.log(`🗑️ Eski oda temizlendi: ${roomId}`);
             delete activeRooms[roomId];
         }
     }
-}, 300000); // 5 dakikada bir kontrol
+}, 300000);
 
 // ============================================================
 // SUNUCU BAŞLAT
@@ -560,5 +537,4 @@ setInterval(() => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Sunucu ${PORT} portunda çalışıyor...`);
-    console.log(`📡 WebSocket aktif, iOS Safari için optimize edildi`);
 });
