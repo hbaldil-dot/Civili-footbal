@@ -409,28 +409,28 @@ function draw() {
             ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
             ctx.fill();
         } else {
-            let logoFile = 'default.png';
+            let logoFile = 'fb.png';
             if (pin.team === 1) {
                 if (gameMode === 'local' && localPlayer1Logo) {
                     logoFile = localPlayer1Logo;
                 } else if (gameMode === 'online' && myTeamNumber === 2) {
-                    logoFile = aiTeamLogo || 'default.png';
+                    logoFile = aiTeamLogo || 'fb.png';
                 } else {
-                    logoFile = selectedTeamLogo || 'default.png';
+                    logoFile = selectedTeamLogo || 'fb.png';
                 }
             } else if (pin.team === 2) {
                 if (gameMode === 'ai') {
-                    logoFile = aiTeamLogo || 'default.png';
+                    logoFile = aiTeamLogo || 'fb.png';
                 } else if (gameMode === 'local' && localPlayer2Logo) {
                     logoFile = localPlayer2Logo;
                 } else if (gameMode === 'online') {
                     if (myTeamNumber === 1) {
-                        logoFile = aiTeamLogo || 'default.png';
+                        logoFile = aiTeamLogo || 'fb.png';
                     } else {
-                        logoFile = selectedTeamLogo || 'default.png';
+                        logoFile = selectedTeamLogo || 'fb.png';
                     }
                 } else {
-                    logoFile = 'default.png';
+                    logoFile = 'fb.png';
                 }
             }
             drawPlayerWithLogo(pin.x, pin.y, logoFile);
@@ -1563,17 +1563,17 @@ function selectTeamLogo(logoFile) {
 function updateTeamLogoDisplay() {
     const displayImg = document.getElementById('selected-team-logo-display');
     if (displayImg) {
-        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
+        if (selectedTeamLogo && selectedTeamLogo !== 'fb.png') {
             displayImg.src = `takimlar/${selectedTeamLogo}`;
             displayImg.style.display = 'block';
             displayImg.style.opacity = '1';
         } else {
-            displayImg.src = 'takimlar/default.png';
+            displayImg.src = 'takimlar/fb.png';
             displayImg.style.display = 'block';
             displayImg.style.opacity = '0.3';
         }
         displayImg.onerror = function() {
-            this.src = 'takimlar/default.png';
+            this.src = 'takimlar/fb.png';
             this.style.opacity = '0.3';
         };
         console.log('🔄 Takım logosu güncellendi:', selectedTeamLogo || 'default');
@@ -1596,11 +1596,11 @@ function updateScoreLogos() {
         if (gameMode === 'local' && localPlayer1Logo) {
             logoP1.src = `takimlar/${localPlayer1Logo}`;
         } else if (gameMode === 'online' && myTeamNumber === 2) {
-            logoP1.src = `takimlar/${aiTeamLogo || 'default.png'}`;
+            logoP1.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
         } else {
-            logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/default.png';
+            logoP1.src = selectedTeamLogo ? `takimlar/${selectedTeamLogo}` : 'takimlar/fb.png';
         }
-        logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
+        logoP1.onerror = function() { this.src = 'takimlar/fb.png'; };
     }
     
     const logoP2 = document.getElementById('score-logo-p2');
@@ -1608,13 +1608,13 @@ function updateScoreLogos() {
         if (gameMode === 'local' && localPlayer2Logo) {
             logoP2.src = `takimlar/${localPlayer2Logo}`;
         } else if (gameMode === 'online' && myTeamNumber === 1) {
-            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
+            logoP2.src = `takimlar/${aiTeamLogo || fb.png'}`;
         } else if (gameMode === 'ai') {
-            logoP2.src = `takimlar/${aiTeamLogo || 'default.png'}`;
+            logoP2.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
         } else {
-            logoP2.src = 'takimlar/default.png';
+            logoP2.src = 'takimlar/fb.png';
         }
-        logoP2.onerror = function() { this.src = 'takimlar/default.png'; };
+        logoP2.onerror = function() { this.src = 'takimlar/fb.png'; };
     }
 }
 
@@ -1632,7 +1632,7 @@ function loadTeamLogoImage(logoFile) {
         // DOĞRU: onerror tetiklendiğinde döngüyü engeller
 img.onerror = function() {
     this.onerror = null; // Tekrar tekrar hata tetiklenmesini önler
-    this.src = '/takimlar/default.png'; // veya boş bir data-URI
+    this.src = '/takimlar/fb.png'; // veya boş bir data-URI
 };
         img.src = `takimlar/${logoFile}`;
     });
@@ -1689,7 +1689,7 @@ function loadLocalTeamLogos() {
         const img1 = document.createElement('img');
         img1.src = `takimlar/${logo.file}`;
         img1.alt = logo.name;
-        img1.onerror = function() { this.src = 'takimlar/default.png'; };
+        img1.onerror = function() { this.src = 'takimlar/fb.png'; };
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
@@ -1702,7 +1702,7 @@ function loadLocalTeamLogos() {
         const img2 = document.createElement('img');
         img2.src = `takimlar/${logo.file}`;
         img2.alt = logo.name;
-        img2.onerror = function() { this.src = 'takimlar/default.png'; };
+        img2.onerror = function() { this.src = 'takimlar/fb.png'; };
         btn2.appendChild(img2);
         btn2.onclick = function() { selectLocalTeam(2, logo.file); };
         container2.appendChild(btn2);
@@ -1732,7 +1732,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
         }
         
         // İsmi güncelleme - KALDIRILDI
@@ -1762,7 +1762,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
         }
         
         // İsmi güncelleme - KALDIRILDI
@@ -2085,7 +2085,7 @@ function getPlayerData() {
     const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
     return {
         name: name,
-        logo: selectedTeamLogo || 'default.png'
+        logo: selectedTeamLogo || 'fb.png'
     };
 }
 
@@ -2105,9 +2105,9 @@ function setupSocketListeners() {
                 
                 const infoSpan = document.createElement('span');
                 const logoImg = document.createElement('img');
-                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+                logoImg.src = `takimlar/${p.logo || 'fb.png'}`;
                 logoImg.className = 'lobby-logo';
-                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+                logoImg.onerror = function() { this.src = 'takimlar/fb.png'; };
                 infoSpan.appendChild(logoImg);
                 
                 const nameSpan = document.createElement('span');
@@ -2141,7 +2141,7 @@ function setupSocketListeners() {
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
-        aiTeamLogo = opponentLogo || 'default.png';
+        aiTeamLogo = opponentLogo || 'fb.png';
         console.log('🟢 Online rakip logosu:', aiTeamLogo);
         
         loadTeamLogoImage(aiTeamLogo);
@@ -2229,7 +2229,7 @@ function joinOnlineGame() {
     // Sunucuya profil bilgisiyle bağlan
     socket.emit("registerPlayer", {
         username: currentUsername,
-        teamLogo: selectedTeamLogo || "default.png"
+        teamLogo: selectedTeamLogo || "fb.png"
     });
 
     // Lobi / Eşleşme ekranını aç
@@ -2474,7 +2474,7 @@ function loadLocalTeamLogos() {
         const img1 = document.createElement('img');
         img1.src = `takimlar/${logo.file}`;
         img1.alt = logo.name;
-        img1.onerror = function() { this.src = 'takimlar/default.png'; };
+        img1.onerror = function() { this.src = 'takimlar/fb.png'; };
         btn1.appendChild(img1);
         btn1.onclick = function() { selectLocalTeam(1, logo.file); };
         container1.appendChild(btn1);
@@ -2487,7 +2487,7 @@ function loadLocalTeamLogos() {
         const img2 = document.createElement('img');
         img2.src = `takimlar/${logo.file}`;
         img2.alt = logo.name;
-        img2.onerror = function() { this.src = 'takimlar/default.png'; };
+        img2.onerror = function() { this.src = 'takimlar/fb.png'; };
         btn2.appendChild(img2);
         btn2.onclick = function() { selectLocalTeam(2, logo.file); };
         container2.appendChild(btn2);
@@ -2518,7 +2518,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
         }
         
         // İsmi güncelle
@@ -2548,7 +2548,7 @@ function selectLocalTeam(player, logoFile) {
         if (shield) {
             shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
-            shield.onerror = function() { this.src = 'takimlar/default.png'; };
+            shield.onerror = function() { this.src = 'takimlar/fb.png'; };
         }
         
         const nameEl = document.getElementById('local-p2-name');
@@ -2587,7 +2587,7 @@ function openTeamSelectPopup() {
 
     // Mevcut seçili takımı armaya yerleştir
     if (shieldImg) {
-        if (selectedTeamLogo && selectedTeamLogo !== 'default.png') {
+        if (selectedTeamLogo && selectedTeamLogo !== 'fb.png') {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
             console.log('🛡️ Seçili takım arması gösteriliyor:', selectedTeamLogo);
@@ -2627,7 +2627,7 @@ function openTeamSelectPopup() {
             img.alt = team.name || team.file;
             img.onerror = function() {
                 console.warn('⚠️ Logo yüklenemedi:', team.file);
-                this.src = 'takimlar/default.png';
+                this.src = 'takimlar/fb.png';
             };
             btn.appendChild(img);
             
@@ -2651,7 +2651,7 @@ function openTeamSelectPopup() {
                     shieldImg.src = 'takimlar/' + team.file;
                     shieldImg.style.display = 'block';
                     shieldImg.onerror = function() {
-                        this.src = 'takimlar/default.png';
+                        this.src = 'takimlar/fb.png';
                     };
                 }
                 
@@ -2759,7 +2759,7 @@ function setLocalShotDuration(seconds) {
 // Varsayılan Oyuncu Verisi Yapısı
 let playerProfile = {
     username: "Oyuncu_" + Math.floor(Math.random() * 1000),
-    selectedTeamLogo: "default.png",
+    selectedTeamLogo: "fb.png",
     stats: {
         totalMatches: 0,
         wins: 0,
