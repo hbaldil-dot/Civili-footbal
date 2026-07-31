@@ -1134,6 +1134,7 @@ body::before {
 
 
 /* ============================================================
+ /* ============================================================
    2 KİŞİLİK EKRAN MENÜSÜ - GÜNCELLENMİŞ
    ============================================================ */
 
@@ -1181,23 +1182,28 @@ body::before {
     z-index: 1 !important;
 }
 
-/* Seçilen Takım Shield Alanları */
+/* YUKARIDA SEÇİLEN LOGOLARIN YERLEŞİMİ (Siyah Yuvarlak Yuvalar) */
 .local-selected-area {
     position: absolute !important;
-    top: 30% !important;
-    width: 60px !important;
-    height: 60px !important;
+    top: 32.5% !important; /* Dairelerin tam merkezine oturtur */
+    width: 68px !important;
+    height: 68px !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: transparent !important;
     border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
 }
 
-.p1-selected-area { left: 35% !important; transform: translateX(-120%) !important; }
-.p2-selected-area { right: 35% !important; transform: translateX(120%) !important; }
+.p1-selected-area { 
+    left: 17.5% !important; 
+}
+
+.p2-selected-area { 
+    right: 17.5% !important; 
+}
 
 .local-selected-area img {
     width: 100% !important;
@@ -1207,53 +1213,51 @@ body::before {
     border-radius: 50% !important;
 }
 
-local-team-body {
+/* TAKIM LİSTESİ KARSAYICISI (Nokta Hatası Düzeltildi) */
+.local-team-body {
     position: absolute !important;
-    top: 53% !important;
+    top: 48% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translateX(-50%) !important;
     width: 90% !important;
-    max-width: 330px !important; /* Genişlik düşürüldü, arkadaki gölgeler kaybolacak */
+    max-width: 360px !important;
     z-index: 10 !important;
     display: flex !important;
     flex-direction: row !important;
-    gap: 10px !important;
-    justify-content: center !important;
+    gap: 15px !important;
+    justify-content: space-between !important;
     align-items: flex-start !important;
 }
 
-/* Oyuncu Kutuları: Solda 1 Tane, Sağda 1 Tane */
+/* Oyuncu Seçim Kutuları (Sağ ve Sol Logolar) */
 .local-player-section {
     flex: 1 !important;
-    width: 50% !important;
-    max-width: 155px !important; /* Dışarı taşmayı engeller */
-    background: rgba(0, 0, 0, 0.4) !important; /* Koyu dumanlı arka plan */
-    border-radius: 12px !important;
-    padding: 8px 4px !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    max-height: 210px !important;
+    width: 48% !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    border-radius: 10px !important;
+    padding: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    max-height: 180px !important;
     overflow-y: auto !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
 }
 
-/* Logo Izgarası (Hizalama) */
+/* Logo Izgarası */
 .team-logo-options {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 5px !important;
+    gap: 6px !important;
     justify-content: center !important;
     width: 100% !important;
     padding: 2px 0 !important;
 }
 
-/* Logo Buton Boyutları */
+/* Logo Butonları */
 .team-logo-btn {
-    width: 32px !important; /* Boyut hafif küçültüldü ki 4'lü sıraya tam sığsın */
-    height: 32px !important;
+    width: 34px !important;
+    height: 34px !important;
     border-radius: 50% !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
@@ -1263,25 +1267,20 @@ local-team-body {
     padding: 2px !important;
     flex-shrink: 0 !important;
 }
+
 .team-logo-btn:hover {
     transform: scale(1.08) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.team-logo-btn.active {
-    border-color: #2ecc71 !important;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.25) !important;
-    transform: scale(1.06) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .team-logo-btn.active-p1 {
     border-color: #3498db !important;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.25) !important;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.5) !important;
 }
 
 .team-logo-btn.active-p2 {
     border-color: #e74c3c !important;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.25) !important;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.5) !important;
 }
 
 .team-logo-btn img {
@@ -1289,27 +1288,22 @@ local-team-body {
     height: 100% !important;
     object-fit: contain !important;
     border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.02) !important;
 }
 
-/* Oyuncu ismi KALDIRILDI */
-/* .local-player-name { ... } */
-
-/* ===== ALT AKSİYON BUTONLARI ===== */
+/* ALT AKSİYON BUTONLARI */
 .local-action-buttons {
     position: absolute !important;
-    bottom: 5% !important;
+    bottom: 3% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 6px !important;
     z-index: 10 !important;
     width: 90% !important;
     max-width: 340px !important;
 }
-
 
 /* ============================================================
    2 KİŞİLİK - MAÇA BAŞLA BUTONU (5px AŞAĞI)
