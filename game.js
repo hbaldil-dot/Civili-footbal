@@ -21,7 +21,11 @@ if (typeof io !== 'undefined') {
             reconnectionDelay: 1000
         });
 
-        socket.on('connect', () => console.log('✅ Sunucuya bağlandı!'));
+        socket.on('connect', () => {
+            console.log('✅ Sunucuya bağlandı!');
+            setupSocketListeners(); // Listeners'ı bağlandıktan sonra tetikleyin
+        });
+        
         socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
     } catch (e) {
         console.error("❌ Socket bağlantı hatası:", e);
@@ -1925,51 +1929,98 @@ function selectStadium(stadiumKey, texturePath) {
 // SOCKET OLAY DİNLEYİCİLERİ
 // ============================================================
 function getPlayerData() {
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+    // Profil nesnesi varsa oradan, yoksa input alanından al
+    const inputName = document.getElementById('player-name')?.value.trim();
+    const name = (playerProfile && playerProfile.username && playerProfile.username !== 'Oyuncu') 
+                 ? playerProfile.username 
+                 : (inputName || "Oyuncu_" + Math.floor(Math.random() * 100));
+
     return {
+        id: socket.id,
         name: name,
         logo: selectedTeamLogo || 'default.png'
     };
 }
 
+function openOnlineLobby() {
+    if (!socket || !socket.connected) { 
+        alert("Şu anda sunucuya bağlı değilsiniz! Lütfen internetinizi kontrol edin."); 
+        return; 
+    }
+    gameMode = 'online';
+    const playerData = getPlayerData();
+    
+    // Sunucuya lobiye katılma isteği atıyoruz
+    socket.emit("join-lobby", playerData);
+    
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('online-lobby').style.display = 'flex';
+}
+
 function setupSocketListeners() {
     if (!socket) return;
+
+    // Oyuncu listesi güncellemesi
     socket.on("update-lobby-players", (players) => {
         const listContainer = document.getElementById('lobby-list');
         if (!listContainer) return;
+        
         listContainer.innerHTML = "";
         let count = 0;
+
+        if (!Array.isArray(players)) return;
+
         players.forEach(p => {
-            if (p.id !== socket.id) {
+            // Kendi socket.id'mizi veya kullanıcı adımızı listede göstermiyoruz
+            const isMe = (p.id === socket.id) || (p.socketId === socket.id) || (p.name === getPlayerData().name);
+            
+            if (!isMe) {
                 count++;
                 const item = document.createElement('div');
                 item.className = 'player-item';
+
                 const infoSpan = document.createElement('span');
                 const logoImg = document.createElement('img');
-                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+                
+                // Logo yolu kontrolü
+                const teamLogo = p.logo || p.teamLogo || 'default.png';
+                logoImg.src = `takimlar/${teamLogo}`;
                 logoImg.className = 'lobby-logo';
                 logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+                
                 infoSpan.appendChild(logoImg);
+
                 const nameSpan = document.createElement('span');
-                nameSpan.textContent = ` ${p.name}`;
+                nameSpan.textContent = ` ${p.name || p.username || 'Oyuncu'}`;
                 infoSpan.appendChild(nameSpan);
+
                 const btn = document.createElement('button');
                 btn.className = 'status';
                 btn.innerText = 'Davet Et';
+                
+                // Target ID belirleme (MongoDB id veya Socket id)
+                const targetSocketId = p.id || p.socketId;
+                
                 btn.onclick = () => {
                     btn.innerText = "Bekleniyor...";
                     btn.style.background = "#e67e22";
-                    socket.emit("send-invite", p.id);
+                    btn.disabled = true;
+                    socket.emit("send-invite", targetSocketId);
                 };
+
                 item.appendChild(infoSpan);
                 item.appendChild(btn);
                 listContainer.appendChild(item);
             }
         });
+
         if (count === 0) {
-            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
+            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuzda başka oyuncu yok.</div>";
         }
     });
+
+    // ... Diğer socket eventleri (receive-invite, start-online-match vs.) aynı kalabilir ...
+}
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
             socket.emit("accept-invite", data.fromId);
