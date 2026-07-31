@@ -391,8 +391,9 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('pin-move-sync', { team, index, x, y });
     });
 // server.js içinde player-ready olayı
+// server.js içinde player-ready olayı
 socket.on('player-ready', (data) => {
-    const { roomId, pins, logo } = data;  // logo eklendi
+    const { roomId, pins, logo } = data;
     const room = activeRooms[roomId];
     if (!room) return;
     
@@ -404,7 +405,8 @@ socket.on('player-ready', (data) => {
         player.pins = pins;
     }
     if (logo) {
-        player.logo = logo;  // Logo kaydedildi
+        player.logo = logo;
+        console.log(`📊 ${player.name} logosu:`, logo);
     }
     
     console.log(`✅ ${player.name} hazır (${roomId})`);
@@ -431,6 +433,8 @@ socket.on('player-ready', (data) => {
         const guestPlayer = room.players.find(p => !p.isHost);
         
         console.log(`🎮 Maç başlıyor: ${roomId}`);
+        console.log(`📊 Host logo:`, hostPlayer?.logo);
+        console.log(`📊 Guest logo:`, guestPlayer?.logo);
         
         // Tüm pinleri topla
         const allPins = [];
@@ -442,20 +446,20 @@ socket.on('player-ready', (data) => {
             }
         });
         
-        // Host (Takım 1)
+        // Host (Takım 1) - Rakip logosu guest'in logosu
         io.to(hostPlayer.id).emit('match-start', {
             roomId,
             team: 1,
-            opponentLogo: guestPlayer?.logo || 'default.png',  // Rakip logosu
+            opponentLogo: guestPlayer?.logo || 'default.png',
             opponentPins: guestPlayer?.pins || [],
             allPins: allPins
         });
         
-        // Guest (Takım 2)
+        // Guest (Takım 2) - Rakip logosu host'un logosu
         io.to(guestPlayer.id).emit('match-start', {
             roomId,
             team: 2,
-            opponentLogo: hostPlayer?.logo || 'default.png',  // Rakip logosu
+            opponentLogo: hostPlayer?.logo || 'default.png',
             opponentPins: hostPlayer?.pins || [],
             allPins: allPins
         });
