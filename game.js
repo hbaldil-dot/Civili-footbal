@@ -115,21 +115,27 @@ function initSocket() {
     // ONLINE SENKRONİZASYON OLAYLARI
     // ============================================================
 
-    // MAÇ BAŞLANGICI
-    socket.on('match-start', function(data) {
-        console.log('🎮 MAÇ BAŞLANGIÇ VERİLERİ:', data);
-        currentRoomId = data.roomId;
-        myTeamNumber = data.team;
-        aiTeamLogo = data.opponentLogo || 'default.png';
-        isOnlineMatch = true;
-        
-        // Rakip pinlerini kaydet
-        opponentPinsData = data.opponentPins || [];
-        console.log('✅ Rakip pinleri kaydedildi:', opponentPinsData.length);
-        
-        document.getElementById('room-waiting').style.display = 'none';
-        startOnlineMatch();
-    });
+  // MAÇ BAŞLANGICI
+socket.on('match-start', function(data) {
+    console.log('🎮 MAÇ BAŞLANGIÇ VERİLERİ:', data);
+    currentRoomId = data.roomId;
+    myTeamNumber = data.team;
+    aiTeamLogo = data.opponentLogo || 'default.png';
+    isOnlineMatch = true;
+    
+    // Rakip pinlerini kaydet
+    opponentPinsData = data.opponentPins || [];
+    console.log('✅ Rakip pinleri kaydedildi:', opponentPinsData.length);
+    console.log('✅ Rakip logosu:', aiTeamLogo);
+    
+    // Rakip logosunu yükle
+    if (aiTeamLogo) {
+        loadTeamLogoImage(aiTeamLogo);
+    }
+    
+    document.getElementById('room-waiting').style.display = 'none';
+    startOnlineMatch();
+});
 
     // PIN HAREKETİ ALMA
     socket.on('pin-move-sync', function(data) {
@@ -413,10 +419,12 @@ function setReady() {
     }
     
     console.log('📤 HAZIR - Pin sayısı:', myPlacedPins.length);
+    console.log('📤 Benim logo:', selectedTeamLogo);
     
     socket.emit('player-ready', { 
         roomId: currentRoomId, 
-        pins: myPlacedPins 
+        pins: myPlacedPins,
+        logo: selectedTeamLogo || 'default.png'  // LOGO EKLENDİ
     });
     
     var btn = document.getElementById('player-ready-btn');
@@ -461,6 +469,7 @@ function sendPinMove(pin) {
 // ============================================================
 function startOnlineMatch() {
     console.log('🎮 Online maç başlıyor... Takım:', myTeamNumber);
+    console.log('📊 Rakip logosu:', aiTeamLogo);
     isOnlineMatch = true;
     
     document.getElementById('top-bar').style.display = 'flex';
@@ -469,8 +478,17 @@ function startOnlineMatch() {
     
     showField();
     
-    if (aiTeamLogo) loadTeamLogoImage(aiTeamLogo);
-    setTimeout(function() { updateScoreLogos(); }, 100);
+    // Kendi logosunu ve rakip logosunu yükle
+    if (selectedTeamLogo) {
+        loadTeamLogoImage(selectedTeamLogo);
+    }
+    if (aiTeamLogo) {
+        loadTeamLogoImage(aiTeamLogo);
+    }
+    
+    setTimeout(function() { 
+        updateScoreLogos(); 
+    }, 100);
     
     startOnlineSetupPhase();
 }
@@ -981,41 +999,52 @@ function draw() {
         ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
     }
 
-    for (var i = 0; i < pins.length; i++) {
-        var pin = pins[i];
-        if (pin.isPost) {
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            var logoFile = 'default.png';
-            if (pin.team === 1) {
-                if (gameMode === 'local' && localPlayer1Logo) {
-                    logoFile = localPlayer1Logo;
-                } else if (gameMode === 'online' && myTeamNumber === 2) {
-                    logoFile = aiTeamLogo || 'default.png';
-                } else {
+  // draw fonksiyonu içinde, pins.forEach veya for döngüsü içindeki logo seçim kısmı
+for (var i = 0; i < pins.length; i++) {
+    var pin = pins[i];
+    if (pin.isPost) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(pin.x, pin.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        var logoFile = 'default.png';
+        if (pin.team === 1) {
+            if (gameMode === 'local' && localPlayer1Logo) {
+                logoFile = localPlayer1Logo;
+            } else if (gameMode === 'online') {
+                // ONLINE: Takım 1 ise
+                if (myTeamNumber === 1) {
+                    // Ben Takım 1 ise kendi logomu göster
                     logoFile = selectedTeamLogo || 'default.png';
-                }
-            } else if (pin.team === 2) {
-                if (gameMode === 'ai') {
-                    logoFile = aiTeamLogo || 'default.png';
-                } else if (gameMode === 'local' && localPlayer2Logo) {
-                    logoFile = localPlayer2Logo;
-                } else if (gameMode === 'online') {
-                    if (myTeamNumber === 1) {
-                        logoFile = aiTeamLogo || 'default.png';
-                    } else {
-                        logoFile = selectedTeamLogo || 'default.png';
-                    }
                 } else {
-                    logoFile = 'default.png';
+                    // Ben Takım 2 ise rakip logomu göster
+                    logoFile = aiTeamLogo || 'default.png';
                 }
+            } else {
+                logoFile = selectedTeamLogo || 'default.png';
             }
-            drawPlayerWithLogo(pin.x, pin.y, logoFile);
+        } else if (pin.team === 2) {
+            if (gameMode === 'ai') {
+                logoFile = aiTeamLogo || 'default.png';
+            } else if (gameMode === 'local' && localPlayer2Logo) {
+                logoFile = localPlayer2Logo;
+            } else if (gameMode === 'online') {
+                // ONLINE: Takım 2 ise
+                if (myTeamNumber === 2) {
+                    // Ben Takım 2 ise kendi logomu göster
+                    logoFile = selectedTeamLogo || 'default.png';
+                } else {
+                    // Ben Takım 1 ise rakip logomu göster
+                    logoFile = aiTeamLogo || 'default.png';
+                }
+            } else {
+                logoFile = 'default.png';
+            }
         }
+        drawPlayerWithLogo(pin.x, pin.y, logoFile);
     }
+}
 
     if (currentPhase === 'playing' && isDraggingBall) {
         var dx = dragStart.x - dragCurrent.x;
@@ -2105,19 +2134,30 @@ function updateScoreLogos() {
     if (logoP1) {
         if (gameMode === 'local' && localPlayer1Logo) {
             logoP1.src = 'takimlar/' + localPlayer1Logo;
-        } else if (gameMode === 'online' && myTeamNumber === 2) {
-            logoP1.src = 'takimlar/' + (aiTeamLogo || 'default.png');
+        } else if (gameMode === 'online') {
+            // ONLINE: Takım 1 logosu
+            if (myTeamNumber === 1) {
+                logoP1.src = 'takimlar/' + (selectedTeamLogo || 'default.png');
+            } else {
+                logoP1.src = 'takimlar/' + (aiTeamLogo || 'default.png');
+            }
         } else {
             logoP1.src = selectedTeamLogo ? 'takimlar/' + selectedTeamLogo : 'takimlar/default.png';
         }
         logoP1.onerror = function() { this.src = 'takimlar/default.png'; };
     }
+    
     var logoP2 = document.getElementById('score-logo-p2');
     if (logoP2) {
         if (gameMode === 'local' && localPlayer2Logo) {
             logoP2.src = 'takimlar/' + localPlayer2Logo;
-        } else if (gameMode === 'online' && myTeamNumber === 1) {
-            logoP2.src = 'takimlar/' + (aiTeamLogo || 'default.png');
+        } else if (gameMode === 'online') {
+            // ONLINE: Takım 2 logosu
+            if (myTeamNumber === 2) {
+                logoP2.src = 'takimlar/' + (selectedTeamLogo || 'default.png');
+            } else {
+                logoP2.src = 'takimlar/' + (aiTeamLogo || 'default.png');
+            }
         } else if (gameMode === 'ai') {
             logoP2.src = 'takimlar/' + (aiTeamLogo || 'default.png');
         } else {
