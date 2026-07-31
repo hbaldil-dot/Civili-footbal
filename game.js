@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
     
-    console.log('✅ Sayfa yüklendi, online mod test için hazır!');
+    console.log('✅ Sayfa yüklendi,  mod test için hazır!');
 });
 
 // ============================================================
@@ -351,7 +351,7 @@ function draw() {
     
     ctx.save();
 
-    if (gameMode === 'online' && myTeamNumber === 2) {
+    if (gameMode === '' && myTeamNumber === 2) {
         ctx.translate(width / 2, height / 2);
         ctx.rotate(Math.PI);
         ctx.translate(-width / 2, -height / 2);
@@ -432,7 +432,7 @@ function draw() {
             if (pin.team === 1) {
                 if (gameMode === 'local' && localPlayer1Logo) {
                     logoFile = localPlayer1Logo;
-                } else if (gameMode === 'online' && myTeamNumber === 2) {
+                } else if (gameMode === '' && myTeamNumber === 2) {
                     logoFile = aiTeamLogo || 'default.png';
                 } else {
                     logoFile = selectedTeamLogo || 'default.png';
@@ -442,7 +442,7 @@ function draw() {
                     logoFile = aiTeamLogo || 'default.png';
                 } else if (gameMode === 'local' && localPlayer2Logo) {
                     logoFile = localPlayer2Logo;
-                } else if (gameMode === 'online') {
+                } else if (gameMode === '') {
                     if (myTeamNumber === 1) {
                         logoFile = aiTeamLogo || 'default.png';
                     } else {
@@ -527,7 +527,7 @@ function draw() {
         if (alpha < 0.01) alpha = 0;
         if (scale < 0.01) scale = 0;
         
-        if (gameMode === 'online' && myTeamNumber === 2) {
+        if (gameMode === '' && myTeamNumber === 2) {
             ctx.save();
             ctx.translate(width / 2, height / 2);
             ctx.rotate(Math.PI);
@@ -621,7 +621,7 @@ function draw() {
             }
         }
         ctx.restore();
-        if (gameMode === 'online' && myTeamNumber === 2) {
+        if (gameMode === '' && myTeamNumber === 2) {
             ctx.restore();
         }
         if (progress >= 1) {
@@ -839,22 +839,65 @@ function startLocalGame(mode, level) {
     startSetupPhase();
 }
 
+// ============================================================
+// ONLINE LOBBY FONKSİYONLARI (DÜZELTİLMİŞ)
+// ============================================================
+
 function openOnlineLobby() {
+    console.log('🌐 Online lobi açılıyor...');
+    
     if (!socket) { 
-        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
+        alert("❌ Sunucuya bağlı değilsiniz! Lütfen sayfayı yenileyin.");
         return; 
     }
-    gameMode = 'online';
+    
+    if (!socket.connected) {
+        alert("⚠️ Sunucu bağlantısı kurulamadı. Tekrar deneyin.");
+        socket.connect();
+        return;
+    }
+    
+    // Önce lobiye katıl
     const playerData = getPlayerData();
+    console.log('📤 Oyuncu verileri gönderiliyor:', playerData);
     socket.emit("join-lobby", playerData);
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('online-lobby').style.display = 'flex';
+    
+    // Menüyü gizle, lobiyi göster
+    const menu = document.getElementById('menu');
+    if (menu) menu.style.display = 'none';
+    
+    const lobby = document.getElementById('online-lobby');
+    if (lobby) {
+        lobby.style.display = 'flex';
+        lobby.style.visibility = 'visible';
+        lobby.style.opacity = '1';
+        console.log('✅ Online lobi açıldı');
+    } else {
+        console.error('❌ online-lobby elementi bulunamadı!');
+    }
 }
 
 function closeOnlineLobby() {
-    if (socket) socket.emit("leave-lobby");
-    document.getElementById('online-lobby').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
+    console.log('🌐 Online lobi kapatılıyor...');
+    
+    if (socket) {
+        socket.emit("leave-lobby");
+        console.log('📤 Lobi terk edildi');
+    }
+    
+    const lobby = document.getElementById('online-lobby');
+    if (lobby) {
+        lobby.style.display = 'none';
+        lobby.style.visibility = 'hidden';
+        lobby.style.opacity = '0';
+    }
+    
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    console.log('✅ Online lobi kapatıldı');
 }
 
 function startSetupPhase() {
