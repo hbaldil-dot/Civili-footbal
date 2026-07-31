@@ -116,35 +116,55 @@ function initSocket() {
     // ============================================================
 
   // MAÇ BAŞLANGICI - GÜNCELLENMİŞ
+// MAÇ BAŞLANGICI - GÜNCELLENMİŞ
 socket.on('match-start', function(data) {
     console.log('🎮 MAÇ BAŞLANGIÇ VERİLERİ:', data);
-    console.log('📊 Benim takımım:', data.team);
-    console.log('📊 Rakip logosu:', data.opponentLogo);
-    console.log('📊 Rakip pinleri:', data.opponentPins);
     
     currentRoomId = data.roomId;
-    myTeamNumber = data.team;
+    isHost = data.isHost;              // <-- EKLENDİ: Host mu Misafir mi?
+    myTeamNumber = data.isHost ? 1 : 2; // <-- EKLENDİ
     isOnlineMatch = true;
-    
+
     // Rakip logosunu kaydet
     if (data.opponentLogo) {
         aiTeamLogo = data.opponentLogo;
         console.log('✅ Rakip logosu kaydedildi:', aiTeamLogo);
-        // Rakip logosunu hemen yükle
         loadTeamLogoImage(aiTeamLogo);
     } else {
         aiTeamLogo = 'default.png';
         console.warn('⚠️ Rakip logosu gelmedi, default kullanılacak');
     }
-    
+
     // Rakip pinlerini kaydet
     opponentPinsData = data.opponentPins || [];
     console.log('✅ Rakip pinleri kaydedildi:', opponentPinsData.length);
-    
+
     document.getElementById('room-waiting').style.display = 'none';
     startOnlineMatch();
+
+    // ========================================================
+    // 🔥 EKLENEN KISIM: EĞER HOST İSEK SAHAYI DİĞER OYUNCUYA GÖNDER
+    // ========================================================
+    if (isHost) {
+        const initialGameState = {
+            pins: getPinsData(), // Sahadaki pin koordinatlarınız
+            ball: getNormalizedBallState(ball, canvas.width, canvas.height)
+        };
+        socket.emit('sync-initial-field', { roomId: currentRoomId, gameState: initialGameState });
+    }
 });
 
+// ========================================================
+// 🔥 EKLENEN KISIM: MİSAFİR OYUNCU HOST'TAN GELEN SAHAYI YÜKLER
+// (Hemen match-start bloğunun altına ekleyebilirsiniz)
+// ========================================================
+socket.on('load-initial-field', function(gameState) {
+    if (!isHost) {
+        console.log("📌 Host'un sahası ve pinleri yüklendi!");
+        applyPinsData(gameState.pins);
+        applyBallState(gameState.ball);
+    }
+});
     // PIN HAREKETİ ALMA
     socket.on('pin-move-sync', function(data) {
         console.log('📥 PIN HAREKETİ ALINDI:', data);
@@ -228,6 +248,26 @@ function makeShot(startX, endY, startY, endX) {
                 endY: endY
             }
         });
+    }
+}
+// game.js içindeki mevcut gol kontrol fonksiyonunuz (Örn: checkGoal veya updatePhysics içi):
+
+function checkGoal() {
+    // ... Sizin mevcut gol atıldı mı kontrolünüz ...
+    if (topKaleCizgisiniGecti) {
+        
+        // --- İŞTE BURAYA EKLENECEK ---
+        if (isOnlineMatch) {
+            socket.emit('send-goal', {
+                roomId: currentRoomId,
+                goalData: {
+                    scorer: golAtanTakim,
+                    scoreTeam1: score1,
+                    scoreTeam2: score2
+                }
+            });
+        }
+        // -----------------------------
     }
 }
 // Top durduğunda kesin konumu sabitle
@@ -3128,4 +3168,21 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTeamLogoImage(selectedTeamLogo);
     selectRandomAITeam();
     console.log('✅ Sayfa yüklendi!');
+});
+// ==========================================
+// ONLINE GOL DİNLENMESİ (game.js - En Alt Kısım)
+// ==========================================
+socket.on('on-goal-scored', function(goalData) {
+    console.log('⚽ GOL DETAYLARI ALINDI:', goalData);
+    
+    // Her iki ekranda skorları eşitle
+    score1 = goalData.scoreTeam1;
+    score2 = goalData.scoreTeam2;
+    
+    // Ekrana skoru bas ve animasyonları çalıştır
+    if (typeof updateScoreboardUI === 'function') updateScoreboardUI();
+    if (typeof triggerGoalAnimation === 'function') triggerGoalAnimation();
+    
+    // Topu sıfırla (Santra yap)
+    if (typeof resetBallAndPositions === 'function') resetBallAndPositions();
 });
