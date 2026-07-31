@@ -2639,7 +2639,21 @@ function openOnlineLobby() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'flex';
 }
+function skipAuthAndPlay() {
+    // Rastgele misafir adı oluştur
+    const guestName = "Misafir_" + Math.floor(1000 + Math.random() * 9000);
+    
+    playerProfile = { username: guestName };
 
+    // Kayıt Penceresini Kapat
+    const authModal = document.getElementById('auth-modal');
+    if (authModal) authModal.style.display = 'none';
+
+    // Lobiye Geç
+    if (typeof openOnlineLobby === 'function') {
+        openOnlineLobby();
+    }
+}
 function closeOnlineLobby() {
     if (socket) socket.emit("leave-lobby");
     document.getElementById('online-lobby').style.display = 'none';
