@@ -18,48 +18,32 @@ const io = new Server(server, {
 // MONGODB BAĞLANTISI - DÜZELTİLMİŞ
 // ============================================================
 
+const uri = "mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/civili-futbol?retryWrites=true&w=majority&appName=hbaldil";
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/?appName=hbaldil";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
+async function connectDB() {
+    try {
+        await mongoose.connect(uri);
+        console.log("✅ MongoDB bağlantısı Mongoose ile başarıyla kuruldu!");
+    } catch (err) {
+        console.error("❌ MongoDB bağlantı hatası:", err.message);
+        setTimeout(connectDB, 5000);
+    }
 }
-run().catch(console.dir);
 
 // Bağlantı olaylarını dinle
 mongoose.connection.on('connected', () => {
-    console.log('✅ MongoDB bağlandı');
+    console.log('✅ Mongoose veritabanına bağlandı');
 });
 
 mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB bağlantı hatası:', err.message);
+    console.error('❌ Mongoose bağlantı hatası:', err.message);
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('⚠️ MongoDB bağlantısı kesildi, yeniden bağlanılıyor...');
-    setTimeout(connectDB, 3000);
+    console.warn('⚠️ Mongoose bağlantısı kesildi, yeniden bağlanılıyor...');
 });
 
-// Uygulama kapanırken bağlantıyı kapat
+// Uygulama kapanırken bağlantıyı güvenli kapat
 process.on('SIGINT', async () => {
     await mongoose.connection.close();
     console.log('✅ MongoDB bağlantısı kapatıldı');
@@ -68,7 +52,6 @@ process.on('SIGINT', async () => {
 
 // Bağlantıyı başlat
 connectDB();
-
 // ============================================================
 // KULLANICI ŞEMASI (MODEL)
 // ============================================================
