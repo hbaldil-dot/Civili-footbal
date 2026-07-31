@@ -390,76 +390,77 @@ io.on('connection', (socket) => {
         const { roomId, team, index, x, y } = data;
         socket.to(roomId).emit('pin-move-sync', { team, index, x, y });
     });
-
-    // Oyuncu hazır olduğunda
-    socket.on('player-ready', (data) => {
-        const { roomId, pins } = data;
-        const room = activeRooms[roomId];
-        if (!room) return;
-        
-        const player = room.players.find(p => p.id === socket.id);
-        if (!player) return;
-        
-        player.isReady = true;
-        if (pins) {
-            player.pins = pins;
+// server.js içinde player-ready olayı
+socket.on('player-ready', (data) => {
+    const { roomId, pins, logo } = data;  // logo eklendi
+    const room = activeRooms[roomId];
+    if (!room) return;
+    
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player) return;
+    
+    player.isReady = true;
+    if (pins) {
+        player.pins = pins;
+    }
+    if (logo) {
+        player.logo = logo;  // Logo kaydedildi
+    }
+    
+    console.log(`✅ ${player.name} hazır (${roomId})`);
+    
+    // Oda güncellemesi
+    io.to(roomId).emit('room-update', {
+        roomId,
+        playerCount: room.players.length,
+        players: room.players
+    });
+    
+    // Rakibe hazır olduğunu bildir
+    room.players.forEach(p => {
+        if (p.id !== socket.id) {
+            io.to(p.id).emit('opponent-ready');
         }
+    });
+    
+    // Her iki oyuncu da hazırsa maçı başlat
+    const allReady = room.players.every(p => p.isReady === true);
+    if (allReady && room.players.length === 2) {
+        room.started = true;
+        const hostPlayer = room.players.find(p => p.isHost);
+        const guestPlayer = room.players.find(p => !p.isHost);
         
-        console.log(`✅ ${player.name} hazır (${roomId})`);
+        console.log(`🎮 Maç başlıyor: ${roomId}`);
         
-        // Oda güncellemesi
-        io.to(roomId).emit('room-update', {
-            roomId,
-            playerCount: room.players.length,
-            players: room.players
-        });
-        
-        // Rakibe hazır olduğunu bildir
+        // Tüm pinleri topla
+        const allPins = [];
         room.players.forEach(p => {
-            if (p.id !== socket.id) {
-                io.to(p.id).emit('opponent-ready');
+            if (p.pins && p.pins.length > 0) {
+                p.pins.forEach(pin => {
+                    allPins.push({ x: pin.x, y: pin.y, team: p.id === hostPlayer?.id ? 1 : 2 });
+                });
             }
         });
         
-        // Her iki oyuncu da hazırsa maçı başlat
-        const allReady = room.players.every(p => p.isReady === true);
-        if (allReady && room.players.length === 2) {
-            room.started = true;
-            const hostPlayer = room.players.find(p => p.isHost);
-            const guestPlayer = room.players.find(p => !p.isHost);
-            
-            console.log(`🎮 Maç başlıyor: ${roomId}`);
-            
-            // HER İKİ OYUNCUNUN DA TÜM PIN'LERİNİ GÖNDER
-            const allPins = [];
-            room.players.forEach(p => {
-                if (p.pins && p.pins.length > 0) {
-                    p.pins.forEach(pin => {
-                        allPins.push({ x: pin.x, y: pin.y, team: p.id === hostPlayer?.id ? 1 : 2 });
-                    });
-                }
-            });
-            
-            // Host (Takım 1)
-            io.to(hostPlayer.id).emit('match-start', {
-                roomId,
-                team: 1,
-                opponentLogo: guestPlayer?.logo || 'default.png',
-                allPins: allPins,
-                opponentPins: guestPlayer?.pins || []
-            });
-            
-            // Guest (Takım 2)
-            io.to(guestPlayer.id).emit('match-start', {
-                roomId,
-                team: 2,
-                opponentLogo: hostPlayer?.logo || 'default.png',
-                allPins: allPins,
-                opponentPins: hostPlayer?.pins || []
-            });
-        }
-    });
-
+        // Host (Takım 1)
+        io.to(hostPlayer.id).emit('match-start', {
+            roomId,
+            team: 1,
+            opponentLogo: guestPlayer?.logo || 'default.png',  // Rakip logosu
+            opponentPins: guestPlayer?.pins || [],
+            allPins: allPins
+        });
+        
+        // Guest (Takım 2)
+        io.to(guestPlayer.id).emit('match-start', {
+            roomId,
+            team: 2,
+            opponentLogo: hostPlayer?.logo || 'default.png',  // Rakip logosu
+            opponentPins: hostPlayer?.pins || [],
+            allPins: allPins
+        });
+    }
+});
     // ============================================================
     // OYUN SİSTEMİ - SENKRONİZASYON
     // ============================================================
