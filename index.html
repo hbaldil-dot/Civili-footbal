@@ -268,42 +268,40 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         ODA BEKLEME EKRANI (YENİ - ONLINE LOBBY'DEN SONRA EKLE)
-         ============================================================ -->
-    <div id="room-waiting" style="display: none;" onclick="if(event.target===this) leaveRoom()">
-        <div class="popup-content room-waiting-content">
-            <div class="room-waiting-bg">
-                <div class="room-waiting-overlay">
-                    <div class="room-header">
-                        <h2>🏠 ODA</h2>
-                        <button class="room-close" onclick="leaveRoom()">✕</button>
+   <!-- ODA BEKLEME EKRANI -->
+<div id="room-waiting" style="display: none;" onclick="if(event.target===this) leaveRoom()">
+    <div class="popup-content room-waiting-content">
+        <div class="room-waiting-bg">
+            <div class="room-waiting-overlay">
+                <div class="room-header">
+                    <h2>🏠 ODA</h2>
+                    <button class="room-close" onclick="leaveRoom()">✕</button>
+                </div>
+                <div class="room-code-area">
+                    <span class="room-code-label">🔑 ODA KODU</span>
+                    <div class="room-code-display" id="room-code-display">------</div>
+                </div>
+                <div class="room-players-area">
+                    <div class="room-players-header">
+                        <span>👥 Oyuncular</span>
+                        <span id="room-player-count">1/2</span>
                     </div>
-                    <div class="room-code-area">
-                        <span class="room-code-label">🔑 ODA KODU</span>
-                        <div class="room-code-display" id="room-code-display">------</div>
+                    <div id="room-player-list" class="room-players-list">
+                        <!-- JavaScript ile doldurulacak -->
                     </div>
-                    <div class="room-players-area">
-                        <div class="room-players-header">
-                            <span>👥 Oyuncular</span>
-                            <span id="room-player-count">1/2</span>
-                        </div>
-                        <div id="room-player-list" class="room-players-list">
-                            <div class="room-player">Sen 👑 ⏳</div>
-                        </div>
-                    </div>
-                    <div class="room-opponent-status">
-                        <span>Rakip:</span>
-                        <span id="opponent-status" style="color:#f1c40f;">⏳ Bekleniyor...</span>
-                    </div>
-                    <div class="room-actions">
-                        <button id="player-ready-btn" class="room-ready-btn" onclick="setReady()">✅ HAZIRIM</button>
-                        <button class="room-leave-btn" onclick="leaveRoom()">🚪 AYRIL</button>
-                    </div>
+                </div>
+                <div class="room-opponent-status">
+                    <span>Rakip:</span>
+                    <span id="opponent-status" style="color:#f1c40f;">⏳ Bekleniyor...</span>
+                </div>
+                <div class="room-actions">
+                    <button id="player-ready-btn" class="room-ready-btn" onclick="setReady()">✅ HAZIRIM</button>
+                    <button class="room-leave-btn" onclick="leaveRoom()">🚪 AYRIL</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- ============================================================
          2 KİŞİLİK TAKIM SEÇ POP-UP
