@@ -776,7 +776,7 @@ body::before {
 }
 
 .settings-btn-img {
-    width: 100% !important;  /* Oyun butonlarına yakın bir boyut */
+    width: 110% !important;  /* Oyun butonlarına yakın bir boyut */
     max-width: 160px !important;
     display: block !important;
     cursor: pointer !important;
@@ -788,17 +788,17 @@ body::before {
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.05) !important; /* Hafif büyüme */
+    transform: scale(1.65) !important; /* Hafif büyüme */
     opacity: 1 !important;
 }
 
 .settings-btn-img:active {
-    transform: scale(0.95) !important;
+    transform: scale(2.95) !important;
 }
 
 /* En alttaki 'Ana Menü' butonu için ayrı ayar */
 .settings-btn-img:last-child {
-    width: 40% !important;
+    width: 60% !important;
     max-width: 100px !important;
     margin-top: 10px !important;
     transform: none !important;
@@ -808,7 +808,7 @@ body::before {
 }
 
 .settings-btn-img:last-child {
-    transform: scale(0.60) !important;
+    transform: scale(0.90) !important;
     margin-top: 4px !important;
 }
 
