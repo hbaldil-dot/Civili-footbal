@@ -1522,7 +1522,7 @@ body::before {
     }
 }
 /* ============================================================
-   ONLINE LOBBY - YENİ STİLLER
+   ONLINE LOBBY STİLLERİ (YENİ)
    ============================================================ */
 
 #online-lobby {
@@ -1570,7 +1570,6 @@ body::before {
     border-radius: 20px !important;
 }
 
-/* Header */
 .online-header {
     display: flex !important;
     align-items: center !important;
@@ -1608,7 +1607,6 @@ body::before {
     padding: 0 4px !important;
 }
 
-/* Oyuncu Listesi */
 .online-players-section {
     flex: 1 !important;
     margin: 8px 0 !important;
@@ -1639,13 +1637,8 @@ body::before {
     border-bottom: 1px solid rgba(255,255,255,0.02) !important;
 }
 
-.lobby-player:last-child {
-    border-bottom: none !important;
-}
-
-.lobby-player.me {
-    background: rgba(46, 204, 113, 0.05) !important;
-}
+.lobby-player:last-child { border-bottom: none !important; }
+.lobby-player.me { background: rgba(46, 204, 113, 0.05) !important; }
 
 .lobby-player-info {
     display: flex !important;
@@ -1677,11 +1670,8 @@ body::before {
     transition: all 0.2s ease !important;
 }
 
-.lobby-invite-btn:hover {
-    background: rgba(46, 204, 113, 0.25) !important;
-}
+.lobby-invite-btn:hover { background: rgba(46, 204, 113, 0.25) !important; }
 
-/* Oda İşlemleri */
 .online-room-section {
     display: flex !important;
     flex-direction: column !important;
@@ -1695,9 +1685,7 @@ body::before {
     width: 100% !important;
 }
 
-.join-row {
-    gap: 6px !important;
-}
+.join-row { gap: 6px !important; }
 
 .online-btn {
     flex: 1 !important;
@@ -1718,9 +1706,7 @@ body::before {
     border: 1px solid rgba(46, 204, 113, 0.2) !important;
 }
 
-.online-btn.primary:hover {
-    background: rgba(46, 204, 113, 0.35) !important;
-}
+.online-btn.primary:hover { background: rgba(46, 204, 113, 0.35) !important; }
 
 .online-btn.secondary {
     background: rgba(52, 152, 219, 0.2) !important;
@@ -1729,9 +1715,7 @@ body::before {
     flex: 0.5 !important;
 }
 
-.online-btn.secondary:hover {
-    background: rgba(52, 152, 219, 0.3) !important;
-}
+.online-btn.secondary:hover { background: rgba(52, 152, 219, 0.3) !important; }
 
 .online-input {
     flex: 1 !important;
@@ -1747,9 +1731,7 @@ body::before {
     outline: none !important;
 }
 
-.online-input:focus {
-    border-color: rgba(52, 152, 219, 0.3) !important;
-}
+.online-input:focus { border-color: rgba(52, 152, 219, 0.3) !important; }
 
 .online-footer {
     display: flex !important;
@@ -1761,8 +1743,7 @@ body::before {
     width: 30% !important;
     max-width: 90px !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease !important;
-}
+    transition: transform 0.15
 
 .online-menu-btn:active {
     transform: scale(0.95) !important;
