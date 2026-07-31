@@ -887,7 +887,7 @@ function executeAIShot(target, params) {
         }
     }, params.reactionDelay + extraDelay);
 }
-}
+
 function executeFakeShot(target, params) {
     // Sahte vuruş: Önce farklı bir açıya çek, sonra hedefe vur
     const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
@@ -932,6 +932,7 @@ function executeFakeShot(target, params) {
         }, 200);
     }, params.reactionDelay * 0.6);
 }
+
 // ============================================================
 // OYUN FONKSİYONLARI
 // ============================================================
@@ -1608,7 +1609,7 @@ function updateScoreLogos() {
         if (gameMode === 'local' && localPlayer2Logo) {
             logoP2.src = `takimlar/${localPlayer2Logo}`;
         } else if (gameMode === 'online' && myTeamNumber === 1) {
-            logoP2.src = `takimlar/${aiTeamLogo || fb.png'}`;
+            logoP2.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
         } else if (gameMode === 'ai') {
             logoP2.src = `takimlar/${aiTeamLogo || 'fb.png'}`;
         } else {
@@ -1630,10 +1631,10 @@ function loadTeamLogoImage(logoFile) {
             resolve(img);
         };
         // DOĞRU: onerror tetiklendiğinde döngüyü engeller
-img.onerror = function() {
-    this.onerror = null; // Tekrar tekrar hata tetiklenmesini önler
-    this.src = '/takimlar/fb.png'; // veya boş bir data-URI
-};
+        img.onerror = function() {
+            this.onerror = null; // Tekrar tekrar hata tetiklenmesini önler
+            this.src = '/takimlar/fb.png'; // veya boş bir data-URI
+        };
         img.src = `takimlar/${logoFile}`;
     });
 }
@@ -3201,3 +3202,4 @@ if (socket) {
         }
     });
 }
+[file content end]
