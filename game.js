@@ -3203,3 +3203,61 @@ if (socket) {
     });
 }
 [file content end]
+// ============================================================
+// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ)
+// ============================================================
+
+// Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
+function switchAuthTab(tab) {
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const formForgot = document.getElementById('form-forgot');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+
+    if (!formLogin || !formRegister || !formForgot) return;
+
+    // Tüm formları gizle
+    formLogin.classList.add('hidden');
+    formRegister.classList.add('hidden');
+    formForgot.classList.add('hidden');
+    
+    // Tab butonlarından active sınıfını kaldır
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+
+    // Seçilen sekmeyi göster ve active yap
+    if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        if (tabLogin) tabLogin.classList.add('active');
+    } else if (tab === 'register') {
+        formRegister.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.add('active');
+    } else if (tab === 'forgot') {
+        formForgot.classList.remove('hidden');
+    }
+}
+
+// Misafir Olarak Devam Et
+function continueAsGuest() {
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.add('hidden'); // Giriş ekranını gizle
+    }
+    
+    // Ana menünün görünür olduğundan emin ol
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    console.log("🎮 Misafir olarak giriş yapıldı.");
+}
+
+// Auth Modalını Kapatma (Kullanılmıyorsa da ekleyelim)
+function closeAuthModal() {
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.add('hidden');
+    }
+}
