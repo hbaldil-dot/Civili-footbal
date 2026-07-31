@@ -34,29 +34,110 @@ let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 
 // ============================================================
-// SOCKET BAĞLANTISI
+// SOCKET OLAY DİNLEYİCİLERİ (KONTROL)
 // ============================================================
-let socket = null;
-if (typeof io !== 'undefined') {
-    try {
-        const serverUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? undefined
-            : window.location.origin;
 
-        socket = io(serverUrl, {
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
-        });
-
-        socket.on('connect', () => console.log('✅ Sunucuya bağlandı!'));
-        socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
-    } catch (e) {
-        console.error("❌ Socket bağlantı hatası:", e);
+function setupSocketListeners() {
+    if (!socket) {
+        console.warn('⚠️ Socket bağlantısı yok!');
+        return;
     }
+    
+    console.log('🔄 Socket dinleyiciler kuruluyor...');
+    
+    socket.on("connect", () => {
+        console.log('✅ Sunucuya bağlandı! Socket ID:', socket.id);
+    });
+    
+    socket.on("connect_error", (error) => {
+        console.warn('⚠️ Bağlantı hatası:', error);
+    });
+    
+    socket.on("update-lobby-players", (players) => {
+        console.log('📋 Lobi güncellendi, oyuncular:', players);
+        const listContainer = document.getElementById('lobby-list');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = "";
+        let count = 0;
+        
+        players.forEach(p => {
+            if (p.id !== socket.id) {
+                count++;
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                const infoSpan = document.createElement('span');
+                
+                const logoImg = document.createElement('img');
+                logoImg.src = `takimlar/${p.logo || 'default.png'}`;
+                logoImg.className = 'lobby-logo';
+                logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
+                infoSpan.appendChild(logoImg);
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = ` ${p.name}`;
+                infoSpan.appendChild(nameSpan);
+                
+                const btn = document.createElement('button');
+                btn.className = 'status';
+                btn.innerText = 'Davet Et';
+                btn.onclick = () => {
+                    btn.innerText = "Bekleniyor...";
+                    btn.style.background = "#e67e22";
+                    socket.emit("send-invite", p.id);
+                };
+                
+                item.appendChild(infoSpan);
+                item.appendChild(btn);
+                listContainer.appendChild(item);
+            }
+        });
+        
+        if (count === 0) {
+            listContainer.innerHTML = `<div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">🔄 Oyuncu bekleniyor...</div>`;
+        }
+    });
+    
+    socket.on("receive-invite", (data) => {
+        console.log('📨 Davet alındı:', data);
+        if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+            socket.emit("accept-invite", data.fromId);
+        }
+    });
+    
+    socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
+        console.log('⚽ Maç başlıyor! Oda:', roomId, 'Takım:', team, 'Rakip logosu:', opponentLogo);
+        currentRoomId = roomId;
+        myTeamNumber = team;
+        aiTeamLogo = opponentLogo || 'default.png';
+        
+        loadTeamLogoImage(aiTeamLogo);
+        document.getElementById('online-lobby').style.display = 'none';
+        document.getElementById('top-bar').style.display = 'flex';
+        
+        matchSecondsLeft = MATCH_DURATION;
+        const timeBoard = document.getElementById('time-board');
+        if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+        
+        setTimeout(() => {
+            updateScoreLogos();
+        }, 100);
+        
+        startSetupPhase();
+    });
+    
+    socket.on("opponent-disconnected", () => {
+        alert("⚠️ Rakip oyundan ayrıldı.");
+        exitToMenu();
+    });
+    
+    console.log('✅ Socket dinleyiciler kuruldu');
 }
 
+// Socket dinleyicileri başlat
+if (socket) {
+    setupSocketListeners();
+}
 // ============================================================
 // SAHA GÖSTER/GİZLE
 // ============================================================
