@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,13 +18,103 @@ const io = new Server(server, {
 });
 
 // ============================================================
-// STATIC DOSYALAR
+// MONGODB BAĞLANTISI
+// ============================================================
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://hbaldil_db_user:8OZyS1gIcgLVLAtd@hbaldil.0whzqhn.mongodb.net/civili-futbol?retryWrites=true&w=majority";
+
+async function connectDB() {
+    try {
+        await mongoose.connect(MONGO_URI);
+        console.log('✅ MongoDB Mongoose ile başarıyla bağlandı');
+    } catch (err) {
+        console.error('❌ MongoDB bağlantı hatası:', err.message);
+        // 5 saniye sonra yeniden dene
+        setTimeout(connectDB, 5000);
+    }
+}
+
+// Bağlantı Olayları Dinleyicileri
+mongoose.connection.on('disconnected', () => {
+    console.log('⚠️ MongoDB bağlantısı kesildi, yeniden bağlanılıyor...');
+    setTimeout(connectDB, 5000);
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB bağlantı hatası:', err);
+});
+
+process.on('SIGINT', async () => {
+    await mongoose.connection.close();
+    console.log('✅ MongoDB bağlantısı kapatıldı');
+    process.exit(0);
+});
+
+// Veritabanı Bağlantısını Başlat
+connectDB();
+
+// ============================================================
+// KULLANICI ŞEMASI (MODEL)
+// ============================================================
+const userSchema = new mongoose.Schema({
+    username: { 
+        type: String, 
+        required: true,
+        trim: true,
+        minlength: 2,
+        maxlength: 30
+    },
+    email: { 
+        type: String, 
+        required: true, 
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    password: { 
+        type: String, 
+        required: true 
+    },
+    teamLogo: {
+        type: String,
+        default: 'default.png'
+    },
+    createdAt: { 
+        type: Date, 
+        default: Date.now 
+    },
+    lastLogin: { 
+        type: Date, 
+        default: Date.now 
+    },
+    stats: {
+        totalMatches: { type: Number, default: 0 },
+        wins: { type: Number, default: 0 },
+        losses: { type: Number, default: 0 },
+        draws: { type: Number, default: 0 }
+    }
+});
+
+userSchema.index({ email: 1 });
+const User = mongoose.model('User', userSchema);
+
+// ============================================================
+// EXPRESS AYARLARI
 // ============================================================
 app.use(express.static(__dirname));
 app.use(express.json());
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Healthcheck Endpoint
+app.get('/health', (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.json({ 
+        status: 'ok', 
+        database: dbStatus,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // ============================================================
@@ -38,6 +129,160 @@ let activeRooms = {};
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
     console.log(`📊 Toplam lobby oyuncusu: ${lobbyPlayers.length}`);
+
+    // ============================================================
+    // KAYIT İŞLEMİ
+    // ============================================================
+    socket.on('registerUser', async (data) => {
+        const { username, email, password } = data;
+
+        if (!username || !email || !password) {
+            socket.emit('authResponse', { 
+                success: false, 
+                message: 'Tüm alanları doldurun!' 
+            });
+            return;
+        }
+
+        try {
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) {
+                socket.emit('authResponse', { 
+                    success: false, 
+                    message: 'Bu e-posta adresi zaten kayıtlı!' 
+                });
+                return;
+            }
+
+            const existingUsername = await User.findOne({ username: username });
+            if (existingUsername) {
+                socket.emit('authResponse', { 
+                    success: false, 
+                    message: 'Bu kullanıcı adı zaten alınmış!' 
+                });
+                return;
+            }
+
+            const newUser = new User({
+                username: username.trim(),
+                email: email.toLowerCase().trim(),
+                password: password,
+                teamLogo: 'default.png',
+                lastLogin: new Date()
+            });
+
+            await newUser.save();
+            console.log(`✅ Yeni kayıt: ${username} (${email})`);
+            
+            socket.emit('authResponse', {
+                success: true,
+                action: 'register',
+                username: username,
+                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+            });
+
+        } catch (error) {
+            console.error('❌ Kayıt hatası:', error);
+            socket.emit('authResponse', { 
+                success: false, 
+                message: 'Kayıt sırasında bir hata oluştu.' 
+            });
+        }
+    });
+
+    // ============================================================
+    // GİRİŞ İŞLEMİ
+    // ============================================================
+    socket.on('loginUser', async (data) => {
+        const { email, password } = data;
+
+        if (!email || !password) {
+            socket.emit('authResponse', { 
+                success: false, 
+                message: 'E-posta ve şifre girin!' 
+            });
+            return;
+        }
+
+        try {
+            const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+            if (!user || user.password !== password) {
+                socket.emit('authResponse', { 
+                    success: false, 
+                    message: 'E-posta veya şifre hatalı!' 
+                });
+                return;
+            }
+
+            user.lastLogin = new Date();
+            await user.save();
+
+            console.log(`🔑 Giriş: ${user.username}`);
+            
+            socket.emit('authResponse', {
+                success: true,
+                action: 'login',
+                username: user.username,
+                message: 'Giriş başarılı!'
+            });
+
+        } catch (error) {
+            console.error('❌ Giriş hatası:', error);
+            socket.emit('authResponse', { 
+                success: false, 
+                message: 'Giriş sırasında bir hata oluştu.' 
+            });
+        }
+    });
+
+    // ============================================================
+    // ŞİFRE UNUTTUM
+    // ============================================================
+    socket.on('forgotPassword', async (data) => {
+        const { email } = data;
+        try {
+            const user = await User.findOne({ email: email.toLowerCase().trim() });
+            if (!user) {
+                socket.emit('authResponse', { 
+                    success: false, 
+                    message: 'Bu e-posta ile kayıtlı kullanıcı bulunamadı!' 
+                });
+                return;
+            }
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'forgot',
+                message: `Şifreniz: ${user.password}`
+            });
+        } catch (error) {
+            console.error('❌ Şifre sıfırlama hatası:', error);
+            socket.emit('authResponse', { 
+                success: false, 
+                message: 'İşlem hatası.' 
+            });
+        }
+    });
+
+    // ============================================================
+    // OYUNCU KAYDI (game.js'deki registerPlayer için)
+    // ============================================================
+    socket.on('registerPlayer', (data) => {
+        console.log(`📝 registerPlayer alındı: ${socket.id}`, data);
+        
+        // Lobiye ekle
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        lobbyPlayers.push({
+            id: socket.id,
+            name: data?.username || 'Oyuncu',
+            logo: data?.teamLogo || 'default.png',
+            joinedAt: Date.now()
+        });
+        
+        broadcastLobbyUpdate();
+        socket.emit('register-confirm', { success: true });
+    });
 
     // ============================================================
     // LOBIYE KATIL
@@ -70,25 +315,6 @@ io.on('connection', (socket) => {
     socket.on('get-lobby-status', () => {
         console.log(`📊 Lobi durumu sorgulandı: ${socket.id}, ${lobbyPlayers.length} oyuncu`);
         socket.emit('lobby-status', lobbyPlayers);
-    });
-
-    // ============================================================
-    // OYUNCU KAYDI (game.js'deki registerPlayer için)
-    // ============================================================
-    socket.on('registerPlayer', (data) => {
-        console.log(`📝 registerPlayer alındı: ${socket.id}`, data);
-        
-        // Lobiye ekle
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        lobbyPlayers.push({
-            id: socket.id,
-            name: data?.username || 'Oyuncu',
-            logo: data?.teamLogo || 'default.png',
-            joinedAt: Date.now()
-        });
-        
-        broadcastLobbyUpdate();
-        socket.emit('register-confirm', { success: true });
     });
 
     // ============================================================
@@ -266,5 +492,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Sunucu ${PORT} portunda çalışıyor...`);
     console.log(`🌐 Adres: http://localhost:${PORT}`);
-    console.log(`📱 Ağdaki cihazlardan erişmek için: http://${require('os').networkInterfaces()['eth0']?.[0]?.address || '192.168.x.x'}:${PORT}`);
+    console.log(`📊 MongoDB durumu: ${mongoose.connection.readyState === 1 ? '✅ Bağlı' : '❌ Bağlı değil'}`);
 });
