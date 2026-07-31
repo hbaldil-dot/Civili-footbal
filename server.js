@@ -270,34 +270,61 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('accept-invite', (hostId) => {
-        const host = lobbyPlayers.find(p => p.id === hostId);
-        const guest = lobbyPlayers.find(p => p.id === socket.id);
+socket.on('accept-invite', (hostId) => {
+    console.log('📨 Davet kabul edildi, host:', hostId);
+    
+    const host = lobbyPlayers.find(p => p.id === hostId);
+    const guest = lobbyPlayers.find(p => p.id === socket.id);
 
-        if (host && guest) {
-            const roomId = `room_${hostId}_${socket.id}`;
-            lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
-            broadcastLobbyUpdate();
+    if (!host || !guest) {
+        console.error('❌ Oyuncu bulunamadı!');
+        return;
+    }
 
-            const hostSocket = io.sockets.sockets.get(hostId);
-            const guestSocket = io.sockets.sockets.get(socket.id);
+    const roomId = `room_${hostId}_${Date.now()}`;
+    console.log(`🏠 Yeni oda oluşturuldu: ${roomId}`);
 
-            if (hostSocket && guestSocket) {
-                hostSocket.join(roomId);
-                guestSocket.join(roomId);
+    // Oyuncuları lobiden kaldır
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
+    broadcastLobbyUpdate();
 
-                activeRooms[roomId] = {
-                    players: [
-                        { id: hostId, name: host.name, team: 1, ready: false, placedPins: [], logo: host.logo || 'default.png' },
-                        { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [], logo: guest.logo || 'default.png' }
-                    ]
-                };
+    const hostSocket = io.sockets.sockets.get(hostId);
+    const guestSocket = io.sockets.sockets.get(socket.id);
 
-                io.to(hostId).emit('start-online-match', { roomId, team: 1, opponentLogo: guest.logo || 'default.png' });
-                io.to(socket.id).emit('start-online-match', { roomId, team: 2, opponentLogo: host.logo || 'default.png' });
-            }
-        }
-    });
+    if (!hostSocket || !guestSocket) {
+        console.error('❌ Socket bulunamadı!');
+        return;
+    }
+
+    // Odaya katıl
+    hostSocket.join(roomId);
+    guestSocket.join(roomId);
+
+    activeRooms[roomId] = {
+        players: [
+            { id: hostId, name: host.name, team: 1, ready: false, placedPins: [], logo: host.logo || 'default.png' },
+            { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [], logo: guest.logo || 'default.png' }
+        ]
+    };
+
+    // MAÇ BAŞLAT - doğrudan emit
+    console.log(`⚽ Maç başlatılıyor: ${roomId}`);
+    
+    const hostData = { roomId, team: 1, opponentLogo: guest.logo || 'default.png' };
+    const guestData = { roomId, team: 2, opponentLogo: host.logo || 'default.png' };
+    
+    console.log('📤 Host verisi:', hostData);
+    console.log('📤 Guest verisi:', guestData);
+    
+    io.to(hostId).emit('start-online-match', hostData);
+    io.to(socket.id).emit('start-online-match', guestData);
+    
+    // Ayrıca doğrudan socket'lere de gönder (yedek)
+    hostSocket.emit('start-online-match', hostData);
+    guestSocket.emit('start-online-match', guestData);
+    
+    console.log(`✅ Maç başlatma event'leri gönderildi: ${roomId}`);
+});
 
     socket.on('playerShot', ({ roomId, shotData }) => {
         socket.to(roomId).emit('opponentShot', shotData);
