@@ -1894,8 +1894,8 @@ body::before {
     }
     .team-select-grid {
         top: calc(40% + 12px) !important;
-        max-height: 42% !important;
-        min-height: 22% !important;
+        max-height: 32% !important;
+        min-height: 32% !important;
         gap: 5px !important;
         padding: 5px 4px !important;
         width: 86% !important;
@@ -2022,8 +2022,8 @@ body::before {
     }
     .team-select-grid {
         top: calc(40% + 12px) !important;
-        max-height: 46% !important;
-        min-height: 28% !important;
+        max-height: 32% !important;
+        min-height: 32% !important;
         gap: 3px !important;
         padding: 3px 2px !important;
         width: 90% !important;
