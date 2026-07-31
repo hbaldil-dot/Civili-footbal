@@ -784,7 +784,7 @@ body::before {
     opacity: 0.9 !important;
     pointer-events: auto !important;
     margin: 0 auto !important; /* Ortaya hizala */
-    transform: scale(1.95) !important; /* Scale kaldırıldı */
+    transform: scale(1.85) !important; /* Scale kaldırıldı */
 }
 
 .settings-btn-img:hover {
@@ -793,7 +793,7 @@ body::before {
 }
 
 .settings-btn-img:active {
-    transform: scale(1.95) !important;
+    transform: scale(1.85) !important;
 }
 
 /* En alttaki 'Ana Menü' butonu için ayrı ayar */
