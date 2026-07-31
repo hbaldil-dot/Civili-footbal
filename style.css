@@ -784,11 +784,11 @@ body::before {
     opacity: 0.9 !important;
     pointer-events: auto !important;
     margin: 0 auto !important; /* Ortaya hizala */
-    transform: scale(1.1) !important; /* Scale kaldırıldı */
+    transform: scale(1.95) !important; /* Scale kaldırıldı */
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.65) !important; /* Hafif büyüme */
+    transform: scale(1.95) !important; /* Hafif büyüme */
     opacity: 1 !important;
 }
 
