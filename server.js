@@ -355,7 +355,7 @@ io.on('connection', (socket) => {
         lobbyPlayers.push({ 
             id: socket.id, 
             name: playerData?.name || 'Oyuncu',
-            logo: playerData?.logo || 'default.png'
+            logo: playerData?.logo || 'fb.png'
         });
         console.log(`${playerData?.name || 'Oyuncu'} lobiye katıldı.`);
         broadcastLobbyUpdate();
@@ -365,7 +365,7 @@ io.on('connection', (socket) => {
         const player = lobbyPlayers.find(p => p.id === socket.id);
         if (player) {
             player.name = playerData.name;
-            player.logo = playerData.logo || 'default.png';
+            player.logo = playerData.logo || 'fb.png';
             broadcastLobbyUpdate();
         }
     });
@@ -380,7 +380,7 @@ io.on('connection', (socket) => {
             io.to(targetId).emit('receive-invite', {
                 fromId: socket.id,
                 fromName: sender.name,
-                fromLogo: sender.logo || 'default.png'
+                fromLogo: sender.logo || 'fb.png'
             });
         }
     });
@@ -403,21 +403,21 @@ io.on('connection', (socket) => {
 
                 activeRooms[roomId] = {
                     players: [
-                        { id: hostId, name: host.name, team: 1, ready: false, placedPins: [], logo: host.logo || 'default.png' },
-                        { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [], logo: guest.logo || 'default.png' }
+                        { id: hostId, name: host.name, team: 1, ready: false, placedPins: [], logo: host.logo || 'fb.png' },
+                        { id: socket.id, name: guest.name, team: 2, ready: false, placedPins: [], logo: guest.logo || 'fb.png' }
                     ]
                 };
 
                 io.to(hostId).emit('start-online-match', { 
                     roomId, 
                     team: 1,
-                    opponentLogo: guest.logo || 'default.png'
+                    opponentLogo: guest.logo || 'fb.png'
                 });
                 
                 io.to(socket.id).emit('start-online-match', { 
                     roomId, 
                     team: 2,
-                    opponentLogo: host.logo || 'default.png'
+                    opponentLogo: host.logo || 'fb.png'
                 });
                 
                 console.log(`🎮 Maç başladı! Oda: ${roomId}`);
