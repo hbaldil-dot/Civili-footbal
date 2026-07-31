@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    teamLogo: {
+        type: String,
+        default: 'default.png'
+    },
     createdAt: { 
         type: Date, 
         default: Date.now 
@@ -94,7 +98,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Render Healthcheck Endpoint
+// Healthcheck Endpoint
 app.get('/health', (req, res) => {
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     res.json({ 
@@ -116,7 +120,9 @@ let activeRooms = {};
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
 
+    // ============================================================
     // KAYIT İŞLEMİ
+    // ============================================================
     socket.on('registerUser', async (data) => {
         const { username, email, password } = data;
 
@@ -151,6 +157,7 @@ io.on('connection', (socket) => {
                 username: username.trim(),
                 email: email.toLowerCase().trim(),
                 password: password,
+                teamLogo: 'default.png',
                 lastLogin: new Date()
             });
 
@@ -173,7 +180,9 @@ io.on('connection', (socket) => {
         }
     });
 
+    // ============================================================
     // GİRİŞ İŞLEMİ
+    // ============================================================
     socket.on('loginUser', async (data) => {
         const { email, password } = data;
 
@@ -217,7 +226,9 @@ io.on('connection', (socket) => {
         }
     });
 
+    // ============================================================
     // ŞİFRE UNUTTUM
+    // ============================================================
     socket.on('forgotPassword', async (data) => {
         const { email } = data;
         try {
@@ -244,7 +255,28 @@ io.on('connection', (socket) => {
         }
     });
 
+    // ============================================================
+    // ** YENİ: ONLINE OYUNCU KAYDI (game.js'deki joinOnlineGame için) **
+    // ============================================================
+    socket.on('registerPlayer', (data) => {
+        const username = data.username || 'Oyuncu_' + Math.floor(Math.random() * 1000);
+        const teamLogo = data.teamLogo || 'default.png';
+        
+        // Socket'i lobby'ye ekle veya güncelle
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        lobbyPlayers.push({
+            id: socket.id,
+            name: username,
+            logo: teamLogo
+        });
+        
+        console.log(`👤 Oyuncu lobiye katıldı: ${username} (${socket.id})`);
+        broadcastLobbyUpdate();
+    });
+
+    // ============================================================
     // ONLINE LOBBY
+    // ============================================================
     socket.on('join-lobby', (playerData) => {
         lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
         lobbyPlayers.push({ 
@@ -253,20 +285,27 @@ io.on('connection', (socket) => {
             logo: playerData?.logo || 'default.png'
         });
         broadcastLobbyUpdate();
+        console.log(`📋 Lobi güncellendi: ${lobbyPlayers.length} oyuncu`);
     });
 
     socket.on('leave-lobby', () => {
         removePlayerFromLobby(socket.id);
     });
 
+    // ============================================================
+    // DAVET SİSTEMİ
+    // ============================================================
     socket.on('send-invite', (targetId) => {
         const sender = lobbyPlayers.find(p => p.id === socket.id);
         if (sender) {
+            console.log(`📨 Davet gönderildi: ${sender.name} -> ${targetId}`);
             io.to(targetId).emit('receive-invite', {
                 fromId: socket.id,
                 fromName: sender.name,
                 fromLogo: sender.logo || 'default.png'
             });
+        } else {
+            console.warn(`⚠️ Davet gönderen lobide bulunamadı: ${socket.id}`);
         }
     });
 
@@ -276,6 +315,8 @@ io.on('connection', (socket) => {
 
         if (host && guest) {
             const roomId = `room_${hostId}_${socket.id}`;
+            
+            // Oyuncuları lobiden çıkar
             lobbyPlayers = lobbyPlayers.filter(p => p.id !== hostId && p.id !== socket.id);
             broadcastLobbyUpdate();
 
@@ -293,46 +334,108 @@ io.on('connection', (socket) => {
                     ]
                 };
 
+                console.log(`🎮 Oda oluşturuldu: ${roomId} (${host.name} vs ${guest.name})`);
+
                 io.to(hostId).emit('start-online-match', { roomId, team: 1, opponentLogo: guest.logo || 'default.png' });
                 io.to(socket.id).emit('start-online-match', { roomId, team: 2, opponentLogo: host.logo || 'default.png' });
             }
+        } else {
+            console.warn(`⚠️ Davet kabul edilemedi: host=${hostId}, guest=${socket.id}`);
         }
     });
 
+    // ============================================================
+    // OYUN SIRASINDAKİ OLAYLAR
+    // ============================================================
     socket.on('playerShot', ({ roomId, shotData }) => {
         socket.to(roomId).emit('opponentShot', shotData);
     });
 
+    socket.on('player-ready', ({ roomId, team, placedPins }) => {
+        if (activeRooms[roomId]) {
+            const room = activeRooms[roomId];
+            const player = room.players.find(p => p.team === team);
+            if (player) {
+                player.ready = true;
+                player.placedPins = placedPins;
+                console.log(`✅ Oyuncu hazır: ${player.name} (Takım ${team})`);
+                
+                // Her iki oyuncu da hazırsa maçı başlat
+                if (room.players.every(p => p.ready)) {
+                    const allPins = [];
+                    room.players.forEach(p => {
+                        p.placedPins.forEach(pin => {
+                            allPins.push({ x: pin.x, y: pin.y, team: p.team });
+                        });
+                    });
+                    
+                    console.log(`🚀 Maç başlıyor: ${roomId}`);
+                    io.to(roomId).emit('match-go', { pins: allPins });
+                }
+            }
+        }
+    });
+
+    socket.on('syncBallPosition', ({ roomId, ballState }) => {
+        socket.to(roomId).emit('correctBallPosition', ballState);
+    });
+
+    socket.on('setup-pin-move', ({ roomId, team, index, x, y }) => {
+        socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
+    });
+
+    socket.on('leave-room', (roomId) => {
+        if (activeRooms[roomId]) {
+            socket.to(roomId).emit('opponent-disconnected');
+            delete activeRooms[roomId];
+            console.log(`🚪 Oda kapatıldı: ${roomId}`);
+        }
+    });
+
+    // ============================================================
+    // BAĞLANTI KOPMASI
+    // ============================================================
     socket.on('disconnect', () => {
         handlePlayerDisconnection(socket);
     });
 });
+
+// ============================================================
+// YARDIMCI FONKSİYONLAR
+// ============================================================
 
 function broadcastLobbyUpdate() {
     io.emit('update-lobby-players', lobbyPlayers);
 }
 
 function removePlayerFromLobby(socketId) {
-    const lengthBefore = lobbyPlayers.length;
+    const removed = lobbyPlayers.filter(p => p.id === socketId);
     lobbyPlayers = lobbyPlayers.filter(p => p.id !== socketId);
-    if (lobbyPlayers.length !== lengthBefore) {
+    if (removed.length > 0) {
+        console.log(`👋 Oyuncu lobiden ayrıldı: ${removed[0].name}`);
         broadcastLobbyUpdate();
     }
 }
 
 function handlePlayerDisconnection(socket) {
     removePlayerFromLobby(socket.id);
+    
     for (const roomId in activeRooms) {
         const room = activeRooms[roomId];
         if (room.players.some(p => p.id === socket.id)) {
             socket.to(roomId).emit('opponent-disconnected');
             delete activeRooms[roomId];
+            console.log(`🚪 Oda kapatıldı (bağlantı koptu): ${roomId}`);
             break;
         }
     }
 }
 
+// ============================================================
+// SUNUCU BAŞLATMA
+// ============================================================
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Sunucu ${PORT} portunda çalışıyor...`);
+    console.log(`📊 MongoDB durumu: ${mongoose.connection.readyState === 1 ? 'Bağlı' : 'Bağlı değil'}`);
 });
