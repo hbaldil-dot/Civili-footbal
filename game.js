@@ -170,7 +170,7 @@ socket.on('match-start', function(data) {
     });
 
     // VURUŞ ALMA
-   / Rakip vuruş yaptığında
+   //Rakip vuruş yaptığında
 socket.on('opponent-shot', (shotData) => {
     // Rakibin vuruş açı ve kuvvetini al, topa uygula
     applyShotToBall(shotData);
