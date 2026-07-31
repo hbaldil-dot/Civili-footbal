@@ -2326,12 +2326,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// playSound - iOS Safari Düzeltmesi
+// playSound - iOS Safari ve Genel Düzeltme
 // ============================================================
 function playSound(type) {
     if (!isSoundOn) return;
     
-    if (audioCtx.state === 'suspended') {
+    if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
     
@@ -2340,7 +2340,6 @@ function playSound(type) {
             if (audioElements.hit) {
                 audioElements.hit.currentTime = 0;
                 audioElements.hit.play().catch(() => {
-                    // Hata durumunda yeni ses oluştur
                     const newHit = new Audio('sesler/Carpma.mp3');
                     newHit.play().catch(e => console.log('Hit ses hatası:', e));
                 });
@@ -2353,72 +2352,56 @@ function playSound(type) {
     
     if (type === 'goal') {
         try {
-            // iOS Safari'de her seferinde yeni Audio nesnesi oluştur (en güvenilir yöntem)
-            const goalSound = new Audio('sesler/gol.mp3');
-            goalSound.preload = 'auto';
-            goalSound.volume = 1.0;
+            const goalAudio = new Audio('sesler/gol.mp3');
+            goalAudio.preload = 'auto';
+            goalAudio.volume = 1.0;
             
-            // iOS'ta sesi çalıştır
-            const playPromise = goalSound.play();
+            const playPromise = goalAudio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
-                    // Başarısız olursa AudioContext ile sentezle
                     try {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
-                        const now = audioCtx.currentTime;
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(200, now);
-                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                        gain.gain.setValueAtTime(0.2, now);
-                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                        osc.start(now);
-                        osc.stop(now + 0.45);
-                    } catch (e) {}
+                        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.8);
+                    } catch (err) {
+                        console.log('AudioContext sentez hatası:', err);
+                    }
                 });
             }
-        } catch (error) {
-            // Sentezleyici ile yedek ses
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } catch (e) {}
+        } catch (e) {
+            console.log('Goal ses hatası:', e);
         }
         return;
     }
-    
+
     if (type === 'kick') {
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-        } catch (error) {
-            console.error('❌ Vuruş sesi hatası:', error);
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        } catch (e) {
+            console.log('Kick ses hatası:', e);
         }
     }
 }
 
+// Buton sesleri için yardımcı fonksiyon
+function playButtonSound() {
+    playSound('hit');
+}
 // ============================================================
 // 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ
 // ============================================================
