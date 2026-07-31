@@ -3085,3 +3085,172 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
+// ============================================================
+// AUTH / GİRİŞ FONKSİYONLARI
+// ============================================================
+
+function switchAuthTab(tab) {
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const formForgot = document.getElementById('form-forgot');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    
+    if (!formLogin || !formRegister || !formForgot) {
+        console.warn("⚠️ Auth formları bulunamadı!");
+        return;
+    }
+    
+    // Tüm formları gizle
+    formLogin.classList.add('hidden');
+    formRegister.classList.add('hidden');
+    formForgot.classList.add('hidden');
+    
+    // Tüm tabları pasif yap
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+    
+    // Seçilen tabı aktif yap
+    if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        if (tabLogin) tabLogin.classList.add('active');
+    } else if (tab === 'register') {
+        formRegister.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.add('active');
+    } else if (tab === 'forgot') {
+        formForgot.classList.remove('hidden');
+    }
+}
+
+function handleAuthSubmit(event, action) {
+    event.preventDefault();
+    
+    if (!socket || !socket.connected) {
+        alert("⚠️ Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
+        return;
+    }
+    
+    if (action === 'login') {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        
+        if (!email || !password) {
+            alert("⚠️ Lütfen e-posta ve şifrenizi girin!");
+            return;
+        }
+        
+        socket.emit('loginUser', { email, password });
+        
+    } else if (action === 'register') {
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+        
+        if (!username || !email || !password) {
+            alert("⚠️ Lütfen tüm alanları doldurun!");
+            return;
+        }
+        
+        if (username.length < 2) {
+            alert("⚠️ Kullanıcı adı en az 2 karakter olmalı!");
+            return;
+        }
+        
+        socket.emit('registerUser', { username, email, password });
+        
+    } else if (action === 'forgot') {
+        const email = document.getElementById('forgot-email').value.trim();
+        
+        if (!email) {
+            alert("⚠️ Lütfen e-posta adresinizi girin!");
+            return;
+        }
+        
+        socket.emit('forgotPassword', { email });
+    }
+}
+
+function continueAsGuest() {
+    console.log("🎮 Misafir girişi yapılıyor...");
+    
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.add('hidden');
+        authOverlay.style.display = 'none';
+    }
+    
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    // Rastgele misafir ismi oluştur
+    const guestName = "Misafir_" + Math.floor(Math.random() * 10000);
+    const playerNameInput = document.getElementById('player-name');
+    if (playerNameInput) {
+        playerNameInput.value = guestName;
+    }
+    
+    // Profil oluştur
+    if (typeof playerProfile !== 'undefined') {
+        playerProfile.username = guestName;
+        savePlayerData();
+    }
+    
+    console.log(`✅ Misafir girişi başarılı: ${guestName}`);
+}
+
+// ============================================================
+// SOCKET AUTH CEVAPLARI - game.js'de setupSocketListeners içine EKLE
+// ============================================================
+
+// Bu kısmı setupSocketListeners() fonksiyonunun içine ekleyin
+/*
+socket.on('authResponse', (data) => {
+    console.log('📨 Auth cevabı:', data);
+    alert(data.message);
+    
+    if (data.success) {
+        if (data.username) {
+            const playerNameInput = document.getElementById('player-name');
+            if (playerNameInput) playerNameInput.value = data.username;
+        }
+        
+        if (data.action === 'login' || data.action === 'register') {
+            // Giriş başarılı, modal'ı kapat
+            const authOverlay = document.getElementById('auth-modal-overlay');
+            if (authOverlay) {
+                authOverlay.classList.add('hidden');
+                authOverlay.style.display = 'none';
+            }
+            const menu = document.getElementById('menu');
+            if (menu) {
+                menu.style.display = 'block';
+            }
+        } else if (data.action === 'forgot') {
+            switchAuthTab('login');
+        }
+    }
+});
+*/
+
+// ============================================================
+// SAYFA YÜKLENDİĞİNDE AUTH MODAL'INI GÖSTER
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auth modal'ını göster (eğer kullanıcı giriş yapmamışsa)
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.remove('hidden');
+        authOverlay.style.display = 'flex';
+    }
+    
+    // Menüyü gizle
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    
+    console.log("📱 Sayfa yüklendi, auth modal gösteriliyor.");
+});
