@@ -147,39 +147,45 @@ function setupSocketListeners() {
         }
     });
     
-    socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
-        console.log('⚽ Maç başlıyor! Oda:', roomId, 'Takım:', team, 'Rakip logosu:', opponentLogo);
-        currentRoomId = roomId;
-        myTeamNumber = team;
-        aiTeamLogo = opponentLogo || 'default.png';
-        
-        loadTeamLogoImage(aiTeamLogo);
-        document.getElementById('online-lobby').style.display = 'none';
-        document.getElementById('top-bar').style.display = 'flex';
-        
-        matchSecondsLeft = MATCH_DURATION;
-        const timeBoard = document.getElementById('time-board');
-        if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
-        
-        setTimeout(() => {
-            updateScoreLogos();
-        }, 100);
-        
-        startSetupPhase();
-    });
+   socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
+    console.log('⚽ MAÇ BAŞLIYOR!');
+    console.log('📋 Oda ID:', roomId);
+    console.log('👤 Takım numarası:', team);
+    console.log('🖼️ Rakip logosu:', opponentLogo);
     
-    socket.on("opponent-disconnected", () => {
-        alert("⚠️ Rakip oyundan ayrıldı.");
-        exitToMenu();
-    });
+    currentRoomId = roomId;
+    myTeamNumber = team;
+    aiTeamLogo = opponentLogo || 'default.png';
     
-    console.log('✅ Socket dinleyiciler kuruldu');
-}
-
-// Socket dinleyicileri başlat
-if (socket) {
-    setupSocketListeners();
-}
+    // Rakip logosunu yükle
+    loadTeamLogoImage(aiTeamLogo);
+    
+    // Lobi'yi kapat
+    const lobby = document.getElementById('online-lobby');
+    if (lobby) {
+        lobby.style.display = 'none';
+        lobby.style.visibility = 'hidden';
+        lobby.style.opacity = '0';
+    }
+    
+    // Top Bar'ı göster
+    const topBar = document.getElementById('top-bar');
+    if (topBar) topBar.style.display = 'flex';
+    
+    // Süreyi ayarla
+    matchSecondsLeft = MATCH_DURATION;
+    const timeBoard = document.getElementById('time-board');
+    if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
+    
+    // Skor logolarını güncelle
+    setTimeout(() => {
+        updateScoreLogos();
+    }, 100);
+    
+    // Setup fazını başlat
+    console.log('🎯 Setup fazı başlatılıyor...');
+    startSetupPhase();
+});
 // ============================================================
 // SAHA GÖSTER/GİZLE
 // ============================================================
