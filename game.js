@@ -3044,10 +3044,10 @@ if (typeof socket !== 'undefined') {
     });
 }
 // ============================================================
-// AUTH & MİSAFİR GİRİŞİ MANTIĞI
+// OYUN MENÜSÜNE GEÇİŞ & MİSAFİR GİRİŞİ (DÜZELTİLMİŞ TEK BLOK)
 // ============================================================
 
-// Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
+// --- 1. Sekme Değiştirme (Giriş / Kayıt / Şifre) ---
 function switchAuthTab(tab) {
     const formLogin = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
@@ -3057,12 +3057,14 @@ function switchAuthTab(tab) {
 
     if (!formLogin || !formRegister || !formForgot) return;
 
+    // Hepsini gizle
     formLogin.classList.add('hidden');
     formRegister.classList.add('hidden');
     formForgot.classList.add('hidden');
     if (tabLogin) tabLogin.classList.remove('active');
     if (tabRegister) tabRegister.classList.remove('active');
 
+    // Seçileni göster
     if (tab === 'login') {
         formLogin.classList.remove('hidden');
         if (tabLogin) tabLogin.classList.add('active');
@@ -3074,115 +3076,12 @@ function switchAuthTab(tab) {
     }
 }
 
-// Form Gönderimleri (Login, Register, Forgot)
-function handleAuthSubmit(event, action) {
-    event.preventDefault();
-
-    if (!socket) {
-        alert("Sunucu bağlantısı kurulamadı. Lütfen tekrar deneyin.");
-        return;
-    }
-
-    if (action === 'login') {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        socket.emit('loginUser', { email, password });
-    } else if (action === 'register') {
-        const username = document.getElementById('reg-username').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
-        socket.emit('registerUser', { username, email, password });
-    } else if (action === 'forgot') {
-        const email = document.getElementById('forgot-email').value;
-        socket.emit('forgotPassword', { email });
-    }
-}
-
-// Misafir Tıklaması
-function continueAsGuest() {
-    const authOverlay = document.getElementById('auth-modal-overlay');
-    if (authOverlay) {
-        authOverlay.classList.add('hidden'); // Giriş ekranını tamamen kapat
-    }
-    
-    // Ana menünün görünür ve tıklanabilir olduğundan emin olun
-    const menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-    }
-    
-    console.log("🎮 Misafir olarak giriş yapıldı.");
-}
-
-// Sunucudan (Socket.io) Gelen Auth Yanıtlarını Dinleme
-if (socket) {
-    socket.on('authResponse', (data) => {
-        alert(data.message);
-        
-        if (data.success) {
-            // İsim alanını otomatik doldur
-            if (data.username) {
-                const playerNameInput = document.getElementById('player-name');
-                if (playerNameInput) playerNameInput.value = data.username;
-            }
-
-            // Kayıt veya Giriş başarılıysa pencereyi kapatıp ana menüyü aç
-            if (data.action === 'login' || data.action === 'register') {
-                const authOverlay = document.getElementById('auth-modal-overlay');
-                if (authOverlay) {
-                    authOverlay.classList.add('hidden');
-                }
-                const menu = document.getElementById('menu');
-                if (menu) {
-                    menu.style.display = 'block';
-                }
-            }
-        }
-    };
-}
-// ... dosyanızın mevcut son satırları ...
-
-// ============================================================
-// EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ) - TEK BLOK
-// ============================================================
-
-// Sekmeler arası geçiş (Giriş Yap / Kayıt Ol / Şifremi Unuttum)
-function switchAuthTab(tab) {
-    const formLogin = document.getElementById('form-login');
-    const formRegister = document.getElementById('form-register');
-    const formForgot = document.getElementById('form-forgot');
-    const tabLogin = document.getElementById('tab-login');
-    const tabRegister = document.getElementById('tab-register');
-
-    if (!formLogin || !formRegister || !formForgot) return;
-
-    // Tüm formları gizle
-    formLogin.classList.add('hidden');
-    formRegister.classList.add('hidden');
-    formForgot.classList.add('hidden');
-    
-    // Tablardan active sınıfını kaldır
-    if (tabLogin) tabLogin.classList.remove('active');
-    if (tabRegister) tabRegister.classList.remove('active');
-
-    // Seçilen sekmeyi göster
-    if (tab === 'login') {
-        formLogin.classList.remove('hidden');
-        if (tabLogin) tabLogin.classList.add('active');
-    } else if (tab === 'register') {
-        formRegister.classList.remove('hidden');
-        if (tabRegister) tabRegister.classList.add('active');
-    } else if (tab === 'forgot') {
-        formForgot.classList.remove('hidden');
-    }
-}
-
-// Form Gönderimleri (Login, Register, Forgot)
+// --- 2. Form Gönderimleri (Sunucuya Veri Yollama) ---
 function handleAuthSubmit(event, action) {
     event.preventDefault();
 
     if (!socket || !socket.connected) {
-        alert("Sunucu bağlantısı henüz kurulamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+        alert("Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
         return;
     }
 
@@ -3201,34 +3100,42 @@ function handleAuthSubmit(event, action) {
     }
 }
 
-// Misafir Olarak Devam Et
+// --- 3. MİSAFİR GİRİŞİ VE ANA MENÜYE GEÇİŞ (En Önemli Kısım) ---
 function continueAsGuest() {
+    // Giriş ekranını (auth modal) gizle
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
-        authOverlay.classList.add('hidden'); // Giriş ekranını kapat
+        authOverlay.classList.add('hidden');
     }
     
-    // Ana menüyü aç
+    // Ana menüyü (menu) göster
     const menu = document.getElementById('menu');
     if (menu) {
         menu.style.display = 'block';
     }
+
+    // Rastgele bir misafir ismi ver
+    const playerNameInput = document.getElementById('player-name');
+    if (playerNameInput && playerNameInput.value === 'Oyuncu') {
+        playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
+    }
     
-    console.log("🎮 Misafir olarak giriş yapıldı.");
+    console.log("🎮 Misafir girişi başarılı, ana menü açıldı.");
 }
 
-// Sunucudan (Socket.io) Gelen Auth Yanıtlarını Dinleme
+// --- 4. Sunucudan Gelen Yanıtları Dinleme ---
 if (socket) {
     socket.on('authResponse', (data) => {
-        // Burada alert kullanıyoruz, kullanıcıya başarılı/başarısız mesajını gösterir
-        alert(data.message);
+        alert(data.message); // Sunucudan gelen başarılı/başarısız mesajını göster
         
         if (data.success) {
+            // Kullanıcı adını oyun alanına yaz
             if (data.username) {
                 const playerNameInput = document.getElementById('player-name');
                 if (playerNameInput) playerNameInput.value = data.username;
             }
 
+            // Kayıt veya Giriş başarılıysa ekranı kapat
             if (data.action === 'login' || data.action === 'register') {
                 const authOverlay = document.getElementById('auth-modal-overlay');
                 if (authOverlay) {
