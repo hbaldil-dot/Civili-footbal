@@ -776,22 +776,35 @@ body::before {
 }
 
 .settings-btn-img {
-    width: 100% !important;
+    width: 60% !important;  /* Oyun butonlarına yakın bir boyut */
+    max-width: 160px !important;
     display: block !important;
     cursor: pointer !important;
     transition: transform 0.2s ease, opacity 0.2s ease !important;
     opacity: 0.9 !important;
     pointer-events: auto !important;
-    transform: scale(1.65) !important;
+    margin: 0 auto !important; /* Ortaya hizala */
+    transform: none !important; /* Scale kaldırıldı */
 }
 
 .settings-btn-img:hover {
-    transform: scale(1.70) !important;
+    transform: scale(1.05) !important; /* Hafif büyüme */
     opacity: 1 !important;
 }
 
 .settings-btn-img:active {
-    transform: scale(1.55) !important;
+    transform: scale(0.95) !important;
+}
+
+/* En alttaki 'Ana Menü' butonu için ayrı ayar */
+.settings-btn-img:last-child {
+    width: 40% !important;
+    max-width: 100px !important;
+    margin-top: 10px !important;
+    transform: none !important;
+}
+.settings-btn-img:last-child:hover {
+    transform: scale(1.05) !important;
 }
 
 .settings-btn-img:last-child {
