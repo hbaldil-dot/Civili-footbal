@@ -174,7 +174,6 @@ socket.on('match-start', function(data) {
 socket.on('opponent-shot', (shotData) => {
     // Rakibin vuruş açı ve kuvvetini al, topa uygula
     applyShotToBall(shotData);
-});
         console.log('📥 VURUŞ ALINDI:', shotData);
         if (currentPhase === 'playing' && isOnlineMatch) {
             cap.vx = (shotData.startX - shotData.endX) * 0.13;
