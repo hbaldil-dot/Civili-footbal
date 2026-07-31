@@ -5,7 +5,7 @@ let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 
 // ============================================================
-// SOCKET BAĞLANTISI
+// SOCKET BAĞLANTISI - iOS Safari için optimize
 // ============================================================
 let socket = null;
 let currentRoomId = null;
@@ -13,7 +13,9 @@ let myTeamNumber = 1;
 let isHost = false;
 let onlinePlayers = [];
 let isOnlineMatch = false;
-let isSocketReady = false;
+let socketReady = false;
+let reconnectAttempts = 0;
+const MAX_RECONNECT = 5;
 
 function initSocket() {
     if (typeof io === 'undefined') {
@@ -21,34 +23,75 @@ function initSocket() {
         return;
     }
     
+    // iOS Safari için özel ayarlar
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const serverUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? undefined
         : window.location.origin;
 
-    socket = io(serverUrl, {
+    const socketOptions = {
         transports: ['websocket', 'polling'],
         reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000
-    });
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+        autoConnect: true,
+        forceNew: true,
+        upgrade: true,
+        rememberUpgrade: true,
+        // iOS Safari için ekstra
+        withCredentials: false,
+        ...(isIOS && {
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            forceNew: true
+        })
+    };
+
+    console.log('📡 Socket bağlanıyor...', isIOS ? '(iOS Safari)' : '');
+
+    socket = io(serverUrl, socketOptions);
 
     socket.on('connect', () => {
-        console.log('✅ Sunucuya bağlandı!');
-        isSocketReady = true;
+        console.log('✅ Sunucuya bağlandı! ID:', socket.id);
+        socketReady = true;
+        reconnectAttempts = 0;
         updateLobbyStatus('🟢 Bağlandı', '#2ecc71');
+        
+        // iOS Safari için heartbeat
+        if (isIOS) {
+            setInterval(() => {
+                if (socket && socket.connected) {
+                    socket.emit('ping');
+                }
+            }, 15000);
+        }
     });
     
     socket.on('connect_error', (error) => {
-        console.warn('⚠️ Bağlantı hatası:', error);
-        isSocketReady = false;
+        console.warn('⚠️ Bağlantı hatası:', error.message);
+        socketReady = false;
+        reconnectAttempts++;
         updateLobbyStatus('🔴 Bağlantı Hatası', '#e74c3c');
+        
+        if (reconnectAttempts >= MAX_RECONNECT) {
+            alert('🔴 Sunucuya bağlanılamıyor! Lütfen sayfayı yenileyin.');
+        }
     });
 
-    socket.on('disconnect', () => {
-        console.warn('⚠️ Bağlantı kesildi');
-        isSocketReady = false;
+    socket.on('disconnect', (reason) => {
+        console.warn('⚠️ Bağlantı kesildi:', reason);
+        socketReady = false;
         updateLobbyStatus('🔴 Bağlantı Kesildi', '#e74c3c');
     });
+
+    socket.on('pong', () => {
+        // iOS Safari için heartbeat yanıtı
+        console.log('💓 Heartbeat alındı');
+    });
+
+    // ... diğer socket olayları aynı kalacak ...
 
     // Lobby güncellemeleri
     socket.on('lobby-update', (players) => {
