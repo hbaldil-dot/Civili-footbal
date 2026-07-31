@@ -776,7 +776,7 @@ body::before {
 }
 
 .settings-btn-img {
-    width: 60% !important;  /* Oyun butonlarına yakın bir boyut */
+    width: 100% !important;  /* Oyun butonlarına yakın bir boyut */
     max-width: 160px !important;
     display: block !important;
     cursor: pointer !important;
@@ -813,11 +813,11 @@ body::before {
 }
 
 .settings-btn-img:last-child:hover {
-    transform: scale(0.65) !important;
+    transform: scale(0.95) !important;
 }
 
 .settings-btn-img:last-child:active {
-    transform: scale(0.55) !important;
+    transform: scale(0.90) !important;
 }
 
 /* ===== MAÇ SÜRESİ VE DÜZENİ ===== */
