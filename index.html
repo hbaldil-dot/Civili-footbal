@@ -43,11 +43,7 @@
             <img src="butonlar/ayarlar.webp" alt="AYARLAR" class="menu-btn-img">
         </button>
     </div>
-<!-- Ana menüde #menu içine ekleyin -->
-<div id="user-info" style="display: none; justify-content: center; align-items: center; gap: 8px; margin-bottom: 6px; color: #2ecc71; font-size: 12px;">
-    <span>👤 Misafir</span>
-    <button onclick="logoutUser()" style="background: rgba(231,76,60,0.2); border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; padding: 2px 12px; border-radius: 12px; font-size: 10px; cursor: pointer; font-family: inherit;">ÇIKIŞ</button>
-</div>
+
     <!-- ===== AYARLAR POP-UP ===== -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
@@ -375,11 +371,6 @@
     </div>
 
     <!-- ===== GİRİŞ & KAYIT PENCERESİ ===== -->
-    <!-- BU SATIRI YORUM SATIRI YAPIN VEYA SILIN -->
-<!-- 
-<div id="auth-modal-overlay" class="auth-overlay">
-    ... içindeki her şey ...
-</div>
     <div id="auth-modal-overlay" class="auth-overlay">
         <div class="auth-card">
             <div class="auth-tabs">
