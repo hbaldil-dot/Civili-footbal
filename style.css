@@ -1242,13 +1242,11 @@ body::before {
     ...
 } */
 
-/* Logo Izgarası */
-.team-logo-options {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-    justify-content: center !important;
-    width: 100% !important;
+.local-player-section {
+    flex: 1 !important;        /* Bunu değiştir */
+    max-width: 200px !important; /* Veya max-width ekle */
+    min-width: 120px !important;
+}
 }
 
 /* Logo Butonları */
