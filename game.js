@@ -1629,13 +1629,11 @@ function loadTeamLogoImage(logoFile) {
             loadedLogos[logoFile] = img;
             resolve(img);
         };
-        img.onerror = function() {
-            if (logoFile !== 'default.png') {
-                loadTeamLogoImage('default.png').then(resolve);
-            } else {
-                resolve(null);
-            }
-        };
+        // DOĞRU: onerror tetiklendiğinde döngüyü engeller
+img.onerror = function() {
+    this.onerror = null; // Tekrar tekrar hata tetiklenmesini önler
+    this.src = '/takimlar/default.png'; // veya boş bir data-URI
+};
         img.src = `takimlar/${logoFile}`;
     });
 }
