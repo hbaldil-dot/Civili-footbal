@@ -870,23 +870,45 @@ function executeAIShot(target, params) {
     // Vuruş süresi kontrolü (eğer süre azsa daha hızlı vur)
     let extraDelay = 150;
     if (shotSecondsLeft < 2) {
-        extraDelay = 50; // Süre azaldığında gecikmeyi düşür
+        extraDelay = 50; // Hızlı vuruş
     }
-
+    
     setTimeout(() => {
-        // AI Vuruş Fiziğini Uygula
-        const force = pullDistance * 0.15;
-        cap.vx = Math.cos(angle) * force;
-        cap.vy = Math.sin(angle) * force;
+        isDraggingBall = true;
+        dragStart = { x: cap.x, y: cap.y };
+        dragCurrent = { x: cap.x, y: cap.y };
         
-        isAiThinking = false;
+        let stepCount = 0;
+        const totalSteps = Math.max(4, Math.min(10, Math.floor(pullDistance / 10)));
         
-        // Sırayı diğer oyuncuya devret veya oyun akışını güncelle
-        if (typeof switchTurn === 'function') {
-            switchTurn();
-        }
-    }, params.reactionDelay + extraDelay);
-}
+        const pullInterval = setInterval(() => {
+            stepCount++;
+            const ratio = stepCount / totalSteps;
+            const currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
+            dragCurrent = { 
+                x: cap.x - Math.cos(angle) * currentPull, 
+                y: cap.y - Math.sin(angle) * currentPull 
+            };
+            
+            if (stepCount >= totalSteps) {
+                clearInterval(pullInterval);
+                setTimeout(() => {
+                    isDraggingBall = false;
+                    isAiThinking = false;
+                    playSound('kick');
+                    
+                    // Vuruş katsayısı: Hedefe olan mesafeye göre hafif ayar
+                    const powerMultiplier = 0.13 * (0.9 + Math.random() * 0.2);
+                    cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
+                    cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
+                    
+                    turn = 1;
+                    updateHUDTurn();
+                    resetShotTimer();
+                }, extraDelay);
+            }
+        }, 30);
+    }, params.reactionDelay);
 }
 function executeFakeShot(target, params) {
     // Sahte vuruş: Önce farklı bir açıya çek, sonra hedefe vur
@@ -3136,69 +3158,6 @@ if (socket) {
                 if (menu) {
                     menu.style.display = 'block';
                 }
-            }
-        }
-    };
-}
-// ... dosyanızın mevcut son satırları ...
-
-// --- AUTH TAB & FORM YÖNETİMİ ---
-function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.add('hidden'));
-
-    if (tab === 'login') {
-        document.getElementById('tab-login').classList.add('active');
-        document.getElementById('form-login').classList.remove('hidden');
-    } else if (tab === 'register') {
-        document.getElementById('tab-register').classList.add('active');
-        document.getElementById('form-register').classList.remove('hidden');
-    } else if (tab === 'forgot') {
-        document.getElementById('form-forgot').classList.remove('hidden');
-    }
-}
-
-function handleAuthSubmit(event, action) {
-    event.preventDefault();
-    if (!socket) {
-        alert("Sunucu bağlantısı kurulamadı!");
-        return;
-    }
-
-    if (action === 'register') {
-        const username = document.getElementById('reg-username').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
-
-        socket.emit('registerUser', { username, email, password });
-    } else if (action === 'login') {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        socket.emit('loginUser', { email, password });
-    } else if (action === 'forgot') {
-        const email = document.getElementById('forgot-email').value;
-        socket.emit('forgotPassword', { email });
-    }
-}
-
-function continueAsGuest() {
-    document.getElementById('auth-modal-overlay').classList.add('hidden');
-}
-
-// --- SUNUCUDAN GELEN YANITLARI DİNLEME ---
-if (socket) {
-    socket.on('authResponse', (data) => {
-        alert(data.message);
-        if (data.success) {
-            if (data.action === 'register' || data.action === 'login') {
-                if (data.username) {
-                    const nameInput = document.getElementById('player-name');
-                    if (nameInput) nameInput.value = data.username;
-                }
-                document.getElementById('auth-modal-overlay').classList.add('hidden');
-            } else if (data.action === 'forgot') {
-                switchAuthTab('login');
             }
         }
     });
