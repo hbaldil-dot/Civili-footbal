@@ -770,7 +770,7 @@ body::before {
     flex-direction: column !important;
     align-items: center !important;
     gap: 10px !important;
-    width: 65% !important;
+    width: 110% !important;
     max-width: 260px !important;
     pointer-events: none !important;
 }
@@ -793,7 +793,7 @@ body::before {
 }
 
 .settings-btn-img:active {
-    transform: scale(2.95) !important;
+    transform: scale(1.95) !important;
 }
 
 /* En alttaki 'Ana Menü' butonu için ayrı ayar */
