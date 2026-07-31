@@ -1743,14 +1743,13 @@ body::before {
     width: 30% !important;
     max-width: 90px !important;
     cursor: pointer !important;
-    transition: transform 0.15
-
-.online-menu-btn:active {
-    transform: scale(0.95) !important;
+    transition: transform 0.15s ease !important;
 }
 
+.online-menu-btn:active { transform: scale(0.95) !important; }
+
 /* ============================================================
-   ODA BEKLEME EKRANI
+   ODA BEKLEME EKRANI STİLLERİ
    ============================================================ */
 
 #room-waiting {
@@ -1897,14 +1896,8 @@ body::before {
     letter-spacing: 1px !important;
 }
 
-.room-ready-btn:hover {
-    background: rgba(46, 204, 113, 0.3) !important;
-}
-
-.room-ready-btn:disabled {
-    opacity: 0.5 !important;
-    cursor: default !important;
-}
+.room-ready-btn:hover { background: rgba(46, 204, 113, 0.3) !important; }
+.room-ready-btn:disabled { opacity: 0.5 !important; cursor: default !important; }
 
 .room-leave-btn {
     flex: 1 !important;
@@ -1920,9 +1913,7 @@ body::before {
     transition: all 0.2s ease !important;
 }
 
-.room-leave-btn:hover {
-    background: rgba(231, 76, 60, 0.2) !important;
-}
+.room-leave-btn:hover { background: rgba(231, 76, 60, 0.2) !important; }
 
 /* Scrollbar */
 .online-players-list::-webkit-scrollbar,
