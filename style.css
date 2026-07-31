@@ -1214,9 +1214,9 @@ body::before {
 }
 
 /* TAKIM LİSTESİ KARSAYICISI (Nokta Hatası Düzeltildi) */
-local-team-body {
+.local-team-body {
     position: absolute !important;
-    top: calc(48% - 14px) !important; /* Pozisyon 14px yukarı alındı */
+    top: 48% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90% !important;
