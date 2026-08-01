@@ -1967,6 +1967,7 @@ function selectLocalTeam(player, logoFile) {
     console.log('👤 Oyuncu ' + player + ' takım seçti:', logoFile);
     
     if (player === 1) {
+        // Oyuncu 1 seçimi
         if (logoFile === localPlayer2Logo && localP2Selected) {
             alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -1975,6 +1976,7 @@ function selectLocalTeam(player, logoFile) {
         localPlayer1Logo = logoFile;
         localP1Selected = true;
         
+        // Butonları işaretle
         var btns1 = document.querySelectorAll('#local-player1-logos .team-logo-btn');
         for (var i = 0; i < btns1.length; i++) {
             var btn = btns1[i];
@@ -1984,6 +1986,7 @@ function selectLocalTeam(player, logoFile) {
             }
         }
         
+        // Shield'ı güncelle
         var shield = document.getElementById('local-p1-shield-img');
         if (shield) {
             shield.src = 'takimlar/' + logoFile;
@@ -1991,6 +1994,7 @@ function selectLocalTeam(player, logoFile) {
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
+        // İsmi güncelle
         var nameEl = document.getElementById('local-p1-name');
         if (nameEl) {
             var logo = null;
@@ -2006,6 +2010,7 @@ function selectLocalTeam(player, logoFile) {
         }
         
     } else if (player === 2) {
+        // Oyuncu 2 seçimi
         if (logoFile === localPlayer1Logo && localP1Selected) {
             alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -2014,6 +2019,7 @@ function selectLocalTeam(player, logoFile) {
         localPlayer2Logo = logoFile;
         localP2Selected = true;
         
+        // Butonları işaretle
         var btns2 = document.querySelectorAll('#local-player2-logos .team-logo-btn');
         for (var i = 0; i < btns2.length; i++) {
             var btn = btns2[i];
@@ -2023,6 +2029,7 @@ function selectLocalTeam(player, logoFile) {
             }
         }
         
+        // Shield'ı güncelle
         var shield = document.getElementById('local-p2-shield-img');
         if (shield) {
             shield.src = 'takimlar/' + logoFile;
@@ -2030,6 +2037,7 @@ function selectLocalTeam(player, logoFile) {
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
+        // İsmi güncelle
         var nameEl = document.getElementById('local-p2-name');
         if (nameEl) {
             var logo = null;
