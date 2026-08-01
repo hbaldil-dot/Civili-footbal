@@ -245,15 +245,78 @@ io.on('connection', (socket) => {
     });
 
     // ONLINE LOBBY
-    socket.on('join-lobby', (playerData) => {
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        lobbyPlayers.push({ 
-            id: socket.id, 
-            name: playerData?.name || 'Oyuncu',
-            logo: playerData?.logo || 'default.png'
+  socket.on("join-lobby", (playerData) => {
+
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+
+    const player = {
+        id: socket.id,
+        name: playerData?.name || "Oyuncu",
+        logo: playerData?.logo || "default.png"
+    };
+
+    lobbyPlayers.push(player);
+
+    broadcastLobbyUpdate();
+
+    // Kuyrukta en az iki kişi varsa otomatik eşleştir
+    if (lobbyPlayers.length >= 2) {
+
+        const host = lobbyPlayers.shift();
+        const guest = lobbyPlayers.shift();
+
+        const roomId =
+            "room_" +
+            Date.now() +
+            "_" +
+            Math.floor(Math.random() * 99999);
+
+        const hostSocket = io.sockets.sockets.get(host.id);
+        const guestSocket = io.sockets.sockets.get(guest.id);
+
+        if (!hostSocket || !guestSocket)
+            return;
+
+        hostSocket.join(roomId);
+        guestSocket.join(roomId);
+
+        activeRooms[roomId] = {
+            players: [
+                {
+                    id: host.id,
+                    name: host.name,
+                    team: 1,
+                    ready: false,
+                    placedPins: [],
+                    logo: host.logo
+                },
+                {
+                    id: guest.id,
+                    name: guest.name,
+                    team: 2,
+                    ready: false,
+                    placedPins: [],
+                    logo: guest.logo
+                }
+            ]
+        };
+
+        io.to(host.id).emit("start-online-match", {
+            roomId,
+            team: 1,
+            opponentLogo: guest.logo
         });
+
+        io.to(guest.id).emit("start-online-match", {
+            roomId,
+            team: 2,
+            opponentLogo: host.logo
+        });
+
         broadcastLobbyUpdate();
-    });
+    }
+
+});
 
     socket.on('leave-lobby', () => {
         removePlayerFromLobby(socket.id);
