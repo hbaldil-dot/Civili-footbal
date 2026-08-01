@@ -157,7 +157,9 @@
     </div>
 
     <!-- ===== ONLINE LOBBY POP-UP ===== -->
-    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
+    <!-- Online Lobi -->
+<div id="online-lobby" style="display: none;">
+    <div id="online-lobby-players"></div>
         <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
             <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
@@ -290,7 +292,11 @@
 </div>
 
     <!-- ===== OYUN EKRANI ===== -->
-    <div id="top-bar" style="display: none;">
+   <!-- HUD (Heads Up Display) -->
+<div id="top-bar" style="display: none;">
+    <div id="match-timer">90:00</div>
+    <div id="match-score">0 - 0</div>
+</div>
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
             <div id="score-board">
