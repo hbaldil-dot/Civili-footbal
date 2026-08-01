@@ -1551,19 +1551,20 @@ function getAIParameters() {
         case 'kolay': 
             return { 
                 reactionDelay: 800, 
-                pullDistanceMin: 20, 
-                pullDistanceMax: 50, 
-                errorMargin: 25, 
-                powerError: 0.20,
-                fakeChance: 0.02,
+                pullDistanceMin: 30, 
+                pullDistanceMax: 60, 
+                errorMargin: 20, 
+                powerError: 0.15,
+                fakeChance: 0,
                 targetZones: 3,
                 analyzeOpponents: false,
-                analyzeWalls: false,
-                useBankShots: false,
+                analyzeWalls: true,
+                useBankShots: true,      // ← DUVAR SEKTİRME AÇIK
                 useDoubleBank: false,
-                bankShotChance: 0,
+                bankShotChance: 1.0,      // ← %100 duvar sektirmesi!
                 usePinBank: false,
-                usePinWallCombo: false
+                usePinWallCombo: false,
+                forceWallShot: true       // ← ZORLA DUVAR VURUŞU
             };
         case 'orta': 
             return { 
@@ -1575,12 +1576,13 @@ function getAIParameters() {
                 fakeChance: 0.08,
                 targetZones: 5,
                 analyzeOpponents: true,
-                analyzeWalls: false,
+                analyzeWalls: true,
                 useBankShots: true,
                 useDoubleBank: false,
-                bankShotChance: 0.30,
+                bankShotChance: 0.50,
                 usePinBank: false,
-                usePinWallCombo: false
+                usePinWallCombo: false,
+                forceWallShot: false
             };
         case 'zor': 
             return { 
@@ -1595,9 +1597,10 @@ function getAIParameters() {
                 analyzeWalls: true,
                 useBankShots: true,
                 useDoubleBank: false,
-                bankShotChance: 0.40,
+                bankShotChance: 0.60,
                 usePinBank: true,
-                usePinWallCombo: false
+                usePinWallCombo: false,
+                forceWallShot: false
             };
         case 'usta': 
             return { 
@@ -1612,9 +1615,10 @@ function getAIParameters() {
                 analyzeWalls: true,
                 useBankShots: true,
                 useDoubleBank: true,
-                bankShotChance: 0.50,
+                bankShotChance: 0.70,
                 usePinBank: true,
-                usePinWallCombo: true
+                usePinWallCombo: true,
+                forceWallShot: false
             };
         default: 
             return { 
@@ -1626,12 +1630,13 @@ function getAIParameters() {
                 fakeChance: 0.08,
                 targetZones: 5,
                 analyzeOpponents: true,
-                analyzeWalls: false,
-                useBankShots: false,
+                analyzeWalls: true,
+                useBankShots: true,
                 useDoubleBank: false,
-                bankShotChance: 0,
+                bankShotChance: 0.50,
                 usePinBank: false,
-                usePinWallCombo: false
+                usePinWallCombo: false,
+                forceWallShot: false
             };
     }
 }
@@ -1639,6 +1644,86 @@ function getAIParameters() {
 // ============================================================
 // 6. AI HEDEF SEÇİMİ - GELİŞMİŞ VERSİYON
 // ============================================================
+function calculateAITarget(params) {
+    var goalY = height - goalHeight;
+    var goalLeft = (width - goalWidth) / 2;
+    var goalRight = (width + goalWidth) / 2;
+    var level = aiLevel;
+    
+    // === KOLAY SEVİYE: SADECE DUVAR SEKTİRMESİ ===
+    if (level === 'kolay' && params.forceWallShot) {
+        console.log('🔵 KOLAY MOD - SADECE DUVAR SEKTİRMESİ TESTİ');
+        
+        var wallSides = ['left', 'right'];
+        var bestWallShot = null;
+        var bestWallScore = -Infinity;
+        
+        // Topun hangi duvara daha yakın olduğunu bul
+        var isNearLeft = cap.x < width / 2;
+        var priorityWall = isNearLeft ? 'left' : 'right';
+        
+        // Önce yakın duvarı dene, sonra uzak duvarı
+        var wallsToTry = [priorityWall];
+        if (priorityWall === 'left') wallsToTry.push('right');
+        else wallsToTry.push('left');
+        
+        for (var w = 0; w < wallsToTry.length; w++) {
+            var wallSide = wallsToTry[w];
+            
+            // Kalenin 5 farklı noktasına vurmayı dene
+            for (var i = 0; i < 5; i++) {
+                var targetX = goalLeft + (i / 4) * (goalRight - goalLeft);
+                var targetY = goalY;
+                
+                // Duvar sektirme hesapla
+                var wallBank = calculateWallBankShot(wallSide, targetX, targetY);
+                
+                // Geçerlilik kontrolü
+                if (wallBank.wallY < goalHeight + 20 || wallBank.wallY > height - goalHeight - 20) continue;
+                if (wallBank.distToWall < 15 || wallBank.distToWall > 300) continue;
+                
+                // Skor hesapla
+                var score = 0;
+                // Hedef kalitesi
+                var centerDist = Math.abs(targetX - width/2);
+                score += (60 - centerDist) * 1.5;
+                // Duvar mesafesi (çok yakın veya çok uzak değilse)
+                if (wallBank.distToWall > 30 && wallBank.distToWall < 200) score += 20;
+                // Duvar noktası kaleye yakınsa
+                var distWallToGoal = Math.hypot(targetX - wallBank.wallX, targetY - wallBank.wallY);
+                if (distWallToGoal < 150) score += 15;
+                
+                console.log('🧱 DUVAR SEKTİRME DENEME:', wallSide, 'Hedef:', targetX, 'Skor:', score);
+                
+                if (score > bestWallScore) {
+                    bestWallScore = score;
+                    bestWallShot = {
+                        x: wallBank.wallX,
+                        y: wallBank.wallY,
+                        type: 'bank_wall',
+                        wallSide: wallSide,
+                        wallPoint: { x: wallBank.wallX, y: wallBank.wallY },
+                        actualTarget: { x: targetX, y: targetY },
+                        distToWall: wallBank.distToWall
+                    };
+                }
+            }
+        }
+        
+        // Eğer geçerli bir duvar sektirmesi bulunduysa kullan
+        if (bestWallShot) {
+            console.log('✅ KOLAY MOD - DUVAR SEKTİRMESİ SEÇİLDİ:', bestWallShot.wallSide);
+            return bestWallShot;
+        } else {
+            console.log('⚠️ KOLAY MOD - DUVAR SEKTİRMESİ BULUNAMADI, DOĞRUDAN VURUŞ');
+            // Yedek: Doğrudan vuruş
+            return { x: width/2, y: goalY, type: 'direct' };
+        }
+    }
+    
+    // === DİĞER SEVİYELER İÇİN NORMAL HEDEF SEÇİMİ ===
+    // ... (mevcut kod devam eder)
+}
 function calculateAITarget(params) {
     var goalY = height - goalHeight;
     var goalLeft = (width - goalWidth) / 2;
@@ -1850,70 +1935,46 @@ function calculateAITarget(params) {
 // DUVARDAN SEKTİRME - DOĞRU FİZİK (YENİ)
 // ============================================================
 function calculateWallBankShot(wallSide, targetX, targetY) {
-    // wallSide: 'left' veya 'right'
-    // targetX, targetY: Kaleye vurmak istenen nokta
-    
     var ballX = cap.x;
     var ballY = cap.y;
     var goalY = height - goalHeight;
     
-    // 1. Duvar noktasını hesapla (Topun duvara çarpacağı yer)
     var wallX, wallY;
     var distToWall;
     
     if (wallSide === 'left') {
         wallX = 0;
         // Top-hedef çizgisinin sol duvara uzatılması
-        // y = y1 + (y2 - y1) * (x - x1) / (x2 - x1)
-        // x = 0 için:
-        wallY = ballY + (targetY - ballY) * (0 - ballX) / (targetX - ballX);
+        if (Math.abs(targetX - ballX) < 5) {
+            // Dikey çizgi, duvara paralel
+            wallY = ballY;
+        } else {
+            wallY = ballY + (targetY - ballY) * (0 - ballX) / (targetX - ballX);
+        }
         distToWall = Math.hypot(wallX - ballX, wallY - ballY);
     } else {
         wallX = width;
-        wallY = ballY + (targetY - ballY) * (width - ballX) / (targetX - ballX);
+        if (Math.abs(targetX - ballX) < 5) {
+            wallY = ballY;
+        } else {
+            wallY = ballY + (targetY - ballY) * (width - ballX) / (targetX - ballX);
+        }
         distToWall = Math.hypot(wallX - ballX, wallY - ballY);
     }
     
     // Duvar noktasını sınırla (kale çizgilerinin dışına çıkmasın)
     wallY = Math.max(goalHeight + 30, Math.min(height - goalHeight - 30, wallY));
     
-    // 2. Top → Duvar açısını hesapla
-    var angleToWall = Math.atan2(wallY - ballY, wallX - ballX);
+    // Topun duvara olan mesafesini tekrar hesapla
+    distToWall = Math.hypot(wallX - ballX, wallY - ballY);
     
-    // 3. Duvar → Kale açısını hesapla
-    var angleWallToGoal = Math.atan2(targetY - wallY, targetX - wallX);
-    
-    // 4. Yansıma kanunu: Geliş açısı = Yansıma açısı
-    // Duvar normali: x ekseni (1, 0)
-    // Yansıma: angle_reflected = 2 * normal - angle_incoming
-    // Normal = 0 (yatay duvar)
-    var reflectedAngle = -angleToWall;
-    
-    // 5. Topun duvara çarptıktan sonra kaleye ulaşması için gereken mesafe
-    var distWallToGoal = Math.hypot(targetX - wallX, targetY - wallY);
-    var totalDist = distToWall + distWallToGoal;
-    
-    // DEBUG: Konsola yazdır
-    console.log('🧱 DUVAR SEKTİRME:', {
-        wallSide: wallSide,
-        wallPoint: { x: wallX, y: wallY },
-        distToWall: distToWall,
-        distWallToGoal: distWallToGoal,
-        totalDist: totalDist,
-        angleToWall: angleToWall * 180 / Math.PI,
-        angleWallToGoal: angleWallToGoal * 180 / Math.PI,
-        reflectedAngle: reflectedAngle * 180 / Math.PI
-    });
+    console.log('🧱 DUVAR HESAPLAMA:', wallSide, 'Duvar noktası:', wallX, wallY, 'Mesafe:', distToWall);
     
     return {
         wallX: wallX,
         wallY: wallY,
-        angleToWall: angleToWall,
-        reflectedAngle: reflectedAngle,
-        actualTarget: { x: targetX, y: targetY },
         distToWall: distToWall,
-        distWallToGoal: distWallToGoal,
-        totalDist: totalDist
+        actualTarget: { x: targetX, y: targetY }
     };
 }
     
@@ -2065,45 +2126,26 @@ function executeAIShot(target, params) {
             break;
             
       case 'bank_wall':
-    // Duvardan sektirme - DOĞRU FİZİK
+    // Duvardan sektirme
     if (target.wallSide === 'left') {
-        // Sol duvar: Top sol duvara çarpacak
-        // Topun gitmesi gereken açı: Duvar noktasına doğru
+        // Sol duvar: Topu sol duvara doğru vur
         angle = Math.atan2(target.wallPoint.y - cap.y, target.wallPoint.x - cap.x);
-        
-        console.log('🧱 SOL DUVAR VURUŞU - Açı:', angle * 180 / Math.PI, 
-                    'Duvar noktası:', target.wallPoint.x, target.wallPoint.y);
+        console.log('🧱 SOL DUVAR VURUŞU - Açı:', angle * 180 / Math.PI);
     } else {
         // Sağ duvar
         angle = Math.atan2(target.wallPoint.y - cap.y, target.wallPoint.x - cap.x);
-        
-        console.log('🧱 SAĞ DUVAR VURUŞU - Açı:', angle * 180 / Math.PI,
-                    'Duvar noktası:', target.wallPoint.x, target.wallPoint.y);
+        console.log('🧱 SAĞ DUVAR VURUŞU - Açı:', angle * 180 / Math.PI);
+    }
+    
+    // Kolay seviye için duvar vuruşu gücü
+    if (level === 'kolay') {
+        // Duvar sektirmesi için güç hesapla
+        var distToWall = target.distToWall || 100;
+        // Duvar ne kadar uzaksa, o kadar sert vur
+        pullDistance = Math.min(40 + (distToWall / 300) * 40, MAX_DRAG_DIST);
+        console.log('💪 KOLAY DUVAR VURUŞU - Güç:', pullDistance);
     }
     break;
-        // Duvar noktasından kaleye olan açı
-        var goalAngle = Math.atan2(target.actualTarget.y - target.wallPoint.y, 
-                                   target.actualTarget.x - target.wallPoint.x);
-        
-        // Yansıma: Duvar normali x eksenidir (0, 1)
-        // Topun duvara geliş açısı = duvardan çıkış açısı
-        // Normal: angle = 2 * normal - gelişAçısı
-        angle = 2 * Math.atan2(0, 1) - wallAngle;
-        
-        console.log('🧱 SOL DUVAR SEKTİRME - Duvar:', target.wallPoint.x, target.wallPoint.y, 
-                    'Açı:', angle * 180 / Math.PI);
-    } else {
-        // Sağ duvar
-        var wallAngle = Math.atan2(target.wallPoint.y - cap.y, target.wallPoint.x - cap.x);
-        var goalAngle = Math.atan2(target.actualTarget.y - target.wallPoint.y, 
-                                   target.actualTarget.x - target.wallPoint.x);
-        angle = 2 * Math.atan2(0, 1) - wallAngle;
-        
-        console.log('🧱 SAĞ DUVAR SEKTİRME - Duvar:', target.wallPoint.x, target.wallPoint.y, 
-                    'Açı:', angle * 180 / Math.PI);
-    }
-    break;
-            break;
             
         case 'bank_pin':
             // Pinden sektirme
