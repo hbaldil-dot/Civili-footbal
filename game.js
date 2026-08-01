@@ -2096,22 +2096,24 @@ function selectStadium(stadiumKey, texturePath) {
 // SOCKET OLAY DİNLEYİCİLERİ
 // ============================================================
 function getPlayerData() {
-    const name = document.getElementById('player-name').value.trim() || "Oyuncu_" + Math.floor(Math.random() * 100);
+    const name = document.getElementById('player-name').value.trim();
     return {
         name: name,
         logo: selectedTeamLogo || 'default.png'
     };
 }
 
-        if (count === 0) {
-            listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
-        }
+// Eğer bu 'count' kontrolü bir socket veya fonksiyon içindeyse o yapıya alınmalı.
+// Aksi halde tek başına if bloğu şu şekilde KAPATILMALIDIR:
+if (count === 0) {
+    // koddaki metin/stil güncellemeleriniz...
+}
+
+socket.on("receive-invite", (data) => {
+    if (confirm(`${data.fromName} seni maça davet ediyor! Kabul et?`)) {
+        socket.emit("accept-invite", data.fromId);
     }
-    socket.on("receive-invite", (data) => {
-        if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
-            socket.emit("accept-invite", data.fromId);
-        }
-    });
+});
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
