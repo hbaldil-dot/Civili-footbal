@@ -1964,10 +1964,9 @@ function loadLocalTeamLogos() {
 }
 
 function selectLocalTeam(player, logoFile) {
-    console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
+    console.log('👤 Oyuncu ' + player + ' takım seçti:', logoFile);
     
     if (player === 1) {
-        // Aynı takım kontrolü
         if (logoFile === localPlayer2Logo && localP2Selected) {
             alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -1976,33 +1975,37 @@ function selectLocalTeam(player, logoFile) {
         localPlayer1Logo = logoFile;
         localP1Selected = true;
         
-        // Butonları işaretle
-        document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
+        var btns1 = document.querySelectorAll('#local-player1-logos .team-logo-btn');
+        for (var i = 0; i < btns1.length; i++) {
+            var btn = btns1[i];
             btn.classList.remove('active', 'active-p1');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p1');
             }
-        });
+        }
         
-        // Shield'ı güncelle
-        const shield = document.getElementById('local-p1-shield-img');
+        var shield = document.getElementById('local-p1-shield-img');
         if (shield) {
-            shield.src = `takimlar/${logoFile}`;
+            shield.src = 'takimlar/' + logoFile;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
-        // İsmi güncelle
-        const nameEl = document.getElementById('local-p1-name');
+        var nameEl = document.getElementById('local-p1-name');
         if (nameEl) {
-            const logo = teamLogos.find(l => l.file === logoFile);
-            nameEl.textContent = logo ? `👤 ${logo.name.replace('⚽ ', '')}` : '👤 Seçildi';
+            var logo = null;
+            for (var j = 0; j < teamLogos.length; j++) {
+                if (teamLogos[j].file === logoFile) {
+                    logo = teamLogos[j];
+                    break;
+                }
+            }
+            nameEl.textContent = logo ? '👤 ' + logo.name.replace('⚽ ', '') : '👤 Seçildi';
             nameEl.style.color = '#3498db';
             nameEl.style.opacity = '1';
         }
         
     } else if (player === 2) {
-        // Aynı takım kontrolü
         if (logoFile === localPlayer1Logo && localP1Selected) {
             alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -2011,34 +2014,38 @@ function selectLocalTeam(player, logoFile) {
         localPlayer2Logo = logoFile;
         localP2Selected = true;
         
-        // Butonları işaretle
-        document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
+        var btns2 = document.querySelectorAll('#local-player2-logos .team-logo-btn');
+        for (var i = 0; i < btns2.length; i++) {
+            var btn = btns2[i];
             btn.classList.remove('active', 'active-p2');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p2');
             }
-        });
+        }
         
-        // Shield'ı güncelle
-        const shield = document.getElementById('local-p2-shield-img');
+        var shield = document.getElementById('local-p2-shield-img');
         if (shield) {
-            shield.src = `takimlar/${logoFile}`;
+            shield.src = 'takimlar/' + logoFile;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
-        // İsmi güncelle
-        const nameEl = document.getElementById('local-p2-name');
+        var nameEl = document.getElementById('local-p2-name');
         if (nameEl) {
-            const logo = teamLogos.find(l => l.file === logoFile);
-            nameEl.textContent = logo ? `👤 ${logo.name.replace('⚽ ', '')}` : '👤 Seçildi';
+            var logo = null;
+            for (var j = 0; j < teamLogos.length; j++) {
+                if (teamLogos[j].file === logoFile) {
+                    logo = teamLogos[j];
+                    break;
+                }
+            }
+            nameEl.textContent = logo ? '👤 ' + logo.name.replace('⚽ ', '') : '👤 Seçildi';
             nameEl.style.color = '#e74c3c';
             nameEl.style.opacity = '1';
         }
     }
     
-    // Seçim durumunu kontrol et
-    console.log(`📊 Seçim durumu: P1=${localP1Selected ? localPlayer1Logo : '❌'}, P2=${localP2Selected ? localPlayer2Logo : '❌'}`);
+    console.log('📊 Seçim durumu: P1=' + (localP1Selected ? localPlayer1Logo : '❌') + ', P2=' + (localP2Selected ? localPlayer2Logo : '❌'));
 }
 
 function startLocalGameWithTeams() {
@@ -2399,7 +2406,16 @@ console.log("🎮 Çivili Futbol Başlatıldı!");
 console.log("⏱️ Maç Süresi: " + MATCH_DURATION + " saniye");
 console.log("🎯 Vuruş Süresi: " + SHOT_DURATION + " saniye");
 startPeriodicSync();
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Auth modal'ı göster
+    var authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.remove('hidden');
+        console.log('✅ Auth modal gösteriliyor');
+    }
+    
+    initSocket();
     selectRandomTeam();
     updateSelectedTeamName();
     updateTeamLogoDisplay();
@@ -2410,19 +2426,80 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// SES AÇ/KAPA FONKSİYONLARI
+// SES FONKSİYONLARI - EKSİK OLANLAR
 // ============================================================
-let isSoundOn = true;
+
+// isSoundOn zaten tanımlıysa tekrar tanımlama
+if (typeof isSoundOn === 'undefined') {
+    var isSoundOn = true;
+}
+
+function playSound(type) {
+    if (!isSoundOn) return;
+    
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    
+    if (type === 'hit') {
+        try {
+            if (audioElements.hit) {
+                audioElements.hit.currentTime = 0;
+                audioElements.hit.play().catch(function(e) {
+                    console.log('Hit ses hatası:', e);
+                });
+            }
+        } catch (e) {
+            console.log('Hit ses hatası:', e);
+        }
+        return;
+    }
+    
+    if (type === 'goal') {
+        try {
+            var goalSound = new Audio('sesler/gol.mp3');
+            goalSound.preload = 'auto';
+            goalSound.volume = 1.0;
+            var playPromise = goalSound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function(e) {
+                    console.log('Goal ses hatası:', e);
+                });
+            }
+        } catch (error) {
+            console.log('Goal ses hatası:', error);
+        }
+        return;
+    }
+    
+    if (type === 'kick') {
+        try {
+            var osc = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            var now = audioCtx.currentTime;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (error) {
+            console.error('❌ Vuruş sesi hatası:', error);
+        }
+    }
+}
 
 function toggleSound() {
     console.log('🔊 Ses butonuna tıklandı! Mevcut durum:', isSoundOn ? 'AÇIK' : 'KAPALI');
     isSoundOn = !isSoundOn;
-    const soundBtn = document.getElementById('sound-toggle-btn');
+    var soundBtn = document.getElementById('sound-toggle-btn');
     if (soundBtn) {
         if (isSoundOn) {
             soundBtn.src = 'menu/ayarlar/ses.webp';
             console.log('🔊 Ses AÇIK');
-            setTimeout(() => playButtonSound(), 100);
         } else {
             soundBtn.src = 'menu/ayarlar/ses-off.webp';
             console.log('🔇 Ses KAPALI');
@@ -2431,22 +2508,30 @@ function toggleSound() {
     localStorage.setItem('soundEnabled', isSoundOn ? 'true' : 'false');
 }
 
-function loadSoundSettings() {
-    const savedSound = localStorage.getItem('soundEnabled');
-    if (savedSound !== null) {
-        isSoundOn = savedSound === 'true';
-        const soundBtn = document.getElementById('sound-toggle-btn');
-        if (soundBtn) {
-            soundBtn.src = isSoundOn ? 'menu/ayarlar/ses.webp' : 'menu/ayarlar/ses-off.webp';
-        }
-        console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
+function playButtonSound() {
+    if (!isSoundOn) return;
+    try {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        var now = audioCtx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    } catch(e) {
+        console.log('Buton ses hatası:', e);
     }
 }
 
 // ============================================================
-// MP3 SES DOSYALARI - iOS Safari İçin Özel
+// MP3 SES DOSYALARI
 // ============================================================
-let audioElements = {
+var audioElements = {
     hit: null,
     goal: null
 };
@@ -2460,90 +2545,12 @@ function preloadSounds() {
     audioElements.goal.load();
 }
 
+// DOMContentLoaded'de preloadSounds'u çağır
 document.addEventListener('DOMContentLoaded', function() {
     preloadSounds();
 });
 
-function playSound(type) {
-    if (!isSoundOn) return;
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    if (type === 'hit') {
-        try {
-            if (audioElements.hit) {
-                audioElements.hit.currentTime = 0;
-                audioElements.hit.play().catch(() => {
-                    const newHit = new Audio('sesler/Carpma.mp3');
-                    newHit.play().catch(e => console.log('Hit ses hatası:', e));
-                });
-            }
-        } catch (e) {
-            console.log('Hit ses hatası:', e);
-        }
-        return;
-    }
-    if (type === 'goal') {
-        try {
-            const goalSound = new Audio('sesler/gol.mp3');
-            goalSound.preload = 'auto';
-            goalSound.volume = 1.0;
-            const playPromise = goalSound.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(() => {
-                    try {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        const now = audioCtx.currentTime;
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(200, now);
-                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                        gain.gain.setValueAtTime(0.2, now);
-                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                        osc.start(now);
-                        osc.stop(now + 0.45);
-                    } catch (e) {}
-                });
-            }
-        } catch (error) {
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.45);
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } catch (e) {}
-        }
-        return;
-    }
-    if (type === 'kick') {
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-        } catch (error) {
-            console.error('❌ Vuruş sesi hatası:', error);
-        }
-    }
-}
+console.log('✅ game.js yüklendi!');
 
 // ============================================================
 // 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ (DEVAM)
