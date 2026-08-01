@@ -33,11 +33,15 @@ if (typeof io !== 'undefined') {
         // LOBBY OLAYLARI
         // ============================================================
         
-        socket.on('update-lobby-players', (players) => {
-            console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
-            onlinePlayers = players;
-            updateLobbyUI();
-        });
+        socket.on('update-lobby-players', function(players) {
+    console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
+    onlinePlayers = players;
+    if (typeof updateLobbyUI === 'function') {
+        updateLobbyUI();
+    } else {
+        console.warn('⚠️ updateLobbyUI fonksiyonu tanımlı değil!');
+    }
+});
 
         // ============================================================
         // ODA OLAYLARI
@@ -168,7 +172,170 @@ socket.on('authResponse', (data) => {
         console.error("❌ Socket bağlantı hatası:", e);
     }
 }
+// ============================================================
+// AUTH FONKSİYONLARI - EKSİK OLANLAR
+// ============================================================
 
+function switchAuthTab(tab) {
+    console.log('🔄 Auth sekmesi değiştiriliyor:', tab);
+    
+    var formLogin = document.getElementById('form-login');
+    var formRegister = document.getElementById('form-register');
+    var formForgot = document.getElementById('form-forgot');
+    var tabLogin = document.getElementById('tab-login');
+    var tabRegister = document.getElementById('tab-register');
+    
+    if (!formLogin || !formRegister || !formForgot) {
+        console.warn('⚠️ Auth formları bulunamadı!');
+        return;
+    }
+    
+    // Tüm formları gizle
+    formLogin.classList.add('hidden');
+    formRegister.classList.add('hidden');
+    formForgot.classList.add('hidden');
+    
+    // Tüm tabları pasif yap
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+    
+    // Seçilen tab'ı aktif yap
+    if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        if (tabLogin) tabLogin.classList.add('active');
+        console.log('✅ Login formu açıldı');
+    } else if (tab === 'register') {
+        formRegister.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.add('active');
+        console.log('✅ Register formu açıldı');
+    } else if (tab === 'forgot') {
+        formForgot.classList.remove('hidden');
+        console.log('✅ Forgot formu açıldı');
+    }
+}
+
+function handleAuthSubmit(event, action) {
+    event.preventDefault();
+    console.log('📤 Auth form gönderiliyor:', action);
+    
+    if (!socket || !socket.connected) {
+        alert("Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
+        return;
+    }
+    
+    if (action === 'login') {
+        var email = document.getElementById('login-email').value.trim();
+        var password = document.getElementById('login-password').value.trim();
+        socket.emit('loginUser', { email: email, password: password });
+    } else if (action === 'register') {
+        var username = document.getElementById('reg-username').value.trim();
+        var email = document.getElementById('reg-email').value.trim();
+        var password = document.getElementById('reg-password').value.trim();
+        socket.emit('registerUser', { username: username, email: email, password: password });
+    } else if (action === 'forgot') {
+        var email = document.getElementById('forgot-email').value.trim();
+        socket.emit('forgotPassword', { email: email });
+    }
+}
+
+function continueAsGuest() {
+    console.log('🎮 Misafir girişi başlatılıyor...');
+    
+    var authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.classList.add('hidden');
+        console.log('✅ Auth overlay gizlendi');
+    }
+    
+    var menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+        console.log('✅ Ana menü gösteriliyor');
+    }
+    
+    var playerNameInput = document.getElementById('player-name');
+    if (playerNameInput && playerNameInput.value === 'Oyuncu') {
+        playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
+        console.log('✅ Misafir adı oluşturuldu:', playerNameInput.value);
+    }
+    
+    console.log("🎮 Misafir girişi başarılı, ana menü açıldı.");
+}
+
+// ============================================================
+// LOBBY UI GÜNCELLEME
+// ============================================================
+
+function updateLobbyUI() {
+    console.log('🔄 Lobby UI güncelleniyor, oyuncu sayısı:', onlinePlayers.length);
+    
+    var listContainer = document.getElementById('lobby-list');
+    if (!listContainer) {
+        console.warn('⚠️ lobby-list elementi bulunamadı!');
+        return;
+    }
+    
+    // Mevcut oyuncuyu filtrele (kendini gösterme)
+    var otherPlayers = onlinePlayers.filter(function(p) {
+        return p.id !== socket.id;
+    });
+    
+    if (otherPlayers.length === 0) {
+        listContainer.innerHTML = `
+            <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:12px;">
+                <div style="font-size:24px;margin-bottom:8px;">👤</div>
+                Havuzda oyuncu yok.<br>Bekleyin veya başka birini davet edin.
+            </div>
+        `;
+        return;
+    }
+    
+    var html = '';
+    for (var i = 0; i < otherPlayers.length; i++) {
+        var p = otherPlayers[i];
+        html += `
+            <div class="player-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);">
+                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);">
+                    ${p.name}
+                </span>
+                <button class="status" onclick="sendInvite('${p.id}')" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.1);padding:4px 14px;border-radius:16px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s ease;">
+                    Davet Et
+                </button>
+            </div>
+        `;
+    }
+    
+    listContainer.innerHTML = html;
+    console.log('✅ Lobby UI güncellendi,', otherPlayers.length, 'oyuncu gösteriliyor');
+}
+
+// ============================================================
+// DAVET GÖNDERME
+// ============================================================
+
+function sendInvite(targetId) {
+    if (!socket) {
+        alert('Bağlantı yok!');
+        return;
+    }
+    
+    console.log('📨 Davet gönderiliyor:', targetId);
+    socket.emit("send-invite", targetId);
+    
+    // Tüm davet butonlarını güncelle
+    var btns = document.querySelectorAll('.status');
+    for (var i = 0; i < btns.length; i++) {
+        var btn = btns[i];
+        if (btn.textContent === 'Davet Et') {
+            btn.textContent = '⏳ Bekleniyor...';
+            btn.style.background = 'rgba(230, 126, 34, 0.2)';
+            btn.style.color = '#f1c40f';
+            btn.style.borderColor = 'rgba(230, 126, 34, 0.2)';
+            btn.disabled = true;
+        }
+    }
+}
 // ============================================================
 // SAHA GÖSTER/GİZLE
 // ============================================================
