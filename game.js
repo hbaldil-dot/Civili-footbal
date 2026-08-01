@@ -782,8 +782,8 @@ if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden �
     if (typeof isAITurn !== 'undefined') {
         isAITurn = false; 
     }
+   // 🟢 OLMASI GEREKEN DOĞRU YAPILANDIRMA:
     if (typeof currentPlayer !== 'undefined') {
-        // Sırayı Oyuncu 1'e (insan oyuncuya) devret
         currentPlayer = 1; 
     }
 }
