@@ -1171,7 +1171,7 @@ function updatePhysics() {
     if (isMoving) {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
-        runAIMove();
+      executeAIShot();
     }
 }
 
@@ -2693,4 +2693,8 @@ function selectLocalTeam(player, logoFile) {
 function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
+}
+// updatePhysics içinden çağrılan ama eksik olan fonksiyon
+function runAIMove() {
+    executeAIShot();
 }
