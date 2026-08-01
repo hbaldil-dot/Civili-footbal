@@ -2110,9 +2110,13 @@ function getPlayerData() {
     };
 }
 
-socket.on("receive-invite", (data) => {
-    if (confirm(`${data.fromName} seni maça davet ediyor! Kabul et?`)) {
+// Davet alma (initSocket içinde)
+socket.on('receive-invite', (data) => {
+    console.log('📨 Davet alındı:', data);
+    if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
         socket.emit("accept-invite", data.fromId);
+    }
+});
     }
 });
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
@@ -2757,19 +2761,26 @@ function updateLobbyUI() {
     const otherPlayers = onlinePlayers.filter(p => p.id !== socket.id);
     
     if (otherPlayers.length === 0) {
-        listContainer.innerHTML = "<div style='padding:15px;color:rgba(255,255,255,0.3);text-align:center;'>Havuzda oyuncu yok. Bekleyin...</div>";
+        listContainer.innerHTML = `
+            <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:12px;">
+                <div style="font-size:24px;margin-bottom:8px;">👤</div>
+                Havuzda oyuncu yok.<br>Bekleyin veya başka birini davet edin.
+            </div>
+        `;
         return;
     }
     
     let html = '';
     otherPlayers.forEach(p => {
         html += `
-            <div class="player-item">
-                <span>
-                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'">
+            <div class="player-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);">
+                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);">
                     ${p.name}
                 </span>
-                <button class="status" onclick="sendInvite('${p.id}')">Davet Et</button>
+                <button class="status" onclick="sendInvite('${p.id}')" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.1);padding:4px 14px;border-radius:16px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s ease;">
+                    Davet Et
+                </button>
             </div>
         `;
     });
@@ -2790,12 +2801,15 @@ function sendInvite(targetId) {
     console.log('📨 Davet gönderiliyor:', targetId);
     socket.emit("send-invite", targetId);
     
-    // Butonu güncelle
+    // Tüm davet butonlarını güncelle
     const btns = document.querySelectorAll('.status');
     btns.forEach(btn => {
         if (btn.textContent === 'Davet Et') {
             btn.textContent = '⏳ Bekleniyor...';
-            btn.style.background = '#e67e22';
+            btn.style.background = 'rgba(230, 126, 34, 0.2)';
+            btn.style.color = '#f1c40f';
+            btn.style.borderColor = 'rgba(230, 126, 34, 0.2)';
+            btn.disabled = true;
         }
     });
 }
