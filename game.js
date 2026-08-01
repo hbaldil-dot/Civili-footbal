@@ -774,20 +774,18 @@ if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden �
 
     const basePower = 12;
     const finalPower = basePower * powerMultiplier;
-
-    source.vx = Math.cos(angle) * finalPower;
+source.vx = Math.cos(angle) * finalPower;
     source.vy = Math.sin(angle) * finalPower;
 
-    // 🔴 KRİTİK NOKTA: Sırayı HEMEN AI'dan alıyoruz ki üst üste vuruş yapmasın!
     if (typeof isAITurn !== 'undefined') {
-        isAITurn = false; 
+        isAITurn = false;
     }
-   // 🟢 OLMASI GEREKEN DOĞRU YAPILANDIRMA:
     if (typeof currentPlayer !== 'undefined') {
-        currentPlayer = 1; 
+        currentPlayer = 1;
     }
 }
 
+function executeFakeShot(target, params) {
 function executeFakeShot(target, params) {
     const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
     const realAngle = Math.atan2(target.y - cap.y, target.x - cap.x);
