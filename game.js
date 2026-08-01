@@ -8,7 +8,6 @@ let SHOT_DURATION = 5;
 // SOCKET.IO BAĞLANTISI (Online Oyun)
 // ============================================================
 let socket = null;
-let currentRoomId = null;
 
 if (typeof io !== 'undefined') {
     try {
@@ -136,7 +135,6 @@ let gameMode = 'local';
 let score = { p1: 0, p2: 0 };
 let turn = 1;
 let myTeamNumber = 1;
-let currentRoomId = null;
 
 let matchSecondsLeft = MATCH_DURATION;
 let timerInterval = null;
