@@ -5,8 +5,20 @@ let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 
 // ============================================================
-// SOCKET BAĞLANTISI - GÜNCELLENMİŞ
+// SOCKET BAĞLANTISI - iOS Safari Uyumlu
 // ============================================================
+let socket = null;
+let currentRoomId = null;
+let myTeamNumber = 1;
+let isHost = false;
+let onlinePlayers = [];
+let isOnlineMatch = false;
+let opponentPinsData = [];
+let opponentLogoData = 'default.png';
+
+// iOS Safari tespiti
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+console.log('📱 Platform:', isIOS ? 'iOS Safari' : 'Diğer');
 
 if (typeof io !== 'undefined') {
     try {
@@ -14,17 +26,69 @@ if (typeof io !== 'undefined') {
             ? undefined
             : window.location.origin;
 
-        socket = io(serverUrl, {
+        // iOS Safari için özel socket ayarları
+        const socketOptions = {
             transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
-        });
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000,
+            autoConnect: true,
+            forceNew: true,
+            upgrade: true,
+            rememberUpgrade: true
+        };
+
+        // iOS Safari için ekstra ayarlar
+        if (isIOS) {
+            socketOptions.transports = ['websocket', 'polling'];
+            socketOptions.forceNew = true;
+            console.log('📱 iOS Safari modu aktif');
+        }
+
+        socket = io(serverUrl, socketOptions);
 
         socket.on('connect', () => {
-            console.log('✅ Sunucuya bağlandı!');
-            // Lobby'ye otomatik katılma yok, manuel
+            console.log('✅ Sunucuya bağlandı! ID:', socket.id);
+            console.log('📱 Platform:', isIOS ? 'iOS Safari' : 'Diğer');
+            
+            // iOS Safari için heartbeat
+            if (isIOS) {
+                setInterval(() => {
+                    if (socket && socket.connected) {
+                        socket.emit('ping');
+                    }
+                }, 15000);
+            }
         });
+        
+        socket.on('connect_error', (error) => {
+            console.warn('⚠️ Bağlantı hatası:', error.message);
+            if (isIOS) {
+                console.log('📱 iOS Safari bağlantı hatası, yeniden deneniyor...');
+                setTimeout(() => {
+                    if (socket) socket.connect();
+                }, 2000);
+            }
+        });
+        
+        socket.on('disconnect', (reason) => {
+            console.warn('⚠️ Bağlantı kesildi:', reason);
+            if (isIOS && reason === 'io client disconnect') {
+                console.log('📱 iOS Safari bağlantısı kesildi, yeniden bağlanılıyor...');
+                setTimeout(() => {
+                    if (socket) socket.connect();
+                }, 1000);
+            }
+        });
+
+        // Pong yanıtı (iOS Safari heartbeat)
+        socket.on('pong', () => {
+            console.log('💓 Heartbeat alındı (iOS Safari)');
+        });
+
+        // ... diğer socket.on olayları aynen devam eder ...
         
         socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
         socket.on('disconnect', () => console.warn('⚠️ Bağlantı kesildi'));
