@@ -1372,6 +1372,67 @@ function getCanvasTouchPos(e) {
 // ============================================================
 // AI SİSTEMİ - GELİŞMİŞ VERSİYON
 // ============================================================
+// ============================================================
+// TEST: DOĞRUDAN DUVARA VURMA (EN BASİT)
+// ============================================================
+function testWallShot() {
+    console.log('🧪 DUVAR TESTİ BAŞLATILIYOR...');
+    console.log('📍 Top konumu:', cap.x, cap.y);
+    
+    // Top hangi duvara daha yakın?
+    var distToLeft = cap.x;
+    var distToRight = width - cap.x;
+    
+    var targetWall;
+    var wallX;
+    var angle;
+    var pullDistance;
+    
+    if (distToLeft < distToRight) {
+        // Sol duvara vur
+        targetWall = 'SOL';
+        wallX = 10; // Duvara 10px kala
+        angle = Math.PI * 0.85; // Sola doğru (180 dereceye yakın)
+        pullDistance = 50;
+        console.log('🧱 SOL DUVARA VURUŞ - Mesafe:', distToLeft);
+    } else {
+        // Sağ duvara vur
+        targetWall = 'SAĞ';
+        wallX = width - 10;
+        angle = -Math.PI * 0.85; // Sağa doğru
+        pullDistance = 50;
+        console.log('🧱 SAĞ DUVARA VURUŞ - Mesafe:', distToRight);
+    }
+    
+    // Topu duvara doğru fırlat
+    cap.vx = Math.cos(angle) * pullDistance * 0.13;
+    cap.vy = Math.sin(angle) * pullDistance * 0.13;
+    
+    // Sırayı rakibe ver
+    turn = 1;
+    updateHUDTurn();
+    resetShotTimer();
+    isAiThinking = false;
+    
+    console.log('✅ DUVAR TESTİ TAMAMLANDI - Hedef:', targetWall);
+    console.log('💪 Vuruş hızı:', Math.hypot(cap.vx, cap.vy));
+}
+
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
+    isAiThinking = true;
+    
+    console.log('🤖 AI HAREKET BAŞLADI - Seviye:', aiLevel);
+    
+    // === TEST: SADECE DUVAR VURUŞU YAP ===
+    testWallShot();
+    
+    // Normal AI kodunu geçici olarak devre dışı bırak
+    // var params = getAIParameters();
+    // var target = calculateAITarget(params);
+    // executeAIShot(target, params);
+}
 
 // ============================================================
 // 1. VURUŞ DEĞERLENDİRME SİSTEMİ
