@@ -7,11 +7,19 @@ const mongoose = require('mongoose');
 const app = express();
 const server = http.createServer(app);
 
+// iOS Safari için CORS ve WebSocket ayarları
 const io = new Server(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-    }
+        methods: ["GET", "POST"],
+        credentials: true
+    },
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    allowEIO3: true,
+    upgradeTimeout: 10000,
+    maxHttpBufferSize: 1e8
 });
 
 // ============================================================
@@ -108,10 +116,21 @@ let lobbyPlayers = [];
 let activeRooms = {};
 
 // ============================================================
-// SOCKET.IO OLAY DİNLEYİCİLERİ
+// SOCKET.IO OLAY DİNLEYİCİLERİ - iOS Safari Uyumlu
 // ============================================================
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
+    console.log(`📱 Transport: ${socket.conn.transport.name}`);
+    
+    // iOS Safari için transport yükseltme
+    socket.on('upgrade', () => {
+        console.log(`📱 Transport yükseltildi: ${socket.conn.transport.name}`);
+    });
+
+    // Heartbeat (iOS Safari için)
+    socket.on('ping', () => {
+        socket.emit('pong');
+    });
 
     // ============================================================
     // AUTH İŞLEMLERİ
