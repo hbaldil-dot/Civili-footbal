@@ -1669,32 +1669,44 @@ function calculateAITarget(params) {
         }
     }
     
-    // === 3. PİNDEN SEKTİRME (Zor ve Usta) ===
-    if (level === 'zor' || level === 'usta') {
-        var numPinZones = (level === 'usta') ? 4 : 3;
-        for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
-            var pin = opponentPins[pinIdx];
-            for (var i = 0; i < numPinZones; i++) {
-                var targetX = goalLeft + (i / (numPinZones - 1)) * (goalRight - goalLeft);
-                var targetY = goalY;
-                
-                var pinBank = calculatePinBankShot(pin, targetX, targetY);
-                var score = evaluateShot(pinBank.x, pinBank.y, 'bank_pin', level);
-                
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestShot = {
-                        x: pinBank.x,
-                        y: pinBank.y,
-                        type: 'bank_pin',
-                        actualTarget: { x: targetX, y: targetY },
-                        pinUsed: pin
-                    };
-                }
+  // === 3. PİNDEN SEKTİRME (Zor ve Usta) ===
+if (level === 'zor' || level === 'usta') {
+    var numPinZones = (level === 'usta') ? 5 : 3; // Daha fazla bölge
+    for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
+        var pin = opponentPins[pinIdx];
+        // Sadece topa yakın pinleri kullan (Usta için)
+        var distToPin = Math.hypot(pin.x - cap.x, pin.y - cap.y);
+        if (level === 'usta' && distToPin > 200) continue; // Çok uzak pinleri atla
+        
+        for (var i = 0; i < numPinZones; i++) {
+            var targetX = goalLeft + (i / (numPinZones - 1)) * (goalRight - goalLeft);
+            var targetY = goalY;
+            
+            var pinBank = calculatePinBankShot(pin, targetX, targetY);
+            
+            // Usta için: Pin'den sonra topun kaleye ulaşma açısını kontrol et
+            if (level === 'usta') {
+                var angleAfterPin = Math.atan2(targetY - pin.y, targetX - pin.x);
+                var angleToGoal = Math.atan2(goalY - pin.y, goalCenterX - pin.x);
+                var angleDiff = Math.abs(angleAfterPin - angleToGoal);
+                if (angleDiff > 0.5) continue; // Açı çok farklıysa atla
+            }
+            
+            var score = evaluateShot(pinBank.x, pinBank.y, 'bank_pin', level);
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestShot = {
+                    x: pinBank.x,
+                    y: pinBank.y,
+                    type: 'bank_pin',
+                    actualTarget: { x: targetX, y: targetY },
+                    pinUsed: pin
+                };
             }
         }
     }
-    
+}
     // === 4. PIN + DUVAR KOMBİNASYONU (Sadece Usta) ===
     if (level === 'usta') {
         for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
@@ -1753,29 +1765,32 @@ function calculateAITarget(params) {
 }
 
 // ============================================================
-// 7. AI VURUŞ FONKSİYONU - GELİŞMİŞ VERSİYON
+// 7. AI VURUŞ FONKSİYONU - TAM GÜNCELLENMİŞ (USTA İYİLEŞTİRMELİ)
 // ============================================================
 function executeAIShot(target, params) {
     var angle;
     var pullDistance;
     var level = aiLevel;
     
-    // Vuruş tipine göre açı hesaplama
+    // === Vuruş tipine göre açı hesaplama ===
     switch(target.type) {
         case 'direct':
+            // Doğrudan vuruş
             angle = Math.atan2(target.y - cap.y, target.x - cap.x);
             break;
             
         case 'bank_wall':
             // Duvardan sektirme
             if (target.x < 0) {
-                // Sol duvar
+                // Sol duvar: Top sol duvara çarpıp kaleye gidecek
                 var reflectedX = -target.x;
                 angle = Math.atan2(target.y - cap.y, reflectedX - cap.x);
+                console.log('🎯 SOL DUVAR SEKTİRME - Açı:', angle * 180 / Math.PI);
             } else {
-                // Sağ duvar
+                // Sağ duvar: Top sağ duvara çarpıp kaleye gidecek
                 var reflectedX = width + (width - target.x);
                 angle = Math.atan2(target.y - cap.y, reflectedX - cap.x);
+                console.log('🎯 SAĞ DUVAR SEKTİRME - Açı:', angle * 180 / Math.PI);
             }
             break;
             
@@ -1786,6 +1801,7 @@ function executeAIShot(target, params) {
                 var anglePinToGoal = Math.atan2(target.actualTarget.y - target.pinUsed.y, 
                                                  target.actualTarget.x - target.pinUsed.x);
                 angle = 2 * anglePinToGoal - angleToPin;
+                console.log('🎯 PİNDEN SEKTİRME - Pin:', target.pinUsed.x, target.pinUsed.y, 'Açı:', angle * 180 / Math.PI);
             } else {
                 angle = Math.atan2(target.y - cap.y, target.x - cap.x);
             }
@@ -1798,6 +1814,7 @@ function executeAIShot(target, params) {
                 var wallX = target.wallUsed === 'left' ? 0 : width;
                 var anglePinToWall = Math.atan2(wallX - target.pinUsed.x, target.pinUsed.y - cap.y);
                 angle = 2 * anglePinToWall - angleToPin;
+                console.log('🎯 PIN+DUVAR KOMBO - Pin:', target.pinUsed.x, target.pinUsed.y, 'Duvar:', target.wallUsed, 'Açı:', angle * 180 / Math.PI);
             } else {
                 angle = Math.atan2(target.y - cap.y, target.x - cap.x);
             }
@@ -1808,21 +1825,27 @@ function executeAIShot(target, params) {
             var tempX = -target.x;
             var doubleReflectedX = width + (width - tempX);
             angle = Math.atan2(target.y - cap.y, doubleReflectedX - cap.x);
+            console.log('🎯 ÇİFT DUVAR SEKTİRME - Açı:', angle * 180 / Math.PI);
             break;
             
         default:
             angle = Math.atan2(target.y - cap.y, target.x - cap.x);
     }
     
-    // Güç hesaplama
+    // === GÜÇ HESAPLAMA ===
     var distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
     var normalizedDist = Math.min(distanceToTarget / 300, 1);
     
     if (level === 'usta') {
-        // Usta: Hedefe olan mesafeye göre dinamik güç
+        // USTA: Hedefe olan mesafeye göre dinamik güç
+        // Uzaktaki hedefler için daha sert vuruş
         pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
+        // Usta için ekstra güç bonusu
+        pullDistance = Math.min(pullDistance * 1.1, MAX_DRAG_DIST);
+    } else if (level === 'zor') {
+        pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
+        pullDistance = Math.min(pullDistance * 1.05, MAX_DRAG_DIST);
     } else {
-        // Diğer seviyeler: Rastgele aralıkta
         pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
     }
     
@@ -1830,29 +1853,91 @@ function executeAIShot(target, params) {
     var powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
     pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
     
+    // === VURUŞU GERÇEKLEŞTİR ===
     // Vuruş süresi kontrolü
     var extraDelay = 150;
     if (shotSecondsLeft < 2) {
         extraDelay = 50;
-        pullDistance = Math.min(pullDistance, 60); // Hızlı vuruşta daha az güç
+        pullDistance = Math.min(pullDistance, 60);
     }
     
+    // Hata payı: Usta için çok az, diğerleri için daha fazla
+    var angleError = 0;
+    if (level === 'kolay') {
+        angleError = (Math.random() - 0.5) * 0.3;
+    } else if (level === 'orta') {
+        angleError = (Math.random() - 0.5) * 0.15;
+    } else if (level === 'zor') {
+        angleError = (Math.random() - 0.5) * 0.07;
+    } else { // Usta
+        angleError = (Math.random() - 0.5) * 0.03;
+    }
+    angle += angleError;
+    
+    console.log('💪 VURUŞ - Tip:', target.type, 'Güç:', pullDistance, 'Açı:', angle * 180 / Math.PI);
+    
     setTimeout(function() {
-        var force = pullDistance * 0.15;
-        cap.vx = Math.cos(angle) * force;
-        cap.vy = Math.sin(angle) * force;
-        isAiThinking = false;
+        // ÇEKİŞ ANİMASYONU (Görsel efekt için)
+        isDraggingBall = true;
+        dragStart = { x: cap.x, y: cap.y };
+        dragCurrent = { 
+            x: cap.x - Math.cos(angle) * pullDistance * 0.5,
+            y: cap.y - Math.sin(angle) * pullDistance * 0.5
+        };
         
-        // Vuruş sonrası sıra değişimi
-        if (gameMode === 'ai' && currentPhase === 'playing') {
-            turn = 1;
-            updateHUDTurn();
-            resetShotTimer();
-        }
+        var stepCount = 0;
+        var totalSteps = Math.max(4, Math.min(8, Math.floor(pullDistance / 15)));
         
-    }, params.reactionDelay + extraDelay);
+        var pullInterval = setInterval(function() {
+            stepCount++;
+            var ratio = stepCount / totalSteps;
+            var currentPull = Math.min(pullDistance * ratio, MAX_DRAG_DIST);
+            dragCurrent = { 
+                x: cap.x - Math.cos(angle) * currentPull, 
+                y: cap.y - Math.sin(angle) * currentPull 
+            };
+            
+            if (stepCount >= totalSteps) {
+                clearInterval(pullInterval);
+                
+                // VURUŞ
+                setTimeout(function() {
+                    isDraggingBall = false;
+                    isAiThinking = false;
+                    playSound('kick');
+                    
+                    // VURUŞ KATSAYISI (0.13 standart, Usta için biraz daha yüksek)
+                    var powerMultiplier = 0.13;
+                    if (level === 'usta') {
+                        powerMultiplier = 0.14; // Biraz daha sert
+                    } else if (level === 'zor') {
+                        powerMultiplier = 0.135;
+                    }
+                    powerMultiplier *= (0.9 + Math.random() * 0.2);
+                    
+                    cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
+                    cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
+                    
+                    // Usta için vuruş sonrası topa ekstra hız kontrolü
+                    if (level === 'usta') {
+                        var currentSpeed = Math.hypot(cap.vx, cap.vy);
+                        if (currentSpeed < 2) {
+                            cap.vx *= 1.3;
+                            cap.vy *= 1.3;
+                        }
+                    }
+                    
+                    turn = 1;
+                    updateHUDTurn();
+                    resetShotTimer();
+                    
+                    console.log('⚡ VURUŞ TAMAMLANDI - Hız:', Math.hypot(cap.vx, cap.vy));
+                }, extraDelay);
+            }
+        }, 30);
+        
+    }, params.reactionDelay);
 }
-
 // ============================================================
 // 8. SAHTE VURUŞ (FAKE SHOT) - SADECE USTA
 // ============================================================
