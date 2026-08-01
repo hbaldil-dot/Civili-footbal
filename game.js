@@ -2841,23 +2841,30 @@ if (socket) {
  * Lobi oyuncularını ekranda güncelle
  */
 function updateOnlineLobbyDisplay(players) {
+    console.log(`📡 Lobi display güncelleniyor, oyuncu sayısı: ${players.length}`);
+    
     const container = document.getElementById('online-lobby-players');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ online-lobby-players container bulunamadı!');
+        return;
+    }
 
     container.innerHTML = '';
 
     if (players.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #888;">Lobide oyuncu yok...</div>';
+        console.warn('⚠️ Lobide oyuncu yok');
+        container.innerHTML = '<div class="lobby-empty">Lobide oyuncu yok...<br><br>🔄 Arkadaşlarını bekliyorsun...</div>';
         return;
     }
 
-    players.forEach((player) => {
-        if (player.id === socket.id) return; // Kendini gösterme
-
-        const card = document.createElement('div');
-        card.className = 'lobby-player-card';
+    players.forEach((player, i) => {
+        console.log(`${i+1}. ${player.name} (ID: ${player.socketId})`);
         
-        const isOnline = true; // Lobideyse online'dır
+        // Kendini gösterme
+        if (loggedInUser && player.userId === loggedInUser.userId) {
+            console.log(`   → Kendisi, gösterilmiyor`);
+            return;
+        }
         
         card.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
