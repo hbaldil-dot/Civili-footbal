@@ -2116,8 +2116,7 @@ socket.on('receive-invite', (data) => {
     if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
         socket.emit("accept-invite", data.fromId);
     }
-});
-    }
+
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
