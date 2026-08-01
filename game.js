@@ -748,6 +748,7 @@ function calculateAITarget(params) {
 if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden şart
     runAIMove();
 }
+   function executeAIShot() {
     const aiResult = calculateAITarget();
 
     let target = null;
@@ -774,7 +775,8 @@ if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden �
 
     const basePower = 12;
     const finalPower = basePower * powerMultiplier;
-source.vx = Math.cos(angle) * finalPower;
+
+    source.vx = Math.cos(angle) * finalPower;
     source.vy = Math.sin(angle) * finalPower;
 
     if (typeof isAITurn !== 'undefined') {
@@ -785,7 +787,6 @@ source.vx = Math.cos(angle) * finalPower;
     }
 }
 
-function executeFakeShot(target, params) {
 function executeFakeShot(target, params) {
     const fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
     const realAngle = Math.atan2(target.y - cap.y, target.x - cap.x);
