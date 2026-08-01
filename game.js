@@ -5,26 +5,35 @@ let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 
 // ============================================================
-// SOCKET BAĞLANTISI
+// SOCKET.IO BAĞLANTISI (Online Oyun)
 // ============================================================
 let socket = null;
+let currentRoomId = null;
+
 if (typeof io !== 'undefined') {
     try {
-        const serverUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? undefined
-            : window.location.origin;
-
-        socket = io(serverUrl, {
+        socket = io(window.location.origin, {
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000
         });
 
-        socket.on('connect', () => console.log('✅ Sunucuya bağlandı!'));
-        socket.on('connect_error', (error) => console.warn('⚠️ Bağlantı hatası:', error));
+        socket.on('connect', () => {
+            console.log('✅ Socket bağlandı:', socket.id);
+        });
+
+        socket.on('error', (error) => {
+            console.error('❌ Socket hatası:', error);
+            alert('Bağlantı hatası: ' + error);
+        });
+
+        socket.on('connect_error', () => {
+            console.warn('⚠️ Bağlantı koptu, yeniden bağlanıyor...');
+        });
+
     } catch (e) {
-        console.error("❌ Socket bağlantı hatası:", e);
+        console.error("❌ Socket.IO yüklenemedi:", e);
     }
 }
 
@@ -811,23 +820,36 @@ function startLocalGame(mode, level) {
 }
 
 function openOnlineLobby() {
-    if (!socket) { 
-        alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
-        return; 
+    if (!socket) {
+        alert("❌ Sunucuya bağlı değilsiniz!");
+        return;
     }
+
+    console.log('🏟️ Online lobiye giriliyor...');
     gameMode = 'online';
-    const playerData = getPlayerData();
-    socket.emit("join-lobby", playerData);
+    
+    // Oyuncu verilerini gönder
+    const playerName = document.getElementById('player-name').value || 'Oyuncu';
+    socket.emit('join-lobby', {
+        name: playerName,
+        logo: selectedTeamLogo || 'default.png'
+    });
+
+    // Lobi ekranını aç
     document.getElementById('menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'flex';
+    
+    console.log('✅ Lobiye girildi');
 }
 
 function closeOnlineLobby() {
-    if (socket) socket.emit("leave-lobby");
+    if (socket) {
+        socket.emit('leave-lobby');
+    }
     document.getElementById('online-lobby').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
+    console.log('👋 Lobiden çıkıldı');
 }
-
 function startSetupPhase() {
     showField();
     currentPhase = 'setup';
@@ -2673,4 +2695,496 @@ function selectLocalTeam(player, logoFile) {
 function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
+}
+if (socket) {
+    // ========== LOBI OLAYLARI ==========
+    
+    /**
+     * Lobi oyuncuları güncellendi
+     */
+    socket.on('lobby-updated', (data) => {
+        console.log('🏟️ Lobi güncellendi:', data.players.length, 'oyuncu');
+        updateOnlineLobbyDisplay(data.players);
+    });
+
+    /**
+     * Davet alındı
+     */
+    socket.on('receive-invite', (data) => {
+        console.log(`📨 ${data.fromName}'den davet alındı!`);
+        
+        // Toast bildirim göster
+        const notification = document.createElement('div');
+        notification.className = 'invite-notification';
+        notification.innerHTML = `
+            <img src="takimlar/${data.fromLogo}" alt="Avatar">
+            <div>
+                <strong>${data.fromName}</strong>
+                <p>Maç için davet gönderdi</p>
+            </div>
+            <div class="invite-buttons">
+                <button onclick="acceptInvite('${data.fromId}')">✅</button>
+                <button onclick="declineInvite('${data.fromId}')">❌</button>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // 30 saniye sonra kapat
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 30000);
+    });
+
+    /**
+     * MAÇ BAŞLADI!
+     */
+    socket.on('match-started', (data) => {
+        console.log('🎮 Maç başladı!', data);
+        
+        currentRoomId = data.roomId;
+        myTeamNumber = data.myTeam;
+        gameMode = 'online';
+        
+        // UI'ı hazırla
+        document.getElementById('online-lobby').style.display = 'none';
+        document.getElementById('menu').style.display = 'none';
+        showField();
+        
+        // Maç hazırlık ekranını göster
+        showMatchSetupScreen(data);
+    });
+
+    /**
+     * Oyun başladı (setup tamamlandı)
+     */
+    socket.on('game-started', (data) => {
+        console.log('🚀 Oyun başladı!');
+        
+        currentPhase = 'playing';
+        matchSecondsLeft = MATCH_DURATION;
+        
+        // Timer başlat
+        startMatchTimer();
+        
+        // Canvas'ı çiz
+        draw();
+    });
+
+    /**
+     * Rakip vuruş yaptı
+     */
+    socket.on('opponent-shot', (data) => {
+        console.log('⚽ Rakip vuruş yaptı');
+        
+        // Top'un konumu ve hızını güncelle
+        cap.x = data.ballX;
+        cap.y = data.ballY;
+        cap.vx = data.ballVX;
+        cap.vy = data.ballVY;
+        
+        // Sırayı değiştir
+        turn = myTeamNumber === 1 ? 2 : 1;
+    });
+
+    /**
+     * GOL!
+     */
+    socket.on('goal-animation', (data) => {
+        console.log('⚽ GOL!', data.scorerName);
+        
+        // Skoru güncelle
+        if (data.scorerTeam === 1) {
+            score.p1 = data.currentScore.team1;
+        } else {
+            score.p2 = data.currentScore.team2;
+        }
+        
+        // Gol animasyonunu çalıştır
+        triggerGoalAnimation();
+        
+        // Sesi oynat (varsa)
+        try {
+            const sound = new Audio('sesler/gol.mp3');
+            sound.play().catch(() => {});
+        } catch (e) {}
+        
+        updateScoreDisplay();
+    });
+
+    /**
+     * Rakip kesildi
+     */
+    socket.on('opponent-disconnected', (data) => {
+        console.log('❌ Rakip ayrıldı!');
+        alert(`❌ ${data.playerName} oyundan ayrıldı!\n\nMaç iptal ediliyor...`);
+        
+        // Menüye dön
+        goBackToMenu();
+    });
+
+    /**
+     * MAÇ BİTTİ
+     */
+    socket.on('match-finished', (data) => {
+        console.log('🏁 Maç bitti!', data);
+        
+        currentPhase = 'finished';
+        hideField();
+        
+        // Sonuç ekranını göster
+        showMatchResultScreen(data);
+    });
+}
+// ========== LOBİ FONKSIYONLARI ==========
+
+/**
+ * Lobi oyuncularını ekranda güncelle
+ */
+function updateOnlineLobbyDisplay(players) {
+    const container = document.getElementById('online-lobby-players');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (players.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #888;">Lobide oyuncu yok...</div>';
+        return;
+    }
+
+    players.forEach((player) => {
+        if (player.id === socket.id) return; // Kendini gösterme
+
+        const card = document.createElement('div');
+        card.className = 'lobby-player-card';
+        
+        const isOnline = true; // Lobideyse online'dır
+        
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                <img src="takimlar/${player.logo}" alt="${player.name}" 
+                     style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #3498db;">
+                <div>
+                    <div style="font-weight: bold; color: white;">${player.name}</div>
+                    <div style="font-size: 12px; color: #27ae60;">🟢 Lobide</div>
+                </div>
+            </div>
+            <button onclick="sendInviteTo('${player.id}', '${player.name}')" 
+                    style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                📨 Davet Gönder
+            </button>
+        `;
+        
+        container.appendChild(card);
+    });
+}
+
+/**
+ * Oyuncuya davet gönder
+ */
+function sendInviteTo(targetId, playerName) {
+    if (!socket) return;
+    
+    console.log(`📨 ${playerName}'ye davet gönderiliyor...`);
+    socket.emit('send-invite', targetId);
+    
+    // Butonu devre dışı bırak
+    event.target.disabled = true;
+    event.target.textContent = '⏳ Bekleniyor...';
+}
+
+/**
+ * Daveti kabul et
+ */
+function acceptInvite(hostId) {
+    if (!socket) return;
+    
+    console.log('✅ Davet kabul edildi');
+    socket.emit('accept-invite', hostId);
+}
+
+/**
+ * Daveti reddet
+ */
+function declineInvite(hostId) {
+    if (!socket) return;
+    
+    console.log('❌ Davet reddedildi');
+    socket.emit('decline-invite', hostId);
+}
+
+// ========== OYUN FONKSIYONLARI ==========
+
+/**
+ * Maç hazırlık ekranını göster
+ */
+function showMatchSetupScreen(matchData) {
+    const screen = document.createElement('div');
+    screen.id = 'match-setup-screen';
+    screen.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        color: white;
+        font-family: Arial, sans-serif;
+    `;
+    
+    screen.innerHTML = `
+        <h2 style="margin-bottom: 30px; font-size: 24px;">⚽ Maç Hazırlığı</h2>
+        
+        <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 30px;">
+            <div style="text-align: center;">
+                <img src="takimlar/${selectedTeamLogo}" alt="Senin Takımı" 
+                     style="width: 60px; height: 60px; margin-bottom: 10px;">
+                <p style="margin: 0;">Sen (Takım ${matchData.myTeam})</p>
+            </div>
+            
+            <div style="font-size: 28px; font-weight: bold; color: #f39c12;">VS</div>
+            
+            <div style="text-align: center;">
+                <img src="takimlar/${matchData.opponentLogo}" alt="Rakip" 
+                     style="width: 60px; height: 60px; margin-bottom: 10px;">
+                <p style="margin: 0;">${matchData.opponentName}</p>
+            </div>
+        </div>
+        
+        <div id="setup-timer" style="font-size: 20px; margin-bottom: 20px; color: #3498db;">
+            Pinleri yerleştir: <span>15</span>s
+        </div>
+        
+        <p style="margin-bottom: 20px; color: #bbb;">Futbolcularını saha üzerine yerleştir</p>
+        
+        <button onclick="finishSetup()" style="
+            padding: 12px 30px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        ">✅ HAZIR</button>
+    `;
+    
+    document.body.appendChild(screen);
+    
+    // Timer
+    let countdown = 15;
+    const timer = setInterval(() => {
+        countdown--;
+        const timerEl = document.getElementById('setup-timer');
+        if (timerEl) {
+            timerEl.innerHTML = `Pinleri yerleştir: <span>${countdown}</span>s`;
+        }
+        
+        if (countdown <= 0) {
+            clearInterval(timer);
+            finishSetup();
+        }
+    }, 1000);
+}
+
+/**
+ * Setup bitir ve hazır ol
+ */
+function finishSetup() {
+    if (!socket || !currentRoomId) return;
+    
+    console.log('✅ Setup tamamlandı');
+    
+    // Setup ekranını kaldır
+    const screen = document.getElementById('match-setup-screen');
+    if (screen && screen.parentNode) {
+        screen.parentNode.removeChild(screen);
+    }
+    
+    // Sunucuya bildir
+    socket.emit('player-ready', {
+        roomId: currentRoomId,
+        pins: pins || []
+    });
+}
+
+/**
+ * Vuruş sonrası sunucuya gönder
+ */
+function sendShotToOpponent() {
+    if (!socket || !currentRoomId || gameMode !== 'online') return;
+    
+    socket.emit('player-shot', {
+        roomId: currentRoomId,
+        shotData: {
+            ballX: cap.x,
+            ballY: cap.y,
+            ballVX: cap.vx,
+            ballVY: cap.vy
+        }
+    });
+}
+
+/**
+ * Gol olduğunda sunucuya bildir
+ */
+function reportGoalToServer(teamNumber) {
+    if (!socket || !currentRoomId || gameMode !== 'online') return;
+    
+    socket.emit('goal-scored', {
+        roomId: currentRoomId,
+        scorerTeam: teamNumber
+    });
+}
+
+/**
+ * Timer güncellemesi sunucuya gönder
+ */
+function sendMatchTimeUpdate() {
+    if (!socket || !currentRoomId || gameMode !== 'online') return;
+    
+    socket.emit('match-time-update', {
+        roomId: currentRoomId,
+        timeElapsed: MATCH_DURATION - matchSecondsLeft
+    });
+}
+
+/**
+ * Sonuç ekranını göster
+ */
+function showMatchResultScreen(resultData) {
+    const screen = document.createElement('div');
+    screen.id = 'match-result-screen';
+    screen.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        color: white;
+        font-family: Arial, sans-serif;
+    `;
+    
+    // Sonucu belirle
+    let resultText = '';
+    let resultEmoji = '';
+    let resultColor = '#f39c12';
+    
+    if (resultData.result === 'team1-wins' && myTeamNumber === 1) {
+        resultText = 'Kazandın! 🏆';
+        resultColor = '#27ae60';
+    } else if (resultData.result === 'team2-wins' && myTeamNumber === 2) {
+        resultText = 'Kazandın! 🏆';
+        resultColor = '#27ae60';
+    } else if (resultData.result === 'draw') {
+        resultText = 'Berabere 🤝';
+        resultColor = '#f39c12';
+    } else {
+        resultText = 'Kaybettin 😔';
+        resultColor = '#e74c3c';
+    }
+    
+    screen.innerHTML = `
+        <div style="text-align: center;">
+            <h1 style="font-size: 48px; color: ${resultColor}; margin-bottom: 30px;">${resultText}</h1>
+            
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 40px; font-size: 32px;">
+                <div>
+                    <img src="takimlar/${selectedTeamLogo}" alt="Takım 1" 
+                         style="width: 60px; height: 60px; margin-bottom: 10px;">
+                    <p style="margin: 10px 0 0 0;">${resultData.players[0].name}</p>
+                    <p style="font-size: 48px; font-weight: bold; color: #3498db; margin: 10px 0 0 0;">
+                        ${resultData.players[0].score}
+                    </p>
+                </div>
+                
+                <div style="font-weight: bold; color: #888;">-</div>
+                
+                <div>
+                    <img src="takimlar/${resultData.players[1].logo || 'default.png'}" alt="Takım 2" 
+                         style="width: 60px; height: 60px; margin-bottom: 10px;">
+                    <p style="margin: 10px 0 0 0;">${resultData.players[1].name}</p>
+                    <p style="font-size: 48px; font-weight: bold; color: #e74c3c; margin: 10px 0 0 0;">
+                        ${resultData.players[1].score}
+                    </p>
+                </div>
+            </div>
+            
+            <button onclick="goBackToMenu()" style="
+                padding: 12px 30px;
+                background: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+            ">Menüye Dön</button>
+        </div>
+    `;
+    
+    document.body.appendChild(screen);
+}
+
+/**
+ * Menüye geri dön
+ */
+function goBackToMenu() {
+    currentPhase = 'menu';
+    currentRoomId = null;
+    gameMode = 'local';
+    
+    // Ekranları kapat
+    const setupScreen = document.getElementById('match-setup-screen');
+    if (setupScreen && setupScreen.parentNode) {
+        setupScreen.parentNode.removeChild(setupScreen);
+    }
+    
+    const resultScreen = document.getElementById('match-result-screen');
+    if (resultScreen && resultScreen.parentNode) {
+        resultScreen.parentNode.removeChild(resultScreen);
+    }
+    
+    hideField();
+    
+    // Menüyü aç
+    document.getElementById('menu').style.display = 'block';
+    document.getElementById('online-lobby').style.display = 'none';
+    
+    // Lobi güncellemelerini durdur
+    if (socket) {
+        socket.emit('leave-lobby');
+    }
+}
+
+/**
+ * Match timer'ı başlat
+ */
+function startMatchTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        matchSecondsLeft--;
+        
+        // Ekranda göster
+        const timerEl = document.getElementById('match-timer');
+        if (timerEl) {
+            const min = Math.floor(matchSecondsLeft / 60);
+            const sec = matchSecondsLeft % 60;
+            timerEl.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+        }
+        
+        // Sunucuya gönder
+        sendMatchTimeUpdate();
+        
+        if (matchSecondsLeft <= 0) {
+            clearInterval(timerInterval);
+        }
+    }, 1000);
 }
