@@ -744,42 +744,44 @@ function calculateAITarget(params) {
     return { target: directTarget, powerMultiplier: 0.9 };
 }
 
-function executeAIShot(target, params) {
-    const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    const distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
-    let pullDistance;
-    
-    // ... (AI güç hesaplamaları aynı kalacak) ...
-    if (aiLevel === 'usta') {
-        const normalizedDist = Math.min(distanceToTarget / 300, 1);
-        pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
-    } else {
-        pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
-    }
-    const powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
-    pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
-    
-    let extraDelay = 150;
-    if (shotSecondsLeft < 2) { extraDelay = 50; }
+function executeAIShot() {
+    const aiResult = calculateAITarget();
 
-    // AI Vuruşu
-    setTimeout(() => {
-        const force = pullDistance * 0.15;
-        cap.vx = Math.cos(angle) * force;
-        cap.vy = Math.sin(angle) * force;
-        isAiThinking = false;
-        
-        // ---- BURASI DEĞİŞTİRİLDİ ----
-        // AI vuruşunu yaptı, top hareket ediyor. 
-        // Sırayı direkt olarak Oyuncu 1'e (insana) veriyoruz.
-        if (gameMode === 'ai' && currentPhase === 'playing') {
-            turn = 1; 
-            updateHUDTurn();
-            resetShotTimer();
+    // Dönen değerin formatını kontrol edip güvenli target ve multiplier alalım
+    let target = null;
+    let powerMultiplier = 1.0;
+
+    if (aiResult) {
+        if (aiResult.target) {
+            target = aiResult.target;
+            powerMultiplier = aiResult.powerMultiplier || 1.0;
+        } else if (aiResult.x !== undefined && aiResult.y !== undefined) {
+            target = aiResult;
         }
-        // ----------------------------
-        
-    }, params.reactionDelay + extraDelay);
+    }
+
+    // Eğer hedef hesaplanamadıysa varsayılan bir hedef belirle (Kilitlenmeyi önler)
+    if (!target) {
+        target = { x: width / 2, y: height - 50 };
+    }
+
+    // Top (cap) veya AI oyuncusu pozisyonu
+    // NOT: Kodunda top veya piyon nesnesi hangisiyse (cap, aiCap, ball) onu kullan
+    const source = (typeof cap !== 'undefined') ? cap : { x: width / 2, y: 100 };
+
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const angle = Math.atan2(dy, dx);
+
+    const basePower = 12;
+    const finalPower = basePower * powerMultiplier;
+
+    source.vx = Math.cos(angle) * finalPower;
+    source.vy = Math.sin(angle) * finalPower;
+
+    if (typeof isAITurn !== 'undefined') {
+        isAITurn = false;
+    }
 }
 
 function executeFakeShot(target, params) {
