@@ -634,157 +634,132 @@ function getCanvasTouchPos(e) {
 // ============================================================
 // AI SİSTEMİ
 // ============================================================
-// ============================================================
-// GELİŞMİŞ AI HESAPLAMA MOTORU
-// ============================================================
-
-// İki nokta arasındaki doğru parçasına piyon çakışması var mı? (Görüş / Yol kontrolü)
-function isRayBlocked(p1, p2, ignorePin = null) {
-    const dX = p2.x - p1.x;
-    const dY = p2.y - p1.y;
-    const dist = Math.hypot(dX, dY);
-    if (dist === 0) return false;
-
-    // Doğru denkleminde piyon teması kontrolü
-    for (let pin of pins) {
-        if (pin === ignorePin || pin.isPost) continue;
-        const pinRadius = 8;
-        // Noktanın doğruya dik uzaklığı
-        const u = ((pin.x - p1.x) * dX + (pin.y - p1.y) * dY) / (dist * dist);
-        if (u >= 0 && u <= 1) {
-            const ix = p1.x + u * dX;
-            const iy = p1.y + u * dY;
-            const distanceToRay = Math.hypot(pin.x - ix, pin.y - iy);
-            if (distanceToRay < (cap.radius + pinRadius + 2)) {
-                return true; // Yol üzerinde engel var
-            }
-        }
+function getAIParameters() {
+    switch (aiLevel) {
+        case 'kolay': 
+            return { reactionDelay: 800, pullDistanceMin: 20, pullDistanceMax: 50, errorMargin: 25, powerError: 0.20, fakeChance: 0.02, targetZones: 3, analyzeOpponents: false, analyzeWalls: false };
+        case 'orta': 
+            return { reactionDelay: 600, pullDistanceMin: 30, pullDistanceMax: 70, errorMargin: 12, powerError: 0.10, fakeChance: 0.08, targetZones: 5, analyzeOpponents: true, analyzeWalls: false };
+        case 'zor': 
+            return { reactionDelay: 400, pullDistanceMin: 50, pullDistanceMax: 85, errorMargin: 6, powerError: 0.05, fakeChance: 0.15, targetZones: 5, analyzeOpponents: true, analyzeWalls: true };
+        case 'usta': 
+            return { reactionDelay: 250, pullDistanceMin: 60, pullDistanceMax: 90, errorMargin: 2, powerError: 0.02, fakeChance: 0.25, targetZones: 7, analyzeOpponents: true, analyzeWalls: true };
+        default: 
+            return { reactionDelay: 600, pullDistanceMin: 30, pullDistanceMax: 65, errorMargin: 12, powerError: 0.10, fakeChance: 0.08, targetZones: 5, analyzeOpponents: true, analyzeWalls: false };
     }
-    return false;
 }
 
-// Sekme ve Atış Simülasyonu
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
+    isAiThinking = true;
+    
+    const params = getAIParameters();
+    if (shotSecondsLeft < 2) {
+        params.reactionDelay = Math.min(params.reactionDelay, 200);
+        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
+        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
+    }
+    const target = calculateAITarget(params);
+    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
+        executeFakeShot(target, params);
+    } else {
+        executeAIShot(target, params);
+    }
+}
+
 function calculateAITarget(params) {
     const goalY = height - goalHeight;
-    const goalLeft = (width - goalWidth) / 2 + 10;
-    const goalRight = (width + goalWidth) / 2 - 10;
-    const targetX = goalLeft + Math.random() * (goalRight - goalLeft);
-    const directTarget = { x: targetX, y: goalY };
-
-    // --- 1. KOLAY SEVİYE ---
-    if (aiLevel === 'kolay') {
-        return { target: directTarget, powerMultiplier: 1.0 };
-    }
-
-    // Direkt yol kontrolü
-    const isDirectBlocked = isRayBlocked(cap, directTarget);
-
-    if (!isDirectBlocked && aiLevel !== 'kolay') {
-        return { target: directTarget, powerMultiplier: 1.0 };
-    }
-
-    // --- 2. ORTA SEVİYE (Duvar Yansımaları) ---
-    if (aiLevel === 'orta' || aiLevel === 'zor' || aiLevel === 'usta') {
-        // Sol Duvar Yansıması (Sanal Hedef Yöntemi)
-        const virtualLeftGoal = { x: -targetX, y: goalY };
-        const leftWallHitY = cap.y + (virtualLeftGoal.y - cap.y) * (-cap.x / (virtualLeftGoal.x - cap.x));
-        const leftWallPoint = { x: 0, y: leftWallHitY };
-
-        if (!isRayBlocked(cap, leftWallPoint) && !isRayBlocked(leftWallPoint, directTarget)) {
-            return { target: leftWallPoint, powerMultiplier: 1.2 };
-        }
-
-        // Sağ Duvar Yansıması
-        const virtualRightGoal = { x: 2 * width - targetX, y: goalY };
-        const rightWallHitY = cap.y + (virtualRightGoal.y - cap.y) * ((width - cap.x) / (virtualRightGoal.x - cap.x));
-        const rightWallPoint = { x: width, y: rightWallHitY };
-
-        if (!isRayBlocked(cap, rightWallPoint) && !isRayBlocked(rightWallPoint, directTarget)) {
-            return { target: rightWallPoint, powerMultiplier: 1.2 };
-        }
-    }
-
-    // --- 3. ZOR VE USTA SEVİYE (Pin Sekme Açıları & Güvenli Duruş) ---
-    if (aiLevel === 'zor' || aiLevel === 'usta') {
-        let bestCandidate = null;
-        let minScore = Infinity;
-
-        // Bütün saha piyonlarını sekme noktası olarak test et
-        for (let pin of pins) {
-            if (pin.isPost) continue;
-
-            // Piyonun üst, alt, sol ve sağ sekme noktalarını türet
-            const bounceAngles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
-            for (let a of bounceAngles) {
-                const bouncePoint = {
-                    x: pin.x + Math.cos(a) * (cap.radius + 10),
-                    y: pin.y + Math.sin(a) * (cap.radius + 10)
-                };
-
-                if (!isRayBlocked(cap, bouncePoint) && !isRayBlocked(bouncePoint, directTarget)) {
-                    
-                    // USTA Seviyesi Güvenlik Şartı: Topun duracağı yer ile kendi kalesi arasında engel olmamalı
-                    if (aiLevel === 'usta') {
-                        const myGoalCenter = { x: width / 2, y: goalHeight };
-                        // Tahmini duruş noktasında kendi kalesine hat kontrolü
-                        const isMyGoalUnblocked = !isRayBlocked(bouncePoint, myGoalCenter);
-                        if (isMyGoalUnblocked) {
-                            // Önü açık/tehlikeli kalacaksa bu vuruşu pas geç veya cezalandır
-                            continue;
-                        }
-                    }
-
-                    return { target: bouncePoint, powerMultiplier: 1.35 };
-                }
+    const goalCenterX = width / 2;
+    const goalLeft = (width - goalWidth) / 2;
+    const goalRight = (width + goalWidth) / 2;
+    const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
+    const zones = [];
+    const numZones = params.targetZones || 5;
+    const zoneWidth = (goalRight - goalLeft) / numZones;
+    for (let i = 0; i < numZones; i++) {
+        const zoneCenterX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+        const testX = zoneCenterX;
+        const testY = goalY;
+        let score = 0;
+        const centerDist = Math.abs(testX - goalCenterX);
+        score += (60 - centerDist) * 1.5;
+        if (params.analyzeOpponents) {
+            let minDistToOpponent = Infinity;
+            opponentPins.forEach(p => {
+                const dist = Math.hypot(testX - p.x, testY - p.y);
+                if (dist < minDistToOpponent) minDistToOpponent = dist;
+            });
+            const safetyMargin = (aiLevel === 'usta') ? 20 : 10;
+            if (minDistToOpponent < safetyMargin) {
+                score -= (safetyMargin - minDistToOpponent) * 3;
+            } else {
+                score += minDistToOpponent * 2;
             }
         }
-    }
-
-    // Hiçbir gelişmiş açı bulunamazsa varsayılan direkt vuruşu yap
-    return { target: directTarget, powerMultiplier: 0.9 };
-}
-
-// updatePhysics içinde AI sırasını tetikleyen kısım:
-if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden şart
-    runAIMove();
-}
-   function executeAIShot() {
-    const aiResult = calculateAITarget();
-
-    let target = null;
-    let powerMultiplier = 1.0;
-
-    if (aiResult) {
-        if (aiResult.target) {
-            target = aiResult.target;
-            powerMultiplier = aiResult.powerMultiplier || 1.0;
-        } else if (aiResult.x !== undefined && aiResult.y !== undefined) {
-            target = aiResult;
+        if (params.analyzeWalls) {
+            const angleToTarget = Math.atan2(testY - cap.y, testX - cap.x);
+            const wallLeftDist = cap.x;
+            const wallRightDist = width - cap.x;
+            const angleToWallLeft = Math.abs(angleToTarget - Math.PI);
+            const angleToWallRight = Math.abs(angleToTarget);
+            if (angleToWallLeft < 0.3 && cap.x < 50) {
+                score -= 20;
+            }
+            if (angleToWallRight < 0.3 && (width - cap.x) < 50) {
+                score -= 20;
+            }
+            const distToGoal = Math.abs(testY - cap.y);
+            if (distToGoal < 50) {
+                score += 10;
+            }
         }
+        zones.push({ x: testX, y: testY, score: score });
     }
+    let bestZone = zones.reduce((a, b) => a.score > b.score ? a : b);
+    const errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+    const errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+    let targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
+    let targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
+    return { x: targetX, y: targetY };
+}
 
-    if (!target) {
-        target = { x: width / 2, y: height - 50 };
+function executeAIShot(target, params) {
+    const angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+    const distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
+    let pullDistance;
+    
+    // ... (AI güç hesaplamaları aynı kalacak) ...
+    if (aiLevel === 'usta') {
+        const normalizedDist = Math.min(distanceToTarget / 300, 1);
+        pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
+    } else {
+        pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
     }
+    const powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
+    pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
+    
+    let extraDelay = 150;
+    if (shotSecondsLeft < 2) { extraDelay = 50; }
 
-    const source = (typeof cap !== 'undefined') ? cap : { x: width / 2, y: 100 };
-
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
-    const angle = Math.atan2(dy, dx);
-
-    const basePower = 12;
-    const finalPower = basePower * powerMultiplier;
-
-    source.vx = Math.cos(angle) * finalPower;
-    source.vy = Math.sin(angle) * finalPower;
-
-    if (typeof isAITurn !== 'undefined') {
-        isAITurn = false;
-    }
-    if (typeof currentPlayer !== 'undefined') {
-        currentPlayer = 1;
-    }
+    // AI Vuruşu
+    setTimeout(() => {
+        const force = pullDistance * 0.15;
+        cap.vx = Math.cos(angle) * force;
+        cap.vy = Math.sin(angle) * force;
+        isAiThinking = false;
+        
+        // ---- BURASI DEĞİŞTİRİLDİ ----
+        // AI vuruşunu yaptı, top hareket ediyor. 
+        // Sırayı direkt olarak Oyuncu 1'e (insana) veriyoruz.
+        if (gameMode === 'ai' && currentPhase === 'playing') {
+            turn = 1; 
+            updateHUDTurn();
+            resetShotTimer();
+        }
+        // ----------------------------
+        
+    }, params.reactionDelay + extraDelay);
 }
 
 function executeFakeShot(target, params) {
@@ -1176,7 +1151,7 @@ function updatePhysics() {
     if (isMoving) {
         cap.rotation += (Math.sign(cap.vx) * Math.abs(cap.vx) + Math.sign(cap.vy) * Math.abs(cap.vy)) * 0.05;
     } else if (gameMode === 'ai' && turn === 2) {
-      executeAIShot();
+        runAIMove();
     }
 }
 
@@ -2698,13 +2673,4 @@ function selectLocalTeam(player, logoFile) {
 function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
-}
-
-// Bu fonksiyonu tam olarak bu isimle dosyanın en altına ekle:
-function runAIMove() {
-    if (typeof executeAIShot === "function") {
-        executeAIShot();
-    } else {
-        console.error("executeAIShot fonksiyonu bulunamadı!");
-    }
 }
