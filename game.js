@@ -2106,7 +2106,7 @@ function getPlayerData() {
         if (count === 0) {
             listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
         }
-    });
+    }
     socket.on("receive-invite", (data) => {
         if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
             socket.emit("accept-invite", data.fromId);
