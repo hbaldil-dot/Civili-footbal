@@ -2098,40 +2098,7 @@ function getPlayerData() {
         logo: selectedTeamLogo || 'default.png'
     };
 }
-//function setupSocketListeners() {
- //   if (!socket) return;
-  //  socket.on("update-lobby-players", (players) => {
-  //      const listContainer = document.getElementById('lobby-list');
-  //      if (!listContainer) return;
-   //     listContainer.innerHTML = "";
-   //     let count = 0;
-   //     players.forEach(p => {
-     //       if (p.id !== socket.id) {
-      //          count++;
-      //          const item = document.createElement('div');
-       //         item.className = 'player-item';
-       //         const infoSpan = document.createElement('span');
-        //        const logoImg = document.createElement('img');
-         //       logoImg.src = `takimlar/${p.logo || 'default.png'}`;
-         //       logoImg.className = 'lobby-logo';
-         //       logoImg.onerror = function() { this.src = 'takimlar/default.png'; };
-        //        infoSpan.appendChild(logoImg);
-        //        const nameSpan = document.createElement('span');
-         //       nameSpan.textContent = ` ${p.name}`;
-         //       infoSpan.appendChild(nameSpan);
-         //       const btn = document.createElement('button');
-        //        btn.className = 'status';
-         //       btn.innerText = 'Davet Et';
-          //      btn.onclick = () => {
-         //           btn.innerText = "Bekleniyor...";
-          //          btn.style.background = "#e67e22";
-          //          socket.emit("send-invite", p.id);
-            //    };
-           //     item.appendChild(infoSpan);
-          //      item.appendChild(btn);
-          //      listContainer.appendChild(item);
-          //  }
-      //  });
+
         if (count === 0) {
             listContainer.innerHTML = "<div style='padding:15px;color:#888;text-align:center;'>Havuz boş.</div>";
         }
@@ -2221,7 +2188,7 @@ function joinOnlineGame() {
     const currentUsername = (playerProfile && playerProfile.username) 
                             ? playerProfile.username 
                             : "Oyuncu_" + Math.floor(Math.random() * 1000);
-    socket.emit("registerPlayer", {
+       socket.emit("registerPlayer", {
         username: currentUsername,
         teamLogo: selectedTeamLogo || "default.png"
     });
