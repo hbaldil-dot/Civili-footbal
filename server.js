@@ -13,14 +13,7 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
-socket = io({
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-    secure: window.location.protocol === 'https:',
-    rejectUnauthorized: false
-});
+
 // ============================================================
 // MONGODB BAĞLANTISI (Mongoose Temelli Stabil Bağlantı)
 // ============================================================
@@ -314,17 +307,7 @@ io.on('connection', (socket) => {
         handlePlayerDisconnection(socket);
     });
 });
-function broadcastLobbyUpdate() {
-    console.log(`📡 Lobi yayınlanıyor: ${lobbyPlayers.length} oyuncu`);
-    lobbyPlayers.forEach(p => {
-        console.log(`  - ${p.name} (${p.socketId})`);
-    });
-    
-    io.emit('lobby-updated', {
-        players: lobbyData,
-        count: lobbyData.length
-    });
-}
+
 function broadcastLobbyUpdate() {
     io.emit('update-lobby-players', lobbyPlayers);
 }

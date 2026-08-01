@@ -10,55 +10,6 @@
 </head>
 <body>
 
-    <!-- ===== KİMLİK DOĞRULAMA MODAL ===== -->
-    <div id="auth-modal-overlay">
-        <div class="auth-modal">
-            <h2>⚽ Çivili Futbol</h2>
-            
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
-                <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
-            </div>
-
-            <!-- GİRİŞ FORMU -->
-            <form class="auth-form active" id="login-form" onsubmit="handleAuthSubmit(event, 'login')">
-                <input type="email" id="login-email" placeholder="E-posta Adresi" required>
-                <input type="password" id="login-password" placeholder="Şifre" required>
-                <button type="submit" class="auth-btn">🔑 Giriş Yap</button>
-            </form>
-
-            <!-- KAYIT FORMU -->
-            <form class="auth-form" id="register-form" onsubmit="handleAuthSubmit(event, 'register')">
-                <input type="text" id="reg-username" placeholder="Kullanıcı Adı (2-30 karakter)" minlength="2" maxlength="30" required>
-                <input type="email" id="reg-email" placeholder="E-posta Adresi" required>
-                <input type="password" id="reg-password" placeholder="Şifre (en az 6 karakter)" minlength="6" required>
-                <button type="submit" class="auth-btn">📝 Kayıt Ol</button>
-            </form>
-
-            <div class="auth-footer">
-                <button type="button" class="auth-btn auth-btn-secondary" onclick="continueAsGuest()">
-                    👤 Misafir Gir
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== ONLINE LOBİ ===== -->
-    <div id="online-lobby" style="display: none;">
-        <div class="lobby-header">
-            <h2>🏟️ Online Lobi</h2>
-            <button class="lobby-close-btn" onclick="closeOnlineLobby()">Ana Menü</button>
-        </div>
-
-        <div class="lobby-stats">
-            <p id="lobby-player-name" style="font-size: 16px; font-weight: bold; color: #3498db;">Oyuncu Adı</p>
-            <p>Oyuncu Sayısı: <span id="lobby-count" style="color: #3498db; font-weight: bold;">0</span></p>
-        </div>
-
-        <div id="online-lobby-players"></div>
-    </div>
-
-  
     <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
         <div class="input-group">
@@ -206,9 +157,7 @@
     </div>
 
     <!-- ===== ONLINE LOBBY POP-UP ===== -->
-    <!-- Online Lobi -->
-<div id="online-lobby" style="display: none;">
-    <div id="online-lobby-players"></div>
+    <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
         <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
             <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
@@ -341,11 +290,7 @@
 </div>
 
     <!-- ===== OYUN EKRANI ===== -->
-   <!-- HUD (Heads Up Display) -->
-<div id="top-bar" style="display: none;">
-    <div id="match-timer">90:00</div>
-    <div id="match-score">0 - 0</div>
-</div>
+    <div id="top-bar" style="display: none;">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
             <div id="score-board">
