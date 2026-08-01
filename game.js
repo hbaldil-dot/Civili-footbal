@@ -7,14 +7,6 @@ let SHOT_DURATION = 5;
 // ============================================================
 // SOCKET BAĞLANTISI - iOS Safari Uyumlu
 // ============================================================
-let socket = null;
-let currentRoomId = null;
-let myTeamNumber = 1;
-let isHost = false;
-let onlinePlayers = [];
-let isOnlineMatch = false;
-let opponentPinsData = [];
-let opponentLogoData = 'default.png';
 
 // iOS Safari tespiti
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
