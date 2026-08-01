@@ -744,10 +744,12 @@ function calculateAITarget(params) {
     return { target: directTarget, powerMultiplier: 0.9 };
 }
 
-function executeAIShot() {
+// updatePhysics içinde AI sırasını tetikleyen kısım:
+if (isAITurn && isBallStopped()) { // Topun durup durmadığını kontrol eden şart
+    runAIMove();
+}
     const aiResult = calculateAITarget();
 
-    // Dönen değerin formatını kontrol edip güvenli target ve multiplier alalım
     let target = null;
     let powerMultiplier = 1.0;
 
@@ -760,13 +762,10 @@ function executeAIShot() {
         }
     }
 
-    // Eğer hedef hesaplanamadıysa varsayılan bir hedef belirle (Kilitlenmeyi önler)
     if (!target) {
         target = { x: width / 2, y: height - 50 };
     }
 
-    // Top (cap) veya AI oyuncusu pozisyonu
-    // NOT: Kodunda top veya piyon nesnesi hangisiyse (cap, aiCap, ball) onu kullan
     const source = (typeof cap !== 'undefined') ? cap : { x: width / 2, y: 100 };
 
     const dx = target.x - source.x;
@@ -779,8 +778,13 @@ function executeAIShot() {
     source.vx = Math.cos(angle) * finalPower;
     source.vy = Math.sin(angle) * finalPower;
 
+    // 🔴 KRİTİK NOKTA: Sırayı HEMEN AI'dan alıyoruz ki üst üste vuruş yapmasın!
     if (typeof isAITurn !== 'undefined') {
-        isAITurn = false;
+        isAITurn = false; 
+    }
+    if (typeof currentPlayer !== 'undefined') {
+        // Sırayı Oyuncu 1'e (insan oyuncuya) devret
+        currentPlayer = 1; 
     }
 }
 
