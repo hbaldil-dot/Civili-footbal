@@ -1020,6 +1020,9 @@ function startLocalGame(mode, level) {
 }
 
 function openOnlineLobby() {
+    console.log('🎮 Online lobby açılıyor...');
+    console.log('📱 Platform:', isIOS ? 'iOS Safari' : 'Diğer');
+    
     if (!socket) { 
         alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
         return; 
@@ -1027,6 +1030,10 @@ function openOnlineLobby() {
     
     if (!socket.connected) {
         alert("Sunucu bağlantısı kurulamadı! Lütfen sayfayı yenileyin.");
+        if (isIOS) {
+            console.log('📱 iOS Safari yeniden bağlanmayı deniyor...');
+            socket.connect();
+        }
         return;
     }
     
@@ -1034,6 +1041,8 @@ function openOnlineLobby() {
     const playerData = getPlayerData();
     
     console.log('📤 Lobby\'ye katılınıyor:', playerData);
+    console.log('📱 Socket ID:', socket.id);
+    
     socket.emit("join-lobby", playerData);
     
     document.getElementById('menu').style.display = 'none';
@@ -2823,8 +2832,53 @@ function openOnlineLobby() {
     }
 }
 function updateLobbyUI() {
-    const listContainer = document.getElementById('lobby-list');
-    if (!listContainer) return;
+    console.log('🔄 Lobby UI güncelleniyor');
+    console.log('📊 Tüm oyuncular:', onlinePlayers);
+    console.log('📊 Benim socket ID:', socket ? socket.id : 'socket yok');
+    console.log('📱 Platform:', isIOS ? 'iOS Safari' : 'Diğer');
+    
+    var listContainer = document.getElementById('lobby-list');
+    if (!listContainer) {
+        console.warn('⚠️ lobby-list elementi bulunamadı!');
+        return;
+    }
+    
+    if (!onlinePlayers || onlinePlayers.length === 0) {
+        listContainer.innerHTML = `
+            <div style="padding:20px;color:rgba(255,255,255,0.4);text-align:center;">
+                <div style="font-size:30px;margin-bottom:8px;">👤</div>
+                Havuzda oyuncu yok
+            </div>
+        `;
+        return;
+    }
+    
+    // TÜM oyuncuları göster (kendini de göster)
+    var html = '';
+    for (var i = 0; i < onlinePlayers.length; i++) {
+        var p = onlinePlayers[i];
+        var isMe = (p.id === socket.id);
+        
+        html += `
+            <div class="player-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.05);${isMe ? 'background:rgba(46,204,113,0.05);' : ''}">
+                <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:${isMe ? '#2ecc71' : 'rgba(255,255,255,0.8)'};">
+                    <img src="takimlar/${p.logo || 'default.png'}" 
+                         style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid ${isMe ? 'rgba(46,204,113,0.3)' : 'rgba(255,255,255,0.1)'};"
+                         onerror="this.src='takimlar/default.png'">
+                    ${p.name} ${isMe ? '(Sen)' : ''}
+                </span>
+                ${!isMe ? `
+                    <button onclick="sendInvite('${p.id}')" 
+                            style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.1);padding:4px 14px;border-radius:16px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s ease;">
+                        Davet Et
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    listContainer.innerHTML = html;
+    console.log('✅ Lobby UI güncellendi,', onlinePlayers.length, 'oyuncu gösteriliyor');
 }
     
 function closeOnlineLobby() {
