@@ -2118,7 +2118,6 @@ socket.on('receive-invite', (data) => {
     }
 });
     }
-});
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
