@@ -7,14 +7,6 @@ let SHOT_DURATION = 5;
 // ============================================================
 // SOCKET BAĞLANTISI - GÜNCELLENMİŞ
 // ============================================================
-let socket = null;
-let currentRoomId = null;
-let myTeamNumber = 1;
-let isHost = false;
-let onlinePlayers = [];
-let isOnlineMatch = false;
-let opponentPinsData = [];
-let opponentLogoData = 'default.png';
 
 if (typeof io !== 'undefined') {
     try {
