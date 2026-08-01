@@ -1380,57 +1380,88 @@ function evaluateShot(targetX, targetY, shotType, level) {
     let score = 0;
     const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
     
-    // 1. Doğrudan yol kontrolü (tüm seviyeler)
+    // 1. Doğrudan yol kontrolü
     const directPath = checkDirectPath(targetX, targetY, opponentPins);
-    if (directPath.clear) {
-        score += 50;
-    } else {
-        // Engellenmişse, sektirme avantajlı
-        if (shotType !== 'direct') {
-            score += 30;
+    
+    // 2. ENGEL VARSA, DOĞRUDAN VURUŞ CEZALANDIRILIR
+    if (shotType === 'direct') {
+        if (directPath.clear) {
+            score += 50; // Yol açık: iyi
+        } else {
+            score -= 30; // Yol tıkalı: KÖTÜ!
+            // Engelin ne kadar yakın olduğuna göre ek ceza
+            if (directPath.blockedBy) {
+                var distToBlocker = Math.hypot(directPath.blockedBy.x - cap.x, directPath.blockedBy.y - cap.y);
+                if (distToBlocker < 100) score -= 20;
+            }
         }
     }
     
-    // 2. Hedef kalitesi (tüm seviyeler)
+    // 3. SEKTİRME VURUŞLARI - Engel varsa AVANTAJLI
+    if (shotType !== 'direct') {
+        if (directPath.clear) {
+            // Yol açık ama sektirme yapıyorsa, biraz ceza
+            score += 10;
+        } else {
+            // Yol tıkalı, sektirme iyi çözüm!
+            score += 60; // BÜYÜK BONUS!
+            
+            // Engelden ne kadar uzakta olduğuna göre bonus
+            if (directPath.blockedBy) {
+                var distToBlocker = Math.hypot(directPath.blockedBy.x - cap.x, directPath.blockedBy.y - cap.y);
+                if (distToBlocker < 80) score += 20; // Engel çok yakın, sektirme şart!
+            }
+        }
+    }
+    
+    // 4. Hedef kalitesi
     const goalCenterX = width / 2;
     const centerDist = Math.abs(targetX - goalCenterX);
     score += (60 - centerDist) * 1.5;
     
-    // 3. Topun hedefe olan mesafesi
+    // 5. Topun hedefe olan mesafesi
     const distToTarget = Math.hypot(targetX - cap.x, targetY - cap.y);
-    if (distToTarget < 50) {
-        score += 10;
-    } else if (distToTarget > 250) {
-        score -= 10;
-    }
+    if (distToTarget < 50) score += 10;
+    else if (distToTarget > 250) score -= 10;
     
-    // 4. Vuruş tipine göre bonus (seviyeye göre)
+    // 6. VURUŞ TİPİNE GÖRE PUANLAMA (SEVİYE BAZINDA)
+    // Usta için sektirme vuruşları daha değerli!
     switch(shotType) {
         case 'direct':
-            score += 15;
+            score += (level === 'usta') ? 5 : 15;
             break;
         case 'bank_wall':
-            if (level === 'orta' || level === 'zor' || level === 'usta') score += 10;
+            if (level === 'usta') score += 35;
+            else if (level === 'zor') score += 25;
+            else if (level === 'orta') score += 15;
+            else score += 5;
             break;
         case 'bank_pin':
-            if (level === 'zor' || level === 'usta') score += 20;
+            if (level === 'usta') score += 45;
+            else if (level === 'zor') score += 30;
+            else score += 10;
             break;
         case 'double_bank':
-            if (level === 'usta') score += 25;
+            if (level === 'usta') score += 50;
+            else score += 15;
             break;
         case 'pin_wall_combo':
-            if (level === 'usta') score += 30;
+            if (level === 'usta') score += 55;
+            else score += 20;
             break;
     }
     
-    // 5. Duvar mesafesi kontrolü
+    // 7. Duvar mesafesi kontrolü
     const wallDist = Math.min(cap.x, width - cap.x);
-    if (wallDist < 30) {
-        if (shotType === 'bank_wall') {
-            score += 10;
-        } else {
-            score -= 5;
-        }
+    if (wallDist < 40) {
+        if (shotType === 'bank_wall') score += 20;
+        else if (shotType === 'direct') score -= 10;
+    }
+    
+    // 8. Eğer top kaleye yakınsa, sektirme daha mantıklı
+    const distToGoal = Math.abs(cap.y - (height - goalHeight));
+    if (distToGoal < 100 && shotType !== 'direct') {
+        score += 15; // Kaleye yakınken sektirme avantajlı
     }
     
     return score;
@@ -1614,7 +1645,7 @@ function calculateAITarget(params) {
     var goalRight = (width + goalWidth) / 2;
     var level = aiLevel;
     
-    // Rakip oyuncular (takım 1)
+    // Rakip oyuncular
     var opponentPins = [];
     for (var i = 0; i < pins.length; i++) {
         if (pins[i].team === 1 && !pins[i].isPost) {
@@ -1622,21 +1653,199 @@ function calculateAITarget(params) {
         }
     }
     
+    console.log('🎯 AI HEDEF SEÇİMİ - Seviye:', level);
+    console.log('📍 Top konumu:', cap.x, cap.y);
+    console.log('👥 Rakip pin sayısı:', opponentPins.length);
+    
+    var allShots = []; // Tüm vuruş seçeneklerini topla
     var bestShot = null;
     var bestScore = -Infinity;
     
-    // === 1. DOĞRUDAN VURUŞLAR (Tüm seviyeler) ===
+    // === 1. DOĞRUDAN VURUŞLAR ===
     var numDirectZones = (level === 'usta') ? 7 : (level === 'zor' || level === 'orta' ? 5 : 3);
     for (var i = 0; i < numDirectZones; i++) {
         var targetX = goalLeft + (i / (numDirectZones - 1)) * (goalRight - goalLeft);
         var targetY = goalY;
         
         var score = evaluateShot(targetX, targetY, 'direct', level);
+        allShots.push({ x: targetX, y: targetY, type: 'direct', score: score });
+        
         if (score > bestScore) {
             bestScore = score;
             bestShot = { x: targetX, y: targetY, type: 'direct' };
         }
     }
+    
+    // === 2. DUVARDAN SEKTİRME ===
+    if (level === 'orta' || level === 'zor' || level === 'usta') {
+        var numBankZones = (level === 'usta') ? 5 : 4;
+        var wallSides = ['left', 'right'];
+        
+        for (var w = 0; w < wallSides.length; w++) {
+            var wallSide = wallSides[w];
+            
+            for (var i = 0; i < numBankZones; i++) {
+                var targetX = goalLeft + (i / (numBankZones - 1)) * (goalRight - goalLeft);
+                var targetY = goalY;
+                
+                var wallBank = calculateWallBankShot(wallSide, targetX, targetY);
+                
+                // Geçerlilik kontrolü
+                if (wallBank.wallY < goalHeight + 20 || wallBank.wallY > height - goalHeight - 20) continue;
+                if (wallBank.distToWall < 20 || wallBank.distToWall > 300) continue;
+                
+                var score = evaluateShot(wallBank.wallX, wallBank.wallY, 'bank_wall', level);
+                allShots.push({ 
+                    x: wallBank.wallX, 
+                    y: wallBank.wallY, 
+                    type: 'bank_wall', 
+                    score: score,
+                    wallSide: wallSide,
+                    wallPoint: { x: wallBank.wallX, y: wallBank.wallY },
+                    actualTarget: { x: targetX, y: targetY },
+                    distToWall: wallBank.distToWall
+                });
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = {
+                        x: wallBank.wallX,
+                        y: wallBank.wallY,
+                        type: 'bank_wall',
+                        wallSide: wallSide,
+                        wallPoint: { x: wallBank.wallX, y: wallBank.wallY },
+                        actualTarget: { x: targetX, y: targetY },
+                        distToWall: wallBank.distToWall
+                    };
+                }
+            }
+        }
+    }
+    
+    // === 3. PİNDEN SEKTİRME (Zor ve Usta) ===
+    if (level === 'zor' || level === 'usta') {
+        var numPinZones = (level === 'usta') ? 5 : 3;
+        
+        for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
+            var pin = opponentPins[pinIdx];
+            
+            // Sadece topa yakın pinleri kullan
+            var distToPin = Math.hypot(pin.x - cap.x, pin.y - cap.y);
+            if (distToPin > 200) continue;
+            
+            for (var i = 0; i < numPinZones; i++) {
+                var targetX = goalLeft + (i / (numPinZones - 1)) * (goalRight - goalLeft);
+                var targetY = goalY;
+                
+                var pinBank = calculatePinBankShot(pin, targetX, targetY);
+                var score = evaluateShot(pinBank.x, pinBank.y, 'bank_pin', level);
+                allShots.push({ 
+                    x: pinBank.x, 
+                    y: pinBank.y, 
+                    type: 'bank_pin', 
+                    score: score,
+                    pinUsed: pin,
+                    actualTarget: { x: targetX, y: targetY }
+                });
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = {
+                        x: pinBank.x,
+                        y: pinBank.y,
+                        type: 'bank_pin',
+                        pinUsed: pin,
+                        actualTarget: { x: targetX, y: targetY }
+                    };
+                }
+            }
+        }
+    }
+    
+    // === 4. PIN + DUVAR KOMBİNASYONU (Sadece Usta) ===
+    if (level === 'usta') {
+        for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
+            var pin = opponentPins[pinIdx];
+            var distToPin = Math.hypot(pin.x - cap.x, pin.y - cap.y);
+            if (distToPin > 200) continue;
+            
+            for (var wallSide = 0; wallSide < 2; wallSide++) {
+                var combo = calculatePinWallCombo(pin, wallSide === 0 ? 'left' : 'right');
+                var score = evaluateShot(combo.x, combo.y, 'pin_wall_combo', level);
+                allShots.push({ 
+                    x: combo.x, 
+                    y: combo.y, 
+                    type: 'pin_wall_combo', 
+                    score: score,
+                    pinUsed: pin,
+                    wallUsed: wallSide === 0 ? 'left' : 'right'
+                });
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = {
+                        x: combo.x,
+                        y: combo.y,
+                        type: 'pin_wall_combo',
+                        pinUsed: pin,
+                        wallUsed: wallSide === 0 ? 'left' : 'right'
+                    };
+                }
+            }
+        }
+    }
+    
+    // === 5. ÇİFT DUVAR SEKTİRME (Sadece Usta) ===
+    if (level === 'usta') {
+        var numDoubleZones = 3;
+        for (var i = 0; i < numDoubleZones; i++) {
+            var targetX = goalLeft + (i / (numDoubleZones - 1)) * (goalRight - goalLeft);
+            var targetY = goalY;
+            
+            var tempX = -targetX;
+            var doubleReflectedX = width + (width - tempX);
+            
+            var score = evaluateShot(doubleReflectedX, targetY, 'double_bank', level);
+            allShots.push({ 
+                x: doubleReflectedX, 
+                y: targetY, 
+                type: 'double_bank', 
+                score: score,
+                actualTarget: { x: targetX, y: targetY }
+            });
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestShot = {
+                    x: doubleReflectedX,
+                    y: targetY,
+                    type: 'double_bank',
+                    actualTarget: { x: targetX, y: targetY }
+                };
+            }
+        }
+    }
+    
+    // === DEBUG: TÜM VURUŞ SEÇENEKLERİNİ YAZDIR ===
+    console.log('📊 TÜM VURUŞ SEÇENEKLERİ:');
+    allShots.sort(function(a, b) { return b.score - a.score; });
+    for (var i = 0; i < Math.min(10, allShots.length); i++) {
+        var s = allShots[i];
+        console.log('  ' + (i+1) + '. ' + s.type + ' - Skor: ' + s.score.toFixed(1));
+    }
+    
+    console.log('🏆 SEÇİLEN VURUŞ:', bestShot ? bestShot.type : 'YOK', 'Skor:', bestScore);
+    
+    // Hata payı ekle
+    if (bestShot) {
+        var errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+        var errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+        bestShot.x += errorX;
+        bestShot.y += errorY;
+    }
+    
+    return bestShot || { x: width/2, y: goalY, type: 'direct' };
+}
  // ============================================================
 // DUVARDAN SEKTİRME - DOĞRU FİZİK (YENİ)
 // ============================================================
