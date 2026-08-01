@@ -295,20 +295,6 @@ let dragCurrent = { x: 0, y: 0 };
 let isAiThinking = false;
 let aiLevel = 'orta';
 
-const minAllowedDistance = 45;
-const goalWidth = cap.radius * 2 * 3.2;
-const goalHeight = 12;
-const penaltyBoxW = goalWidth * 2.2;
-const penaltyBoxH = height * 0.15;
-const pBoxX1 = (width - penaltyBoxW) / 2;
-const MAX_DRAG_DIST = cap.radius * 2 * 6;
-
-let goalAnimation = null;
-let goalAnimationStartTime = 0;
-const GOAL_ANIMATION_DURATION = 3000;
-let goalImage = null;
-let fieldImage = null;
-
 // ============================================================
 // SAHA RESMİ YÜKLEME
 // ============================================================
