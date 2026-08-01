@@ -1370,130 +1370,482 @@ function getCanvasTouchPos(e) {
 }
 
 // ============================================================
-// AI SİSTEMİ
+// AI SİSTEMİ - GELİŞMİŞ VERSİYON
+// ============================================================
+
+// ============================================================
+// 1. VURUŞ DEĞERLENDİRME SİSTEMİ
+// ============================================================
+function evaluateShot(targetX, targetY, shotType, level) {
+    let score = 0;
+    const opponentPins = pins.filter(p => p.team === 1 && !p.isPost);
+    
+    // 1. Doğrudan yol kontrolü (tüm seviyeler)
+    const directPath = checkDirectPath(targetX, targetY, opponentPins);
+    if (directPath.clear) {
+        score += 50;
+    } else {
+        // Engellenmişse, sektirme avantajlı
+        if (shotType !== 'direct') {
+            score += 30;
+        }
+    }
+    
+    // 2. Hedef kalitesi (tüm seviyeler)
+    const goalCenterX = width / 2;
+    const centerDist = Math.abs(targetX - goalCenterX);
+    score += (60 - centerDist) * 1.5;
+    
+    // 3. Topun hedefe olan mesafesi
+    const distToTarget = Math.hypot(targetX - cap.x, targetY - cap.y);
+    if (distToTarget < 50) {
+        score += 10;
+    } else if (distToTarget > 250) {
+        score -= 10;
+    }
+    
+    // 4. Vuruş tipine göre bonus (seviyeye göre)
+    switch(shotType) {
+        case 'direct':
+            score += 15;
+            break;
+        case 'bank_wall':
+            if (level === 'orta' || level === 'zor' || level === 'usta') score += 10;
+            break;
+        case 'bank_pin':
+            if (level === 'zor' || level === 'usta') score += 20;
+            break;
+        case 'double_bank':
+            if (level === 'usta') score += 25;
+            break;
+        case 'pin_wall_combo':
+            if (level === 'usta') score += 30;
+            break;
+    }
+    
+    // 5. Duvar mesafesi kontrolü
+    const wallDist = Math.min(cap.x, width - cap.x);
+    if (wallDist < 30) {
+        if (shotType === 'bank_wall') {
+            score += 10;
+        } else {
+            score -= 5;
+        }
+    }
+    
+    return score;
+}
+
+// ============================================================
+// 2. DOĞRUDAN YOL KONTROLÜ
+// ============================================================
+function checkDirectPath(targetX, targetY, opponentPins) {
+    const ballToTargetAngle = Math.atan2(targetY - cap.y, targetX - cap.x);
+    const distToTarget = Math.hypot(targetX - cap.x, targetY - cap.y);
+    let clear = true;
+    let blockedBy = null;
+    
+    for (var i = 0; i < opponentPins.length; i++) {
+        var pin = opponentPins[i];
+        var pinToBall = Math.hypot(pin.x - cap.x, pin.y - cap.y);
+        var pinAngle = Math.atan2(pin.y - cap.y, pin.x - cap.x);
+        var angleDiff = Math.abs(ballToTargetAngle - pinAngle);
+        
+        if (angleDiff < 0.2 && pinToBall < distToTarget) {
+            var distFromLine = Math.abs(Math.sin(angleDiff) * pinToBall);
+            if (distFromLine < 25) {
+                clear = false;
+                blockedBy = pin;
+            }
+        }
+    }
+    
+    return { clear: clear, blockedBy: blockedBy };
+}
+
+// ============================================================
+// 3. PİNDEN SEKTİRME HESAPLAMA
+// ============================================================
+function calculatePinBankShot(pin, targetX, targetY) {
+    // Top → Pin → Kale açısını hesapla
+    var angleToPin = Math.atan2(pin.y - cap.y, pin.x - cap.x);
+    var anglePinToGoal = Math.atan2(targetY - pin.y, targetX - pin.x);
+    
+    // Yansıma açısı: Geliş açısı = Yansıma açısı
+    var reflectionAngle = 2 * anglePinToGoal - angleToPin;
+    
+    // Yansıyan açıdan hedefi hesapla
+    var distPinToGoal = Math.hypot(targetX - pin.x, targetY - pin.y);
+    var reflectedX = pin.x + Math.cos(reflectionAngle) * distPinToGoal;
+    var reflectedY = pin.y + Math.sin(reflectionAngle) * distPinToGoal;
+    
+    return { x: reflectedX, y: reflectedY, angle: reflectionAngle };
+}
+
+// ============================================================
+// 4. PIN + DUVAR KOMBİNASYONU HESAPLAMA (Sadece Usta)
+// ============================================================
+function calculatePinWallCombo(pin, wallSide) {
+    // Top → Pin → Duvar → Kale
+    var wallX, wallY;
+    
+    if (wallSide === 'left') {
+        wallX = 0;
+        wallY = pin.y + (cap.y - pin.y) * (0 - pin.x) / (cap.x - pin.x);
+    } else {
+        wallX = width;
+        wallY = pin.y + (cap.y - pin.y) * (width - pin.x) / (cap.x - pin.x);
+    }
+    
+    // Duvar → Kale
+    var goalY = height - goalHeight;
+    var goalCenterX = width / 2;
+    
+    // Duvar noktasından kaleye doğru açı
+    var angleWallToGoal = Math.atan2(goalY - wallY, goalCenterX - wallX);
+    
+    // Yansıma açısı ile hedefi bul
+    var distWallToGoal = Math.hypot(goalCenterX - wallX, goalY - wallY);
+    var reflectedX = wallX + Math.cos(angleWallToGoal) * distWallToGoal;
+    var reflectedY = wallY + Math.sin(angleWallToGoal) * distWallToGoal;
+    
+    return { x: reflectedX, y: reflectedY, wallX: wallX, wallY: wallY };
+}
+
+// ============================================================
+// 5. AI PARAMETRELERİ - GELİŞMİŞ VERSİYON
 // ============================================================
 function getAIParameters() {
     switch (aiLevel) {
         case 'kolay': 
-            return { reactionDelay: 800, pullDistanceMin: 20, pullDistanceMax: 50, errorMargin: 25, powerError: 0.20, fakeChance: 0.02, targetZones: 3, analyzeOpponents: false, analyzeWalls: false };
+            return { 
+                reactionDelay: 800, 
+                pullDistanceMin: 20, 
+                pullDistanceMax: 50, 
+                errorMargin: 25, 
+                powerError: 0.20,
+                fakeChance: 0.02,
+                targetZones: 3,
+                analyzeOpponents: false,
+                analyzeWalls: false,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0,
+                usePinBank: false,
+                usePinWallCombo: false
+            };
         case 'orta': 
-            return { reactionDelay: 600, pullDistanceMin: 30, pullDistanceMax: 70, errorMargin: 12, powerError: 0.10, fakeChance: 0.08, targetZones: 5, analyzeOpponents: true, analyzeWalls: false };
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 70, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false,
+                useBankShots: true,
+                useDoubleBank: false,
+                bankShotChance: 0.30,
+                usePinBank: false,
+                usePinWallCombo: false
+            };
         case 'zor': 
-            return { reactionDelay: 400, pullDistanceMin: 50, pullDistanceMax: 85, errorMargin: 6, powerError: 0.05, fakeChance: 0.15, targetZones: 5, analyzeOpponents: true, analyzeWalls: true };
+            return { 
+                reactionDelay: 400, 
+                pullDistanceMin: 50, 
+                pullDistanceMax: 85, 
+                errorMargin: 6, 
+                powerError: 0.05,
+                fakeChance: 0.15,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: true,
+                useBankShots: true,
+                useDoubleBank: false,
+                bankShotChance: 0.40,
+                usePinBank: true,
+                usePinWallCombo: false
+            };
         case 'usta': 
-            return { reactionDelay: 250, pullDistanceMin: 60, pullDistanceMax: 90, errorMargin: 2, powerError: 0.02, fakeChance: 0.25, targetZones: 7, analyzeOpponents: true, analyzeWalls: true };
+            return { 
+                reactionDelay: 200, 
+                pullDistanceMin: 50, 
+                pullDistanceMax: 90, 
+                errorMargin: 2, 
+                powerError: 0.02,
+                fakeChance: 0.30,
+                targetZones: 7,
+                analyzeOpponents: true,
+                analyzeWalls: true,
+                useBankShots: true,
+                useDoubleBank: true,
+                bankShotChance: 0.50,
+                usePinBank: true,
+                usePinWallCombo: true
+            };
         default: 
-            return { reactionDelay: 600, pullDistanceMin: 30, pullDistanceMax: 65, errorMargin: 12, powerError: 0.10, fakeChance: 0.08, targetZones: 5, analyzeOpponents: true, analyzeWalls: false };
+            return { 
+                reactionDelay: 600, 
+                pullDistanceMin: 30, 
+                pullDistanceMax: 65, 
+                errorMargin: 12, 
+                powerError: 0.10,
+                fakeChance: 0.08,
+                targetZones: 5,
+                analyzeOpponents: true,
+                analyzeWalls: false,
+                useBankShots: false,
+                useDoubleBank: false,
+                bankShotChance: 0,
+                usePinBank: false,
+                usePinWallCombo: false
+            };
     }
 }
 
-function runAIMove() {
-    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
-    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
-    isAiThinking = true;
-    
-    var params = getAIParameters();
-    if (shotSecondsLeft < 2) {
-        params.reactionDelay = Math.min(params.reactionDelay, 200);
-        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
-        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
-    }
-    var target = calculateAITarget(params);
-    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
-        executeFakeShot(target, params);
-    } else {
-        executeAIShot(target, params);
-    }
-}
-
+// ============================================================
+// 6. AI HEDEF SEÇİMİ - GELİŞMİŞ VERSİYON
+// ============================================================
 function calculateAITarget(params) {
     var goalY = height - goalHeight;
-    var goalCenterX = width / 2;
     var goalLeft = (width - goalWidth) / 2;
     var goalRight = (width + goalWidth) / 2;
+    var level = aiLevel;
+    
+    // Rakip oyuncular (takım 1)
     var opponentPins = [];
     for (var i = 0; i < pins.length; i++) {
         if (pins[i].team === 1 && !pins[i].isPost) {
             opponentPins.push(pins[i]);
         }
     }
-    var zones = [];
-    var numZones = params.targetZones || 5;
-    var zoneWidth = (goalRight - goalLeft) / numZones;
-    for (var i = 0; i < numZones; i++) {
-        var zoneCenterX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
-        var testX = zoneCenterX;
-        var testY = goalY;
-        var score = 0;
-        var centerDist = Math.abs(testX - goalCenterX);
-        score += (60 - centerDist) * 1.5;
-        if (params.analyzeOpponents) {
-            var minDistToOpponent = Infinity;
-            for (var j = 0; j < opponentPins.length; j++) {
-                var p = opponentPins[j];
-                var dist = Math.hypot(testX - p.x, testY - p.y);
-                if (dist < minDistToOpponent) minDistToOpponent = dist;
-            }
-            var safetyMargin = (aiLevel === 'usta') ? 20 : 10;
-            if (minDistToOpponent < safetyMargin) {
-                score -= (safetyMargin - minDistToOpponent) * 3;
-            } else {
-                score += minDistToOpponent * 2;
+    
+    var bestShot = null;
+    var bestScore = -Infinity;
+    
+    // === 1. DOĞRUDAN VURUŞLAR (Tüm seviyeler) ===
+    var numDirectZones = (level === 'usta') ? 7 : (level === 'zor' || level === 'orta' ? 5 : 3);
+    for (var i = 0; i < numDirectZones; i++) {
+        var targetX = goalLeft + (i / (numDirectZones - 1)) * (goalRight - goalLeft);
+        var targetY = goalY;
+        
+        var score = evaluateShot(targetX, targetY, 'direct', level);
+        if (score > bestScore) {
+            bestScore = score;
+            bestShot = { x: targetX, y: targetY, type: 'direct' };
+        }
+    }
+    
+    // === 2. DUVARDAN SEKTİRME (Orta ve üzeri) ===
+    if (level === 'orta' || level === 'zor' || level === 'usta') {
+        var numBankZones = (level === 'usta') ? 5 : 4;
+        for (var wallSide = 0; wallSide < 2; wallSide++) {
+            for (var i = 0; i < numBankZones; i++) {
+                var targetX = goalLeft + (i / (numBankZones - 1)) * (goalRight - goalLeft);
+                var targetY = goalY;
+                
+                var reflectedX, reflectedY;
+                if (wallSide === 0) {
+                    reflectedX = -targetX; // Sol duvar
+                    reflectedY = targetY;
+                } else {
+                    reflectedX = width + (width - targetX); // Sağ duvar
+                    reflectedY = targetY;
+                }
+                
+                var score = evaluateShot(reflectedX, reflectedY, 'bank_wall', level);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = { 
+                        x: reflectedX, 
+                        y: reflectedY, 
+                        type: 'bank_wall',
+                        actualTarget: { x: targetX, y: targetY }
+                    };
+                }
             }
         }
-        if (params.analyzeWalls) {
-            var angleToTarget = Math.atan2(testY - cap.y, testX - cap.x);
-            var angleToWallLeft = Math.abs(angleToTarget - Math.PI);
-            var angleToWallRight = Math.abs(angleToTarget);
-            if (angleToWallLeft < 0.3 && cap.x < 50) {
-                score -= 20;
-            }
-            if (angleToWallRight < 0.3 && (width - cap.x) < 50) {
-                score -= 20;
-            }
-            var distToGoal = Math.abs(testY - cap.y);
-            if (distToGoal < 50) {
-                score += 10;
+    }
+    
+    // === 3. PİNDEN SEKTİRME (Zor ve Usta) ===
+    if (level === 'zor' || level === 'usta') {
+        var numPinZones = (level === 'usta') ? 4 : 3;
+        for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
+            var pin = opponentPins[pinIdx];
+            for (var i = 0; i < numPinZones; i++) {
+                var targetX = goalLeft + (i / (numPinZones - 1)) * (goalRight - goalLeft);
+                var targetY = goalY;
+                
+                var pinBank = calculatePinBankShot(pin, targetX, targetY);
+                var score = evaluateShot(pinBank.x, pinBank.y, 'bank_pin', level);
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = {
+                        x: pinBank.x,
+                        y: pinBank.y,
+                        type: 'bank_pin',
+                        actualTarget: { x: targetX, y: targetY },
+                        pinUsed: pin
+                    };
+                }
             }
         }
-        zones.push({ x: testX, y: testY, score: score });
     }
-    var bestZone = zones[0];
-    for (var i = 1; i < zones.length; i++) {
-        if (zones[i].score > bestZone.score) bestZone = zones[i];
+    
+    // === 4. PIN + DUVAR KOMBİNASYONU (Sadece Usta) ===
+    if (level === 'usta') {
+        for (var pinIdx = 0; pinIdx < opponentPins.length; pinIdx++) {
+            var pin = opponentPins[pinIdx];
+            for (var wallSide = 0; wallSide < 2; wallSide++) {
+                var combo = calculatePinWallCombo(pin, wallSide === 0 ? 'left' : 'right');
+                var score = evaluateShot(combo.x, combo.y, 'pin_wall_combo', level);
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestShot = {
+                        x: combo.x,
+                        y: combo.y,
+                        type: 'pin_wall_combo',
+                        actualTarget: { x: combo.x, y: combo.y },
+                        pinUsed: pin,
+                        wallUsed: wallSide === 0 ? 'left' : 'right'
+                    };
+                }
+            }
+        }
     }
-    var errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
-    var errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
-    var targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
-    var targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
-    return { x: targetX, y: targetY };
+    
+    // === 5. ÇİFT DUVAR SEKTİRME (Sadece Usta) ===
+    if (level === 'usta') {
+        var numDoubleZones = 3;
+        for (var i = 0; i < numDoubleZones; i++) {
+            var targetX = goalLeft + (i / (numDoubleZones - 1)) * (goalRight - goalLeft);
+            var targetY = goalY;
+            
+            var tempX = -targetX;
+            var doubleReflectedX = width + (width - tempX);
+            
+            var score = evaluateShot(doubleReflectedX, targetY, 'double_bank', level);
+            if (score > bestScore) {
+                bestScore = score;
+                bestShot = {
+                    x: doubleReflectedX,
+                    y: targetY,
+                    type: 'double_bank',
+                    actualTarget: { x: targetX, y: targetY }
+                };
+            }
+        }
+    }
+    
+    // Hata payı ekle
+    if (bestShot) {
+        var errorX = (Math.random() - 0.5) * 2 * params.errorMargin;
+        var errorY = (Math.random() - 0.5) * 2 * (params.errorMargin * 0.6);
+        bestShot.x += errorX;
+        bestShot.y += errorY;
+    }
+    
+    return bestShot || { x: width/2, y: goalY, type: 'direct' };
 }
 
+// ============================================================
+// 7. AI VURUŞ FONKSİYONU - GELİŞMİŞ VERSİYON
+// ============================================================
 function executeAIShot(target, params) {
-    var angle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    var distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
+    var angle;
     var pullDistance;
+    var level = aiLevel;
     
-    if (aiLevel === 'usta') {
-        var normalizedDist = Math.min(distanceToTarget / 300, 1);
+    // Vuruş tipine göre açı hesaplama
+    switch(target.type) {
+        case 'direct':
+            angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+            break;
+            
+        case 'bank_wall':
+            // Duvardan sektirme
+            if (target.x < 0) {
+                // Sol duvar
+                var reflectedX = -target.x;
+                angle = Math.atan2(target.y - cap.y, reflectedX - cap.x);
+            } else {
+                // Sağ duvar
+                var reflectedX = width + (width - target.x);
+                angle = Math.atan2(target.y - cap.y, reflectedX - cap.x);
+            }
+            break;
+            
+        case 'bank_pin':
+            // Pinden sektirme
+            if (target.pinUsed) {
+                var angleToPin = Math.atan2(target.pinUsed.y - cap.y, target.pinUsed.x - cap.x);
+                var anglePinToGoal = Math.atan2(target.actualTarget.y - target.pinUsed.y, 
+                                                 target.actualTarget.x - target.pinUsed.x);
+                angle = 2 * anglePinToGoal - angleToPin;
+            } else {
+                angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+            }
+            break;
+            
+        case 'pin_wall_combo':
+            // Pin + Duvar kombinasyonu
+            if (target.pinUsed) {
+                var angleToPin = Math.atan2(target.pinUsed.y - cap.y, target.pinUsed.x - cap.x);
+                var wallX = target.wallUsed === 'left' ? 0 : width;
+                var anglePinToWall = Math.atan2(wallX - target.pinUsed.x, target.pinUsed.y - cap.y);
+                angle = 2 * anglePinToWall - angleToPin;
+            } else {
+                angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+            }
+            break;
+            
+        case 'double_bank':
+            // Çift duvar sektirme
+            var tempX = -target.x;
+            var doubleReflectedX = width + (width - tempX);
+            angle = Math.atan2(target.y - cap.y, doubleReflectedX - cap.x);
+            break;
+            
+        default:
+            angle = Math.atan2(target.y - cap.y, target.x - cap.x);
+    }
+    
+    // Güç hesaplama
+    var distanceToTarget = Math.hypot(target.x - cap.x, target.y - cap.y);
+    var normalizedDist = Math.min(distanceToTarget / 300, 1);
+    
+    if (level === 'usta') {
+        // Usta: Hedefe olan mesafeye göre dinamik güç
         pullDistance = params.pullDistanceMin + (params.pullDistanceMax - params.pullDistanceMin) * normalizedDist;
     } else {
+        // Diğer seviyeler: Rastgele aralıkta
         pullDistance = params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin);
     }
+    
+    // Güç hata payı ekle
     var powerErrorFactor = 1 + (Math.random() - 0.5) * 2 * params.powerError;
     pullDistance = Math.min(pullDistance * powerErrorFactor, MAX_DRAG_DIST);
     
+    // Vuruş süresi kontrolü
     var extraDelay = 150;
-    if (shotSecondsLeft < 2) { extraDelay = 50; }
-
+    if (shotSecondsLeft < 2) {
+        extraDelay = 50;
+        pullDistance = Math.min(pullDistance, 60); // Hızlı vuruşta daha az güç
+    }
+    
     setTimeout(function() {
         var force = pullDistance * 0.15;
         cap.vx = Math.cos(angle) * force;
         cap.vy = Math.sin(angle) * force;
         isAiThinking = false;
         
+        // Vuruş sonrası sıra değişimi
         if (gameMode === 'ai' && currentPhase === 'playing') {
-            turn = 1; 
+            turn = 1;
             updateHUDTurn();
             resetShotTimer();
         }
@@ -1501,24 +1853,44 @@ function executeAIShot(target, params) {
     }, params.reactionDelay + extraDelay);
 }
 
+// ============================================================
+// 8. SAHTE VURUŞ (FAKE SHOT) - SADECE USTA
+// ============================================================
 function executeFakeShot(target, params) {
     var fakeAngle = Math.atan2(target.y - cap.y, target.x - cap.x) + (Math.random() - 0.5) * 1.5;
     var realAngle = Math.atan2(target.y - cap.y, target.x - cap.x);
-    var pullDistance = Math.min(params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin), MAX_DRAG_DIST);
+    
+    var pullDistance = Math.min(
+        params.pullDistanceMin + Math.random() * (params.pullDistanceMax - params.pullDistanceMin),
+        MAX_DRAG_DIST
+    );
+    
+    // 1. Sahte çekiş
     setTimeout(function() {
         isDraggingBall = true;
         dragStart = { x: cap.x, y: cap.y };
-        dragCurrent = { x: cap.x - Math.cos(fakeAngle) * pullDistance * 0.6, y: cap.y - Math.sin(fakeAngle) * pullDistance * 0.6 };
+        dragCurrent = { 
+            x: cap.x - Math.cos(fakeAngle) * pullDistance * 0.6,
+            y: cap.y - Math.sin(fakeAngle) * pullDistance * 0.6
+        };
+        
+        // 2. Gerçek vuruşa geç
         setTimeout(function() {
             var realPullDistance = Math.min(pullDistance * 0.8, MAX_DRAG_DIST);
-            dragCurrent = { x: cap.x - Math.cos(realAngle) * realPullDistance, y: cap.y - Math.sin(realAngle) * realPullDistance };
+            dragCurrent = {
+                x: cap.x - Math.cos(realAngle) * realPullDistance,
+                y: cap.y - Math.sin(realAngle) * realPullDistance
+            };
+            
             setTimeout(function() {
                 isDraggingBall = false;
                 isAiThinking = false;
                 playSound('kick');
+                
                 var powerMultiplier = 0.13 * (0.8 + Math.random() * 0.4);
                 cap.vx = (dragStart.x - dragCurrent.x) * powerMultiplier;
                 cap.vy = (dragStart.y - dragCurrent.y) * powerMultiplier;
+                
                 turn = 1;
                 updateHUDTurn();
                 resetShotTimer();
@@ -1527,6 +1899,32 @@ function executeFakeShot(target, params) {
     }, params.reactionDelay * 0.6);
 }
 
+// ============================================================
+// 9. AI HAREKET BAŞLATICI - GÜNCELLENMİŞ
+// ============================================================
+function runAIMove() {
+    if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
+    if (Math.hypot(cap.vx, cap.vy) > 0.2 || isAiThinking) return;
+    isAiThinking = true;
+    
+    var params = getAIParameters();
+    
+    // Vuruş süresine göre acil durum kontrolü
+    if (shotSecondsLeft < 2) {
+        params.reactionDelay = Math.min(params.reactionDelay, 200);
+        params.pullDistanceMin = Math.min(params.pullDistanceMin, 20);
+        params.pullDistanceMax = Math.min(params.pullDistanceMax, 40);
+    }
+    
+    var target = calculateAITarget(params);
+    
+    // Sahte vuruş kontrolü (sadece Usta)
+    if (Math.random() < params.fakeChance && aiLevel === 'usta') {
+        executeFakeShot(target, params);
+    } else {
+        executeAIShot(target, params);
+    }
+}
 // ============================================================
 // OYUN FONKSİYONLARI
 // ============================================================
