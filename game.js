@@ -272,7 +272,20 @@ let gameMode = 'local';
 let score = { p1: 0, p2: 0 };
 let turn = 1;
 
-// ONLINE DEĞİŞKENLER - SADECE BURADA TANIMLA
+// ============================================================
+// OYUN DEĞİŞKENLERİ
+// ============================================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const width = 360;
+const height = 620;
+canvas.width = width;
+canvas.height = height;
+
+let currentPhase = 'menu';
+let gameMode = 'local';
+let score = { p1: 0, p2: 0 };
+let turn = 1;
 let myTeamNumber = 1;
 let currentRoomId = null;
 let isOnlineMatch = false;
