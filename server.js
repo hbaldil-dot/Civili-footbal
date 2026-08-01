@@ -265,26 +265,37 @@ io.on('connection', (socket) => {
     // LOBBY İŞLEMLERİ
     // ============================================================
 
-    socket.on("join-lobby", (playerData) => {
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+socket.on("join-lobby", (playerData) => {
+    console.log(`📥 join-lobby alındı:`, playerData);
+    console.log(`📱 Socket ID: ${socket.id}`);
+    console.log(`📱 Transport: ${socket.conn.transport.name}`);
+    
+    // Eski kaydı kaldır
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
 
-        const player = {
-            id: socket.id,
-            name: playerData?.name || "Oyuncu",
-            logo: playerData?.logo || "default.png"
-        };
+    const player = {
+        id: socket.id,
+        name: playerData?.name || "Oyuncu",
+        logo: playerData?.logo || "default.png"
+    };
 
-        lobbyPlayers.push(player);
-        console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
+    lobbyPlayers.push(player);
+    console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
+    console.log(`📊 Lobby listesi:`, lobbyPlayers);
 
-        io.emit('update-lobby-players', lobbyPlayers);
-    });
+    // TÜM oyunculara lobby listesini gönder
+    io.emit('update-lobby-players', lobbyPlayers);
+    
+    // Yeni katılan oyuncuya özel olarak da gönder
+    socket.emit('update-lobby-players', lobbyPlayers);
+});
 
-    socket.on('leave-lobby', () => {
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        io.emit('update-lobby-players', lobbyPlayers);
-        console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
-    });
+socket.on('leave-lobby', () => {
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+    io.emit('update-lobby-players', lobbyPlayers);
+    console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
+    console.log(`📊 Kalan oyuncular:`, lobbyPlayers);
+});
 
     // ============================================================
     // DAVET İŞLEMLERİ
