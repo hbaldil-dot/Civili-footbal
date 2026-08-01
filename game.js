@@ -2694,7 +2694,12 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
-// updatePhysics içinden çağrılan ama eksik olan fonksiyon
+
+// Bu fonksiyonu tam olarak bu isimle dosyanın en altına ekle:
 function runAIMove() {
-    executeAIShot();
+    if (typeof executeAIShot === "function") {
+        executeAIShot();
+    } else {
+        console.error("executeAIShot fonksiyonu bulunamadı!");
+    }
 }
