@@ -146,27 +146,31 @@ if (typeof io !== 'undefined') {
         // AUTH CEVAPLARI
         // ============================================================
         
-        socket.on('authResponse', (data) => {
-            alert(data.message);
-            if (data.success) {
-                if (data.username) {
-                    const playerNameInput = document.getElementById('player-name');
-                    if (playerNameInput) playerNameInput.value = data.username;
-                }
-                if (data.action === 'login' || data.action === 'register') {
-                    const authOverlay = document.getElementById('auth-modal-overlay');
-                    if (authOverlay) {
-                        authOverlay.classList.add('hidden');
-                    }
-                    const menu = document.getElementById('menu');
-                    if (menu) {
-                        menu.style.display = 'block';
-                    }
-                } else if (data.action === 'forgot') {
-                    switchAuthTab('login');
-                }
+socket.on('authResponse', (data) => {
+    alert(data.message);
+    if (data.success) {
+        if (data.username) {
+            const playerNameInput = document.getElementById('player-name');
+            if (playerNameInput) playerNameInput.value = data.username;
+        }
+        if (data.action === 'login' || data.action === 'register') {
+            // Giriş modülünü gizle
+            const authOverlay = document.getElementById('auth-modal-overlay');
+            if (authOverlay) {
+                authOverlay.style.display = 'none'; // CSS class yerine direkt style güncelleyin
+                authOverlay.classList.add('hidden');
             }
-        });
+            
+            // Ana menüyü görünür yap
+            const menu = document.getElementById('menu');
+            if (menu) {
+                menu.style.display = 'block';
+            }
+        } else if (data.action === 'forgot') {
+            switchAuthTab('login');
+        }
+    }
+});
 
     } catch (e) {
         console.error("❌ Socket bağlantı hatası:", e);
@@ -2564,16 +2568,20 @@ function handleAuthSubmit(event, action) {
 function continueAsGuest() {
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
+        authOverlay.style.display = 'none'; // Görünürlüğü tamamen kaldırır
         authOverlay.classList.add('hidden');
     }
+    
     const menu = document.getElementById('menu');
     if (menu) {
-        menu.style.display = 'block';
+        menu.style.display = 'block'; // Ana menüyü açar
     }
+
     const playerNameInput = document.getElementById('player-name');
-    if (playerNameInput && playerNameInput.value === 'Oyuncu') {
+    if (playerNameInput && (!playerNameInput.value || playerNameInput.value === 'Oyuncu')) {
         playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
     }
+    
     console.log("🎮 Misafir girişi başarılı, ana menü açıldı.");
 }
 
