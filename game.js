@@ -275,11 +275,11 @@ let currentPhase = 'menu';
 let gameMode = 'local';
 let score = { p1: 0, p2: 0 };
 let turn = 1;
-myTeamNumber = 1;
-currentRoomId = null;
-isOnlineMatch = false;
-opponentPinsData = [];
-opponentLogoData = 'default.png';
+let myTeamNumber = 1;
+let currentRoomId = null;
+let isOnlineMatch = false;
+let opponentPinsData = [];
+let opponentLogoData = 'default.png';
 
 let matchSecondsLeft = MATCH_DURATION;
 let timerInterval = null;
@@ -289,6 +289,7 @@ let setupSecondsLeft = 15;
 let setupTimerInterval = null;
 let syncInterval = null;
 
+// TOP VE SAHA DEĞİŞKENLERİ
 let cap = { x: width / 2, y: height / 2, vx: 0, vy: 0, radius: 11, friction: 0.983, rotation: 0 };
 let pins = [];
 let editableTeam = 1;
@@ -299,6 +300,20 @@ let dragCurrent = { x: 0, y: 0 };
 let isAiThinking = false;
 let aiLevel = 'orta';
 
+// SAHA ÖLÇÜLERİ (cap tanımlandıktan sonra)
+const minAllowedDistance = 45;
+const goalWidth = cap.radius * 2 * 3.2;
+const goalHeight = 12;
+const penaltyBoxW = goalWidth * 2.2;
+const penaltyBoxH = height * 0.15;
+const pBoxX1 = (width - penaltyBoxW) / 2;
+const MAX_DRAG_DIST = cap.radius * 2 * 6;
+
+let goalAnimation = null;
+let goalAnimationStartTime = 0;
+const GOAL_ANIMATION_DURATION = 3000;
+let goalImage = null;
+let fieldImage = null;
 // ============================================================
 // SAHA RESMİ YÜKLEME
 // ============================================================
