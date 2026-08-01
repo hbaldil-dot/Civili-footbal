@@ -960,9 +960,18 @@ function openOnlineLobby() {
         alert("Şu anda bir sunucuya bağlı değilsiniz!"); 
         return; 
     }
+    
+    if (!socket.connected) {
+        alert("Sunucu bağlantısı kurulamadı! Lütfen sayfayı yenileyin.");
+        return;
+    }
+    
     gameMode = 'online';
     const playerData = getPlayerData();
+    
+    console.log('📤 Lobby\'ye katılınıyor:', playerData);
     socket.emit("join-lobby", playerData);
+    
     document.getElementById('menu').style.display = 'none';
     document.getElementById('online-lobby').style.display = 'flex';
 }
@@ -2749,33 +2758,7 @@ function openOnlineLobby() {
         listContainer.innerHTML = "<div style='padding:15px;color:rgba(255,255,255,0.3);text-align:center;'>Oyuncular aranıyor...</div>";
     }
 }
-function updateLobbyUI() {
-    const listContainer = document.getElementById('lobby-list');
-    if (!listContainer) return;
-    
-    // Mevcut oyuncuyu filtrele (kendini gösterme)
-    const otherPlayers = onlinePlayers.filter(p => p.id !== socket.id);
-    
-    if (otherPlayers.length === 0) {
-        listContainer.innerHTML = "<div style='padding:15px;color:rgba(255,255,255,0.3);text-align:center;'>Havuzda oyuncu yok. Bekleyin...</div>";
-        return;
-    }
-    
-    let html = '';
-    otherPlayers.forEach(p => {
-        html += `
-            <div class="player-item">
-                <span>
-                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'">
-                    ${p.name}
-                </span>
-                <button class="status" onclick="sendInvite('${p.id}')">Davet Et</button>
-            </div>
-        `;
-    });
-    
-    listContainer.innerHTML = html;
-}
+function updateLobb
 function closeOnlineLobby() {
     if (socket) socket.emit("leave-lobby");
     document.getElementById('online-lobby').style.display = 'none';
@@ -2790,12 +2773,13 @@ function sendInvite(targetId) {
     console.log('📨 Davet gönderiliyor:', targetId);
     socket.emit("send-invite", targetId);
     
-    // Butonu güncelle
-    const btns = document.querySelectorAll('.status');
-    btns.forEach(btn => {
+    // Butonları güncelle
+    document.querySelectorAll('.player-item button').forEach(btn => {
         if (btn.textContent === 'Davet Et') {
             btn.textContent = '⏳ Bekleniyor...';
-            btn.style.background = '#e67e22';
+            btn.style.background = 'rgba(230, 126, 34, 0.2)';
+            btn.style.color = '#f1c40f';
+            btn.disabled = true;
         }
     });
 }
