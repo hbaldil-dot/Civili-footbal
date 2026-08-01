@@ -697,14 +697,14 @@ function calculateAITarget(params) {
     const numZones = params.targetZones || 5;
     const zoneWidth = (goalRight - goalLeft) / numZones;
 
-    if (aiLevel === 'usta') {
-        const candidateShots = [];
+  if (aiLevel === 'usta') {
+    const candidateShots = [];
+    const targetY = goalY; // 👈 Buraya, döngünün dışına taşıyın!
 
-        for (let i = 0; i < numZones; i++) {
-            const targetX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
-            const targetY = goalY;
-            const targetPt = { x: targetX, y: targetY };
-
+    for (let i = 0; i < numZones; i++) {
+        const targetX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+        // const targetY = goalY; // 👈 Buradaki satırı kaldırın veya silin
+        const targetPt = { x: targetX, y: targetY };
             // 1. DOĞRUDAN VURUŞ KONTROLÜ
             const directBlocked = isPathBlockedByPin(cap, targetPt);
             if (!directBlocked) {
