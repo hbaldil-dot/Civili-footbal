@@ -2758,7 +2758,11 @@ function openOnlineLobby() {
         listContainer.innerHTML = "<div style='padding:15px;color:rgba(255,255,255,0.3);text-align:center;'>Oyuncular aranıyor...</div>";
     }
 }
-function updateLobb
+function updateLobbyUI() {
+    const listContainer = document.getElementById('lobby-list');
+    if (!listContainer) return;
+}
+    
 function closeOnlineLobby() {
     if (socket) socket.emit("leave-lobby");
     document.getElementById('online-lobby').style.display = 'none';
