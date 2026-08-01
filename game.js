@@ -33,15 +33,11 @@ if (typeof io !== 'undefined') {
         // LOBBY OLAYLARI
         // ============================================================
         
-        socket.on('update-lobby-players', function(players) {
-    console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
-    onlinePlayers = players;
-    if (typeof updateLobbyUI === 'function') {
-        updateLobbyUI();
-    } else {
-        console.warn('⚠️ updateLobbyUI fonksiyonu tanımlı değil!');
-    }
-});
+        socket.on('update-lobby-players', (players) => {
+            console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
+            onlinePlayers = players;
+            updateLobbyUI();
+        });
 
         // ============================================================
         // ODA OLAYLARI
@@ -172,170 +168,7 @@ socket.on('authResponse', (data) => {
         console.error("❌ Socket bağlantı hatası:", e);
     }
 }
-// ============================================================
-// AUTH FONKSİYONLARI - EKSİK OLANLAR
-// ============================================================
 
-function switchAuthTab(tab) {
-    console.log('🔄 Auth sekmesi değiştiriliyor:', tab);
-    
-    var formLogin = document.getElementById('form-login');
-    var formRegister = document.getElementById('form-register');
-    var formForgot = document.getElementById('form-forgot');
-    var tabLogin = document.getElementById('tab-login');
-    var tabRegister = document.getElementById('tab-register');
-    
-    if (!formLogin || !formRegister || !formForgot) {
-        console.warn('⚠️ Auth formları bulunamadı!');
-        return;
-    }
-    
-    // Tüm formları gizle
-    formLogin.classList.add('hidden');
-    formRegister.classList.add('hidden');
-    formForgot.classList.add('hidden');
-    
-    // Tüm tabları pasif yap
-    if (tabLogin) tabLogin.classList.remove('active');
-    if (tabRegister) tabRegister.classList.remove('active');
-    
-    // Seçilen tab'ı aktif yap
-    if (tab === 'login') {
-        formLogin.classList.remove('hidden');
-        if (tabLogin) tabLogin.classList.add('active');
-        console.log('✅ Login formu açıldı');
-    } else if (tab === 'register') {
-        formRegister.classList.remove('hidden');
-        if (tabRegister) tabRegister.classList.add('active');
-        console.log('✅ Register formu açıldı');
-    } else if (tab === 'forgot') {
-        formForgot.classList.remove('hidden');
-        console.log('✅ Forgot formu açıldı');
-    }
-}
-
-function handleAuthSubmit(event, action) {
-    event.preventDefault();
-    console.log('📤 Auth form gönderiliyor:', action);
-    
-    if (!socket || !socket.connected) {
-        alert("Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
-        return;
-    }
-    
-    if (action === 'login') {
-        var email = document.getElementById('login-email').value.trim();
-        var password = document.getElementById('login-password').value.trim();
-        socket.emit('loginUser', { email: email, password: password });
-    } else if (action === 'register') {
-        var username = document.getElementById('reg-username').value.trim();
-        var email = document.getElementById('reg-email').value.trim();
-        var password = document.getElementById('reg-password').value.trim();
-        socket.emit('registerUser', { username: username, email: email, password: password });
-    } else if (action === 'forgot') {
-        var email = document.getElementById('forgot-email').value.trim();
-        socket.emit('forgotPassword', { email: email });
-    }
-}
-
-function continueAsGuest() {
-    console.log('🎮 Misafir girişi başlatılıyor...');
-    
-    var authOverlay = document.getElementById('auth-modal-overlay');
-    if (authOverlay) {
-        authOverlay.classList.add('hidden');
-        console.log('✅ Auth overlay gizlendi');
-    }
-    
-    var menu = document.getElementById('menu');
-    if (menu) {
-        menu.style.display = 'block';
-        console.log('✅ Ana menü gösteriliyor');
-    }
-    
-    var playerNameInput = document.getElementById('player-name');
-    if (playerNameInput && playerNameInput.value === 'Oyuncu') {
-        playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
-        console.log('✅ Misafir adı oluşturuldu:', playerNameInput.value);
-    }
-    
-    console.log("🎮 Misafir girişi başarılı, ana menü açıldı.");
-}
-
-// ============================================================
-// LOBBY UI GÜNCELLEME
-// ============================================================
-
-function updateLobbyUI() {
-    console.log('🔄 Lobby UI güncelleniyor, oyuncu sayısı:', onlinePlayers.length);
-    
-    var listContainer = document.getElementById('lobby-list');
-    if (!listContainer) {
-        console.warn('⚠️ lobby-list elementi bulunamadı!');
-        return;
-    }
-    
-    // Mevcut oyuncuyu filtrele (kendini gösterme)
-    var otherPlayers = onlinePlayers.filter(function(p) {
-        return p.id !== socket.id;
-    });
-    
-    if (otherPlayers.length === 0) {
-        listContainer.innerHTML = `
-            <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:12px;">
-                <div style="font-size:24px;margin-bottom:8px;">👤</div>
-                Havuzda oyuncu yok.<br>Bekleyin veya başka birini davet edin.
-            </div>
-        `;
-        return;
-    }
-    
-    var html = '';
-    for (var i = 0; i < otherPlayers.length; i++) {
-        var p = otherPlayers[i];
-        html += `
-            <div class="player-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);">
-                <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);">
-                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);">
-                    ${p.name}
-                </span>
-                <button class="status" onclick="sendInvite('${p.id}')" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.1);padding:4px 14px;border-radius:16px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s ease;">
-                    Davet Et
-                </button>
-            </div>
-        `;
-    }
-    
-    listContainer.innerHTML = html;
-    console.log('✅ Lobby UI güncellendi,', otherPlayers.length, 'oyuncu gösteriliyor');
-}
-
-// ============================================================
-// DAVET GÖNDERME
-// ============================================================
-
-function sendInvite(targetId) {
-    if (!socket) {
-        alert('Bağlantı yok!');
-        return;
-    }
-    
-    console.log('📨 Davet gönderiliyor:', targetId);
-    socket.emit("send-invite", targetId);
-    
-    // Tüm davet butonlarını güncelle
-    var btns = document.querySelectorAll('.status');
-    for (var i = 0; i < btns.length; i++) {
-        var btn = btns[i];
-        if (btn.textContent === 'Davet Et') {
-            btn.textContent = '⏳ Bekleniyor...';
-            btn.style.background = 'rgba(230, 126, 34, 0.2)';
-            btn.style.color = '#f1c40f';
-            btn.style.borderColor = 'rgba(230, 126, 34, 0.2)';
-            btn.disabled = true;
-        }
-    }
-}
 // ============================================================
 // SAHA GÖSTER/GİZLE
 // ============================================================
@@ -1602,75 +1435,54 @@ window.addEventListener('mouseup', () => {
     }
     if (currentPhase === 'playing' && isDraggingBall) {
         isDraggingBall = false;
-     // playSound fonksiyonunun tanımlı olduğundan emin ol
-    if (typeof playSound === 'function') {
         playSound('kick');
+        const startX = dragStart.x;
+        const startY = dragStart.y;
+        const endX = dragCurrent.x;
+        const endY = dragCurrent.y;
+        cap.vx = (startX - endX) * 0.13;
+        cap.vy = (startY - endY) * 0.13;
+        turn = turn === 1 ? 2 : 1;
+        updateHUDTurn();
+        resetShotTimer();
+        if (gameMode === 'online' && socket) {
+            socket.emit('playerShot', {
+                roomId: currentRoomId,
+                shotData: { player: turn, startX, startY, endX, endY, timestamp: Date.now() }
+            });
+        }
+        const container = document.getElementById('power-bar-container');
+        if (container) container.style.display = 'none';
+        const powerBar = document.getElementById('power-bar');
+        if (powerBar) powerBar.style.width = '0%';
     }
-    
-    var startX = dragStart.x;
-    var startY = dragStart.y;
-    var endX = dragCurrent.x;
-    var endY = dragCurrent.y;
-    cap.vx = (startX - endX) * 0.13;
-    cap.vy = (startY - endY) * 0.13;
-    turn = turn === 1 ? 2 : 1;
-    updateHUDTurn();
-    resetShotTimer();
-    
-    if (gameMode === 'online' && socket) {
-        socket.emit('playerShot', {
-            roomId: currentRoomId,
-            shotData: { player: turn, startX: startX, startY: startY, endX: endX, endY: endY, timestamp: Date.now() }
-        });
-    }
-    
-    var container = document.getElementById('power-bar-container');
-    if (container) container.style.display = 'none';
-    var powerBar = document.getElementById('power-bar');
-    if (powerBar) powerBar.style.width = '0%';
-}
+});
 
 // Touch Events
-// Touch Events - DÜZELTİLMİŞ
-canvas.addEventListener('touchstart', function(e) {
+canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    var touch = e.touches[0];
-    if (touch) {
-        canvas.dispatchEvent(new MouseEvent('mousedown', { 
-            clientX: touch.clientX, 
-            clientY: touch.clientY 
-        }));
-    }
+    const touch = e.touches[0];
+    if (touch) canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
 }, { passive: false });
 
-canvas.addEventListener('touchmove', function(e) {
+canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    var touch = e.touches[0];
-    if (touch) {
-        canvas.dispatchEvent(new MouseEvent('mousemove', { 
-            clientX: touch.clientX, 
-            clientY: touch.clientY 
-        }));
-    }
+    const touch = e.touches[0];
+    if (touch) canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
 }, { passive: false });
 
-canvas.addEventListener('touchend', function(e) {
+canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    var touch = e.changedTouches[0];
-    if (touch) {
-        window.dispatchEvent(new MouseEvent('mouseup', { 
-            clientX: touch.clientX, 
-            clientY: touch.clientY 
-        }));
-    } else {
-        window.dispatchEvent(new MouseEvent('mouseup'));
-    }
+    const touch = e.changedTouches[0];
+    if (touch) window.dispatchEvent(new MouseEvent('mouseup', { clientX: touch.clientX, clientY: touch.clientY }));
+    else window.dispatchEvent(new MouseEvent('mouseup'));
 }, { passive: false });
 
-canvas.addEventListener('touchcancel', function(e) {
+canvas.addEventListener('touchcancel', (e) => {
     e.preventDefault();
     window.dispatchEvent(new MouseEvent('mouseup'));
 }, { passive: false });
+
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
@@ -1964,10 +1776,10 @@ function loadLocalTeamLogos() {
 }
 
 function selectLocalTeam(player, logoFile) {
-    console.log('👤 Oyuncu ' + player + ' takım seçti:', logoFile);
+    console.log(`👤 Oyuncu ${player} takım seçti:`, logoFile);
     
     if (player === 1) {
-        // Oyuncu 1 seçimi
+        // Aynı takım kontrolü
         if (logoFile === localPlayer2Logo && localP2Selected) {
             alert('⚠️ Oyuncu 2 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -1977,40 +1789,32 @@ function selectLocalTeam(player, logoFile) {
         localP1Selected = true;
         
         // Butonları işaretle
-        var btns1 = document.querySelectorAll('#local-player1-logos .team-logo-btn');
-        for (var i = 0; i < btns1.length; i++) {
-            var btn = btns1[i];
+        document.querySelectorAll('#local-player1-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p1');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p1');
             }
-        }
+        });
         
         // Shield'ı güncelle
-        var shield = document.getElementById('local-p1-shield-img');
+        const shield = document.getElementById('local-p1-shield-img');
         if (shield) {
-            shield.src = 'takimlar/' + logoFile;
+            shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         // İsmi güncelle
-        var nameEl = document.getElementById('local-p1-name');
+        const nameEl = document.getElementById('local-p1-name');
         if (nameEl) {
-            var logo = null;
-            for (var j = 0; j < teamLogos.length; j++) {
-                if (teamLogos[j].file === logoFile) {
-                    logo = teamLogos[j];
-                    break;
-                }
-            }
-            nameEl.textContent = logo ? '👤 ' + logo.name.replace('⚽ ', '') : '👤 Seçildi';
+            const logo = teamLogos.find(l => l.file === logoFile);
+            nameEl.textContent = logo ? `👤 ${logo.name.replace('⚽ ', '')}` : '👤 Seçildi';
             nameEl.style.color = '#3498db';
             nameEl.style.opacity = '1';
         }
         
     } else if (player === 2) {
-        // Oyuncu 2 seçimi
+        // Aynı takım kontrolü
         if (logoFile === localPlayer1Logo && localP1Selected) {
             alert('⚠️ Oyuncu 1 zaten bu takımı seçti! Farklı bir takım seçin.');
             return;
@@ -2020,40 +1824,33 @@ function selectLocalTeam(player, logoFile) {
         localP2Selected = true;
         
         // Butonları işaretle
-        var btns2 = document.querySelectorAll('#local-player2-logos .team-logo-btn');
-        for (var i = 0; i < btns2.length; i++) {
-            var btn = btns2[i];
+        document.querySelectorAll('#local-player2-logos .team-logo-btn').forEach(btn => {
             btn.classList.remove('active', 'active-p2');
             if (btn.dataset.logo === logoFile) {
                 btn.classList.add('active', 'active-p2');
             }
-        }
+        });
         
         // Shield'ı güncelle
-        var shield = document.getElementById('local-p2-shield-img');
+        const shield = document.getElementById('local-p2-shield-img');
         if (shield) {
-            shield.src = 'takimlar/' + logoFile;
+            shield.src = `takimlar/${logoFile}`;
             shield.style.display = 'block';
             shield.onerror = function() { this.src = 'takimlar/default.png'; };
         }
         
         // İsmi güncelle
-        var nameEl = document.getElementById('local-p2-name');
+        const nameEl = document.getElementById('local-p2-name');
         if (nameEl) {
-            var logo = null;
-            for (var j = 0; j < teamLogos.length; j++) {
-                if (teamLogos[j].file === logoFile) {
-                    logo = teamLogos[j];
-                    break;
-                }
-            }
-            nameEl.textContent = logo ? '👤 ' + logo.name.replace('⚽ ', '') : '👤 Seçildi';
+            const logo = teamLogos.find(l => l.file === logoFile);
+            nameEl.textContent = logo ? `👤 ${logo.name.replace('⚽ ', '')}` : '👤 Seçildi';
             nameEl.style.color = '#e74c3c';
             nameEl.style.opacity = '1';
         }
     }
     
-    console.log('📊 Seçim durumu: P1=' + (localP1Selected ? localPlayer1Logo : '❌') + ', P2=' + (localP2Selected ? localPlayer2Logo : '❌'));
+    // Seçim durumunu kontrol et
+    console.log(`📊 Seçim durumu: P1=${localP1Selected ? localPlayer1Logo : '❌'}, P2=${localP2Selected ? localPlayer2Logo : '❌'}`);
 }
 
 function startLocalGameWithTeams() {
@@ -2313,13 +2110,11 @@ function getPlayerData() {
     };
 }
 
-// Davet alma (initSocket içinde)
-socket.on('receive-invite', (data) => {
-    console.log('📨 Davet alındı:', data);
-    if (confirm(`${data.fromName} seni maça davet ediyor! Kabul ediyor musun?`)) {
+socket.on("receive-invite", (data) => {
+    if (confirm(`${data.fromName} seni maça davet ediyor! Kabul et?`)) {
         socket.emit("accept-invite", data.fromId);
     }
-
+});
     socket.on("start-online-match", ({ roomId, team, opponentLogo }) => {
         currentRoomId = roomId;
         myTeamNumber = team;
@@ -2414,16 +2209,7 @@ console.log("🎮 Çivili Futbol Başlatıldı!");
 console.log("⏱️ Maç Süresi: " + MATCH_DURATION + " saniye");
 console.log("🎯 Vuruş Süresi: " + SHOT_DURATION + " saniye");
 startPeriodicSync();
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Auth modal'ı göster
-    var authOverlay = document.getElementById('auth-modal-overlay');
-    if (authOverlay) {
-        authOverlay.classList.remove('hidden');
-        console.log('✅ Auth modal gösteriliyor');
-    }
-    
-    initSocket();
     selectRandomTeam();
     updateSelectedTeamName();
     updateTeamLogoDisplay();
@@ -2434,80 +2220,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// SES FONKSİYONLARI - EKSİK OLANLAR
+// SES AÇ/KAPA FONKSİYONLARI
 // ============================================================
-
-// isSoundOn zaten tanımlıysa tekrar tanımlama
-if (typeof isSoundOn === 'undefined') {
-    var isSoundOn = true;
-}
-
-function playSound(type) {
-    if (!isSoundOn) return;
-    
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    
-    if (type === 'hit') {
-        try {
-            if (audioElements.hit) {
-                audioElements.hit.currentTime = 0;
-                audioElements.hit.play().catch(function(e) {
-                    console.log('Hit ses hatası:', e);
-                });
-            }
-        } catch (e) {
-            console.log('Hit ses hatası:', e);
-        }
-        return;
-    }
-    
-    if (type === 'goal') {
-        try {
-            var goalSound = new Audio('sesler/gol.mp3');
-            goalSound.preload = 'auto';
-            goalSound.volume = 1.0;
-            var playPromise = goalSound.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(function(e) {
-                    console.log('Goal ses hatası:', e);
-                });
-            }
-        } catch (error) {
-            console.log('Goal ses hatası:', error);
-        }
-        return;
-    }
-    
-    if (type === 'kick') {
-        try {
-            var osc = audioCtx.createOscillator();
-            var gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            var now = audioCtx.currentTime;
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-        } catch (error) {
-            console.error('❌ Vuruş sesi hatası:', error);
-        }
-    }
-}
+let isSoundOn = true;
 
 function toggleSound() {
     console.log('🔊 Ses butonuna tıklandı! Mevcut durum:', isSoundOn ? 'AÇIK' : 'KAPALI');
     isSoundOn = !isSoundOn;
-    var soundBtn = document.getElementById('sound-toggle-btn');
+    const soundBtn = document.getElementById('sound-toggle-btn');
     if (soundBtn) {
         if (isSoundOn) {
             soundBtn.src = 'menu/ayarlar/ses.webp';
             console.log('🔊 Ses AÇIK');
+            setTimeout(() => playButtonSound(), 100);
         } else {
             soundBtn.src = 'menu/ayarlar/ses-off.webp';
             console.log('🔇 Ses KAPALI');
@@ -2516,30 +2241,22 @@ function toggleSound() {
     localStorage.setItem('soundEnabled', isSoundOn ? 'true' : 'false');
 }
 
-function playButtonSound() {
-    if (!isSoundOn) return;
-    try {
-        var osc = audioCtx.createOscillator();
-        var gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        var now = audioCtx.currentTime;
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-    } catch(e) {
-        console.log('Buton ses hatası:', e);
+function loadSoundSettings() {
+    const savedSound = localStorage.getItem('soundEnabled');
+    if (savedSound !== null) {
+        isSoundOn = savedSound === 'true';
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        if (soundBtn) {
+            soundBtn.src = isSoundOn ? 'menu/ayarlar/ses.webp' : 'menu/ayarlar/ses-off.webp';
+        }
+        console.log('🔊 Ses durumu yüklendi:', isSoundOn ? 'AÇIK' : 'KAPALI');
     }
 }
 
 // ============================================================
-// MP3 SES DOSYALARI
+// MP3 SES DOSYALARI - iOS Safari İçin Özel
 // ============================================================
-var audioElements = {
+let audioElements = {
     hit: null,
     goal: null
 };
@@ -2553,12 +2270,90 @@ function preloadSounds() {
     audioElements.goal.load();
 }
 
-// DOMContentLoaded'de preloadSounds'u çağır
 document.addEventListener('DOMContentLoaded', function() {
     preloadSounds();
 });
 
-console.log('✅ game.js yüklendi!');
+function playSound(type) {
+    if (!isSoundOn) return;
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    if (type === 'hit') {
+        try {
+            if (audioElements.hit) {
+                audioElements.hit.currentTime = 0;
+                audioElements.hit.play().catch(() => {
+                    const newHit = new Audio('sesler/Carpma.mp3');
+                    newHit.play().catch(e => console.log('Hit ses hatası:', e));
+                });
+            }
+        } catch (e) {
+            console.log('Hit ses hatası:', e);
+        }
+        return;
+    }
+    if (type === 'goal') {
+        try {
+            const goalSound = new Audio('sesler/gol.mp3');
+            goalSound.preload = 'auto';
+            goalSound.volume = 1.0;
+            const playPromise = goalSound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        const now = audioCtx.currentTime;
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(200, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                        osc.start(now);
+                        osc.stop(now + 0.45);
+                    } catch (e) {}
+                });
+            }
+        } catch (error) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } catch (e) {}
+        }
+        return;
+    }
+    if (type === 'kick') {
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (error) {
+            console.error('❌ Vuruş sesi hatası:', error);
+        }
+    }
+}
 
 // ============================================================
 // 2 KİŞİLİK AYNI EKRAN - TAKIM SEÇ (DEVAM)
@@ -2819,20 +2614,14 @@ if (socket) {
 // EKSİK KALAN MENÜ VE POP-UP FONKSİYONLARI
 // ============================================================
 
-// ============================================================
-// TAKIM SEÇİM POP-UP
-// ============================================================
-
+// --- TAKIM SEÇİM POP-UP AÇ/KAPA ---
 function openTeamSelectPopup() {
     console.log('🏆 Takım seçim pop-up açılıyor...');
-    var popup = document.getElementById('team-select-popup');
-    var grid = document.getElementById('team-select-grid');
-    var shieldImg = document.getElementById('popup-selected-team-img');
+    const popup = document.getElementById('team-select-popup');
+    const grid = document.getElementById('team-select-grid');
+    const shieldImg = document.getElementById('popup-selected-team-img');
     
-    if (!popup || !grid) {
-        console.error("Pop-up veya Grid bulunamadı!");
-        return;
-    }
+    if (!popup || !grid) { console.error("Pop-up veya Grid bulunamadı!"); return; }
 
     popup.style.display = 'block';
     popup.style.visibility = 'visible';
@@ -2844,7 +2633,7 @@ function openTeamSelectPopup() {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
         } else {
-            var defaultTeam = teamLogos[0];
+            const defaultTeam = teamLogos[0];
             if (defaultTeam) {
                 selectedTeamLogo = defaultTeam.file;
                 shieldImg.src = 'takimlar/' + defaultTeam.file;
@@ -2855,53 +2644,47 @@ function openTeamSelectPopup() {
 
     // Grid'i doldur
     grid.innerHTML = '';
-    for (var i = 0; i < teamLogos.length; i++) {
-        var team = teamLogos[i];
-        var btn = document.createElement('div');
+    teamLogos.forEach((team) => {
+        const btn = document.createElement('div');
         btn.className = 'big-team-logo-btn';
         if (selectedTeamLogo === team.file) btn.classList.add('active');
         
-        var img = document.createElement('img');
+        const img = document.createElement('img');
         img.src = 'takimlar/' + team.file;
         img.alt = team.name;
         img.onerror = function() { this.src = 'takimlar/default.png'; };
         btn.appendChild(img);
         
-        btn.onclick = (function(teamFile) {
-            return function(e) {
-                e.stopPropagation();
-                var btns = document.querySelectorAll('.big-team-logo-btn');
-                for (var j = 0; j < btns.length; j++) {
-                    btns[j].classList.remove('active');
-                }
-                this.classList.add('active');
-                
-                selectedTeamLogo = teamFile;
-                console.log('🏆 Takım seçildi:', teamFile);
-                
-                if (shieldImg) {
-                    shieldImg.src = 'takimlar/' + teamFile;
-                    shieldImg.style.display = 'block';
-                }
-                var menuOverlay = document.getElementById('selected-team-logo-display');
-                if (menuOverlay) {
-                    menuOverlay.src = 'takimlar/' + teamFile;
-                    menuOverlay.style.display = 'block';
-                    menuOverlay.style.opacity = '1';
-                }
-                loadTeamLogoImage(teamFile);
-                selectRandomAITeam();
-                updateScoreLogos();
-            };
-        })(team.file);
-        
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            selectedTeamLogo = team.file;
+            console.log('🏆 Takım seçildi:', team.file);
+            
+            if (shieldImg) {
+                shieldImg.src = 'takimlar/' + team.file;
+                shieldImg.style.display = 'block';
+            }
+            // Ana menüdeki logoyu güncelle
+            const menuOverlay = document.getElementById('selected-team-logo-display');
+            if (menuOverlay) {
+                menuOverlay.src = 'takimlar/' + team.file;
+                menuOverlay.style.display = 'block';
+                menuOverlay.style.opacity = '1';
+            }
+            loadTeamLogoImage(team.file);
+            selectRandomAITeam();
+            updateScoreLogos();
+        };
         grid.appendChild(btn);
-    }
+    });
 }
 
 function closeTeamSelectPopup() {
     console.log('🏆 Takım seçim pop-up kapatılıyor...');
-    var popup = document.getElementById('team-select-popup');
+    const popup = document.getElementById('team-select-popup');
     if (popup) {
         popup.style.display = 'none';
         popup.style.visibility = 'hidden';
@@ -2974,26 +2757,19 @@ function updateLobbyUI() {
     const otherPlayers = onlinePlayers.filter(p => p.id !== socket.id);
     
     if (otherPlayers.length === 0) {
-        listContainer.innerHTML = `
-            <div style="padding:20px;color:rgba(255,255,255,0.3);text-align:center;font-size:12px;">
-                <div style="font-size:24px;margin-bottom:8px;">👤</div>
-                Havuzda oyuncu yok.<br>Bekleyin veya başka birini davet edin.
-            </div>
-        `;
+        listContainer.innerHTML = "<div style='padding:15px;color:rgba(255,255,255,0.3);text-align:center;'>Havuzda oyuncu yok. Bekleyin...</div>";
         return;
     }
     
     let html = '';
     otherPlayers.forEach(p => {
         html += `
-            <div class="player-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);">
-                <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);">
-                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);">
+            <div class="player-item">
+                <span>
+                    <img src="takimlar/${p.logo || 'default.png'}" class="lobby-logo" onerror="this.src='takimlar/default.png'">
                     ${p.name}
                 </span>
-                <button class="status" onclick="sendInvite('${p.id}')" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.1);padding:4px 14px;border-radius:16px;font-size:10px;cursor:pointer;font-family:inherit;transition:all 0.2s ease;">
-                    Davet Et
-                </button>
+                <button class="status" onclick="sendInvite('${p.id}')">Davet Et</button>
             </div>
         `;
     });
@@ -3014,15 +2790,12 @@ function sendInvite(targetId) {
     console.log('📨 Davet gönderiliyor:', targetId);
     socket.emit("send-invite", targetId);
     
-    // Tüm davet butonlarını güncelle
+    // Butonu güncelle
     const btns = document.querySelectorAll('.status');
     btns.forEach(btn => {
         if (btn.textContent === 'Davet Et') {
             btn.textContent = '⏳ Bekleniyor...';
-            btn.style.background = 'rgba(230, 126, 34, 0.2)';
-            btn.style.color = '#f1c40f';
-            btn.style.borderColor = 'rgba(230, 126, 34, 0.2)';
-            btn.disabled = true;
+            btn.style.background = '#e67e22';
         }
     });
 }
@@ -3100,4 +2873,8 @@ function selectLocalTeam(player, logoFile) {
         }
     }
 }
-});
+// Ses butonu test sesi için (Hata vermemesi için boş fonksiyon)
+function playButtonSound() {
+    // Bu fonksiyon şu an için sadece hatayı susturmak için var.
+    // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
+}
