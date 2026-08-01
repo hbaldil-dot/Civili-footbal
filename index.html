@@ -2,11 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <!-- Mobil Web Uygulaması için -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Çivili Futbol</title>
     <link rel="stylesheet" href="style.css">
     <script src="/socket.io/socket.io.js" defer></script>
@@ -14,77 +10,7 @@
 </head>
 <body>
 
-    <!-- ============================================================
-         GİRİŞ & KAYIT PENCERESİ (AUTH MODAL)
-         ============================================================ -->
-    <div id="auth-modal-overlay" class="auth-overlay">
-        <div class="auth-card">
-            <div class="auth-tabs">
-                <button id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">GİRİŞ YAP</button>
-                <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">KAYIT OL</button>
-            </div>
-
-            <!-- GİRİŞ YAP FORMU -->
-            <form id="form-login" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
-                <h2>HOŞ GELDİN!</h2>
-                <div class="auth-input-group">
-                    <label for="login-email">E-Posta Adresi</label>
-                    <input type="email" id="login-email" placeholder="ornek@mail.com" required>
-                </div>
-                <div class="auth-input-group">
-                    <label for="login-password">Şifre</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required>
-                </div>
-                <div class="auth-forgot">
-                    <a href="#" onclick="switchAuthTab('forgot'); return false;">Şifremi Unuttum?</a>
-                </div>
-                <button type="submit" class="auth-btn">GİRİŞ YAP</button>
-            </form>
-
-            <!-- KAYIT OL FORMU -->
-            <form id="form-register" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
-                <h2>KAYIT OL</h2>
-                <div class="auth-input-group">
-                    <label for="reg-username">Oyuncu Adı</label>
-                    <input type="text" id="reg-username" placeholder="Oyuncu_123" maxlength="15" required>
-                </div>
-                <div class="auth-input-group">
-                    <label for="reg-email">E-Posta Adresi</label>
-                    <input type="email" id="reg-email" placeholder="ornek@mail.com" required>
-                </div>
-                <div class="auth-input-group">
-                    <label for="reg-password">Şifre</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="auth-btn">KAYDOL VE BAŞLA</button>
-            </form>
-
-            <!-- ŞİFREMİ UNUTTUM FORMU -->
-            <form id="form-forgot" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'forgot')">
-                <h2>ŞİFRE SIFIRLAMA</h2>
-                <p class="auth-desc">Kayıtlı e-posta adresinizi girin, şifre sıfırlama bağlantısını gönderelim.</p>
-                <div class="auth-input-group">
-                    <label for="forgot-email">E-Posta Adresi</label>
-                    <input type="email" id="forgot-email" placeholder="ornek@mail.com" required>
-                </div>
-                <button type="submit" class="auth-btn">ŞİFREYİ E-POSTA İLE GÖNDER</button>
-                <div class="auth-back">
-                    <a href="#" onclick="switchAuthTab('login'); return false;">← Giriş Ekranına Dön</a>
-                </div>
-            </form>
-
-            <div class="guest-container">
-                <div class="auth-divider"><span>VEYA</span></div>
-                <button type="button" class="guest-btn" onclick="continueAsGuest()">
-                    🎮 MİSAFİR OLARAK DEVAM ET
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================================
-         ANA MENÜ
-         ============================================================ -->
+    <!-- ===== ANA MENÜ ===== -->
     <div id="menu">
         <div class="input-group">
             <div class="input-wrapper">
@@ -118,9 +44,7 @@
         </button>
     </div>
 
-    <!-- ============================================================
-         AYARLAR POP-UP
-         ============================================================ -->
+    <!-- ===== AYARLAR POP-UP ===== -->
     <div id="settings-popup" style="display: none;" onclick="if(event.target===this) closeSettingsPopup()">
         <div class="popup-content settings-popup-content">
             <img src="menu/ayarlar/arkafon.webp" alt="Ayarlar" class="settings-bg">
@@ -203,9 +127,7 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         AI ZORLUK POP-UP
-         ============================================================ -->
+    <!-- ===== AI ZORLUK POP-UP ===== -->
     <div id="ai-level-menu" style="display: none;">
         <div class="popup-content difficulty-popup">
             <div class="difficulty-container">
@@ -234,130 +156,140 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         ONLINE LOBBY POP-UP (YENİ - ANA MENÜ İLE AI ARASINA EKLE)
-         ============================================================ -->
+    <!-- ===== ONLINE LOBBY POP-UP ===== -->
     <div id="online-lobby" style="display: none;" onclick="if(event.target===this) closeOnlineLobby()">
-        <div class="popup-content online-lobby-content">
-            <img src="menu/online/onlinearkafon.webp" alt="Online Menü" class="online-bg">
-            <div class="online-overlay">
-                <div class="online-header">
-                    <h2>🏟️ ONLINE FUTBOL</h2>
-                    <span id="lobby-status" class="online-status">🔄 Bağlanıyor...</span>
-                    <button class="online-close" onclick="closeOnlineLobby()">✕</button>
+        <div class="popup-content" style="position: relative; overflow: hidden; padding: 0; background: transparent; border: none; box-shadow: none; max-width: 420px;">
+            <img src="menu/online/onlinearkafon.webp" alt="Online Menü" style="width: 100%; display: block; border-radius: 16px;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; padding: 20px; border-radius: 16px;">
+                <div class="popup-header" style="border-bottom: none; background: transparent; padding: 5px 5px 10px 5px;">
+                    <h2 style="color: rgba(255,255,255,0.9); font-size: 18px; letter-spacing: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">ONLINE FUTBOL</h2>
+                    <button class="popup-close" onclick="closeOnlineLobby()" style="color: rgba(255,255,255,0.5); font-size: 24px;">✕</button>
                 </div>
-                <div class="online-players-section">
-                    <div class="online-section-title">👥 ÇEVRİMİÇİ OYUNCULAR</div>
-                    <div id="lobby-players" class="online-players-list">
-                        <div style="color:#666;text-align:center;padding:15px;">Yükleniyor...</div>
+                <div class="popup-body" style="flex: 1; padding: 5px 5px 10px 5px; overflow-y: auto;">
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-align: center; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.5);">
+                        MAÇ YAPMAK İSTEDİĞİNİZ KİŞİYE TIKLAYARAK DAVET GÖNDERİN
+                    </p>
+                    <div class="player-list" id="lobby-list" style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 8px; max-height: 200px; overflow-y: auto;">
+                        <div style="padding:15px;color:rgba(255,255,255,0.3);text-align:center;">Havuz güncelleniyor...</div>
                     </div>
                 </div>
-                <div class="online-room-section">
-                    <div class="online-room-row">
-                        <button class="online-btn primary" onclick="createRoom()">🏠 ODA OLUŞTUR</button>
-                    </div>
-                    <div class="online-room-row join-row">
-                        <input type="text" id="room-code-input" class="online-input" placeholder="ODA KODU" maxlength="6">
-                        <button class="online-btn secondary" onclick="joinRoom()">🔗 KATIL</button>
-                    </div>
-                </div>
-                <div class="online-footer">
-                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" class="online-menu-btn">
+                <div style="text-align: center; padding: 10px 0 5px 0;">
+                    <img src="menu/online/ana-menu.webp" alt="Ana Menü" onclick="closeOnlineLobby()" style="cursor: pointer; max-width: 120px; width: 35%; display: inline-block; transition: transform 0.15s ease;">
                 </div>
             </div>
         </div>
     </div>
 
-   <!-- ODA BEKLEME EKRANI -->
-<div id="room-waiting" style="display: none;" onclick="if(event.target===this) leaveRoom()">
-    <div class="popup-content room-waiting-content">
-        <div class="room-waiting-bg">
-            <div class="room-waiting-overlay">
-                <div class="room-header">
-                    <h2>🏠 ODA</h2>
-                    <button class="room-close" onclick="leaveRoom()">✕</button>
-                </div>
-                <div class="room-code-area">
-                    <span class="room-code-label">🔑 ODA KODU</span>
-                    <div class="room-code-display" id="room-code-display">------</div>
-                </div>
-                <div class="room-players-area">
-                    <div class="room-players-header">
-                        <span>👥 Oyuncular</span>
-                        <span id="room-player-count">1/2</span>
-                    </div>
-                    <div id="room-player-list" class="room-players-list">
-                        <!-- JavaScript ile doldurulacak -->
-                    </div>
-                </div>
-                <div class="room-opponent-status">
-                    <span>Rakip:</span>
-                    <span id="opponent-status" style="color:#f1c40f;">⏳ Bekleniyor...</span>
-                </div>
-                <div class="room-actions">
-                    <button id="player-ready-btn" class="room-ready-btn" onclick="setReady()">✅ HAZIRIM</button>
-                    <button class="room-leave-btn" onclick="leaveRoom()">🚪 AYRIL</button>
-                </div>
+ <!-- ============================================================
+     2 KİŞİLİK TAKIM SEÇ POP-UP (YENİ ARKA FONLU TASARIM)
+     ============================================================ -->
+<div id="local-team-select" style="display: none;">
+    <div class="local-team-container">
+        <!-- Arka Fon Görseli -->
+        <img src="menu/2kisilik/2kisilikarkafon.webp" alt="<!-- ===== 2 KİŞİLİK TAKIM SEÇ POP-UP ===== -->
+<div id="local-team-select" style="display: none;">
+    <div class="local-team-container">
+        <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
+        
+        <div class="local-selected-area p1-selected-area">
+            <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
+        </div>
+        <div class="local-selected-area p2-selected-area">
+            <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+        </div>
+
+        <div class="local-team-body">
+            <div class="local-player-section">
+                <!-- Oyuncu 1 etiketi EKLENDİ -->
+                <div class="local-player-name" id="local-p1-name" style="color: #3498db; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 1</div>
+                <div class="team-logo-options" id="local-player1-logos"></div>
+            </div>
+            <div class="local-player-section">
+                <!-- Oyuncu 2 etiketi EKLENDİ -->
+                <div class="local-player-name" id="local-p2-name" style="color: #e74c3c; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 2</div>
+                <div class="team-logo-options" id="local-player2-logos"></div>
+            </div>
+        </div>
+
+        <div class="local-action-buttons">
+            <div class="local-time-selector">
+                <span>MAÇ</span>
+                <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+            </div>
+
+            <div class="local-time-selector">
+                <span>VURUŞ</span>
+                <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
+                <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
+                <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+            </div>
+
+            <div class="local-start-btn" onclick="startLocalGameWithTeams()">
+                <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
+            </div>
+            
+            <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
+            </div>
+        </div>
+    </div>
+</div>lik Arka Fon" class="local-team-bg">
+        
+        <!-- Seçilen Takımlar Önizleme / Shield Alanları -->
+        <div class="local-selected-area p1-selected-area">
+            <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
+        </div>
+        <div class="local-selected-area p2-selected-area">
+            <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
+        </div>
+
+        <!-- Takım Seçim Izgaraları -->
+        <div class="local-team-body">
+            <div class="local-player-section">
+                <div class="team-logo-options" id="local-player1-logos"></div>
+            </div>
+            <div class="local-player-section">
+                <div class="team-logo-options" id="local-player2-logos"></div>
+            </div>
+        </div>
+
+        <!-- Alt Butonlar + SÜRE SEÇİMLERİ (YENİ) -->
+        <div class="local-action-buttons">
+            
+            <!-- *** YENİ: MAÇ SÜRESİ SEÇİMİ *** -->
+            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 4px; width: 100%;">
+                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">MAÇ</span>
+                <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
+                <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
+                <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
+                <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
+            </div>
+
+            <!-- *** YENİ: VURUŞ SÜRESİ SEÇİMİ *** -->
+            <div class="local-time-selector" style="display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); margin-bottom: 6px; width: 100%;">
+                <span style="color: rgba(255,255,255,0.6); font-size: 11px; letter-spacing: 1px;">VURUŞ</span>
+                <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
+                <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
+                <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
+            </div>
+
+            <!-- MAÇA BAŞLA BUTONU -->
+            <div class="local-start-btn" onclick="startLocalGameWithTeams()">
+                <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
+            </div>
+            
+            <!-- Ana Menü Butonu -->
+            <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
+                <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
             </div>
         </div>
     </div>
 </div>
 
-    <!-- ============================================================
-         2 KİŞİLİK TAKIM SEÇ POP-UP
-         ============================================================ -->
-    <div id="local-team-select" style="display: none;">
-        <div class="local-team-container">
-            <img src="menu/2kisilik/2kisilikarkafon.webp" alt="2 Kişilik Arka Fon" class="local-team-bg">
-            
-            <div class="local-selected-area p1-selected-area">
-                <img id="local-p1-shield-img" src="" alt="P1 Takım" style="display: none;">
-            </div>
-            <div class="local-selected-area p2-selected-area">
-                <img id="local-p2-shield-img" src="" alt="P2 Takım" style="display: none;">
-            </div>
-
-            <div class="local-team-body">
-                <div class="local-player-section">
-                    <div class="local-player-name" id="local-p1-name" style="color: #3498db; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 1</div>
-                    <div class="team-logo-options" id="local-player1-logos"></div>
-                </div>
-                <div class="local-player-section">
-                    <div class="local-player-name" id="local-p2-name" style="color: #e74c3c; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">👤 Oyuncu 2</div>
-                    <div class="team-logo-options" id="local-player2-logos"></div>
-                </div>
-            </div>
-
-            <div class="local-action-buttons">
-                <div class="local-time-selector">
-                    <span>MAÇ</span>
-                    <button class="local-time-btn" data-time="60" onclick="setLocalMatchDuration(60)">60sn</button>
-                    <button class="local-time-btn active" data-time="90" onclick="setLocalMatchDuration(90)">90sn</button>
-                    <button class="local-time-btn" data-time="120" onclick="setLocalMatchDuration(120)">120sn</button>
-                    <button class="local-time-btn" data-time="150" onclick="setLocalMatchDuration(150)">150sn</button>
-                </div>
-
-                <div class="local-time-selector">
-                    <span>VURUŞ</span>
-                    <button class="local-time-btn" data-shot="3" onclick="setLocalShotDuration(3)">3sn</button>
-                    <button class="local-time-btn active" data-shot="5" onclick="setLocalShotDuration(5)">5sn</button>
-                    <button class="local-time-btn" data-shot="7" onclick="setLocalShotDuration(7)">7sn</button>
-                </div>
-
-                <div class="local-start-btn" onclick="startLocalGameWithTeams()">
-                    <img src="menu/2kisilik/macabasla.webp" alt="MAÇA BAŞLA" class="local-start-img">
-                </div>
-                
-                <div class="local-main-menu-btn" onclick="closeLocalTeamSelect()">
-                    <img src="menu/ayarlar/ana menu.webp" alt="Ana Menü">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================================
-         OYUN EKRANI
-         ============================================================ -->
+    <!-- ===== OYUN EKRANI ===== -->
     <div id="top-bar" style="display: none;">
         <div class="hud-row">
             <button id="exit-btn" onclick="exitToMenu()">✕</button>
@@ -380,24 +312,18 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         CANVAS VE BUTON
-         ============================================================ -->
+    <!-- ===== CANVAS VE BUTON ===== -->
     <div class="canvas-container">
         <canvas id="gameCanvas"></canvas>
         <button id="start-match-btn" onclick="confirmFormationsAndStart()">BAŞLAT</button>
     </div>
 
-    <!-- ============================================================
-         GÜÇ GÖSTERGESİ
-         ============================================================ -->
+    <!-- ===== GÜÇ GÖSTERGESİ ===== -->
     <div id="power-bar-container">
         <div id="power-bar"></div>
     </div>
 
-    <!-- ============================================================
-         TAKIM SEÇİM POP-UP
-         ============================================================ -->
+    <!-- ===== TAKIM SEÇİM POP-UP ===== -->
     <div id="team-select-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000;">
         <div class="team-select-container">
             <img src="menu/takimsec/takimsecarkafon.webp" alt="Takım Seç" class="team-select-bg">
@@ -411,9 +337,7 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         OYUNCU PROFİLİ MODAL
-         ============================================================ -->
+    <!-- ===== OYUNCU PROFİLİ MODAL ===== -->
     <div id="player-profile-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>👤 OYUNCU PROFİLİ</h2>
@@ -431,7 +355,7 @@
                 </div>
                 <div class="stat-box">
                     <span class="stat-title">Galibiyet</span>
-                    <span id="stat-wins" class="stat-value">0</span>
+                    <span id="stat-value" class="stat-value">0</span>
                 </div>
                 <div class="stat-box">
                     <span class="stat-title">Mağlubiyet</span>
@@ -446,5 +370,70 @@
         </div>
     </div>
 
+    <!-- ===== GİRİŞ & KAYIT PENCERESİ ===== -->
+    <div id="auth-modal-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <button id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">GİRİŞ YAP</button>
+                <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">KAYIT OL</button>
+            </div>
+
+            <!-- 1. GİRİŞ YAP FORMU -->
+            <form id="form-login" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
+                <h2>HOŞ GELDİN!</h2>
+                <div class="auth-input-group">
+                    <label for="login-email">E-Posta Adresi</label>
+                    <input type="email" id="login-email" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="login-password">Şifre</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <div class="auth-forgot">
+                    <a href="#" onclick="switchAuthTab('forgot'); return false;">Şifremi Unuttum?</a>
+                </div>
+                <button type="submit" class="auth-btn">GİRİŞ YAP</button>
+            </form>
+
+            <!-- 2. KAYIT OL FORMU -->
+            <form id="form-register" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
+                <h2>KAYIT OL</h2>
+                <div class="auth-input-group">
+                    <label for="reg-username">Oyuncu Adı</label>
+                    <input type="text" id="reg-username" placeholder="Oyuncu_123" maxlength="15" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="reg-email">E-Posta Adresi</label>
+                    <input type="email" id="reg-email" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="auth-input-group">
+                    <label for="reg-password">Şifre</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="auth-btn">KAYDOL VE BAŞLA</button>
+            </form>
+
+            <!-- 3. ŞİFREMİ UNUTTUM FORMU -->
+            <form id="form-forgot" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'forgot')">
+                <h2>ŞİFRE SIFIRLAMA</h2>
+                <p class="auth-desc">Kayıtlı e-posta adresinizi girin, şifre sıfırlama bağlantısını gönderelim.</p>
+                <div class="auth-input-group">
+                    <label for="forgot-email">E-Posta Adresi</label>
+                    <input type="email" id="forgot-email" placeholder="ornek@mail.com" required>
+                </div>
+                <button type="submit" class="auth-btn">ŞİFREYİ E-POSTA İLE GÖNDER</button>
+                <div class="auth-back">
+                    <a href="#" onclick="switchAuthTab('login'); return false;">← Giriş Ekranına Dön</a>
+                </div>
+            </form>
+
+            <div class="guest-container">
+                <div class="auth-divider"><span>VEYA</span></div>
+                <button type="button" class="guest-btn" onclick="continueAsGuest()">
+                    🎮 MİSAFİR OLARAK DEVAM ET
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

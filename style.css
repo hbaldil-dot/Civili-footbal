@@ -1522,7 +1522,7 @@ body::before {
     }
 }
 /* ============================================================
-   ONLINE LOBBY STİLLERİ
+   ONLINE LOBBY
    ============================================================ */
 
 #online-lobby {
@@ -1532,411 +1532,107 @@ body::before {
     width: 100% !important;
     height: 100% !important;
     background: rgba(0, 0, 0, 0.85) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
     display: none !important;
     align-items: center !important;
     justify-content: center !important;
     z-index: 9999 !important;
-    padding: 16px !important;
+    padding: 20px !important;
+    margin: 0 !important;
 }
 
-#online-lobby[style*="display: flex"] {
+#online-lobby[style*="display: flex"],
+#online-lobby[style*="display: block"] {
     display: flex !important;
 }
 
-.online-lobby-content {
-    position: relative !important;
-    max-width: 400px !important;
-    width: 100% !important;
+#online-lobby .popup-content {
     background: transparent !important;
     border: none !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
-    border-radius: 20px !important;
-    overflow: hidden !important;
-}
-
-.online-bg {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+    max-width: 420px !important;
     width: 100% !important;
-    display: block !important;
-    border-radius: 20px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    position: relative !important;
 }
 
-.online-overlay {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 16px 18px 12px 18px !important;
-    border-radius: 20px !important;
-}
-
-.online-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding-bottom: 8px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-    flex-wrap: wrap !important;
-    gap: 4px !important;
-}
-
-.online-header h2 {
-    color: rgba(255,255,255,0.8) !important;
-    font-size: 15px !important;
-    font-weight: bold !important;
-    letter-spacing: 3px !important;
-    margin: 0 !important;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
-}
-
-.online-status {
-    font-size: 10px !important;
-    padding: 2px 10px !important;
-    border-radius: 12px !important;
-    background: rgba(0,0,0,0.3) !important;
-    color: #2ecc71 !important;
-    font-weight: bold !important;
-}
-
-.online-close {
-    background: none !important;
-    border: none !important;
-    color: rgba(255,255,255,0.3) !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-    padding: 0 4px !important;
-}
-
-.online-players-section {
-    flex: 1 !important;
-    margin: 8px 0 !important;
-    overflow: hidden !important;
-}
-
-.online-section-title {
-    font-size: 10px !important;
-    color: rgba(255,255,255,0.3) !important;
-    letter-spacing: 2px !important;
-    margin-bottom: 6px !important;
-}
-
-.online-players-list {
-    background: rgba(0,0,0,0.3) !important;
-    border-radius: 10px !important;
-    padding: 6px !important;
-    max-height: 180px !important;
-    overflow-y: auto !important;
-}
-
-.lobby-player {
+#online-lobby .player-item {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     padding: 6px 10px !important;
-    border-radius: 8px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.02) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.lobby-player:last-child { border-bottom: none !important; }
-.lobby-player.me { background: rgba(46, 204, 113, 0.05) !important; }
+#online-lobby .player-item:last-child {
+    border-bottom: none !important;
+}
 
-.lobby-player-info {
+#online-lobby .player-item span {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    font-size: 12px !important;
-    color: rgba(255,255,255,0.7) !important;
+    font-size: 13px !important;
 }
 
-.lobby-logo {
+#online-lobby .lobby-logo {
     width: 24px !important;
     height: 24px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.lobby-invite-btn {
-    background: rgba(46, 204, 113, 0.15) !important;
-    color: #2ecc71 !important;
-    border: 1px solid rgba(46, 204, 113, 0.1) !important;
-    padding: 3px 12px !important;
-    border-radius: 12px !important;
-    font-size: 9px !important;
-    cursor: pointer !important;
-    font-family: inherit !important;
-    font-weight: bold !important;
-    letter-spacing: 1px !important;
-    transition: all 0.2s ease !important;
-}
-
-.lobby-invite-btn:hover { background: rgba(46, 204, 113, 0.25) !important; }
-
-.online-room-section {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    margin: 6px 0 !important;
-}
-
-.online-room-row {
-    display: flex !important;
-    gap: 8px !important;
-    width: 100% !important;
-}
-
-.join-row { gap: 6px !important; }
-
-.online-btn {
-    flex: 1 !important;
-    padding: 8px !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-family: 'Courier New', monospace !important;
-    font-weight: bold !important;
-    font-size: 11px !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    letter-spacing: 1px !important;
-}
-
-.online-btn.primary {
-    background: rgba(46, 204, 113, 0.25) !important;
-    color: #2ecc71 !important;
-    border: 1px solid rgba(46, 204, 113, 0.2) !important;
-}
-
-.online-btn.primary:hover { background: rgba(46, 204, 113, 0.35) !important; }
-
-.online-btn.secondary {
-    background: rgba(52, 152, 219, 0.2) !important;
-    color: #3498db !important;
-    border: 1px solid rgba(52, 152, 219, 0.15) !important;
-    flex: 0.5 !important;
-}
-
-.online-btn.secondary:hover { background: rgba(52, 152, 219, 0.3) !important; }
-
-.online-input {
-    flex: 1 !important;
-    padding: 8px 12px !important;
-    background: rgba(0,0,0,0.3) !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
-    border-radius: 10px !important;
-    color: rgba(255,255,255,0.8) !important;
-    font-family: 'Courier New', monospace !important;
-    font-size: 12px !important;
-    text-align: center !important;
-    letter-spacing: 3px !important;
-    outline: none !important;
-}
-
-.online-input:focus { border-color: rgba(52, 152, 219, 0.3) !important; }
-
-.online-footer {
-    display: flex !important;
-    justify-content: center !important;
-    margin-top: 4px !important;
-}
-
-.online-menu-btn {
-    width: 30% !important;
-    max-width: 90px !important;
-    cursor: pointer !important;
-    transition: transform 0.15s ease !important;
-}
-
-.online-menu-btn:active { transform: scale(0.95) !important; }
-
-/* ============================================================
-   ODA BEKLEME EKRANI STİLLERİ
-   ============================================================ */
-
-#room-waiting {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(0, 0, 0, 0.85) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 10000 !important;
-    padding: 16px !important;
-}
-
-#room-waiting[style*="display: flex"] {
-    display: flex !important;
-}
-
-.room-waiting-content {
-    position: relative !important;
-    max-width: 380px !important;
-    width: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
-    border-radius: 20px !important;
-    overflow: hidden !important;
-}
-
-.room-waiting-bg {
-    background: linear-gradient(145deg, #1a1a2e, #16213e) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(46, 204, 113, 0.1) !important;
-}
-
-.room-waiting-overlay {
-    padding: 20px 24px 20px 24px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 14px !important;
-}
-
-.room-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-}
-
-.room-header h2 {
-    color: rgba(255,255,255,0.8) !important;
-    font-size: 16px !important;
-    letter-spacing: 3px !important;
-    margin: 0 !important;
-}
-
-.room-close {
-    background: none !important;
-    border: none !important;
-    color: rgba(255,255,255,0.2) !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-}
-
-.room-code-area {
-    text-align: center !important;
-    background: rgba(0,0,0,0.2) !important;
-    padding: 12px !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(255,255,255,0.03) !important;
-}
-
-.room-code-label {
-    font-size: 10px !important;
-    color: rgba(255,255,255,0.3) !important;
-    letter-spacing: 2px !important;
-    display: block !important;
-    margin-bottom: 4px !important;
-}
-
-.room-code-display {
-    font-size: 28px !important;
-    font-weight: 900 !important;
-    color: #2ecc71 !important;
-    letter-spacing: 6px !important;
-    font-family: 'Courier New', monospace !important;
-    text-shadow: 0 0 30px rgba(46, 204, 113, 0.15) !important;
-}
-
-.room-players-area {
-    background: rgba(0,0,0,0.15) !important;
-    border-radius: 10px !important;
-    padding: 10px 14px !important;
-}
-
-.room-players-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    font-size: 11px !important;
-    color: rgba(255,255,255,0.4) !important;
-    letter-spacing: 2px !important;
-    padding-bottom: 6px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.02) !important;
-}
-
-.room-players-list {
-    padding-top: 6px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 4px !important;
-}
-
-.room-player {
-    font-size: 12px !important;
-    color: rgba(255,255,255,0.7) !important;
-    padding: 4px 0 !important;
-}
-
-.room-opponent-status {
-    display: flex !important;
-    justify-content: space-between !important;
-    font-size: 12px !important;
-    color: rgba(255,255,255,0.5) !important;
-    padding: 0 4px !important;
-}
-
-.room-actions {
-    display: flex !important;
-    gap: 10px !important;
-    margin-top: 4px !important;
-}
-
-.room-ready-btn {
-    flex: 2 !important;
-    padding: 10px !important;
+#online-lobby .status {
     background: rgba(46, 204, 113, 0.2) !important;
     color: #2ecc71 !important;
-    border: 1px solid rgba(46, 204, 113, 0.15) !important;
-    border-radius: 10px !important;
-    font-family: 'Courier New', monospace !important;
-    font-weight: bold !important;
-    font-size: 12px !important;
+    border: 1px solid rgba(46, 204, 113, 0.1) !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 10px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
+    font-family: inherit !important;
     letter-spacing: 1px !important;
 }
 
-.room-ready-btn:hover { background: rgba(46, 204, 113, 0.3) !important; }
-.room-ready-btn:disabled { opacity: 0.5 !important; cursor: default !important; }
-
-.room-leave-btn {
-    flex: 1 !important;
-    padding: 10px !important;
-    background: rgba(231, 76, 60, 0.1) !important;
-    color: #e74c3c !important;
-    border: 1px solid rgba(231, 76, 60, 0.1) !important;
-    border-radius: 10px !important;
-    font-family: 'Courier New', monospace !important;
-    font-weight: bold !important;
-    font-size: 11px !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+#online-lobby .status:hover {
+    background: rgba(46, 204, 113, 0.3) !important;
 }
 
-.room-leave-btn:hover { background: rgba(231, 76, 60, 0.2) !important; }
+#online-lobby .popup-header {
+    background: transparent !important;
+    border-bottom: none !important;
+}
 
-/* Scrollbar */
-.online-players-list::-webkit-scrollbar,
-.room-players-list::-webkit-scrollbar {
+#online-lobby .popup-close {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 22px !important;
+}
+
+#online-lobby .popup-body {
+    padding: 5px 10px !important;
+    margin-top: 157px !important;
+}
+
+#online-lobby .player-list::-webkit-scrollbar {
     width: 3px !important;
 }
-.online-players-list::-webkit-scrollbar-track,
-.room-players-list::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-.online-players-list::-webkit-scrollbar-thumb,
-.room-players-list::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.05) !important;
+
+#online-lobby .player-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02) !important;
     border-radius: 4px !important;
 }
+
+#online-lobby .player-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+}
+
 /* ============================================================
    KAYIT & GİRİŞ MODALI
    ============================================================ */
