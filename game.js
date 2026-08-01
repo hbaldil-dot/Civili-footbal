@@ -2103,12 +2103,6 @@ function getPlayerData() {
     };
 }
 
-// Eğer bu 'count' kontrolü bir socket veya fonksiyon içindeyse o yapıya alınmalı.
-// Aksi halde tek başına if bloğu şu şekilde KAPATILMALIDIR:
-if (count === 0) {
-    // koddaki metin/stil güncellemeleriniz...
-}
-
 socket.on("receive-invite", (data) => {
     if (confirm(`${data.fromName} seni maça davet ediyor! Kabul et?`)) {
         socket.emit("accept-invite", data.fromId);
