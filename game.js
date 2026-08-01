@@ -714,36 +714,64 @@ function calculateAITarget(params) {
             }
 
             // 2. DUVARDAN ÇARPTIRARAK KALEYE (BANK SHOT)
-            // Sol Duvar
-            const rCap = cap.radius;
-            const virtTargetLeft = { x: -targetX + 2 * rCap, y: targetY };
-            const tLeft = (rCap - cap.x) / (virtTargetLeft.x - cap.x);
-            if (tLeft > 0 && tLeft < 1) {
-                const bounceY = cap.y + tLeft * (virtTargetLeft.y - cap.y);
-                if (bounceY > goalHeight + 10 && bounceY < height - goalHeight - 10) {
-                    const bouncePt = { x: rCap, y: bounceY };
-                    if (!isPathBlockedByPin(cap, bouncePt) && !isPathBlockedByPin(bouncePt, targetPt)) {
-                        const dist = Math.hypot(bouncePt.x - cap.x, bouncePt.y - cap.y) + Math.hypot(targetPt.x - bouncePt.x, targetPt.y - bouncePt.y);
-                        candidateShots.push({ x: bouncePt.x, y: bouncePt.y, score: 850 - dist * 0.6, type: 'wall' });
-                    }
-                }
-            }
+            // 2. DUVARDAN ÇARPTIRARAK KALEYE (BANK SHOT)
 
-            // Sağ Duvar
-            const virtTargetRight = { x: 2 * (width - rCap) - targetX, y: targetY };
-            const tRight = ((width - rCap) - cap.x) / (virtTargetRight.x - cap.x);
-            if (tRight > 0 && tRight < 1) {
-                const bounceY = cap.y + tRight * (virtTargetRight.y - cap.y);
-                if (bounceY > goalHeight + 10 && bounceY < height - goalHeight - 10) {
-                    const bouncePt = { x: width - rCap, y: bounceY };
-                    if (!isPathBlockedByPin(cap, bouncePt) && !isPathBlockedByPin(bouncePt, targetPt)) {
-                        const dist = Math.hypot(bouncePt.x - cap.x, bouncePt.y - cap.y) + Math.hypot(targetPt.x - bouncePt.x, targetPt.y - bouncePt.y);
-                        candidateShots.push({ x: bouncePt.x, y: bouncePt.y, score: 850 - dist * 0.6, type: 'wall' });
-                    }
-                }
-            }
-        }
+// A. SOL DUVAR YANSIMASI
+// Sol duvarın x koordinatı 0 kabul edilmiştir (farklıysa değiştirin)
+const leftWallX = 0; 
 
+for (let i = 0; i < numZones; i++) {
+    const targetX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+    
+    // Yansıma noktası (Topun sol duvarda çarpması gereken Y noktası)
+    // Formul: Reflection Y
+    const bounceY = cap.y + (goalY - cap.y) * (cap.x - leftWallX) / (cap.x + targetX - 2 * leftWallX);
+    const bouncePt = { x: leftWallX, y: bounceY };
+
+    // 1. Yol Kontrolü: Top ile Duvar arasındaki yolda engel var mı?
+    const path1Blocked = isPathBlockedByPin(cap, bouncePt);
+    // 2. Yol Kontrolü: Duvar ile Kale arasındaki yolda engel var mı?
+    const path2Blocked = isPathBlockedByPin(bouncePt, { x: targetX, y: goalY });
+
+    if (!path1Blocked && !path2Blocked && bounceY > 0 && bounceY < height) {
+        const dist1 = Math.hypot(bouncePt.x - cap.x, bouncePt.y - cap.y);
+        const dist2 = Math.hypot(targetX - bouncePt.x, goalY - bouncePt.y);
+        const score = 800 - (dist1 + dist2) * 0.5; // Doğrudan vuruştan biraz daha düşük puan
+
+        candidateShots.push({ 
+            x: bouncePt.x, 
+            y: bouncePt.y, 
+            score: score, 
+            type: 'bank_left' 
+        });
+    }
+}
+
+// B. SAĞ DUVAR YANSIMASI
+const rightWallX = width; 
+
+for (let i = 0; i < numZones; i++) {
+    const targetX = goalLeft + (i * zoneWidth) + (zoneWidth / 2);
+    
+    const bounceY = cap.y + (goalY - cap.y) * (rightWallX - cap.x) / (2 * rightWallX - cap.x - targetX);
+    const bouncePt = { x: rightWallX, y: bounceY };
+
+    const path1Blocked = isPathBlockedByPin(cap, bouncePt);
+    const path2Blocked = isPathBlockedByPin(bouncePt, { x: targetX, y: goalY });
+
+    if (!path1Blocked && !path2Blocked && bounceY > 0 && bounceY < height) {
+        const dist1 = Math.hypot(bouncePt.x - cap.x, bouncePt.y - cap.y);
+        const dist2 = Math.hypot(targetX - bouncePt.x, goalY - bouncePt.y);
+        const score = 800 - (dist1 + dist2) * 0.5;
+
+        candidateShots.push({ 
+            x: bouncePt.x, 
+            y: bouncePt.y, 
+            score: score, 
+            type: 'bank_right' 
+        });
+    }
+}
         // 3. PİNDEN KALEYE VEYA PİNDEN DUVARA KALEYE VURUŞLAR (PIN CAROM)
         pins.forEach(pin => {
             if (pin.isPost) return;
