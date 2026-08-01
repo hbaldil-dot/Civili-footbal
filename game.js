@@ -1602,54 +1602,75 @@ window.addEventListener('mouseup', () => {
     }
     if (currentPhase === 'playing' && isDraggingBall) {
         isDraggingBall = false;
+     // playSound fonksiyonunun tanımlı olduğundan emin ol
+    if (typeof playSound === 'function') {
         playSound('kick');
-        const startX = dragStart.x;
-        const startY = dragStart.y;
-        const endX = dragCurrent.x;
-        const endY = dragCurrent.y;
-        cap.vx = (startX - endX) * 0.13;
-        cap.vy = (startY - endY) * 0.13;
-        turn = turn === 1 ? 2 : 1;
-        updateHUDTurn();
-        resetShotTimer();
-        if (gameMode === 'online' && socket) {
-            socket.emit('playerShot', {
-                roomId: currentRoomId,
-                shotData: { player: turn, startX, startY, endX, endY, timestamp: Date.now() }
-            });
-        }
-        const container = document.getElementById('power-bar-container');
-        if (container) container.style.display = 'none';
-        const powerBar = document.getElementById('power-bar');
-        if (powerBar) powerBar.style.width = '0%';
     }
-});
+    
+    var startX = dragStart.x;
+    var startY = dragStart.y;
+    var endX = dragCurrent.x;
+    var endY = dragCurrent.y;
+    cap.vx = (startX - endX) * 0.13;
+    cap.vy = (startY - endY) * 0.13;
+    turn = turn === 1 ? 2 : 1;
+    updateHUDTurn();
+    resetShotTimer();
+    
+    if (gameMode === 'online' && socket) {
+        socket.emit('playerShot', {
+            roomId: currentRoomId,
+            shotData: { player: turn, startX: startX, startY: startY, endX: endX, endY: endY, timestamp: Date.now() }
+        });
+    }
+    
+    var container = document.getElementById('power-bar-container');
+    if (container) container.style.display = 'none';
+    var powerBar = document.getElementById('power-bar');
+    if (powerBar) powerBar.style.width = '0%';
+}
 
 // Touch Events
-canvas.addEventListener('touchstart', (e) => {
+// Touch Events - DÜZELTİLMİŞ
+canvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
-    const touch = e.touches[0];
-    if (touch) canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
+    var touch = e.touches[0];
+    if (touch) {
+        canvas.dispatchEvent(new MouseEvent('mousedown', { 
+            clientX: touch.clientX, 
+            clientY: touch.clientY 
+        }));
+    }
 }, { passive: false });
 
-canvas.addEventListener('touchmove', (e) => {
+canvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
-    const touch = e.touches[0];
-    if (touch) canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
+    var touch = e.touches[0];
+    if (touch) {
+        canvas.dispatchEvent(new MouseEvent('mousemove', { 
+            clientX: touch.clientX, 
+            clientY: touch.clientY 
+        }));
+    }
 }, { passive: false });
 
-canvas.addEventListener('touchend', (e) => {
+canvas.addEventListener('touchend', function(e) {
     e.preventDefault();
-    const touch = e.changedTouches[0];
-    if (touch) window.dispatchEvent(new MouseEvent('mouseup', { clientX: touch.clientX, clientY: touch.clientY }));
-    else window.dispatchEvent(new MouseEvent('mouseup'));
+    var touch = e.changedTouches[0];
+    if (touch) {
+        window.dispatchEvent(new MouseEvent('mouseup', { 
+            clientX: touch.clientX, 
+            clientY: touch.clientY 
+        }));
+    } else {
+        window.dispatchEvent(new MouseEvent('mouseup'));
+    }
 }, { passive: false });
 
-canvas.addEventListener('touchcancel', (e) => {
+canvas.addEventListener('touchcancel', function(e) {
     e.preventDefault();
     window.dispatchEvent(new MouseEvent('mouseup'));
 }, { passive: false });
-
 // ============================================================
 // MENÜ FONKSİYONLARI
 // ============================================================
@@ -2783,14 +2804,20 @@ if (socket) {
 // EKSİK KALAN MENÜ VE POP-UP FONKSİYONLARI
 // ============================================================
 
-// --- TAKIM SEÇİM POP-UP AÇ/KAPA ---
+// ============================================================
+// TAKIM SEÇİM POP-UP
+// ============================================================
+
 function openTeamSelectPopup() {
     console.log('🏆 Takım seçim pop-up açılıyor...');
-    const popup = document.getElementById('team-select-popup');
-    const grid = document.getElementById('team-select-grid');
-    const shieldImg = document.getElementById('popup-selected-team-img');
+    var popup = document.getElementById('team-select-popup');
+    var grid = document.getElementById('team-select-grid');
+    var shieldImg = document.getElementById('popup-selected-team-img');
     
-    if (!popup || !grid) { console.error("Pop-up veya Grid bulunamadı!"); return; }
+    if (!popup || !grid) {
+        console.error("Pop-up veya Grid bulunamadı!");
+        return;
+    }
 
     popup.style.display = 'block';
     popup.style.visibility = 'visible';
@@ -2802,7 +2829,7 @@ function openTeamSelectPopup() {
             shieldImg.src = 'takimlar/' + selectedTeamLogo;
             shieldImg.style.display = 'block';
         } else {
-            const defaultTeam = teamLogos[0];
+            var defaultTeam = teamLogos[0];
             if (defaultTeam) {
                 selectedTeamLogo = defaultTeam.file;
                 shieldImg.src = 'takimlar/' + defaultTeam.file;
@@ -2813,47 +2840,53 @@ function openTeamSelectPopup() {
 
     // Grid'i doldur
     grid.innerHTML = '';
-    teamLogos.forEach((team) => {
-        const btn = document.createElement('div');
+    for (var i = 0; i < teamLogos.length; i++) {
+        var team = teamLogos[i];
+        var btn = document.createElement('div');
         btn.className = 'big-team-logo-btn';
         if (selectedTeamLogo === team.file) btn.classList.add('active');
         
-        const img = document.createElement('img');
+        var img = document.createElement('img');
         img.src = 'takimlar/' + team.file;
         img.alt = team.name;
         img.onerror = function() { this.src = 'takimlar/default.png'; };
         btn.appendChild(img);
         
-        btn.onclick = function(e) {
-            e.stopPropagation();
-            document.querySelectorAll('.big-team-logo-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            selectedTeamLogo = team.file;
-            console.log('🏆 Takım seçildi:', team.file);
-            
-            if (shieldImg) {
-                shieldImg.src = 'takimlar/' + team.file;
-                shieldImg.style.display = 'block';
-            }
-            // Ana menüdeki logoyu güncelle
-            const menuOverlay = document.getElementById('selected-team-logo-display');
-            if (menuOverlay) {
-                menuOverlay.src = 'takimlar/' + team.file;
-                menuOverlay.style.display = 'block';
-                menuOverlay.style.opacity = '1';
-            }
-            loadTeamLogoImage(team.file);
-            selectRandomAITeam();
-            updateScoreLogos();
-        };
+        btn.onclick = (function(teamFile) {
+            return function(e) {
+                e.stopPropagation();
+                var btns = document.querySelectorAll('.big-team-logo-btn');
+                for (var j = 0; j < btns.length; j++) {
+                    btns[j].classList.remove('active');
+                }
+                this.classList.add('active');
+                
+                selectedTeamLogo = teamFile;
+                console.log('🏆 Takım seçildi:', teamFile);
+                
+                if (shieldImg) {
+                    shieldImg.src = 'takimlar/' + teamFile;
+                    shieldImg.style.display = 'block';
+                }
+                var menuOverlay = document.getElementById('selected-team-logo-display');
+                if (menuOverlay) {
+                    menuOverlay.src = 'takimlar/' + teamFile;
+                    menuOverlay.style.display = 'block';
+                    menuOverlay.style.opacity = '1';
+                }
+                loadTeamLogoImage(teamFile);
+                selectRandomAITeam();
+                updateScoreLogos();
+            };
+        })(team.file);
+        
         grid.appendChild(btn);
-    });
+    }
 }
 
 function closeTeamSelectPopup() {
     console.log('🏆 Takım seçim pop-up kapatılıyor...');
-    const popup = document.getElementById('team-select-popup');
+    var popup = document.getElementById('team-select-popup');
     if (popup) {
         popup.style.display = 'none';
         popup.style.visibility = 'hidden';
