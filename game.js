@@ -275,11 +275,11 @@ let currentPhase = 'menu';
 let gameMode = 'local';
 let score = { p1: 0, p2: 0 };
 let turn = 1;
-// let myTeamNumber = 1;
-let currentRoomId = null;
-let isOnlineMatch = false;
-let opponentPinsData = [];
-let opponentLogoData = 'default.png';
+myTeamNumber = 1;
+currentRoomId = null;
+isOnlineMatch = false;
+opponentPinsData = [];
+opponentLogoData = 'default.png';
 
 let matchSecondsLeft = MATCH_DURATION;
 let timerInterval = null;
