@@ -2184,7 +2184,6 @@ socket.on("receive-invite", (data) => {
             }
         }
     });
-}
 
 function joinOnlineGame() {
     if (!socket || !socket.connected) {
