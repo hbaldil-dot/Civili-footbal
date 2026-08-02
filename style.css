@@ -1644,7 +1644,7 @@ body::before {
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1652,7 +1652,7 @@ body::before {
 }
 
 .auth-card {
-    background: rgba(20, 20, 20, 0.3);
+    background: rgba(20, 20, 20, 0.6);
     border: 2px solid #2ecc71;
     border-radius: 12px;
     padding: 25px;
