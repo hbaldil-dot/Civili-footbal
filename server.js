@@ -419,6 +419,11 @@ socket.on('leave-lobby', () => {
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
+    // GOL SENKRONİZASYONU
+socket.on('goal-scored', ({ roomId, scoringTeam }) => {
+    console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
+    socket.to(roomId).emit('opponent-goal', { scoringTeam });
+});
 
     // ============================================================
     // BAĞLANTI KESİLME
