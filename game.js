@@ -681,7 +681,7 @@ function draw() {
     }
 
     if (currentPhase === 'playing' && cap) {
-        drawSoccerBall(cap.x, cap.y,const size , cap.rotation);
+        drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
 
     if (goalAnimation) {
@@ -1347,22 +1347,24 @@ function updatePhysics() {
     for (let step = 0; step < SUB_STEPS; step++) {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
-        if (cap.x -  < 0) { cap.x = ; cap.vx *= -0.85; playSound('hit'); }
-        if (cap.x +  > width) { cap.x = width - ; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
         
-// === ÜST KALE (Takım 2'nin kalesi - Konuk'un kalesi) ===
-if (cap.y -  <= goalHeight) {
+ // === ÜST KALE (Takım 2'nin kalesi - Konuk'un kalesi) ===
+if (cap.y - cap.radius <= goalHeight) {
     const goalLeft = (width - goalWidth) / 2;
     const goalRight = (width + goalWidth) / 2;
     if (cap.x > goalLeft && cap.x < goalRight) {
         console.log('⚽ ÜST KALE - Takım 1 (Host) gol attı!');
         
         if (gameMode === 'online') {
+            // SADECE karşı tarafa gol olduğunu bildir, skoru burada güncelleme!
             socket.emit('goal-scored', {
                 roomId: currentRoomId,
                 scoringTeam: 1
             });
         } else {
+            // Local / AI modu: skoru burada güncelle
             score.p1++;
             document.getElementById('score-p1').innerText = score.p1;
         }
@@ -1373,11 +1375,6 @@ if (cap.y -  <= goalHeight) {
         cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
         resetShotTimer();
         return;
-    } else {
-        // ★★★ EKSİK OLAN KISIM: Topu üst sınırdan sektir ★★★
-        cap.y = goalHeight + cap.radius;
-       cap.vy *= -0.01;
-      playSound('hit');
     }
 }
 
@@ -1389,11 +1386,13 @@ if (cap.y + cap.radius >= height - goalHeight) {
         console.log('⚽ ALT KALE - Takım 2 (Konuk) gol attı!');
         
         if (gameMode === 'online') {
+            // SADECE karşı tarafa gol olduğunu bildir, skoru burada güncelleme!
             socket.emit('goal-scored', {
                 roomId: currentRoomId,
                 scoringTeam: 2
             });
         } else {
+            // Local / AI modu: skoru burada güncelle
             score.p2++;
             document.getElementById('score-p2').innerText = score.p2;
         }
@@ -1404,11 +1403,9 @@ if (cap.y + cap.radius >= height - goalHeight) {
         cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
         resetShotTimer();
         return;
-    } else {
+    }
+}
         
-   
-  }
- }     
         // === ALT KALE (Takım 1'in kalesi - Host'un kalesi) ===
         // Top alt kaleye girerse → Takım 2 (Konuk) gol atar
         if (cap.y + cap.radius >= height - goalHeight) {
