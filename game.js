@@ -1387,30 +1387,30 @@ function updatePhysics() {
                 // Top alt kaleye girdi -> Takım 1'in kalesi -> Takım 2 gol attı
                 console.log('⚽ ALT KALE - Takım 2 gol attı!');
                 
-                if (gameMode === 'online') {
-                    // Online: myTeamNumber'e göre skor güncelle
-                    if (myTeamNumber === 2) {
-                        // Ben Takım 2 isem benim skorum artar
-                        score.p2++;
-                        document.getElementById('score-p2').innerText = score.p2;
-                        socket.emit('goal-scored', {
-                            roomId: currentRoomId,
-                            scoringTeam: 2
-                        });
-                    } else {
-                        // Ben Takım 1 isem rakip skoru artar
-                        score.p1++;
-                        document.getElementById('score-p1').innerText = score.p1;
-                        socket.emit('goal-scored', {
-                            roomId: currentRoomId,
-                            scoringTeam: 2
-                        });
-                    }
-                } else {
-                    // Local / AI modu
-                    score.p2++;
-                    document.getElementById('score-p2').innerText = score.p2;
-                }
+ //               if (gameMode === 'online') {
+   //                 // Online: myTeamNumber'e göre skor güncelle
+    //                if (myTeamNumber === 2) {
+    //                    // Ben Takım 2 isem benim skorum artar
+    //                    score.p2++;
+    //                    document.getElementById('score-p2').innerText = score.p2;
+    //                    socket.emit('goal-scored', {
+    //                        roomId: currentRoomId,
+    //                        scoringTeam: 2
+    //                    });
+    //                } else {
+    //                    // Ben Takım 1 isem rakip skoru artar
+   //                     score.p1++;
+   //                     document.getElementById('score-p1').innerText = score.p1;
+   //                     socket.emit('goal-scored', {
+   //                         roomId: currentRoomId,
+   //                         scoringTeam: 2
+    //                    });
+    //                }
+    ///            } else {
+    ///                // Local / AI modu
+    ///                score.p2++;
+          //          document.getElementById('score-p2').innerText = score.p2;
+         //       }
                 
                 triggerGoalAnimation();
                 turn = 1;
