@@ -1406,11 +1406,11 @@ if (cap.y + cap.radius >= height - goalHeight) {
         return;
     } else {
         // ★★★ ALT SINIR İÇİN DE SEKTİRME EKLENMELİ ★★★
-        cap.y = height - goalHeight - cap.radius;
-        cap.vy *= -0.85;
-        playSound('hit');
-    }
-}     
+    //    cap.y = height - goalHeight - cap.radius;
+   //     cap.vy *= -0.85;
+   //     playSound('hit');
+//    }
+// }     
         // === ALT KALE (Takım 1'in kalesi - Host'un kalesi) ===
         // Top alt kaleye girerse → Takım 2 (Konuk) gol atar
         if (cap.y + cap.radius >= height - goalHeight) {
