@@ -1550,7 +1550,7 @@ body::before {
 #online-lobby .popup-content {
     background: transparent !important;
     border: none !important;
-    box-shadow: 0 20px 60px rgba(220, 220, 220, 0.9) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1) !important;
     max-width: 420px !important;
     width: 100% !important;
     padding: 0 !important;
@@ -1565,7 +1565,7 @@ body::before {
     justify-content: space-between !important;
     padding: 6px 10px !important;
     border-bottom: 1px solid rgba(255, 180, 85, 0.05) !important;
-    color: rgba(212, 15, 185, 0.8) !important;
+    color: rgba(212, 215, 255, 0.99) !important;
 }
 
 #online-lobby .player-item:last-child {
@@ -1601,7 +1601,7 @@ body::before {
 }
 
 #online-lobby .status:hover {
-    background: rgba(46, 204, 113, 0.3) !important;
+    background: rgba(46, 204, 113, 0.99) !important;
 }
 
 #online-lobby .popup-header {
@@ -1611,7 +1611,7 @@ body::before {
 
 #online-lobby .popup-close {
     color: rgba(255, 16, 25, 0.9) !important;
-    font-size: 22px !important;
+    font-size: 29px !important;
 }
 
 #online-lobby .popup-body {
