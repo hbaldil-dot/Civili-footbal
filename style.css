@@ -1531,7 +1531,7 @@ body::before {
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    background: rgba(0, 0, 0, 0.85) !important;
+    background: rgba(220, 2200, 2200, 0.85) !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
     display: none !important;
@@ -1550,7 +1550,7 @@ body::before {
 #online-lobby .popup-content {
     background: transparent !important;
     border: none !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+    box-shadow: 0 20px 60px rgba(220, 220, 220, 0.9) !important;
     max-width: 420px !important;
     width: 100% !important;
     padding: 0 !important;
@@ -1564,8 +1564,8 @@ body::before {
     align-items: center !important;
     justify-content: space-between !important;
     padding: 6px 10px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    border-bottom: 1px solid rgba(255, 180, 85, 0.05) !important;
+    color: rgba(212, 15, 185, 0.8) !important;
 }
 
 #online-lobby .player-item:last-child {
@@ -1590,7 +1590,7 @@ body::before {
 #online-lobby .status {
     background: rgba(46, 204, 113, 0.2) !important;
     color: #2ecc71 !important;
-    border: 1px solid rgba(46, 204, 113, 0.1) !important;
+    border: 1px solid rgba(46, 204, 113, 0.5) !important;
     padding: 4px 12px !important;
     border-radius: 20px !important;
     font-size: 10px !important;
@@ -1610,7 +1610,7 @@ body::before {
 }
 
 #online-lobby .popup-close {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(255, 16, 25, 0.9) !important;
     font-size: 22px !important;
 }
 
