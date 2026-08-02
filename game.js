@@ -473,9 +473,13 @@ function drawPlayerWithLogo(x, y, logoFile) {
     ctx.save();
     ctx.translate(x, y);
     
+    // Misafir (Takım 2) ise logoyu 180 derece döndür
+    const shouldFlip = (gameMode === 'online' && myTeamNumber === 2);
+    
     if (logoFile && loadedLogos[logoFile]) {
         const img = loadedLogos[logoFile];
         const size = cap.radius * 1.4;
+        
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 6;
         ctx.fillStyle = 'rgba(255,255,255,0.1)';
@@ -483,13 +487,26 @@ function drawPlayerWithLogo(x, y, logoFile) {
         ctx.arc(0, 0, size, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
+        
         ctx.save();
         ctx.beginPath();
         ctx.arc(0, 0, size - 2, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(img, -size + 2, -size + 2, size * 2 - 4, size * 2 - 4);
+        
+        // SADECE BURASI DEĞİŞTİ
+        if (shouldFlip) {
+            // Misafir: logo 180 derece döner
+            ctx.translate(0, 0);
+            ctx.rotate(Math.PI);
+            ctx.drawImage(img, -(size - 2), -(size - 2), (size - 2) * 2, (size - 2) * 2);
+        } else {
+            // Host: logo normal
+            ctx.drawImage(img, -size + 2, -size + 2, size * 2 - 4, size * 2 - 4);
+        }
+        
         ctx.restore();
+        
         ctx.strokeStyle = 'rgba(255,255,255,0.4)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
