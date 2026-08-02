@@ -513,7 +513,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
         ctx.arc(0, 0, size - 1, 0, Math.PI * 2);
         ctx.stroke();
     } else {
-        const size =  * 1.2;
+        const size = cap.radius * 1.2;
         ctx.fillStyle = '#666';
         ctx.beginPath();
         ctx.arc(0, 0, size, 0, Math.PI * 2);
