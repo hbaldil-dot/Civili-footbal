@@ -1376,7 +1376,7 @@ if (cap.y - cap.radius <= goalHeight) {
     } else {
         // ★★★ EKSİK OLAN KISIM: Topu üst sınırdan sektir ★★★
         cap.y = goalHeight + cap.radius;
-        cap.vy *= -0.85;
+        cap.vy *= -0.35;
         playSound('hit');
     }
 }
@@ -1406,10 +1406,7 @@ if (cap.y + cap.radius >= height - goalHeight) {
         return;
     } else {
         
-        // ★★★ ALT SINIR İÇİN DE SEKTİRME EKLENMELİ ★★★
-    //   cap.y = height - goalHeight - cap.radius;
-   // cap.vy *= -0.85;
-    //    playSound('hit');
+   
   }
  }     
         // === ALT KALE (Takım 1'in kalesi - Host'un kalesi) ===
@@ -1450,7 +1447,7 @@ if (cap.y + cap.radius >= height - goalHeight) {
                 return;
             } else {
                 cap.y = height - goalHeight - cap.radius;
-                cap.vy *= -0.85;
+                cap.vy *= -0.35;
                 playSound('hit');
             }
         }
