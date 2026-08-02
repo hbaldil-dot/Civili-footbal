@@ -1412,49 +1412,6 @@ if (cap.y + cap.radius >= height - goalHeight) {
     }
 }
         
-        // === ALT KALE (Takım 1'in kalesi - Host'un kalesi) ===
-        // Top alt kaleye girerse → Takım 2 (Konuk) gol atar
-        if (cap.y + cap.radius >= height - goalHeight) {
-            const goalLeft = (width - goalWidth) / 2;
-            const goalRight = (width + goalWidth) / 2;
-            if (cap.x > goalLeft && cap.x < goalRight) {
-                console.log('⚽ ALT KALE - Takım 2 (Konuk) gol attı!');
-                
-                if (gameMode === 'online') {
-                    // Takım 2 gol attı
-                    if (myTeamNumber === 2) {
-                        // Ben Takım 2 isem benim skorum artar
-                        score.p2++;
-                        document.getElementById('score-p2').innerText = score.p2;
-                    } else {
-                        // Ben Takım 1 isem rakip skoru artar
-                        score.p2++;
-                        document.getElementById('score-p2').innerText = score.p2;
-                    }
-                    // Karşı tarafa gol olduğunu bildir
-                    socket.emit('goal-scored', {
-                        roomId: currentRoomId,
-                        scoringTeam: 2
-                    });
-                } else {
-                    // Local / AI modu
-                    score.p2++;
-                    document.getElementById('score-p2').innerText = score.p2;
-                }
-                
-                triggerGoalAnimation();
-                turn = 1;
-                updateHUDTurn();
-                cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
-                resetShotTimer();
-                return;
-            } else {
-                cap.y = height - goalHeight - cap.radius;
-                cap.vy *= -0.85;
-                playSound('hit');
-            }
-        }
-        
         pins.forEach(pin => {
             const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
             const minDist = cap.radius + (pin.isPost ? 4 : 8);
