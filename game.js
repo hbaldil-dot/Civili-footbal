@@ -478,7 +478,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
     
     if (logoFile && loadedLogos[logoFile]) {
         const img = loadedLogos[logoFile];
-        const size =  * 1.4;
+        const size = cap.radius * 1.4;
         
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 6;
