@@ -1333,33 +1333,30 @@ function updatePhysics() {
         if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
         if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
         
-        // === ÜST KALE (Takım 2'nin kalesi - Oyuncu 2 gol atar) ===
+        // === ÜST KALE (Takım 2'nin kalesi - Konuk'un kalesi) ===
+        // Top üst kaleye girerse → Takım 1 (Host) gol atar
         if (cap.y - cap.radius <= goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
             if (cap.x > goalLeft && cap.x < goalRight) {
-                // Top üst kaleye girdi -> Takım 2'nin kalesi -> Takım 1 gol attı
-                console.log('⚽ ÜST KALE - Takım 1 gol attı!');
+                console.log('⚽ ÜST KALE - Takım 1 (Host) gol attı!');
                 
                 if (gameMode === 'online') {
-                    // Online: myTeamNumber'e göre skor güncelle
+                    // Takım 1 gol attı
                     if (myTeamNumber === 1) {
                         // Ben Takım 1 isem benim skorum artar
                         score.p1++;
                         document.getElementById('score-p1').innerText = score.p1;
-                        socket.emit('goal-scored', {
-                            roomId: currentRoomId,
-                            scoringTeam: 1
-                        });
                     } else {
                         // Ben Takım 2 isem rakip skoru artar
-                        score.p2++;
-                        document.getElementById('score-p2').innerText = score.p2;
-                        socket.emit('goal-scored', {
-                            roomId: currentRoomId,
-                            scoringTeam: 1
-                        });
+                        score.p1++;
+                        document.getElementById('score-p1').innerText = score.p1;
                     }
+                    // Karşı tarafa gol olduğunu bildir
+                    socket.emit('goal-scored', {
+                        roomId: currentRoomId,
+                        scoringTeam: 1
+                    });
                 } else {
                     // Local / AI modu
                     score.p1++;
@@ -1379,38 +1376,35 @@ function updatePhysics() {
             }
         }
         
-        // === ALT KALE (Takım 1'in kalesi - Oyuncu 1 gol atar) ===
+        // === ALT KALE (Takım 1'in kalesi - Host'un kalesi) ===
+        // Top alt kaleye girerse → Takım 2 (Konuk) gol atar
         if (cap.y + cap.radius >= height - goalHeight) {
             const goalLeft = (width - goalWidth) / 2;
             const goalRight = (width + goalWidth) / 2;
             if (cap.x > goalLeft && cap.x < goalRight) {
-                // Top alt kaleye girdi -> Takım 1'in kalesi -> Takım 2 gol attı
-                console.log('⚽ ALT KALE - Takım 2 gol attı!');
+                console.log('⚽ ALT KALE - Takım 2 (Konuk) gol attı!');
                 
- //               if (gameMode === 'online') {
-   //                 // Online: myTeamNumber'e göre skor güncelle
-    //                if (myTeamNumber === 2) {
-    //                    // Ben Takım 2 isem benim skorum artar
-    //                    score.p2++;
-    //                    document.getElementById('score-p2').innerText = score.p2;
-    //                    socket.emit('goal-scored', {
-    //                        roomId: currentRoomId,
-    //                        scoringTeam: 2
-    //                    });
-    //                } else {
-    //                    // Ben Takım 1 isem rakip skoru artar
-   //                     score.p1++;
-   //                     document.getElementById('score-p1').innerText = score.p1;
-   //                     socket.emit('goal-scored', {
-   //                         roomId: currentRoomId,
-   //                         scoringTeam: 2
-    //                    });
-    //                }
-    ///            } else {
-    ///                // Local / AI modu
-    ///                score.p2++;
-          //          document.getElementById('score-p2').innerText = score.p2;
-         //       }
+                if (gameMode === 'online') {
+                    // Takım 2 gol attı
+                    if (myTeamNumber === 2) {
+                        // Ben Takım 2 isem benim skorum artar
+                        score.p2++;
+                        document.getElementById('score-p2').innerText = score.p2;
+                    } else {
+                        // Ben Takım 1 isem rakip skoru artar
+                        score.p2++;
+                        document.getElementById('score-p2').innerText = score.p2;
+                    }
+                    // Karşı tarafa gol olduğunu bildir
+                    socket.emit('goal-scored', {
+                        roomId: currentRoomId,
+                        scoringTeam: 2
+                    });
+                } else {
+                    // Local / AI modu
+                    score.p2++;
+                    document.getElementById('score-p2').innerText = score.p2;
+                }
                 
                 triggerGoalAnimation();
                 turn = 1;
