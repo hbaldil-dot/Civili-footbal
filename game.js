@@ -866,6 +866,28 @@ function getAIParameters() {
             return { reactionDelay: 600, pullDistanceMin: 30, pullDistanceMax: 65, errorMargin: 12, powerError: 0.10, fakeChance: 0.08, targetZones: 5, analyzeOpponents: true, analyzeWalls: false };
     }
 }
+function simulateShot(angle, power) {
+    // 1. Sanal bir top ve kopyalanmış durum oluştur
+    let virtualCap = { x: cap.x, y: cap.y, vx: Math.cos(angle) * power, vy: Math.sin(angle) * power, radius: cap.radius };
+    let steps = 0;
+
+    // 2. Fizik motorunu sanal olarak simüle et (Maksimum 300 adım)
+    while ((Math.hypot(virtualCap.vx, virtualCap.vy) > 0.1) && steps < 300) {
+        virtualCap.x += virtualCap.vx;
+        virtualCap.y += virtualCap.vy;
+        
+        // Sanal Duvar & Direk/Taş Çarpışmaları (Görünmez alan)
+        // ... (Mevcut fizik kurallarını sanal topa uygula)
+        
+        virtualCap.vx *= 0.983;
+        virtualCap.vy *= 0.983;
+        steps++;
+
+        // Gol oldu mu kontrol et?
+        if (isVirtualGoal(virtualCap)) return { goal: true, finalX: virtualCap.x, finalY: virtualCap.y };
+    }
+    return { goal: false, finalX: virtualCap.x, finalY: virtualCap.y };
+}
 
 function runAIMove() {
     if (currentPhase !== 'playing' || gameMode !== 'ai' || turn !== 2) return;
@@ -940,6 +962,21 @@ function calculateAITarget(params) {
     let targetX = Math.max(goalLeft + 5, Math.min(goalRight - 5, bestZone.x + errorX));
     let targetY = Math.max(goalY - 5, Math.min(goalY + 5, bestZone.y + errorY));
     return { x: targetX, y: targetY };
+}
+function evaluateBoardState(simResult, angle, power) {
+    if (simResult.goal) return 10000; // Gol varsa tartışmasız en iyi hamle
+
+    let score = 0;
+    const distToGoal = Math.hypot(simResult.finalX - width/2, simResult.finalY - (height - goalHeight));
+    
+    // Kaleye yakınlık puanı
+    score += (1000 - distToGoal);
+
+    // Kendi kalesini koruma (Top kendi kalesine yakın biterse ceza puanı)
+    const distToOwnGoal = Math.hypot(simResult.finalX - width/2, simResult.finalY - goalHeight);
+    if (distToOwnGoal < 100) score -= 500;
+
+    return score;
 }
 
 function executeAIShot(target, params) {
