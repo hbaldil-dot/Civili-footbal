@@ -1643,8 +1643,8 @@ body::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1652,13 +1652,13 @@ body::before {
 }
 
 .auth-card {
-    background: rgba(20, 20, 20, 0.5);
+    background: rgba(20, 20, 20, 0.3);
     border: 2px solid #2ecc71;
     border-radius: 12px;
     padding: 25px;
     width: 90%;
     max-width: 380px;
-    box-shadow: 0 0 25px rgba(46, 204, 113, 0.4);
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.3);
     color: #fff;
     font-family: 'Courier New', monospace;
 }
