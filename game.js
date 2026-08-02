@@ -1448,7 +1448,32 @@ function updatePhysics() {
         runAIMove();
     }
 }
+// Gol olduğunda
+const scoringTeam = (cap.y - cap.radius <= goalHeight) ? 1 : 2;
+// Üst kale → Takım 1 gol atar
+// Alt kale → Takım 2 gol atar
 
+if (gameMode === 'online') {
+    if (myTeamNumber === scoringTeam) {
+        // Ben gol attım
+        if (myTeamNumber === 1) {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        } else {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+    } else {
+        // Rakip gol attı
+        if (myTeamNumber === 1) {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        } else {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        }
+    }
+}
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
