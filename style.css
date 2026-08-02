@@ -1531,7 +1531,7 @@ body::before {
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    background: rgba(220, 2200, 2200, 0.85) !important;
+    background: rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
     display: none !important;
