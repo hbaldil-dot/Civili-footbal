@@ -1374,17 +1374,10 @@ if (cap.y - cap.radius <= goalHeight) {
         resetShotTimer();
         return;
     } else {
-            // Local / AI modu: skoru burada güncelle
-            score.p1++;
-            document.getElementById('score-p1').innerText = score.p1;
-        }
-        
-        triggerGoalAnimation();
-        turn = 2;
-        updateHUDTurn();
-        cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
-        resetShotTimer();
-        return;
+        // ★★★ EKSİK OLAN KISIM: Topu üst sınırdan sektir ★★★
+        cap.y = goalHeight + cap.radius;
+        cap.vy *= -0.85;
+        playSound('hit');
     }
 }
 
@@ -1396,13 +1389,11 @@ if (cap.y + cap.radius >= height - goalHeight) {
         console.log('⚽ ALT KALE - Takım 2 (Konuk) gol attı!');
         
         if (gameMode === 'online') {
-            // SADECE karşı tarafa gol olduğunu bildir, skoru burada güncelleme!
             socket.emit('goal-scored', {
                 roomId: currentRoomId,
                 scoringTeam: 2
             });
         } else {
-            // Local / AI modu: skoru burada güncelle
             score.p2++;
             document.getElementById('score-p2').innerText = score.p2;
         }
@@ -1413,6 +1404,11 @@ if (cap.y + cap.radius >= height - goalHeight) {
         cap.x = width / 2; cap.y = height / 2; cap.vx = 0; cap.vy = 0;
         resetShotTimer();
         return;
+    } else {
+        // ★★★ ALT SINIR İÇİN DE SEKTİRME EKLENMELİ ★★★
+        cap.y = height - goalHeight - cap.radius;
+        cap.vy *= -0.85;
+        playSound('hit');
     }
 }
         
