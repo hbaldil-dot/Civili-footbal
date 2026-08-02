@@ -2322,17 +2322,17 @@ socket.on("receive-invite", (data) => {
     });
 // GOL SENKRONİZASYONU (Karşı taraftan gelen gol)
 socket.on('opponent-goal', (data) => {
-    console.log('📥 Rakip gol attı! Skor güncelleniyor...');
+    console.log('📥 Rakip gol attı! Skor güncelleniyor...', data);
     if (currentPhase === 'playing' && isOnlineMatch) {
         // Rakip gol attığında skoru güncelle
-        if (myTeamNumber === 1) {
-            // Ben Takım 1 isem rakip (Takım 2) gol attı
-            score.p2++;
-            document.getElementById('score-p2').innerText = score.p2;
-        } else {
-            // Ben Takım 2 isem rakip (Takım 1) gol attı
+        if (data.scoringTeam === 1) {
+            // Takım 1 gol attı
             score.p1++;
             document.getElementById('score-p1').innerText = score.p1;
+        } else if (data.scoringTeam === 2) {
+            // Takım 2 gol attı
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
         }
         triggerGoalAnimation();
     }
