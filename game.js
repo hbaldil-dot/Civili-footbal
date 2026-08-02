@@ -355,7 +355,7 @@ const goalHeight = 12;
 const penaltyBoxW = goalWidth * 2.2;
 const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
-const MAX_DRAG_DIST =  * 2 * 6;
+const MAX_DRAG_DIST = cap.radius * 2 * 6;
 
 let goalAnimation = null;
 let goalAnimationStartTime = 0;
