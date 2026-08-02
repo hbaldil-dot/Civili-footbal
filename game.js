@@ -350,12 +350,12 @@ let aiLevel = 'orta';
 
 // SAHA ÖLÇÜLERİ (cap tanımlandıktan sonra)
 const minAllowedDistance = 45;
-const goalWidth = cap.radius * 2 * 3.2;
+const goalWidth =  * 2 * 3.2;
 const goalHeight = 12;
 const penaltyBoxW = goalWidth * 2.2;
 const penaltyBoxH = height * 0.15;
 const pBoxX1 = (width - penaltyBoxW) / 2;
-const MAX_DRAG_DIST = cap.radius * 2 * 6;
+const MAX_DRAG_DIST =  * 2 * 6;
 
 let goalAnimation = null;
 let goalAnimationStartTime = 0;
@@ -478,7 +478,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
     
     if (logoFile && loadedLogos[logoFile]) {
         const img = loadedLogos[logoFile];
-        const size = cap.radius * 1.4;
+        const size =  * 1.4;
         
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 6;
@@ -513,7 +513,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
         ctx.arc(0, 0, size - 1, 0, Math.PI * 2);
         ctx.stroke();
     } else {
-        const size = cap.radius * 1.2;
+        const size =  * 1.2;
         ctx.fillStyle = '#666';
         ctx.beginPath();
         ctx.arc(0, 0, size, 0, Math.PI * 2);
@@ -681,7 +681,7 @@ function draw() {
     }
 
     if (currentPhase === 'playing' && cap) {
-        drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
+        drawSoccerBall(cap.x, cap.y, , cap.rotation);
     }
 
     if (goalAnimation) {
@@ -1347,11 +1347,11 @@ function updatePhysics() {
     for (let step = 0; step < SUB_STEPS; step++) {
         cap.x += cap.vx / SUB_STEPS;
         cap.y += cap.vy / SUB_STEPS;
-        if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -0.85; playSound('hit'); }
-        if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x -  < 0) { cap.x = ; cap.vx *= -0.85; playSound('hit'); }
+        if (cap.x +  > width) { cap.x = width - ; cap.vx *= -0.85; playSound('hit'); }
         
 // === ÜST KALE (Takım 2'nin kalesi - Konuk'un kalesi) ===
-if (cap.y - cap.radius <= goalHeight) {
+if (cap.y -  <= goalHeight) {
     const goalLeft = (width - goalWidth) / 2;
     const goalRight = (width + goalWidth) / 2;
     if (cap.x > goalLeft && cap.x < goalRight) {
@@ -1376,7 +1376,7 @@ if (cap.y - cap.radius <= goalHeight) {
     } else {
         // ★★★ EKSİK OLAN KISIM: Topu üst sınırdan sektir ★★★
         cap.y = goalHeight + cap.radius;
-       cap.vy *= -0.15;
+       cap.vy *= -0.01;
       playSound('hit');
     }
 }
