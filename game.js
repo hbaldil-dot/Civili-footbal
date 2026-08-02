@@ -1376,7 +1376,7 @@ if (cap.y - cap.radius <= goalHeight) {
     } else {
         // ★★★ EKSİK OLAN KISIM: Topu üst sınırdan sektir ★★★
         cap.y = goalHeight + cap.radius;
-        cap.vy *= -0.15;
+        cap.vy *= -0.85;
         playSound('hit');
     }
 }
