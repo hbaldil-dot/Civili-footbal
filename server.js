@@ -420,8 +420,10 @@ socket.on('leave-lobby', () => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
     // GOL SENKRONİZASYONU
+// server.js
 socket.on('goal-scored', ({ roomId, scoringTeam }) => {
     console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
+    // SADECE karşı tarafa gönder (kendine değil!)
     socket.to(roomId).emit('opponent-goal', { scoringTeam });
 });
 
