@@ -350,7 +350,7 @@ let aiLevel = 'orta';
 
 // SAHA ÖLÇÜLERİ (cap tanımlandıktan sonra)
 const minAllowedDistance = 45;
-const goalWidth =  * 2 * 3.2;
+const goalWidth = cap.radius * 2 * 3.2;
 const goalHeight = 12;
 const penaltyBoxW = goalWidth * 2.2;
 const penaltyBoxH = height * 0.15;
