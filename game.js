@@ -681,7 +681,7 @@ function draw() {
     }
 
     if (currentPhase === 'playing' && cap) {
-        drawSoccerBall(cap.x, cap.y, , cap.rotation);
+        drawSoccerBall(cap.x, cap.y,const size , cap.rotation);
     }
 
     if (goalAnimation) {
