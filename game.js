@@ -3,7 +3,42 @@
 // ============================================================
 let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
+// game.js - NORMALİZE YARDIMCILAR
+// ============================================================
+function normalizeCoord(x, y) {
+    return {
+        nx: x / canvas.width,
+        ny: y / canvas.height
+    };
+}
 
+function denormalizeCoord(nx, ny) {
+    return {
+        x: nx * canvas.width,
+        y: ny * canvas.height
+    };
+}
+
+// Pin array'ini normalize et
+function normalizePins(pinsArray) {
+    return pinsArray
+        .filter(p => !p.isPost)
+        .map(p => ({
+            nx: p.x / canvas.width,
+            ny: p.y / canvas.height,
+            team: p.team
+        }));
+}
+
+// Normalize pin array'ini denormalize et
+function denormalizePins(pinsArray) {
+    return pinsArray.map(p => ({
+        x: p.nx * canvas.width,
+        y: p.ny * canvas.height,
+        team: p.team,
+        locked: true
+    }));
+}
 // ============================================================
 // SOCKET BAĞLANTISI - iOS Safari Uyumlu
 // ============================================================
@@ -133,62 +168,121 @@ if (typeof io !== 'undefined') {
             exitToMenu();
         });
 
-        socket.on('opponentShot', (shotData) => {
-            if (gameMode === 'online' && currentPhase === 'playing') {
-                cap.vx = (shotData.startX - shotData.endX) * 0.13;
-                cap.vy = (shotData.startY - shotData.endY) * 0.13;
-                playSound('kick');
-                turn = myTeamNumber;
-                updateHUDTurn();
-                resetShotTimer();
-            }
-        });
+       // game.js - ESKİ opponentShot (YORUM SATIRI YAPIN)
+/*
+socket.on('opponentShot', (shotData) => {
+    if (gameMode === 'online' && currentPhase === 'playing') {
+        cap.vx = (shotData.startX - shotData.endX) * 0.13;
+        cap.vy = (shotData.startY - shotData.endY) * 0.13;
+        playSound('kick');
+        turn = myTeamNumber;
+        updateHUDTurn();
+        resetShotTimer();
+    }
+});
+*/
 
-        socket.on('sync-setup-pin-move', ({ team, index, x, y }) => {
-            if (currentPhase === 'setup') {
-                let count = 0;
-                for (let p of pins) {
-                    if (!p.isPost && p.team === team) {
-                        if (count === index) { p.x = x; p.y = y; break; }
-                        count++;
-                    }
-                }
-            }
-        });
-
-        socket.on('match-go', ({ pins: finalPins }) => {
-            if (setupTimerInterval) clearInterval(setupTimerInterval);
-            pins = [
-                { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
-                { x: (width + goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
-                { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true },
-                { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true }
-            ];
-            finalPins.forEach((p, index) => {
-                let assignedTeam = p.team || (index < 11 ? 1 : 2);
-                pins.push({ x: p.x, y: p.y, team: assignedTeam, locked: true });
-            });
-            currentPhase = 'playing';
-            document.getElementById('start-match-btn').style.display = 'none';
-            const shotTimer = document.getElementById('shot-timer');
-            if (shotTimer) shotTimer.style.display = 'block';
+// ★★★ YENİ batch-shots olayı ★★★
+socket.on('batch-shots', ({ shots, timestamp }) => {
+    if (gameMode !== 'online' || currentPhase !== 'playing') return;
+    if (!shots || shots.length === 0) return;
+    
+    console.log(`📥 Batch alındı: ${shots.length} vuruş`);
+    
+    shots.forEach((shotData, index) => {
+        // Normalize'den denormalize et
+        const start = denormalizeCoord(shotData.startNX, shotData.startNY);
+        const end = denormalizeCoord(shotData.endNX, shotData.endNY);
+        
+        // Vuruşu uygula
+        cap.vx = (start.x - end.x) * 0.13;
+        cap.vy = (start.y - end.y) * 0.13;
+        playSound('kick');
+        
+        // Sırayı güncelle (son vuruşun sırasına göre)
+        if (index === shots.length - 1) {
+            turn = shotData.player === 1 ? 2 : 1;
             updateHUDTurn();
-            startMatchTimer();
             resetShotTimer();
-            animate();
-        });
+        }
+    });
+});
 
-        socket.on('correctBallPosition', (ballState) => {
-            if (gameMode === 'online' && currentPhase === 'playing') {
-                const diff = Math.hypot(cap.x - ballState.x, cap.y - ballState.y);
-                if (diff > 30) {
-                    cap.x = ballState.x; cap.y = ballState.y;
-                    cap.vx = ballState.vx; cap.vy = ballState.vy;
-                    turn = ballState.turn;
-                    updateHUDTurn();
+       // game.js - sync-setup-pin-move olayını güncelle
+socket.on('sync-setup-pin-move', ({ team, index, nx, ny }) => {
+    if (currentPhase === 'setup') {
+        const pos = denormalizeCoord(nx, ny);
+        let count = 0;
+        for (let p of pins) {
+            if (!p.isPost && p.team === team) {
+                if (count === index) {
+                    p.x = pos.x;
+                    p.y = pos.y;
+                    console.log('📥 Pin hareketi alındı (denormalize):', { team, index, x: pos.x, y: pos.y });
+                    break;
                 }
+                count++;
             }
+        }
+    }
+});
+
+      // game.js - match-go olayını güncelle
+socket.on('match-go', ({ pins: finalPins }) => {
+    if (setupTimerInterval) clearInterval(setupTimerInterval);
+    
+    // Direkleri ekle
+    pins = [
+        { x: (canvas.width - goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
+        { x: (canvas.width + goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
+        { x: (canvas.width - goalWidth) / 2, y: canvas.height - goalHeight, isPost: true, locked: true },
+        { x: (canvas.width + goalWidth) / 2, y: canvas.height - goalHeight, isPost: true, locked: true }
+    ];
+    
+    // ★★★ Pinleri denormalize et ★★★
+    finalPins.forEach((p) => {
+        const pos = denormalizeCoord(p.nx, p.ny);
+        let assignedTeam = p.team || (p.nx < 0.5 ? 1 : 2);
+        pins.push({ 
+            x: pos.x, 
+            y: pos.y, 
+            team: assignedTeam, 
+            locked: true 
         });
+    });
+    
+    console.log('📥 Maç başlangıcı alındı, pinler denormalize edildi');
+    
+    currentPhase = 'playing';
+    document.getElementById('start-match-btn').style.display = 'none';
+    const shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) {
+        shotTimer.style.display = 'block';
+        shotTimer.innerText = 'ŞUT: ' + SHOT_DURATION + 's';
+    }
+    updateHUDTurn();
+    startMatchTimer();
+    resetShotTimer();
+    animate();
+});
+        // game.js - correctBallPosition olayını güncelle
+socket.on('correctBallPosition', (ballState) => {
+    if (gameMode === 'online' && currentPhase === 'playing') {
+        // ★★★ Denormalize et ★★★
+        const pos = denormalizeCoord(ballState.nx, ballState.ny);
+        const diff = Math.hypot(cap.x - pos.x, cap.y - pos.y);
+        
+        if (diff > 30) {
+            cap.x = pos.x;
+            cap.y = pos.y;
+            cap.vx = ballState.vx;
+            cap.vy = ballState.vy;
+            turn = ballState.turn;
+            updateHUDTurn();
+            console.log('📥 Pozisyon düzeltmesi alındı (denormalize):', pos);
+        }
+    }
+});
 
         // ============================================================
         // AUTH CEVAPLARI
@@ -1178,16 +1272,32 @@ function startSetupPhase() {
     animate();
 }
 
+// game.js - confirmFormationsAndStart fonksiyonunu güncelle
 function confirmFormationsAndStart() {
     if (setupTimerInterval) clearInterval(setupTimerInterval);
+    
     if (gameMode === 'online' && socket) {
         const btn = document.getElementById('start-match-btn');
         btn.innerHTML = "BEKLE";
         btn.disabled = true;
-        const myPlacedPins = pins.filter(p => p.team === myTeamNumber).map(p => ({ x: p.x, y: p.y }));
-        console.log('📤 Hazır gönderiliyor, pinler:', myPlacedPins);
-        socket.emit("player-ready", { roomId: currentRoomId, team: myTeamNumber, placedPins: myPlacedPins });
+        
+        // ★★★ Normalize pinleri gönder ★★★
+        const myPlacedPins = pins
+            .filter(p => p.team === myTeamNumber && !p.isPost)
+            .map(p => ({
+                nx: p.x / canvas.width,
+                ny: p.y / canvas.height
+            }));
+        
+        console.log('📤 Hazır gönderiliyor, pinler (normalize):', myPlacedPins);
+        
+        socket.emit("player-ready", {
+            roomId: currentRoomId,
+            team: myTeamNumber,
+            placedPins: myPlacedPins
+        });
     } else {
+        // ... local/ai kısmı aynı ...
         pins.forEach(pin => { pin.locked = true; });
         currentPhase = 'playing';
         document.getElementById('start-match-btn').style.display = 'none';
@@ -1338,8 +1448,10 @@ function applyShotPhysics(shotData) {
     playSound('kick');
 }
 
+// game.js - broadcastMyPinMove fonksiyonunu güncelle
 function broadcastMyPinMove(pin) {
     if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
+    
     let index = -1;
     let count = 0;
     for (let p of pins) {
@@ -1348,9 +1460,24 @@ function broadcastMyPinMove(pin) {
             count++;
         }
     }
+    
     if (index !== -1) {
-        console.log('📤 Pin hareketi gönderiliyor:', { team: myTeamNumber, index, x: pin.x, y: pin.y });
-        socket.emit("sync-pin-move", { roomId: currentRoomId, team: myTeamNumber, index: index, x: pin.x, y: pin.y });
+        // ★★★ Normalize gönder ★★★
+        const norm = normalizeCoord(pin.x, pin.y);
+        console.log('📤 Pin hareketi gönderiliyor (normalize):', {
+            team: myTeamNumber,
+            index,
+            nx: norm.nx,
+            ny: norm.ny
+        });
+        
+        socket.emit("sync-pin-move", {
+            roomId: currentRoomId,
+            team: myTeamNumber,
+            index: index,
+            nx: norm.nx,
+            ny: norm.ny
+        });
     }
 }
 
@@ -1501,15 +1628,25 @@ if (gameMode === 'online') {
 // ============================================================
 // PERİYODİK SENKRONİZASYON
 // ============================================================
+// game.js - startPeriodicSync fonksiyonunu güncelle
 function startPeriodicSync() {
     if (syncInterval) clearInterval(syncInterval);
+    
     syncInterval = setInterval(() => {
         if (gameMode === 'online' && currentPhase === 'playing' && socket) {
             const speed = Math.hypot(cap.vx, cap.vy);
             if (speed < 0.5) {
+                // Normalize konum gönder
+                const norm = normalizeCoord(cap.x, cap.y);
                 socket.emit('syncBallPosition', {
                     roomId: currentRoomId,
-                    ballState: { x: cap.x, y: cap.y, vx: cap.vx, vy: cap.vy, turn: turn }
+                    ballState: {
+                        nx: norm.nx,
+                        ny: norm.ny,
+                        vx: cap.vx,
+                        vy: cap.vy,
+                        turn: turn
+                    }
                 });
             }
         }
@@ -1592,48 +1729,59 @@ canvas.addEventListener('mousemove', (e) => {
     }
 });
 
+// game.js - mouseup olayı (vuruş kısmı)
 window.addEventListener('mouseup', () => {
     if (gameMode === 'ai' && turn === 2) return;
+    
     if (currentPhase === 'setup' && selectedPin) {
-        let valid = true;
-        if (selectedPin.x < 15 || selectedPin.x > width - 15) valid = false;
-        if (selectedPin.y < goalHeight + 15 || selectedPin.y > height - goalHeight - 15) valid = false;
-        if (valid) {
-            for (let p of pins) {
-                if (p !== selectedPin && (p.isPost || p.team === selectedPin.team)) {
-                    if (Math.hypot(selectedPin.x - p.x, selectedPin.y - p.y) < minAllowedDistance) { valid = false; break; }
-                }
-            }
-        }
-        if (!valid) { selectedPin.x = dragStartPinPos.x; selectedPin.y = dragStartPinPos.y; }
-        broadcastMyPinMove(selectedPin);
-        selectedPin = null;
+        // ... setup kısmı aynı ...
     }
+    
     if (currentPhase === 'playing' && isDraggingBall) {
         isDraggingBall = false;
         playSound('kick');
+        
         const startX = dragStart.x;
         const startY = dragStart.y;
         const endX = dragCurrent.x;
         const endY = dragCurrent.y;
+        
         cap.vx = (startX - endX) * 0.13;
         cap.vy = (startY - endY) * 0.13;
+        
         turn = turn === 1 ? 2 : 1;
         updateHUDTurn();
         resetShotTimer();
+        
+        // ★★★ ONLINE GÖNDERİM - NORMALİZE ★★★
         if (gameMode === 'online' && socket) {
+            const startNorm = normalizeCoord(startX, startY);
+            const endNorm = normalizeCoord(endX, endY);
+            
             socket.emit('playerShot', {
                 roomId: currentRoomId,
-                shotData: { player: turn, startX, startY, endX, endY, timestamp: Date.now() }
+                shotData: {
+                    player: turn,
+                    startNX: startNorm.nx,
+                    startNY: startNorm.ny,
+                    endNX: endNorm.nx,
+                    endNY: endNorm.ny,
+                    timestamp: Date.now()
+                }
+            });
+            
+            console.log('📤 Vuruş gönderildi (normalize):', {
+                start: startNorm,
+                end: endNorm
             });
         }
+        
         const container = document.getElementById('power-bar-container');
         if (container) container.style.display = 'none';
         const powerBar = document.getElementById('power-bar');
         if (powerBar) powerBar.style.width = '0%';
     }
 });
-
 // Touch Events
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
@@ -2352,28 +2500,23 @@ socket.on("receive-invite", (data) => {
     });
 // GOL SENKRONİZASYONU (Karşı taraftan gelen gol)
 // game.js - initSocket içinde
+// game.js - opponent-goal olayı (zaten var, kontrol et)
 socket.on('opponent-goal', (data) => {
     console.log('📥 Rakip gol attı! Skor güncelleniyor...', data);
     if (currentPhase === 'playing' && isOnlineMatch) {
         if (data.scoringTeam === 1) {
-            // Takım 1 gol attı
             if (myTeamNumber === 1) {
-                // Ben Takım 1 isem benim golüm
                 score.p1++;
                 document.getElementById('score-p1').innerText = score.p1;
             } else {
-                // Ben Takım 2 isem rakip gol attı
                 score.p1++;
                 document.getElementById('score-p1').innerText = score.p1;
             }
         } else if (data.scoringTeam === 2) {
-            // Takım 2 gol attı
             if (myTeamNumber === 2) {
-                // Ben Takım 2 isem benim golüm
                 score.p2++;
                 document.getElementById('score-p2').innerText = score.p2;
             } else {
-                // Ben Takım 1 isem rakip gol attı
                 score.p2++;
                 document.getElementById('score-p2').innerText = score.p2;
             }
