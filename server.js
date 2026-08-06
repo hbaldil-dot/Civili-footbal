@@ -408,112 +408,22 @@ socket.on('leave-lobby', () => {
     // OYUN SENKRONİZASYONU
     // ============================================================
 
-    // server.js - sync-pin-move (Normalize koordinatları kabul et)
-socket.on('sync-pin-move', ({ roomId, team, index, nx, ny }) => {
-    // Normalize koordinatları doğrudan ilet (dönüştürme yapma)
-    socket.to(roomId).emit('sync-setup-pin-move', {
-        team,
-        index,
-        nx,  // 0-1 arası
-        ny   // 0-1 arası
-    });
-});
-
-// server.js - player-ready (Normalize pinleri kaydet)
-socket.on('player-ready', ({ roomId, team, placedPins }) => {
-    const room = activeRooms[roomId];
-    if (!room) {
-        console.warn('⚠️ Oda bulunamadı:', roomId);
-        return;
-    }
-
-    const player = room.players.find(p => p.id === socket.id);
-    if (!player) {
-        console.warn('⚠️ Oyuncu odada bulunamadı:', socket.id);
-        return;
-    }
-
-    player.ready = true;
-    if (placedPins) {
-        // Normalize koordinatları kaydet
-        player.placedPins = placedPins; // zaten nx, ny olarak geliyor
-    }
-
-    console.log(`✅ ${player.name} hazır (${roomId})`);
-
-    room.players.forEach(p => {
-        if (p.id !== socket.id) {
-            io.to(p.id).emit('opponent-ready');
-        }
+    socket.on('sync-pin-move', ({ roomId, team, index, x, y }) => {
+        socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
-    const allReady = room.players.every(p => p.ready === true);
-    if (allReady && room.players.length === 2) {
-        room.started = true;
-
-        const allPins = [];
-        room.players.forEach(p => {
-            if (p.placedPins && p.placedPins.length > 0) {
-                p.placedPins.forEach(pin => {
-                    allPins.push({ 
-                        nx: pin.nx || pin.x, // normalize
-                        ny: pin.ny || pin.y,
-                        team: p.team 
-                    });
-                });
-            }
-        });
-
-        console.log(`🎮 Maç başlıyor: ${roomId}`);
-
-        io.to(roomId).emit('match-go', { pins: allPins });
-    }
-});
-
-// server.js - ESKİ playerShot (YORUM SATIRI YAPIN)
-/*
-socket.on('playerShot', ({ roomId, shotData }) => {
-    socket.to(roomId).emit('opponentShot', shotData);
-});
-*/
-
-// YENİ playerShot - Input Buffer'a ekle
-socket.on('playerShot', ({ roomId, shotData }) => {
-    if (!roomId || !activeRooms[roomId]) {
-        console.warn('⚠️ Geçersiz oda:', roomId);
-        return;
-    }
-    
-    // Buffer'a ekle
-    if (!inputBuffer.has(roomId)) {
-        inputBuffer.set(roomId, []);
-    }
-    
-    inputBuffer.get(roomId).push({
-        playerId: socket.id,
-        shotData: {
-            ...shotData,
-            // Normalize koordinatlar zaten gönderiliyor
-        },
-        timestamp: Date.now()
+    socket.on('playerShot', ({ roomId, shotData }) => {
+        socket.to(roomId).emit('opponentShot', shotData);
     });
-    
-    console.log(`📥 Vuruş buffer'a eklendi: ${roomId} (${inputBuffer.get(roomId).length} vuruş)`);
-});
+
+    socket.on('syncBallPosition', ({ roomId, ballState }) => {
+        socket.to(roomId).emit('correctBallPosition', ballState);
+    });
     // GOL SENKRONİZASYONU
 // server.js
-// server.js - goal-scored (Değişiklik yok, sadece doğrulama ekle)
 socket.on('goal-scored', ({ roomId, scoringTeam }) => {
     console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
-    
-    // Oda kontrolü
-    const room = activeRooms[roomId];
-    if (!room) {
-        console.warn('⚠️ Gol için oda bulunamadı:', roomId);
-        return;
-    }
-    
-    // Sadece karşı tarafa gönder
+    // SADECE karşı tarafa gönder (kendine değil!)
     socket.to(roomId).emit('opponent-goal', { scoringTeam });
 });
 
@@ -543,49 +453,6 @@ socket.on('goal-scored', ({ roomId, scoringTeam }) => {
         }
     });
 });
-
-// server.js - activeRooms tanımından sonra
-// ============================================================
-// INPUT BUFFER SİSTEMİ (Strateji 3)
-// ============================================================
-const inputBuffer = new Map(); // roomId -> [{ playerId, shotData, timestamp }]
-const BUFFER_INTERVAL = 50; // ms - her 50ms'de bir işle
-
-// Buffer işleme fonksiyonu
-function processInputBuffer() {
-    const now = Date.now();
-    
-    for (const [roomId, shots] of inputBuffer) {
-        if (shots.length === 0) continue;
-        
-        // Oda hala aktif mi?
-        const room = activeRooms[roomId];
-        if (!room) {
-            inputBuffer.delete(roomId);
-            continue;
-        }
-        
-        // Eski vuruşları filtrele (100ms'den eski olanları at)
-        const validShots = shots.filter(s => now - s.timestamp < 200);
-        
-        if (validShots.length > 0) {
-            // Tüm oyunculara batch olarak gönder
-            io.to(roomId).emit('batch-shots', {
-                shots: validShots.map(s => s.shotData),
-                timestamp: now
-            });
-            
-            // Oda içindeki tüm oyunculara batch gönderildi
-            console.log(`📦 Buffer işlendi: ${roomId} - ${validShots.length} vuruş`);
-        }
-        
-        // Buffer'ı temizle
-        inputBuffer.set(roomId, []);
-    }
-}
-
-// Buffer'ı düzenli aralıklarla işle
-setInterval(processInputBuffer, BUFFER_INTERVAL);
 
 // ============================================================
 // SUNUCU BAŞLAT
