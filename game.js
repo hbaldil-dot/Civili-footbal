@@ -155,8 +155,8 @@ socket.on('lockstep-shots', ({ shot1, shot2, timestamp, timeout }) => {
         const opponentForceY = (startY - endY) * 0.06;
         
         // Topun mevcut hızına ekle (ama çok fazla değil)
-        cap.vx = cap.vx * 0.6 + opponentForceX * 0.4;
-        cap.vy = cap.vy * 0.6 + opponentForceY * 0.4;
+        cap.vx = cap.vx * 0.6 + opponentForceX * 0.1;
+        cap.vy = cap.vy * 0.6 + opponentForceY * 0.1;
         
         playSound('kick');
         console.log('📥 Rakip vuruşu uygulandı (yumuşak)');
@@ -1712,8 +1712,8 @@ window.addEventListener('mouseup', () => {
         const startY = dragStart.y;
         const endX = dragCurrent.x;
         const endY = dragCurrent.y;
-        cap.vx = (startX - endX) * 0.13;
-        cap.vy = (startY - endY) * 0.13;
+        cap.vx = (startX - endX) * 0.10;
+        cap.vy = (startY - endY) * 0.10;
         turn = turn === 1 ? 2 : 1;
         updateHUDTurn();
         resetShotTimer();
