@@ -127,7 +127,38 @@ if (typeof io !== 'undefined') {
             
             startSetupPhase();
         });
-
+// game.js - socket.on('lockstep-shots') EKLE
+socket.on('lockstep-shots', ({ shot1, shot2, timestamp, timeout }) => {
+    if (gameMode !== 'online' || currentPhase !== 'playing') return;
+    
+    console.log('🎯 Lockstep vuruşlar alındı!');
+    
+    // Rakibin vuruşunu bul
+    let opponentShot = null;
+    
+    if (shot1 && shot1.player !== myTeamNumber) {
+        opponentShot = shot1;
+    } else if (shot2 && shot2.player !== myTeamNumber) {
+        opponentShot = shot2;
+    }
+    
+    // Rakibin vuruşunu uygula
+    if (opponentShot) {
+        const startX = opponentShot.startX || 0;
+        const startY = opponentShot.startY || 0;
+        const endX = opponentShot.endX || 0;
+        const endY = opponentShot.endY || 0;
+        
+        cap.vx = (startX - endX) * 0.13;
+        cap.vy = (startY - endY) * 0.13;
+        playSound('kick');
+    }
+    
+    // Sıra değişir
+    turn = myTeamNumber === 1 ? 2 : 1;
+    updateHUDTurn();
+    resetShotTimer();
+});
         socket.on('opponent-disconnected', () => {
             alert("⚠️ Rakip oyundan ayrıldı!");
             exitToMenu();
@@ -645,40 +676,57 @@ function draw() {
         }
     });
 
-    if (currentPhase === 'playing' && isDraggingBall) {
-        const dx = dragStart.x - dragCurrent.x;
-        const dy = dragStart.y - dragCurrent.y;
-        const dist = Math.hypot(dx, dy);
-        
-        if (dist > 10) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(240, 248, 255, 0.6)';
-            ctx.lineWidth = 6;
-            ctx.setLineDash([6, 6]);
-            ctx.beginPath();
-            ctx.moveTo(cap.x, cap.y);
-            const normX = dx / dist;
-            const normY = dy / dist;
-            const len = Math.min(dist * 1.2, MAX_DRAG_DIST);
-            const endX = cap.x + normX * len;
-            const endY = cap.y + normY * len;
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            const arrowSize = 10;
-            const angle = Math.atan2(dy, dx);
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
-            ctx.beginPath();
-            ctx.moveTo(endX, endY);
-            ctx.lineTo(endX - Math.cos(angle - 0.5) * arrowSize, 
-                       endY - Math.sin(angle - 0.5) * arrowSize);
-            ctx.lineTo(endX - Math.cos(angle + 0.5) * arrowSize, 
-                       endY - Math.sin(angle + 0.5) * arrowSize);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+   if (currentPhase === 'playing' && isDraggingBall) {
+    isDraggingBall = false;
+    playSound('kick');
+    
+    const startX = dragStart.x;
+    const startY = dragStart.y;
+    const endX = dragCurrent.x;
+    const endY = dragCurrent.y;
+    
+    // Topu hemen hareket ettir
+    cap.vx = (startX - endX) * 0.13;
+    cap.vy = (startY - endY) * 0.13;
+    
+    // ★★★ ONLINE: Sırayı HEMEN DEĞİŞTİRME! ★★★
+    if (gameMode === 'online' && socket) {
+        // "Rakip bekleniyor" mesajı göster
+        const shotTimer = document.getElementById('shot-timer');
+        if (shotTimer) {
+            shotTimer.innerText = '⏳ RAKİP BEKLENİYOR';
+            shotTimer.style.color = '#f1c40f';
         }
+        
+        // Vuruşu sunucuya gönder
+        const shotData = {
+            player: myTeamNumber,
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY,
+            timestamp: Date.now()
+        };
+        
+        socket.emit('playerShot', {
+            roomId: currentRoomId,
+            shotData: shotData
+        });
+        
+        console.log('📤 Vuruş gönderildi (Lockstep)');
+    } else {
+        // Local/AI: Sırayı hemen değiştir
+        turn = turn === 1 ? 2 : 1;
+        updateHUDTurn();
+        resetShotTimer();
     }
+    
+    // Güç göstergesini temizle
+    const container = document.getElementById('power-bar-container');
+    if (container) container.style.display = 'none';
+    const powerBar = document.getElementById('power-bar');
+    if (powerBar) powerBar.style.width = '0%';
+}
 
     if (currentPhase === 'playing' && cap) {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
@@ -1238,49 +1286,69 @@ function startSetupTimer() {
 function resetShotTimer() {
     if (shotTimerInterval) clearInterval(shotTimerInterval);
     shotSecondsLeft = SHOT_DURATION;
+    
     const shotTimer = document.getElementById('shot-timer');
     if (shotTimer) {
         shotTimer.innerText = 'ŞUT: ' + shotSecondsLeft + 's';
         shotTimer.classList.remove('warning');
+        shotTimer.style.color = '#2ecc71';
     }
     
-    // Eğer sıra AI'da ise süreyi gösterme (AI anında vuruyor, süre beklemez)
-    if (gameMode === 'ai' && turn === 2) {
-        if (shotTimer) shotTimer.style.display = 'none';
-        return;
-    } else {
-        if (shotTimer) shotTimer.style.display = 'block';
+    // ★★★ LOCKSTEP: Sıra bende değilse bekleme modu ★★★
+    if (gameMode === 'online' && turn !== myTeamNumber) {
+        if (shotTimer) {
+            shotTimer.innerText = '⏳ RAKİP BEKLENİYOR';
+            shotTimer.style.color = '#f1c40f';
+        }
+        return; // Süre sayacını başlatma
     }
-
+    
+    // ★★★ SIRA BENDE: Süreyi başlat ★★★
     shotTimerInterval = setInterval(() => {
         if (currentPhase === 'playing' && Math.hypot(cap.vx, cap.vy) <= 0.2) {
             shotSecondsLeft--;
             const shotTimer = document.getElementById('shot-timer');
             if (shotTimer) {
                 shotTimer.innerText = `ŞUT: ${shotSecondsLeft}s`;
-                if (shotSecondsLeft <= 1) shotTimer.classList.add('warning');
-                else shotTimer.classList.remove('warning');
+                if (shotSecondsLeft <= 1) {
+                    shotTimer.classList.add('warning');
+                    shotTimer.style.color = '#e74c3c';
+                } else {
+                    shotTimer.classList.remove('warning');
+                    shotTimer.style.color = '#2ecc71';
+                }
             }
             
-            // VURUŞ SÜRESİ BİTTİĞİNDE BURASI DEVREDE:
+            // Süre doldu
             if (shotSecondsLeft <= 0) {
                 clearInterval(shotTimerInterval);
-                if (shotTimer) shotTimer.classList.remove('warning');
+                console.log('⏰ Vuruş süresi doldu!');
                 
-                // Sıra süre bittiği için karşıya geçer:
-                turn = (turn === 1) ? 2 : 1; 
-                updateHUDTurn();
-                resetShotTimer(); // Yeni süreyi başlat
-                
-                // Eğer yeni sıra AI'ya geldiyse direkt AI'yı oynat
-                if (gameMode === 'ai' && turn === 2) {
-                    setTimeout(() => runAIMove(), 300); // 300ms bekle, AI vursun
+                if (gameMode === 'online' && socket) {
+                    // Otomatik pas vuruşu
+                    const shotData = {
+                        player: myTeamNumber,
+                        startX: cap.x,
+                        startY: cap.y,
+                        endX: cap.x + (Math.random() - 0.5) * 20,
+                        endY: cap.y + (Math.random() - 0.5) * 20,
+                        timestamp: Date.now(),
+                        auto: true
+                    };
+                    
+                    socket.emit('playerShot', {
+                        roomId: currentRoomId,
+                        shotData: shotData
+                    });
                 }
+                
+                turn = turn === 1 ? 2 : 1;
+                updateHUDTurn();
+                resetShotTimer();
             }
         }
     }, 1000);
 }
-
 function endMatch() {
     currentPhase = 'ended';
     clearInterval(timerInterval);
@@ -2352,33 +2420,20 @@ socket.on("receive-invite", (data) => {
     });
 // GOL SENKRONİZASYONU (Karşı taraftan gelen gol)
 // game.js - initSocket içinde
+// game.js - opponent-goal (ZATEN VAR, KONTROL ET)
 socket.on('opponent-goal', (data) => {
-    console.log('📥 Rakip gol attı! Skor güncelleniyor...', data);
+    console.log('📥 Rakip gol bildirimi:', data);
+    
     if (currentPhase === 'playing' && isOnlineMatch) {
         if (data.scoringTeam === 1) {
-            // Takım 1 gol attı
-            if (myTeamNumber === 1) {
-                // Ben Takım 1 isem benim golüm
-                score.p1++;
-                document.getElementById('score-p1').innerText = score.p1;
-            } else {
-                // Ben Takım 2 isem rakip gol attı
-                score.p1++;
-                document.getElementById('score-p1').innerText = score.p1;
-            }
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+            triggerGoalAnimation();
         } else if (data.scoringTeam === 2) {
-            // Takım 2 gol attı
-            if (myTeamNumber === 2) {
-                // Ben Takım 2 isem benim golüm
-                score.p2++;
-                document.getElementById('score-p2').innerText = score.p2;
-            } else {
-                // Ben Takım 1 isem rakip gol attı
-                score.p2++;
-                document.getElementById('score-p2').innerText = score.p2;
-            }
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+            triggerGoalAnimation();
         }
-        triggerGoalAnimation();
     }
 });
     socket.on("correctBallPosition", (ballState) => {
