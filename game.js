@@ -3109,3 +3109,44 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
+// Socket bağlantısının başlatılması (Global veya ilgili modülde)
+const socket = io();
+
+let currentRoomCode = null;
+let isMyTurn = false;
+
+// Online Arama Başlat
+function startOnlineMatchmaking(userData) {
+    socket.emit('join_matchmaking', userData);
+    showLoadingScreen("Rakip aranıyor...");
+}
+
+// Maç Bulundu Olayı
+socket.on('match_found', (data) => {
+    currentRoomCode = data.roomCode;
+    hideLoadingScreen();
+    startGameUI(data.players);
+    console.log("Maç bulundu, oda:", currentRoomCode);
+});
+
+// Rakip Hamle Yaptığında
+socket.on('opponent_move', (moveData) => {
+    // Gelen hamleyi oyun motorunda uygula (örn: çivinin yeni pozisyonu veya vuruş açısı)
+    applyRemoteMove(moveData);
+});
+
+// Rakip Oyundan Düştüğünde
+socket.on('opponent_disconnected', () => {
+    alert("Rakibin bağlantısı koptu! Maç kazanıldı.");
+    window.location.reload();
+});
+
+// Hamle yapıldığında sunucuya bildir
+function sendMyMove(moveData) {
+    if (currentRoomCode) {
+        socket.emit('player_move', {
+            roomCode: currentRoomCode,
+            moveData: moveData
+        });
+    }
+}
