@@ -1,12 +1,15 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-
+const io = new Server(server, {
+  pingTimeout: 60000,
+  pingInterval: 25000
+});
 // iOS Safari için CORS ve WebSocket ayarları
 const io = new Server(server, {
     cors: {
@@ -93,8 +96,10 @@ const User = mongoose.model('User', userSchema);
 // ============================================================
 // EXPRESS AYARLARI
 // ============================================================
-app.use(express.static(__dirname));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname)));
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -274,39 +279,102 @@ socket.on('ball_state_sync', (data) => {
     // ============================================================
     // LOBBY İŞLEMLERİ
     // ============================================================
+// Aktif Odalar ve Eşleştirme Kuyruğu
+const rooms = new Map(); // roomCode -> Room Object
+const matchmakingQueue = [];
 
-socket.on("join-lobby", (playerData) => {
-    console.log(`📥 join-lobby alındı:`, playerData);
-    console.log(`📱 Socket ID: ${socket.id}`);
-    console.log(`📱 Transport: ${socket.conn.transport.name}`);
+io.on('connection', (socket) => {
+  console.log(`Bir kullanıcı bağlandı: ${socket.id}`);
+
+  // Hızlı Eşleştirme Kuyruğuna Girme
+  socket.on('join_matchmaking', (userData) => {
+    // Kullanıcı zaten kuyruktaysa ekleme
+    if (matchmakingQueue.find(s => s.id === socket.id)) return;
+
+    matchmakingQueue.push({ socket, userData });
+    console.log(`Kuyruğa oyuncu eklendi. Toplam: ${matchmakingQueue.length}`);
+
+    // 2 oyuncu bulduysa oda oluştur
+    if (matchmakingQueue.length >= 2) {
+      const player1 = matchmakingQueue.shift();
+      const player2 = matchmakingQueue.shift();
+
+      const roomCode = 'ROOM_' + Math.random().toString(36.substring(2, 8)).toUpperCase();
+      
+      player1.socket.join(roomCode);
+      player2.socket.join(roomCode);
+
+      rooms.set(roomCode, {
+        code: roomCode,
+        players: [
+          { id: player1.socket.id, name: player1.userData?.username || 'Oyuncu 1', score: 0 },
+          { id: player2.socket.id, name: player2.userData?.username || 'Oyuncu 2', score: 0 }
+        ],
+        state: 'playing'
+      });
+
+      // Oyunculara maçın başladığını bildir
+      io.to(roomCode).emit('match_found', {
+        roomCode,
+        players: rooms.get(roomCode).players
+      });
+      console.log(`Maç başladı: ${roomCode}`);
+    }
+  });
+
+  // Kuyruktan Ayrılma
+  socket.on('leave_matchmaking', () => {
+    const index = matchmakingQueue.findIndex(s => s.socket.id === socket.id);
+    if (index !== -1) {
+      matchmakingQueue.splice(index, 1);
+      console.log(`Oyuncu kuyruktan ayrıldı: ${socket.id}`);
+    }
+  });
+
+  // Hamle / Veri Senkronizasyonu (Rate-limit korumalı)
+  socket.on('player_move', (data) => {
+    const { roomCode, moveData } = data;
+    if (rooms.has(roomCode)) {
+      // Diğer oyuncuya hamleyi ilet
+      socket.to(roomCode).emit('opponent_move', moveData);
+    }
+  });
+
+  // Skor Güncelleme
+  socket.on('update_score', (data) => {
+    const { roomCode, playerIndex } = data;
+    const room = rooms.get(roomCode);
+    if (room && room.players[playerIndex]) {
+      room.players[playerIndex].score += 1;
+      io.to(roomCode).emit('score_updated', room.players);
+    }
+  });
+
+  // Bağlantı Kopması (Disconnect) Yönetimi
+  socket.on('disconnect', () => {
+    console.log(`Kullanıcı ayrıldı: ${socket.id}`);
     
-    // Eski kaydı kaldır
-    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+    // Kuyruktan çıkar
+    const qIndex = matchmakingQueue.findIndex(s => s.socket.id === socket.id);
+    if (qIndex !== -1) matchmakingQueue.splice(qIndex, 1);
 
-    const player = {
-        id: socket.id,
-        name: playerData?.name || "Oyuncu",
-        logo: playerData?.logo || "default.png"
-    };
-
-    lobbyPlayers.push(player);
-    console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
-    console.log(`📊 Lobby listesi:`, lobbyPlayers);
-
-    // TÜM oyunculara lobby listesini gönder
-    io.emit('update-lobby-players', lobbyPlayers);
-    
-    // Yeni katılan oyuncuya özel olarak da gönder
-    socket.emit('update-lobby-players', lobbyPlayers);
+    // Odalardaki durumu kontrol et
+    rooms.forEach((room, roomCode) => {
+      const playerIndex = room.players.findIndex(p => p.id === socket.id);
+      if (playerIndex !== -1) {
+        // Diğer oyuncuya bildir
+        socket.to(roomCode).emit('opponent_disconnected');
+        rooms.delete(roomCode);
+        console.log(`Oda kapandı (bağlantı koptu): ${roomCode}`);
+      }
+    });
+  });
 });
 
-socket.on('leave-lobby', () => {
-    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-    io.emit('update-lobby-players', lobbyPlayers);
-    console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
-    console.log(`📊 Kalan oyuncular:`, lobbyPlayers);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda çalışıyor.`);
 });
-
     // ============================================================
     // DAVET İŞLEMLERİ
     // ============================================================
