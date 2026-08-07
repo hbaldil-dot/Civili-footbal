@@ -3374,3 +3374,215 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
+// ============================================================
+// MİSAFİR GİRİŞİ - EKSİK FONKSİYON
+// ============================================================
+
+function continueAsGuest() {
+    console.log('🎮 Misafir girişi başlatılıyor...');
+    
+    // Auth modal'ını gizle
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.style.display = 'none';
+        authOverlay.classList.add('hidden');
+    }
+    
+    // Ana menüyü göster
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    // Rastgele oyuncu adı oluştur
+    const playerNameInput = document.getElementById('player-name');
+    if (playerNameInput) {
+        const randomName = "Misafir_" + Math.floor(Math.random() * 10000);
+        playerNameInput.value = randomName;
+    }
+    
+    // Rastgele takım seç
+    selectRandomTeam();
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    
+    console.log('✅ Misafir girişi başarılı!');
+}
+
+// ============================================================
+// AUTH FORM GÖNDERME - GÜNCELLENDİ
+// ============================================================
+
+function handleAuthSubmit(event, action) {
+    event.preventDefault();
+    console.log('📤 handleAuthSubmit çağrıldı:', action);
+    
+    if (!socket || !socket.connected) {
+        alert("Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
+        return;
+    }
+    
+    if (action === 'login') {
+        // GİRİŞ: Sadece e-posta ve şifre
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        
+        console.log('📤 Giriş yapılıyor:', email);
+        
+        if (!email || !password) {
+            alert('⚠️ E-posta ve şifre girin!');
+            return;
+        }
+        
+        socket.emit('loginUser', { email, password });
+        
+    } else if (action === 'register') {
+        // KAYIT: Tüm bilgiler
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+        const teamName = document.getElementById('reg-team-name').value.trim();
+        const teamLogo = getSelectedTeamLogo();
+        
+        console.log('📤 Kayıt yapılıyor:', { username, email, teamName });
+        
+        // Validasyon
+        if (!username || username.length < 2) {
+            alert('⚠️ Oyuncu adı en az 2 karakter olmalı!');
+            return;
+        }
+        if (!email || !email.includes('@')) {
+            alert('⚠️ Geçerli bir e-posta adresi girin!');
+            return;
+        }
+        if (!password || password.length < 4) {
+            alert('⚠️ Şifre en az 4 karakter olmalı!');
+            return;
+        }
+        
+        socket.emit('registerUser', { 
+            username, 
+            email, 
+            password, 
+            teamName, 
+            teamLogo 
+        });
+        
+    } else if (action === 'forgot') {
+        const email = document.getElementById('forgot-email').value.trim();
+        console.log('📤 Şifre sıfırlama isteği:', email);
+        
+        if (!email) {
+            alert('⚠️ E-posta adresinizi girin!');
+            return;
+        }
+        socket.emit('forgotPassword', { email });
+    }
+}
+
+// ============================================================
+// AUTH RESPONSE - GÜNCELLENDİ
+// ============================================================
+
+if (typeof socket !== 'undefined') {
+    socket.on('authResponse', (data) => {
+        console.log('📨 authResponse alındı:', data);
+        alert(data.message);
+        
+        if (data.success) {
+            // Oyuncu adını güncelle
+            if (data.username) {
+                const playerNameInput = document.getElementById('player-name');
+                if (playerNameInput) {
+                    playerNameInput.value = data.username;
+                }
+            }
+            
+            // Takım logosunu güncelle (sadece giriş/kayıt başarılıysa)
+            if (data.teamLogo && (data.action === 'login' || data.action === 'register')) {
+                const logoDisplay = document.getElementById('selected-team-logo-display');
+                if (logoDisplay) {
+                    if (data.teamLogo.startsWith('data:')) {
+                        logoDisplay.src = data.teamLogo;
+                    } else {
+                        logoDisplay.src = `takimlar/${data.teamLogo}`;
+                    }
+                    logoDisplay.style.display = 'block';
+                    logoDisplay.style.opacity = '1';
+                }
+                
+                if (!data.teamLogo.startsWith('data:')) {
+                    selectedTeamLogo = data.teamLogo;
+                    loadTeamLogoImage(data.teamLogo);
+                } else {
+                    selectedTeamLogo = data.teamLogo;
+                }
+                updateScoreLogos();
+            }
+            
+            // Giriş başarılı - menüyü aç
+            if (data.action === 'login' || data.action === 'register') {
+                const authOverlay = document.getElementById('auth-modal-overlay');
+                if (authOverlay) {
+                    authOverlay.style.display = 'none';
+                    authOverlay.classList.add('hidden');
+                }
+                const menu = document.getElementById('menu');
+                if (menu) {
+                    menu.style.display = 'block';
+                }
+                console.log('✅ Ana menü açıldı');
+            } else if (data.action === 'forgot') {
+                switchAuthTab('login');
+            }
+        }
+    });
+}
+
+// ============================================================
+// AUTH TAB SWITCH - GÜNCELLENDİ
+// ============================================================
+
+function switchAuthTab(tab) {
+    console.log('🔄 switchAuthTab çağrıldı:', tab);
+    
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const formForgot = document.getElementById('form-forgot');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    
+    if (!formLogin || !formRegister || !formForgot) {
+        console.warn('⚠️ Formlar bulunamadı!');
+        return;
+    }
+    
+    // Tüm formları gizle
+    formLogin.classList.add('hidden');
+    formRegister.classList.add('hidden');
+    formForgot.classList.add('hidden');
+    
+    // Tüm tabları pasif yap
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+    
+    if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        if (tabLogin) tabLogin.classList.add('active');
+        console.log('✅ Giriş formu gösteriliyor');
+    } else if (tab === 'register') {
+        formRegister.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.add('active');
+        console.log('✅ Kayıt formu gösteriliyor');
+        // Kayıt formu açıldığında logoları yükle
+        setTimeout(() => {
+            loadAuthTeamLogos();
+        }, 100);
+    } else if (tab === 'forgot') {
+        formForgot.classList.remove('hidden');
+        console.log('✅ Şifre sıfırlama formu gösteriliyor');
+    }
+}
