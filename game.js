@@ -10,9 +10,9 @@ let isSoundOn = true;
 // ============================================================
 const PHYSICS = {
     FRICTION: 0.985,
-    MAX_SPEED: 10,
+    MAX_SPEED: 12,
     SUB_STEPS: 10,
-    SHOT_POWER_MULTIPLIER: 0.12,
+    SHOT_POWER_MULTIPLIER: 0.14,
     WALL_BOUNCE: 0.85,
     PIN_BOUNCE: 0.85,
     SYNC_INTERVAL: 2000,
