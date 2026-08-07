@@ -131,7 +131,17 @@ io.on('connection', (socket) => {
     socket.on('ping', () => {
         socket.emit('pong');
     });
+// server.js içine eklenecek yapı
+socket.on('ball_hit', (data) => {
+    // data: { gameId, normX, normY, vx, vy, power, angle }
+    // Koordinatlar 0.0 - 1.0 arasında oranlanmıştır.
+    socket.to(data.gameId).emit('ball_hit_broadcast', data);
+});
 
+socket.on('ball_state_sync', (data) => {
+    // Hareket sırasındaki anlık doğru konum paketleri
+    socket.to(data.gameId).emit('ball_state_update', data);
+});
     // ============================================================
     // AUTH İŞLEMLERİ
     // ============================================================
