@@ -7,20 +7,6 @@ const mongoose = require('mongoose');
 const app = express();
 const server = http.createServer(app);
 
-// server.js - En üstte
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const mongoose = require('mongoose');
-
-// ============================================================
-// OYUN AYARLARI - BURAYA EKLE
-// ============================================================
-let SHOT_DURATION = 5; // Vuruş süresi (saniye)
-
-// ... devam eden kodlar ...
-
 // iOS Safari için CORS ve WebSocket ayarları
 const io = new Server(server, {
     cors: {
@@ -128,76 +114,7 @@ app.get('/health', (req, res) => {
 // ============================================================
 let lobbyPlayers = [];
 let activeRooms = {};
-// server.js - activeRooms tanımından sonra EKLE
-// ============================================================
-// LOCKSTEP SİSTEMİ
-// ============================================================
-const pendingShots = new Map();
 
-function addShotToPending(roomId, playerId, shotData) {
-    if (!pendingShots.has(roomId)) {
-        pendingShots.set(roomId, {
-            player1Shot: null,
-            player2Shot: null,
-            timeout: null
-        });
-    }
-    
-    const pending = pendingShots.get(roomId);
-    const room = activeRooms[roomId];
-    if (!room) return;
-    
-    const player = room.players.find(p => p.id === playerId);
-    if (!player) return;
-    
-    if (player.team === 1) {
-        pending.player1Shot = shotData;
-        console.log(`📥 Takım 1 vuruşu alındı: ${roomId}`);
-    } else if (player.team === 2) {
-        pending.player2Shot = shotData;
-        console.log(`📥 Takım 2 vuruşu alındı: ${roomId}`);
-    }
-    
-    if (pending.timeout) {
-        clearTimeout(pending.timeout);
-        pending.timeout = null;
-    }
-    
-    // Her iki vuruş da geldi mi?
-    if (pending.player1Shot && pending.player2Shot) {
-        console.log(`🎯 Her iki vuruş da alındı! ${roomId}`);
-        
-        io.to(roomId).emit('lockstep-shots', {
-            shot1: pending.player1Shot,
-            shot2: pending.player2Shot,
-            timestamp: Date.now()
-        });
-        
-        pendingShots.delete(roomId);
-        return;
-    }
-    
-    // Zaman aşımı: SHOT_DURATION + 1 saniye
-    const waitTime = (SHOT_DURATION || 5) * 1000 + 1000;
-    
-    pending.timeout = setTimeout(() => {
-        console.log(`⏰ Zaman aşımı: ${roomId}`);
-        
-        const singleShot = pending.player1Shot || pending.player2Shot;
-        const shotTeam = pending.player1Shot ? 1 : 2;
-        
-        if (singleShot) {
-            io.to(roomId).emit('lockstep-shots', {
-                shot1: shotTeam === 1 ? singleShot : null,
-                shot2: shotTeam === 2 ? singleShot : null,
-                timestamp: Date.now(),
-                timeout: true
-            });
-        }
-        
-        pendingShots.delete(roomId);
-    }, waitTime);
-}
 // ============================================================
 // SOCKET.IO OLAY DİNLEYİCİLERİ - iOS Safari Uyumlu
 // ============================================================
@@ -495,13 +412,9 @@ socket.on('leave-lobby', () => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
-   socket.on('playerShot', ({ roomId, shotData }) => {
-    if (!roomId || !activeRooms[roomId]) {
-        console.warn('⚠️ Geçersiz oda:', roomId);
-        return;
-    }
-    addShotToPending(roomId, socket.id, shotData);
-});
+    socket.on('playerShot', ({ roomId, shotData }) => {
+        socket.to(roomId).emit('opponentShot', shotData);
+    });
 
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
