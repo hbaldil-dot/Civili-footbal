@@ -696,6 +696,9 @@ function playSound(type) {
 // ============================================================
 // SOCKET OLAYLARI - DÜZELTİLMİŞ
 // ============================================================
+// ============================================================
+// SOCKET BAĞLANTISI
+// ============================================================
 if (typeof io !== 'undefined') {
     try {
         var serverUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -722,16 +725,16 @@ if (typeof io !== 'undefined') {
             console.warn('⚠️ Bağlantı hatası:', error.message);
         });
         
-        socket.on('receive-invite', function(data) {
-            if (confirm(data.fromName + ' seni maça davet ediyor! Kabul et?')) {
-                socket.emit('accept-invite', data.fromId);
-            }
-        });
-        
         socket.on('update-lobby-players', function(players) {
             console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
             onlinePlayers = players || [];
             updateLobbyUI();
+        });
+        
+        socket.on('receive-invite', function(data) {
+            if (confirm(data.fromName + ' seni maça davet ediyor! Kabul et?')) {
+                socket.emit('accept-invite', data.fromId);
+            }
         });
         
         socket.on('start-online-match', function(data) {
@@ -860,7 +863,6 @@ if (typeof io !== 'undefined') {
         console.error('❌ Socket bağlantı hatası:', e);
     }
 }
-
 // ============================================================
 // DİĞER FONKSİYONLAR (KISALTILMIŞ VERSİYONLAR)
 // ============================================================
@@ -1015,7 +1017,7 @@ function animate() {
 loadFieldImage('menu/ayarlar/stat/texure/z1-t.webp');
 preloadSounds();
 drawFieldLinesOnly();
-console.log("🎮 Çivili Futbol Başlatıldı!");            socketOptions.transports = ['websocket', 'polling'];
+console.log('Çivili Futbol Başlatıldı!');            socketOptions.transports = ['websocket', 'polling'];
             socketOptions.forceNew = true;
             console.log('📱 iOS Safari modu aktif');
         }
