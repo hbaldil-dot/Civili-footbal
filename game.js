@@ -1,13 +1,10 @@
-// ============================================================
-// SABİT SÜRELER - BAŞLANGIÇTA TANIMLANMALI
+// TÜM DEĞİŞKENLER EN BAŞTA TANIMLANMALI
 // ============================================================
 let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
-let isSoundOn = true; // SES DEĞİŞKENİ - BAŞLANGIÇTA TANIMLA
+let isSoundOn = true;  // <--- BURASI ÇOK ÖNEMLİ
 
-// ============================================================
-// SENKRONİZE FİZİK SABİTLERİ - PHYSICS ÖNCE TANIMLANMALI
-// ============================================================
+// PHYSICS - playSound'dan önce tanımlanmalı
 const PHYSICS = {
     FRICTION: 0.985,
     MAX_SPEED: 8,
@@ -18,7 +15,6 @@ const PHYSICS = {
     SYNC_INTERVAL: 2000,
     POSITION_TOLERANCE: 25
 };
-
 // ============================================================
 // SOCKET BAĞLANTISI
 // ============================================================
@@ -726,7 +722,9 @@ if (typeof io !== 'undefined') {
         });
         
         // Lobby güncelleme
-        socket.on('update-lobby-players', (players) => {
+       socket.on('update-lobby-players', function(players) {
+    // ...
+});
             console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
             onlinePlayers = players || [];
             updateLobbyUI();
@@ -1101,39 +1099,53 @@ console.log("🎮 Çivili Futbol Başlatıldı!");            socketOptions.tran
             }
         });
 
-        socket.on('sync-setup-pin-move', ({ team, index, x, y }) => {
-            if (currentPhase === 'setup') {
-                let count = 0;
-                for (let p of pins) {
-                    if (!p.isPost && p.team === team) {
-                        if (count === index) { p.x = x; p.y = y; break; }
-                        count++;
-                    }
+       // sync-setup-pin-move
+socket.on('sync-setup-pin-move', function(data) {
+    if (currentPhase === 'setup') {
+        var count = 0;
+        for (var i = 0; i < pins.length; i++) {
+            var p = pins[i];
+            if (!p.isPost && p.team === data.team) {
+                if (count === data.index) {
+                    p.x = data.x;
+                    p.y = data.y;
+                    break;
                 }
+                count++;
             }
-        });
+        }
+    }
+});
 
-        socket.on('match-go', ({ pins: finalPins }) => {
-            if (setupTimerInterval) clearInterval(setupTimerInterval);
-            pins = [
-                { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
-                { x: (width + goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
-                { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true },
-                { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true }
-            ];
-            finalPins.forEach((p, index) => {
-                let assignedTeam = p.team || (index < 11 ? 1 : 2);
-                pins.push({ x: p.x, y: p.y, team: assignedTeam, locked: true });
-            });
-            currentPhase = 'playing';
-            document.getElementById('start-match-btn').style.display = 'none';
-            const shotTimer = document.getElementById('shot-timer');
-            if (shotTimer) shotTimer.style.display = 'block';
-            updateHUDTurn();
-            startMatchTimer();
-            resetShotTimer();
-            animate();
-        });
+// match-go
+socket.on('match-go', function(data) {
+    if (setupTimerInterval) clearInterval(setupTimerInterval);
+    pins = [
+        { x: (width - goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
+        { x: (width + goalWidth) / 2, y: goalHeight, isPost: true, locked: true },
+        { x: (width - goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true },
+        { x: (width + goalWidth) / 2, y: height - goalHeight, isPost: true, locked: true }
+    ];
+    for (var i = 0; i < data.pins.length; i++) {
+        var p = data.pins[i];
+        var assignedTeam = p.team || (i < 11 ? 1 : 2);
+        pins.push({ x: p.x, y: p.y, team: assignedTeam, locked: true });
+    }
+    currentPhase = 'playing';
+    document.getElementById('start-match-btn').style.display = 'none';
+    var shotTimer = document.getElementById('shot-timer');
+    if (shotTimer) shotTimer.style.display = 'block';
+    updateHUDTurn();
+    startMatchTimer();
+    resetShotTimer();
+    animate();
+});
+
+// opponent-disconnected
+socket.on('opponent-disconnected', function() {
+    alert('⚠️ Rakip oyundan ayrıldı!');
+    exitToMenu();
+});
 
         socket.on('correctBallPosition', (ballState) => {
             if (gameMode === 'online' && currentPhase === 'playing') {
@@ -2297,17 +2309,23 @@ function applyShotPhysics(shotData) {
 
 function broadcastMyPinMove(pin) {
     if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
-    let index = -1;
-    let count = 0;
-    for (let p of pins) {
+    var index = -1;
+    var count = 0;
+    for (var i = 0; i < pins.length; i++) {
+        var p = pins[i];
         if (!p.isPost && p.team === myTeamNumber) {
             if (p === pin) { index = count; break; }
             count++;
         }
     }
     if (index !== -1) {
-        console.log('📤 Pin hareketi gönderiliyor:', { team: myTeamNumber, index, x: pin.x, y: pin.y });
-        socket.emit("sync-pin-move", { roomId: currentRoomId, team: myTeamNumber, index: index, x: pin.x, y: pin.y });
+        socket.emit('sync-pin-move', {
+            roomId: currentRoomId,
+            team: myTeamNumber,
+            index: index,
+            x: pin.x,
+            y: pin.y
+        });
     }
 }
 
@@ -3732,23 +3750,21 @@ function handleAuthSubmit(event, action) {
 }
 
 function continueAsGuest() {
-    const authOverlay = document.getElementById('auth-modal-overlay');
+    console.log('🎮 Misafir girişi yapılıyor...');
+    var authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
-        authOverlay.style.display = 'none'; // Görünürlüğü tamamen kaldırır
+        authOverlay.style.display = 'none';
         authOverlay.classList.add('hidden');
     }
-    
-    const menu = document.getElementById('menu');
+    var menu = document.getElementById('menu');
     if (menu) {
-        menu.style.display = 'block'; // Ana menüyü açar
+        menu.style.display = 'block';
     }
-
-    const playerNameInput = document.getElementById('player-name');
+    var playerNameInput = document.getElementById('player-name');
     if (playerNameInput && (!playerNameInput.value || playerNameInput.value === 'Oyuncu')) {
-        playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
+        playerNameInput.value = 'Misafir_' + Math.floor(Math.random() * 1000);
     }
-    
-    console.log("🎮 Misafir girişi başarılı, ana menü açıldı.");
+    console.log('✅ Misafir girişi başarılı, ana menü açıldı.');
 }
 
 if (socket) {
@@ -3969,10 +3985,10 @@ function closeOnlineLobby() {
     document.getElementById('menu').style.display = 'block';
 }
 function sendInvite(targetId) {
-    if (!socket) {
-        alert('Bağlantı yok!');
-        return;
-    }
+    if (!socket) return;
+    console.log('📨 Davet gönderiliyor:', targetId);
+    socket.emit('send-invite', targetId);
+}
     
     console.log('📨 Davet gönderiliyor:', targetId);
     socket.emit("send-invite", targetId);
