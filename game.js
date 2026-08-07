@@ -3109,3 +3109,429 @@ function playButtonSound() {
     // Bu fonksiyon şu an için sadece hatayı susturmak için var.
     // İsterseniz ileride buraya kısa bir 'tık' sesi ekleyebilirsiniz.
 }
+// ============================================================
+// SENKRONİZE FİZİK SABİTLERİ - TÜM CİHAZLARDA AYNI
+// ============================================================
+const PHYSICS = {
+    FRICTION: 0.985,
+    MAX_SPEED: 8,
+    SUB_STEPS: 10,
+    SHOT_POWER_MULTIPLIER: 0.10, // Azaltıldı - daha yavaş top
+    WALL_BOUNCE: 0.85,
+    PIN_BOUNCE: 0.85,
+    SYNC_INTERVAL: 2000, // ms
+    POSITION_TOLERANCE: 25
+};
+
+// ============================================================
+// GELİŞMİŞ SENKRONİZASYON - game.js
+// ============================================================
+
+let lastSyncTime = 0;
+let syncQueue = [];
+
+// Fizik güncellemesi (senkronize versiyon)
+function updatePhysics() {
+    if (currentPhase !== 'playing') return;
+    
+    // Top çok hızlıysa yavaşlat
+    const currentSpeed = Math.hypot(cap.vx, cap.vy);
+    if (currentSpeed > PHYSICS.MAX_SPEED) {
+        cap.vx = (cap.vx / currentSpeed) * PHYSICS.MAX_SPEED;
+        cap.vy = (cap.vy / currentSpeed) * PHYSICS.MAX_SPEED;
+    }
+    
+    const SUB_STEPS = PHYSICS.SUB_STEPS;
+    for (let step = 0; step < SUB_STEPS; step++) {
+        cap.x += cap.vx / SUB_STEPS;
+        cap.y += cap.vy / SUB_STEPS;
+        
+        // Duvar çarpışmaları - SENKRONİZE
+        handleWallCollisions();
+        
+        // Pin çarpışmaları - SENKRONİZE
+        handlePinCollisions();
+    }
+    
+    // Sürtünme
+    cap.vx *= PHYSICS.FRICTION;
+    cap.vy *= PHYSICS.FRICTION;
+    
+    // Çok yavaşsa durdur
+    if (Math.hypot(cap.vx, cap.vy) < 0.05) {
+        cap.vx = 0;
+        cap.vy = 0;
+    }
+    
+    // Top dönüşü
+    if (Math.hypot(cap.vx, cap.vy) > 0.1) {
+        cap.rotation += (cap.vx + cap.vy) * 0.02;
+    }
+    
+    // AI sırası
+    if (gameMode === 'ai' && turn === 2 && Math.hypot(cap.vx, cap.vy) < 0.1) {
+        runAIMove();
+    }
+}
+
+// SENKRONİZE - Duvar çarpışmaları
+function handleWallCollisions() {
+    // Sol duvar
+    if (cap.x - cap.radius < 0) {
+        cap.x = cap.radius;
+        cap.vx *= -PHYSICS.WALL_BOUNCE;
+        playSound('hit');
+    }
+    // Sağ duvar
+    if (cap.x + cap.radius > width) {
+        cap.x = width - cap.radius;
+        cap.vx *= -PHYSICS.WALL_BOUNCE;
+        playSound('hit');
+    }
+    
+    // Üst duvar (kale alanı kontrolü)
+    if (cap.y - cap.radius <= goalHeight) {
+        const goalLeft = (width - goalWidth) / 2;
+        const goalRight = (width + goalWidth) / 2;
+        if (cap.x > goalLeft && cap.x < goalRight) {
+            // GOL - Takım 1
+            handleGoalScored(1);
+            return;
+        } else {
+            cap.y = goalHeight + cap.radius;
+            cap.vy *= -PHYSICS.WALL_BOUNCE;
+            playSound('hit');
+        }
+    }
+    
+    // Alt duvar (kale alanı kontrolü)
+    if (cap.y + cap.radius >= height - goalHeight) {
+        const goalLeft = (width - goalWidth) / 2;
+        const goalRight = (width + goalWidth) / 2;
+        if (cap.x > goalLeft && cap.x < goalRight) {
+            // GOL - Takım 2
+            handleGoalScored(2);
+            return;
+        } else {
+            cap.y = height - goalHeight - cap.radius;
+            cap.vy *= -PHYSICS.WALL_BOUNCE;
+            playSound('hit');
+        }
+    }
+}
+
+// SENKRONİZE - Pin çarpışmaları
+function handlePinCollisions() {
+    const minDist = cap.radius + 8;
+    for (let pin of pins) {
+        if (pin.isPost) continue;
+        const dist = Math.hypot(cap.x - pin.x, cap.y - pin.y);
+        if (dist < minDist) {
+            const angle = Math.atan2(cap.y - pin.y, cap.x - pin.x);
+            cap.x = pin.x + Math.cos(angle) * minDist;
+            cap.y = pin.y + Math.sin(angle) * minDist;
+            const hitSpeed = Math.hypot(cap.vx, cap.vy);
+            const newSpeed = Math.max(hitSpeed, 1.2) * PHYSICS.PIN_BOUNCE;
+            cap.vx = Math.cos(angle) * newSpeed;
+            cap.vy = Math.sin(angle) * newSpeed;
+            playSound('hit');
+        }
+    }
+}
+
+// SENKRONİZE - Gol işleme
+function handleGoalScored(scoringTeam) {
+    console.log(`⚽ Gol! Takım ${scoringTeam} gol attı`);
+    
+    // Skoru güncelle
+    if (gameMode === 'online') {
+        // Online modda sunucuya gol bildir
+        if (socket && currentRoomId) {
+            socket.emit('goal-scored', {
+                roomId: currentRoomId,
+                scoringTeam: scoringTeam,
+                timestamp: Date.now()
+            });
+        }
+        // Skoru güncelle (sunucu cevap gelene kadar bekle)
+        if (scoringTeam === 1) {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        } else {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+    } else {
+        // Lokal modda direkt güncelle
+        if (scoringTeam === 1) {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        } else {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+    }
+    
+    // Gol animasyonu
+    triggerGoalAnimation();
+    
+    // Topu orta sahaya al
+    cap.x = width / 2;
+    cap.y = height / 2;
+    cap.vx = 0;
+    cap.vy = 0;
+    
+    // Sırayı gol atan takıma ver
+    turn = scoringTeam;
+    updateHUDTurn();
+    
+    // Vuruş süresini sıfırla
+    resetShotTimer();
+    
+    // Online ise pozisyonu senkronize et
+    if (gameMode === 'online' && socket && currentRoomId) {
+        setTimeout(() => {
+            socket.emit('syncBallPosition', {
+                roomId: currentRoomId,
+                ballState: {
+                    x: cap.x,
+                    y: cap.y,
+                    vx: 0,
+                    vy: 0,
+                    turn: turn,
+                    score_p1: score.p1,
+                    score_p2: score.p2
+                }
+            });
+        }, 100);
+    }
+}
+
+// ============================================================
+// SENKRONİZE VURUŞ MEKANİĞİ
+// ============================================================
+
+function performShot(startX, startY, endX, endY) {
+    // Maksimum hız sınırı
+    let dx = (startX - endX) * PHYSICS.SHOT_POWER_MULTIPLIER;
+    let dy = (startY - endY) * PHYSICS.SHOT_POWER_MULTIPLIER;
+    
+    const speed = Math.hypot(dx, dy);
+    if (speed > PHYSICS.MAX_SPEED) {
+        dx = (dx / speed) * PHYSICS.MAX_SPEED;
+        dy = (dy / speed) * PHYSICS.MAX_SPEED;
+    }
+    
+    cap.vx = dx;
+    cap.vy = dy;
+    
+    // Vuruş sesi
+    playSound('kick');
+    
+    // Sırayı değiştir
+    turn = turn === 1 ? 2 : 1;
+    updateHUDTurn();
+    resetShotTimer();
+    
+    // Online ise vuruşu bildir
+    if (gameMode === 'online' && socket && currentRoomId) {
+        socket.emit('playerShot', {
+            roomId: currentRoomId,
+            shotData: {
+                player: turn,
+                startX: startX,
+                startY: startY,
+                endX: endX,
+                endY: endY,
+                timestamp: Date.now()
+            }
+        });
+    }
+}
+
+// ============================================================
+// GELİŞMİŞ SENKRONİZASYON İNTERVALİ
+// ============================================================
+
+function startPeriodicSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    
+    syncInterval = setInterval(() => {
+        if (gameMode === 'online' && currentPhase === 'playing' && socket && socket.connected) {
+            const speed = Math.hypot(cap.vx, cap.vy);
+            
+            // Sadece top durduğunda veya yavaş hareket ederken senkronize et
+            if (speed < 1.0) {
+                const syncData = {
+                    roomId: currentRoomId,
+                    ballState: {
+                        x: Math.round(cap.x * 10) / 10,
+                        y: Math.round(cap.y * 10) / 10,
+                        vx: Math.round(cap.vx * 100) / 100,
+                        vy: Math.round(cap.vy * 100) / 100,
+                        turn: turn,
+                        score_p1: score.p1,
+                        score_p2: score.p2,
+                        timestamp: Date.now()
+                    }
+                };
+                socket.emit('syncBallPosition', syncData);
+            }
+        }
+    }, PHYSICS.SYNC_INTERVAL);
+}
+
+// ============================================================
+// GOL SENKRONİZASYONU - SUNUCUDAN GELEN
+// ============================================================
+
+// Socket olay dinleyicisi (game.js içindeki socket.on bölümüne ekleyin)
+socket.on('opponent-goal', (data) => {
+    console.log('📥 Rakip gol bildirimi:', data);
+    
+    if (currentPhase === 'playing' && isOnlineMatch) {
+        // Skoru güncelle
+        if (data.scoringTeam === 1) {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        } else {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+        
+        // Gol animasyonu
+        triggerGoalAnimation();
+        
+        // Topu orta sahaya al
+        cap.x = width / 2;
+        cap.y = height / 2;
+        cap.vx = 0;
+        cap.vy = 0;
+        
+        // Sırayı gol atan takıma ver
+        turn = data.scoringTeam;
+        updateHUDTurn();
+        resetShotTimer();
+    }
+});
+
+// ============================================================
+// EKRAN ÖLÇEKLEME - FARKLI EKRAN BOYUTLARINDA AYNI POZİSYON
+// ============================================================
+
+// Canvas boyutunu sabit tut, CSS ile ölçeklendir
+function setupCanvasScaling() {
+    const container = document.querySelector('.canvas-container');
+    if (!container) return;
+    
+    // Sabit canvas boyutu
+    canvas.width = 360;
+    canvas.height = 620;
+    
+    // CSS ile ölçeklendirme
+    const maxHeight = window.innerHeight * 0.82;
+    const maxWidth = window.innerWidth * 0.92;
+    
+    const scaleX = maxWidth / 360;
+    const scaleY = maxHeight / 620;
+    const scale = Math.min(scaleX, scaleY, 1.2);
+    
+    container.style.width = (360 * scale) + 'px';
+    container.style.height = (620 * scale) + 'px';
+    container.style.maxWidth = '100%';
+    container.style.maxHeight = '82dvh';
+    
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+}
+
+// Pencere yeniden boyutlandığında tekrar ölçekle
+window.addEventListener('resize', setupCanvasScaling);
+
+// ============================================================
+// MOUSE/Touch OLAYI - SENKRONİZE VURUŞ
+// ============================================================
+
+// MouseUp olayını güncelle
+window.addEventListener('mouseup', () => {
+    if (gameMode === 'ai' && turn === 2) return;
+    
+    if (currentPhase === 'setup' && selectedPin) {
+        // ... setup kodu aynı ...
+        selectedPin = null;
+    }
+    
+    if (currentPhase === 'playing' && isDraggingBall) {
+        isDraggingBall = false;
+        
+        const startX = dragStart.x;
+        const startY = dragStart.y;
+        const endX = dragCurrent.x;
+        const endY = dragCurrent.y;
+        
+        // Vuruşu gerçekleştir (senkronize)
+        performShot(startX, startY, endX, endY);
+        
+        // Güç göstergesini gizle
+        const container = document.getElementById('power-bar-container');
+        if (container) container.style.display = 'none';
+        const powerBar = document.getElementById('power-bar');
+        if (powerBar) powerBar.style.width = '0%';
+    }
+});
+
+// ============================================================
+// TOP POZİSYONU DÜZELTME - RAKİPTEN GELEN
+// ============================================================
+
+socket.on('correctBallPosition', (data) => {
+    if (gameMode === 'online' && currentPhase === 'playing') {
+        const ball = data.ballState;
+        
+        // Pozisyon farkını kontrol et
+        const diff = Math.hypot(cap.x - ball.x, cap.y - ball.y);
+        
+        // Eğer fark çok büyükse düzelt
+        if (diff > PHYSICS.POSITION_TOLERANCE) {
+            // Yumuşak geçiş için interpolasyon yap
+            const lerpFactor = 0.3;
+            cap.x = cap.x + (ball.x - cap.x) * lerpFactor;
+            cap.y = cap.y + (ball.y - cap.y) * lerpFactor;
+            cap.vx = ball.vx || 0;
+            cap.vy = ball.vy || 0;
+            
+            console.log('🔄 Top pozisyonu düzeltildi, fark:', diff);
+        }
+        
+        // Sırayı güncelle
+        if (ball.turn && turn !== ball.turn) {
+            turn = ball.turn;
+            updateHUDTurn();
+        }
+        
+        // Skoru güncelle (eğer fark varsa)
+        if (ball.score_p1 !== undefined && score.p1 !== ball.score_p1) {
+            score.p1 = ball.score_p1;
+            document.getElementById('score-p1').innerText = score.p1;
+        }
+        if (ball.score_p2 !== undefined && score.p2 !== ball.score_p2) {
+            score.p2 = ball.score_p2;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+    }
+});
+
+// ============================================================
+// SUNUCUYA GOL BİLDİRİMİ - GÜNCELLENMİŞ
+// ============================================================
+
+// Socket gol olayı (server.js'e ekleyin)
+socket.on('goal-scored', (data) => {
+    console.log('⚽ Gol bildirimi alındı:', data);
+    
+    // Golü tüm odadaki oyunculara ilet
+    io.to(data.roomId).emit('opponent-goal', {
+        scoringTeam: data.scoringTeam,
+        timestamp: data.timestamp || Date.now()
+    });
+});
