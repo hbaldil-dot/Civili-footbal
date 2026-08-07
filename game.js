@@ -3163,3 +3163,33 @@ function sendMyMove(moveData) {
         });
     }
 }
+// Sunucudan gelen hedef konumlar
+let targetBallX = 0;
+let targetBallY = 0;
+
+// Sunucudan senkronizasyon verisi geldiğinde
+socket.on('ball_sync', (data) => {
+    targetBallX = data.x;
+    targetBallY = data.y;
+});
+
+// Oyunun ana render / çizim döngüsünde (requestAnimationFrame içinde)
+function updateGameLoop() {
+    // Topu hedefe doğru yumuşak bir şekilde yaklaştır (Lerp - 0.2 yumuşatma katsayısıdır)
+    ball.x += (targetBallX - ball.x) * 0.2;
+    ball.y += (targetBallY - ball.y) * 0.2;
+
+    // Çizim işlemlerini yap
+    drawGame();
+    
+    requestAnimationFrame(updateGameLoop);
+}
+
+// Oyuncu vurduğunda anlık olarak sunucuya bildir
+function onPlayerKick(vx, vy) {
+    socket.emit('player_kick', {
+        roomCode: currentRoomCode,
+        vx: vx,
+        vy: vy
+    });
+}
