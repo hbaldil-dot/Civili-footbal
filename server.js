@@ -262,66 +262,59 @@ io.on('connection', (socket) => {
     // AUTH İŞLEMLERİ
     // ============================================================
 
-    socket.on('registerUser', async (data) => {
-        const { username, email, password, teamName, teamLogo } = data;
+  socket.on('registerUser', async (data) => {
+    const { username, email, password, teamName, teamLogo } = data;
 
-        if (!username || !email || !password) {
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Tüm alanları doldurun!'
-            });
-            return;
+    if (!username || !email || !password) {
+        socket.emit('authResponse', {
+            success: false,
+            message: 'Tüm alanları doldurun!'
+        });
+        return;
+    }
+
+    try {
+        // ... mevcut kodlar ...
+        
+        // Eğer logo bir URL ise (yüklenmiş dosya), doğrudan kaydet
+        let logoToSave = teamLogo || 'default.png';
+        
+        // Eğer logo base64 ise (çok uzun), default kullan
+        if (logoToSave && logoToSave.startsWith('data:')) {
+            console.warn('⚠️ Base64 logo tespit edildi, default kullanılıyor');
+            logoToSave = 'default.png';
         }
+        
+        const newUser = new User({
+            username: username.trim(),
+            email: email.toLowerCase().trim(),
+            password: password,
+            teamName: teamName || '',
+            teamLogo: logoToSave,
+            lastLogin: new Date()
+        });
 
-        try {
-            const existingUser = await User.findOne({ email: email.toLowerCase() });
-            if (existingUser) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'Bu e-posta adresi zaten kayıtlı!'
-                });
-                return;
-            }
+        await newUser.save();
+        console.log(`✅ Yeni kayıt: ${username} (${email})`);
+        console.log(`🏆 Takım: ${newUser.teamName || 'İsimsiz'}, Logo: ${newUser.teamLogo}`);
 
-            const existingUsername = await User.findOne({ username: username });
-            if (existingUsername) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'Bu kullanıcı adı zaten alınmış!'
-                });
-                return;
-            }
+        socket.emit('authResponse', {
+            success: true,
+            action: 'register',
+            username: username,
+            teamName: newUser.teamName,
+            teamLogo: newUser.teamLogo,
+            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+        });
 
-            const newUser = new User({
-                username: username.trim(),
-                email: email.toLowerCase().trim(),
-                password: password,
-                teamName: teamName || '',
-                teamLogo: teamLogo || 'default.png',
-                lastLogin: new Date()
-            });
-
-            await newUser.save();
-            console.log(`✅ Yeni kayıt: ${username} (${email})`);
-            console.log(`🏆 Takım: ${newUser.teamName || 'İsimsiz'}`);
-
-            socket.emit('authResponse', {
-                success: true,
-                action: 'register',
-                username: username,
-                teamName: newUser.teamName,
-                teamLogo: newUser.teamLogo,
-                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-            });
-
-        } catch (error) {
-            console.error('❌ Kayıt hatası:', error);
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Kayıt sırasında bir hata oluştu.'
-            });
-        }
-    });
+    } catch (error) {
+        console.error('❌ Kayıt hatası:', error);
+        socket.emit('authResponse', {
+            success: false,
+            message: 'Kayıt sırasında bir hata oluştu.'
+        });
+    }
+});
 
     socket.on('loginUser', async (data) => {
         const { email, password } = data;
