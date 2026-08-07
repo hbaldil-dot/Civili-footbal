@@ -378,29 +378,9 @@
             <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">KAYIT OL</button>
         </div>
 
-        <!-- 1. GİRİŞ YAP FORMU -->
+        <!-- 1. GİRİŞ YAP FORMU - SADECE E-POSTA VE ŞİFRE -->
         <form id="form-login" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
             <h2>HOŞ GELDİN!</h2>
-            <!-- Yeni: Takım Adı -->
-            <div class="auth-input-group">
-                <label for="login-team-name">Takım Adı</label>
-                <input type="text" id="login-team-name" placeholder="Takımınızın Adı" maxlength="30">
-            </div>
-            <!-- Yeni: Takım Logosu Seç / Yükle -->
-            <div class="auth-input-group">
-                <label>Takım Logosu</label>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <!-- Logo Yükleme -->
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <img id="login-uploaded-logo-preview" src="takimlar/default.png" alt="Logo Önizleme" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin-bottom: 4px; background: #111;">
-                        <input type="file" id="login-logo-upload" accept="image/png, image/jpeg, image/webp" style="font-size: 10px; max-width: 100px; color: #aaa; background: #111; border: 1px solid #333; border-radius: 4px; padding: 2px;">
-                    </div>
-                    <!-- Hazır Logolar -->
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 150px;" id="login-team-logo-grid">
-                        <!-- Buraya JavaScript ile logolar doldurulacak -->
-                    </div>
-                </div>
-            </div>
             <div class="auth-input-group">
                 <label for="login-email">E-Posta Adresi</label>
                 <input type="email" id="login-email" placeholder="ornek@mail.com" required>
@@ -415,47 +395,69 @@
             <button type="submit" class="auth-btn">GİRİŞ YAP</button>
         </form>
 
-        <!-- 2. KAYIT OL FORMU -->
+        <!-- 2. KAYIT OL FORMU - TAKIM SEÇİMLİ -->
         <form id="form-register" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
             <h2>KAYIT OL</h2>
-            <!-- Yeni: Kullanıcı Adı (Oyuncu Adı) -->
+            
+            <!-- Oyuncu Adı -->
             <div class="auth-input-group">
                 <label for="reg-username">Oyuncu Adı</label>
                 <input type="text" id="reg-username" placeholder="Oyuncu_123" maxlength="15" required>
             </div>
-            <!-- Yeni: Takım Adı -->
+            
+            <!-- Takım Adı -->
             <div class="auth-input-group">
                 <label for="reg-team-name">Takım Adı</label>
                 <input type="text" id="reg-team-name" placeholder="Takımınızın Adı" maxlength="30">
             </div>
-            <!-- Yeni: Takım Logosu Seç / Yükle -->
+            
+            <!-- Takım Logosu -->
             <div class="auth-input-group">
                 <label>Takım Logosu</label>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid rgba(46,204,113,0.2);">
+                    
                     <!-- Logo Yükleme -->
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <img id="reg-uploaded-logo-preview" src="takimlar/default.png" alt="Logo Önizleme" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin-bottom: 4px; background: #111;">
-                        <input type="file" id="reg-logo-upload" accept="image/png, image/jpeg, image/webp" style="font-size: 10px; max-width: 100px; color: #aaa; background: #111; border: 1px solid #333; border-radius: 4px; padding: 2px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                        <img id="reg-uploaded-logo-preview" src="takimlar/default.png" alt="Logo" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; background: #111;">
+                        <input type="file" id="reg-logo-upload" accept="image/png, image/jpeg, image/webp" style="font-size: 9px; color: #aaa; background: #111; border: 1px solid #333; border-radius: 4px; padding: 2px; max-width: 90px;">
+                        <span style="font-size: 8px; color: #666;">100x100</span>
                     </div>
+                    
                     <!-- Hazır Logolar -->
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 150px;" id="reg-team-logo-grid">
-                        <!-- Buraya JavaScript ile logolar doldurulacak -->
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 100px;" id="reg-team-logo-grid">
+                        <!-- JavaScript ile doldurulacak -->
                     </div>
                 </div>
             </div>
+            
+            <!-- E-posta -->
             <div class="auth-input-group">
                 <label for="reg-email">E-Posta Adresi</label>
                 <input type="email" id="reg-email" placeholder="ornek@mail.com" required>
             </div>
+            
+            <!-- Şifre -->
             <div class="auth-input-group">
                 <label for="reg-password">Şifre</label>
                 <input type="password" id="reg-password" placeholder="••••••••" required>
             </div>
+            
             <button type="submit" class="auth-btn">KAYDOL VE BAŞLA</button>
         </form>
 
-        <!-- 3. ŞİFREMİ UNUTTUM FORMU (Değişmedi) -->
-        <!-- ... -->
+        <!-- 3. ŞİFREMİ UNUTTUM FORMU -->
+        <form id="form-forgot" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'forgot')">
+            <h2>ŞİFRE SIFIRLAMA</h2>
+            <p class="auth-desc">Kayıtlı e-posta adresinizi girin, şifreniz e-posta ile gönderilecek.</p>
+            <div class="auth-input-group">
+                <label for="forgot-email">E-Posta Adresi</label>
+                <input type="email" id="forgot-email" placeholder="ornek@mail.com" required>
+            </div>
+            <button type="submit" class="auth-btn">ŞİFREYİ GÖNDER</button>
+            <div class="auth-back">
+                <a href="#" onclick="switchAuthTab('login'); return false;">← Giriş Ekranına Dön</a>
+            </div>
+        </form>
 
         <div class="guest-container">
             <div class="auth-divider"><span>VEYA</span></div>
@@ -463,5 +465,4 @@
         </div>
     </div>
 </div>
-</body>
 </html>
