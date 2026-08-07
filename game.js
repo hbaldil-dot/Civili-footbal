@@ -2813,163 +2813,194 @@ function recordMatchResult(isWin, isDraw) {
 // ============================================================
 // EKSİK OLAN FONKSİYONLAR (AUTH & MİSAFİR GİRİŞİ) - DÜZELTİLDİ
 // ============================================================
+// ============================================================
+// AUTH İŞLEMLERİ - DÜZELTİLDİ
+// ============================================================
+
 function switchAuthTab(tab) {
     const formLogin = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
     const formForgot = document.getElementById('form-forgot');
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
+    
     if (!formLogin || !formRegister || !formForgot) return;
+    
+    // Tüm formları gizle
     formLogin.classList.add('hidden');
     formRegister.classList.add('hidden');
     formForgot.classList.add('hidden');
+    
+    // Tüm tabları pasif yap
     if (tabLogin) tabLogin.classList.remove('active');
     if (tabRegister) tabRegister.classList.remove('active');
+    
     if (tab === 'login') {
         formLogin.classList.remove('hidden');
         if (tabLogin) tabLogin.classList.add('active');
     } else if (tab === 'register') {
         formRegister.classList.remove('hidden');
         if (tabRegister) tabRegister.classList.add('active');
+        // Kayıt formu açıldığında logoları yükle
+        loadAuthTeamLogos();
     } else if (tab === 'forgot') {
         formForgot.classList.remove('hidden');
     }
 }
 
-// game.js - handleAuthSubmit (güncellenmiş)
 function handleAuthSubmit(event, action) {
     event.preventDefault();
+    
     if (!socket || !socket.connected) {
         alert("Sunucu bağlantısı kurulamadı. Lütfen sayfayı yenileyin.");
         return;
     }
+    
     if (action === 'login') {
+        // GİRİŞ: Sadece e-posta ve şifre
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value.trim();
-        // Girişte takım bilgileri gönderilmez, sunucudan gelir.
+        
+        if (!email || !password) {
+            alert('⚠️ E-posta ve şifre girin!');
+            return;
+        }
+        
+        console.log('📤 Giriş yapılıyor:', email);
         socket.emit('loginUser', { email, password });
+        
     } else if (action === 'register') {
+        // KAYIT: Tüm bilgiler
         const username = document.getElementById('reg-username').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const password = document.getElementById('reg-password').value.trim();
         const teamName = document.getElementById('reg-team-name').value.trim();
-        const teamLogo = getSelectedTeamLogo('reg'); // Seçili logoyu al
-        socket.emit('registerUser', { username, email, password, teamName, teamLogo });
+        const teamLogo = getSelectedTeamLogo();
+        
+        // Validasyon
+        if (!username || username.length < 2) {
+            alert('⚠️ Oyuncu adı en az 2 karakter olmalı!');
+            return;
+        }
+        if (!email || !email.includes('@')) {
+            alert('⚠️ Geçerli bir e-posta adresi girin!');
+            return;
+        }
+        if (!password || password.length < 4) {
+            alert('⚠️ Şifre en az 4 karakter olmalı!');
+            return;
+        }
+        
+        console.log('📤 Kayıt gönderiliyor:', { username, email, teamName });
+        socket.emit('registerUser', { 
+            username, 
+            email, 
+            password, 
+            teamName, 
+            teamLogo 
+        });
+        
     } else if (action === 'forgot') {
         const email = document.getElementById('forgot-email').value.trim();
+        if (!email) {
+            alert('⚠️ E-posta adresinizi girin!');
+            return;
+        }
         socket.emit('forgotPassword', { email });
     }
 }
 
-// game.js - Yeni: Seçili logoyu alma fonksiyonu
-function getSelectedTeamLogo(formType) {
-    const gridId = formType === 'reg' ? 'reg-team-logo-grid' : 'login-team-logo-grid';
-    const activeBtn = document.querySelector(`#${gridId} .team-logo-btn.active`);
-    if (activeBtn) {
-        return activeBtn.dataset.logo;
-    }
-    const previewId = formType === 'reg' ? 'reg-uploaded-logo-preview' : 'login-uploaded-logo-preview';
-    const previewImg = document.getElementById(previewId);
-    if (previewImg && previewImg.src && !previewImg.src.includes('default.png')) {
-        // Yüklenen resim base64 olabilir, bunu sunucuya göndermek için veri URL'sini alın.
-        return previewImg.src;
-    }
-    return 'default.png';
-}
+// ============================================================
+// TAKIM LOGO FONKSİYONLARI (KAYIT FORMU İÇİN)
+// ============================================================
 
-// game.js - Yeni: Hazır logoları giriş modalına yükleme
 function loadAuthTeamLogos() {
     const regGrid = document.getElementById('reg-team-logo-grid');
-    const loginGrid = document.getElementById('login-team-logo-grid');
-    if (!regGrid || !loginGrid) return;
-
+    if (!regGrid) return;
+    
+    // Sadece kayıt formu görünürken yükle
+    const formRegister = document.getElementById('form-register');
+    if (!formRegister || formRegister.classList.contains('hidden')) return;
+    
     regGrid.innerHTML = '';
-    loginGrid.innerHTML = '';
-
+    
     teamLogos.forEach((logo) => {
-        // Kayıt için
-        const regBtn = createAuthLogoButton(logo, 'reg');
-        regGrid.appendChild(regBtn);
-        // Giriş için
-        const loginBtn = createAuthLogoButton(logo, 'login');
-        loginGrid.appendChild(loginBtn);
+        const btn = document.createElement('button');
+        btn.className = 'team-logo-btn';
+        btn.dataset.logo = logo.file;
+        btn.title = logo.name;
+        
+        const img = document.createElement('img');
+        img.src = `takimlar/${logo.file}`;
+        img.alt = logo.name;
+        img.onerror = function() { this.src = 'takimlar/default.png'; };
+        
+        btn.appendChild(img);
+        
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            regGrid.querySelectorAll('.team-logo-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const preview = document.getElementById('reg-uploaded-logo-preview');
+            if (preview) {
+                preview.src = `takimlar/${logo.file}`;
+                preview.style.borderColor = '#2ecc71';
+            }
+            
+            console.log('🏆 Hazır logo seçildi:', logo.file);
+        };
+        
+        regGrid.appendChild(btn);
     });
+    
+    console.log('✅ Kayıt formu logoları yüklendi');
 }
 
-function createAuthLogoButton(logo, formType) {
-    const btn = document.createElement('button');
-    btn.className = 'team-logo-btn';
-    btn.dataset.logo = logo.file;
-    btn.title = logo.name;
-    btn.style.width = '32px';
-    btn.style.height = '32px';
-    btn.style.borderRadius = '50%';
-    btn.style.border = '2px solid rgba(255,255,255,0.2)';
-    btn.style.cursor = 'pointer';
-    btn.style.overflow = 'hidden';
-    btn.style.background = 'rgba(0,0,0,0.4)';
-    btn.style.padding = '2px';
-    btn.style.flexShrink = '0';
-
-    const img = document.createElement('img');
-    img.src = `takimlar/${logo.file}`;
-    img.alt = logo.name;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
-    img.style.borderRadius = '50%';
-    img.onerror = function() { this.src = 'takimlar/default.png'; };
-
-    btn.appendChild(img);
-
-    btn.onclick = function(e) {
-        e.stopPropagation();
-        const grid = this.parentElement;
-        grid.querySelectorAll('.team-logo-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-
-        const previewId = formType === 'reg' ? 'reg-uploaded-logo-preview' : 'login-uploaded-logo-preview';
-        const previewImg = document.getElementById(previewId);
-        if (previewImg) {
-            previewImg.src = `takimlar/${logo.file}`;
-            previewImg.style.borderColor = '#2ecc71';
-        }
-    };
-
-    return btn;
-}
-
-// game.js - Yeni: Logo yükleme işleyicisi
-function setupLogoUpload(formType) {
-    const inputId = formType === 'reg' ? 'reg-logo-upload' : 'login-logo-upload';
-    const previewId = formType === 'reg' ? 'reg-uploaded-logo-preview' : 'login-uploaded-logo-preview';
-    const input = document.getElementById(inputId);
-    const preview = document.getElementById(previewId);
-
+function setupLogoUpload() {
+    const input = document.getElementById('reg-logo-upload');
+    const preview = document.getElementById('reg-uploaded-logo-preview');
+    
     if (!input || !preview) return;
-
+    
     input.onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
+        
+        if (file.size > 2 * 1024 * 1024) {
+            alert('⚠️ Logo dosyası 2MB\'dan büyük olamaz!');
+            this.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // 100x100 boyutuna getir
                 const canvas = document.createElement('canvas');
                 canvas.width = 100;
                 canvas.height = 100;
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, 100, 100);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 100, 100);
+                
+                const size = Math.min(img.width, img.height);
+                const offsetX = (img.width - size) / 2;
+                const offsetY = (img.height - size) / 2;
+                ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 100, 100);
+                
                 const resizedDataUrl = canvas.toDataURL('image/png');
-
+                
                 preview.src = resizedDataUrl;
                 preview.style.borderColor = '#2ecc71';
-
-                // Grid'deki aktif seçimi kaldır
-                const gridId = formType === 'reg' ? 'reg-team-logo-grid' : 'login-team-logo-grid';
-                document.querySelectorAll(`#${gridId} .team-logo-btn`).forEach(b => b.classList.remove('active'));
+                
+                const grid = document.getElementById('reg-team-logo-grid');
+                if (grid) {
+                    grid.querySelectorAll('.team-logo-btn').forEach(b => b.classList.remove('active'));
+                }
+                
+                console.log('✅ Logo yüklendi ve 100x100 boyutlandı');
             };
             img.src = event.target.result;
         };
@@ -2977,19 +3008,41 @@ function setupLogoUpload(formType) {
     };
 }
 
-// game.js - authResponse (güncellenmiş)
+function getSelectedTeamLogo() {
+    const grid = document.getElementById('reg-team-logo-grid');
+    if (grid) {
+        const activeBtn = grid.querySelector('.team-logo-btn.active');
+        if (activeBtn) {
+            return activeBtn.dataset.logo;
+        }
+    }
+    
+    const preview = document.getElementById('reg-uploaded-logo-preview');
+    if (preview && preview.src && !preview.src.includes('default.png')) {
+        return preview.src;
+    }
+    
+    return 'default.png';
+}
+
+// ============================================================
+// AUTH RESPONSE - GÜNCELLENDİ
+// ============================================================
+
 socket.on('authResponse', (data) => {
     alert(data.message);
+    
     if (data.success) {
+        // Oyuncu adını güncelle
         if (data.username) {
             const playerNameInput = document.getElementById('player-name');
             if (playerNameInput) playerNameInput.value = data.username;
         }
-        // Takım bilgilerini ana menüye yansıt
-        if (data.teamLogo && data.teamLogo !== 'default.png') {
+        
+        // Takım logosunu güncelle (sadece giriş/kayıt başarılıysa)
+        if (data.teamLogo && (data.action === 'login' || data.action === 'register')) {
             const logoDisplay = document.getElementById('selected-team-logo-display');
             if (logoDisplay) {
-                // Eğer base64 ise doğrudan, değilse takimlar/ klasöründen yükle
                 if (data.teamLogo.startsWith('data:')) {
                     logoDisplay.src = data.teamLogo;
                 } else {
@@ -2998,20 +3051,22 @@ socket.on('authResponse', (data) => {
                 logoDisplay.style.display = 'block';
                 logoDisplay.style.opacity = '1';
             }
-            // Seçili takım logosunu güncelle
+            
             if (!data.teamLogo.startsWith('data:')) {
                 selectedTeamLogo = data.teamLogo;
+                loadTeamLogoImage(data.teamLogo);
             } else {
-                // Base64 logo için özel bir işlem gerekebilir
                 selectedTeamLogo = data.teamLogo;
             }
             updateScoreLogos();
         }
+        
+        // Giriş başarılı - menüyü aç
         if (data.action === 'login' || data.action === 'register') {
             const authOverlay = document.getElementById('auth-modal-overlay');
             if (authOverlay) {
-                authOverlay.classList.add('hidden');
                 authOverlay.style.display = 'none';
+                authOverlay.classList.add('hidden');
             }
             const menu = document.getElementById('menu');
             if (menu) {
@@ -3021,6 +3076,57 @@ socket.on('authResponse', (data) => {
             switchAuthTab('login');
         }
     }
+});
+
+// ============================================================
+// MİSAFİR GİRİŞİ
+// ============================================================
+
+function continueAsGuest() {
+    const authOverlay = document.getElementById('auth-modal-overlay');
+    if (authOverlay) {
+        authOverlay.style.display = 'none';
+        authOverlay.classList.add('hidden');
+    }
+    
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'block';
+    }
+    
+    const playerNameInput = document.getElementById('player-name');
+    if (playerNameInput && (!playerNameInput.value || playerNameInput.value === 'Oyuncu')) {
+        playerNameInput.value = "Misafir_" + Math.floor(Math.random() * 1000);
+    }
+    
+    // Rastgele takım seç
+    selectRandomTeam();
+    updateTeamLogoDisplay();
+    updateSelectedTeamName();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    
+    console.log("🎮 Misafir girişi başarılı");
+}
+
+// ============================================================
+// SAYFA YÜKLENDİĞİNDE
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    selectRandomTeam();
+    updateSelectedTeamName();
+    updateTeamLogoDisplay();
+    updateScoreLogos();
+    loadTeamLogoImage(selectedTeamLogo);
+    selectRandomAITeam();
+    
+    // Kayıt formu logo fonksiyonlarını başlat
+    loadAuthTeamLogos();
+    setupLogoUpload();
+    
+    console.log('✅ Sayfa yüklendi!');
 });
 
 // Sayfa yüklendiğinde çağrılacak
