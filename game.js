@@ -710,15 +710,16 @@ if (typeof io !== 'undefined') {
             timeout: 20000
         });
         
-        socket.on('connect', () => {
+      socket.on('connect', function() { ... });
+
             console.log('✅ Sunucuya bağlandı! ID:', socket.id);
         });
         
-      socket.on('disconnect', function() {
+ socket.on('disconnect', function() { ... }); 
     console.warn('⚠️ Bağlantı kesildi');
 });
 
-socket.on('connect_error', function(error) {
+socket.on('connect_error', function(error) { ... });
     console.warn('⚠️ Bağlantı hatası:', error.message);
 });
 
@@ -982,30 +983,31 @@ console.log("🎮 Çivili Futbol Başlatıldı!");            socketOptions.tran
             console.log('📱 iOS Safari modu aktif');
         }
 
-        socket = io(serverUrl, socketOptions);
+socket = io(serverUrl, socketOptions);
 
-        socket.on('connect', () => {
-            console.log('✅ Sunucuya bağlandı! ID:', socket.id);
-            console.log('📱 Platform:', isIOS ? 'iOS Safari' : 'Diğer');
-            
-            // iOS Safari için heartbeat
-            if (isIOS) {
-                setInterval(() => {
-                    if (socket && socket.connected) {
-                        socket.emit('ping');
-                    }
-                }, 15000);
+socket.on('connect', function() {
+    console.log('Sunucuya bağlandı! ID:', socket.id);
+    console.log('Platform:', isIOS ? 'iOS Safari' : 'Diğer');
+    
+    // iOS Safari için heartbeat
+    if (isIOS) {
+        setInterval(function() {
+            if (socket && socket.connected) {
+                socket.emit('ping');
             }
-        });
+        }, 15000);
+    }
+});
         
         socket.on('connect_error', (error) => {
             console.warn('⚠️ Bağlantı hatası:', error.message);
-            if (isIOS) {
-                console.log('📱 iOS Safari bağlantı hatası, yeniden deneniyor...');
-                setTimeout(() => {
-                    if (socket) socket.connect();
-                }, 2000);
-            }
+        if (isIOS) {
+    setTimeout(function() {
+        if (socket && socket.connected) {
+            socket.emit('ping');
+        }
+    }, 15000);
+}
         });
         
         socket.on('disconnect', (reason) => {
