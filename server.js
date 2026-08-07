@@ -419,12 +419,59 @@ socket.on('leave-lobby', () => {
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
-    // GOL SENKRONİZASYONU
-// server.js
-socket.on('goal-scored', ({ roomId, scoringTeam }) => {
+   // ============================================================
+// GOL SENKRONİZASYONU - SUNUCU TARAFI (server.js)
+// ============================================================
+
+socket.on('goal-scored', ({ roomId, scoringTeam, timestamp }) => {
     console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
-    // SADECE karşı tarafa gönder (kendine değil!)
-    socket.to(roomId).emit('opponent-goal', { scoringTeam });
+    
+    // Odadaki diğer oyuncuya gol bilgisini gönder
+    socket.to(roomId).emit('opponent-goal', {
+        scoringTeam: scoringTeam,
+        timestamp: timestamp || Date.now()
+    });
+    
+    // Golü odadaki herkese logla (opsiyonel)
+    io.to(roomId).emit('goal-log', {
+        team: scoringTeam,
+        time: new Date().toISOString()
+    });
+});
+
+// ============================================================
+// TOP SENKRONİZASYONU - GÜNCELLENMİŞ (server.js)
+// ============================================================
+
+socket.on('syncBallPosition', ({ roomId, ballState }) => {
+    // Sadece oda içindeki diğer oyuncuya gönder
+    socket.to(roomId).emit('correctBallPosition', {
+        ballState: {
+            x: ballState.x,
+            y: ballState.y,
+            vx: ballState.vx || 0,
+            vy: ballState.vy || 0,
+            turn: ballState.turn,
+            score_p1: ballState.score_p1,
+            score_p2: ballState.score_p2,
+            timestamp: Date.now()
+        }
+    });
+});
+
+// ============================================================
+// VURUŞ SENKRONİZASYONU - GÜNCELLENMİŞ (server.js)
+// ============================================================
+
+socket.on('playerShot', ({ roomId, shotData }) => {
+    // Vuruşu diğer oyuncuya ilet
+    socket.to(roomId).emit('opponentShot', {
+        startX: shotData.startX,
+        startY: shotData.startY,
+        endX: shotData.endX,
+        endY: shotData.endY,
+        timestamp: Date.now()
+    });
 });
 
     // ============================================================
