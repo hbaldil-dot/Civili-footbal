@@ -66,33 +66,15 @@ connectDB();
 // ============================================================
 // KULLANICI ŞEMASI
 // ============================================================
+// server.js - userSchema
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 2,
-        maxlength: 30
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    lastLogin: {
-        type: Date,
-        default: Date.now
-    },
+    username: { type: String, required: true, trim: true, minlength: 2, maxlength: 30 },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
+    teamName: { type: String, trim: true, maxlength: 30, default: '' },
+    teamLogo: { type: String, trim: true, default: 'default.png' }, // Dosya adı veya base64
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: { type: Date, default: Date.now },
     stats: {
         totalMatches: { type: Number, default: 0 },
         wins: { type: Number, default: 0 },
@@ -219,104 +201,46 @@ io.on('connection', (socket) => {
     // AUTH İŞLEMLERİ
     // ============================================================
 
-    socket.on('registerUser', async (data) => {
-        const { username, email, password } = data;
-
-        if (!username || !email || !password) {
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Tüm alanları doldurun!'
-            });
-            return;
-        }
-
-        try {
-            const existingUser = await User.findOne({ email: email.toLowerCase() });
-            if (existingUser) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'Bu e-posta adresi zaten kayıtlı!'
-                });
-                return;
-            }
-
-            const existingUsername = await User.findOne({ username: username });
-            if (existingUsername) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'Bu kullanıcı adı zaten alınmış!'
-                });
-                return;
-            }
-
-            const newUser = new User({
-                username: username.trim(),
-                email: email.toLowerCase().trim(),
-                password: password,
-                lastLogin: new Date()
-            });
-
-            await newUser.save();
-            console.log(`✅ Yeni kayıt: ${username} (${email})`);
-
-            socket.emit('authResponse', {
-                success: true,
-                action: 'register',
-                username: username,
-                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-            });
-
-        } catch (error) {
-            console.error('❌ Kayıt hatası:', error);
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Kayıt sırasında bir hata oluştu.'
-            });
-        }
+// server.js - registerUser
+socket.on('registerUser', async (data) => {
+    const { username, email, password, teamName, teamLogo } = data;
+    // ... validasyonlar ...
+    const newUser = new User({
+        username: username.trim(),
+        email: email.toLowerCase().trim(),
+        password: password,
+        teamName: teamName || '',
+        teamLogo: teamLogo || 'default.png',
+        lastLogin: new Date()
     });
-
-    socket.on('loginUser', async (data) => {
-        const { email, password } = data;
-
-        if (!email || !password) {
-            socket.emit('authResponse', {
-                success: false,
-                message: 'E-posta ve şifre girin!'
-            });
-            return;
-        }
-
-        try {
-            const user = await User.findOne({ email: email.toLowerCase().trim() });
-
-            if (!user || user.password !== password) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'E-posta veya şifre hatalı!'
-                });
-                return;
-            }
-
-            user.lastLogin = new Date();
-            await user.save();
-
-            console.log(`🔑 Giriş: ${user.username}`);
-
-            socket.emit('authResponse', {
-                success: true,
-                action: 'login',
-                username: user.username,
-                message: 'Giriş başarılı!'
-            });
-
-        } catch (error) {
-            console.error('❌ Giriş hatası:', error);
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Giriş sırasında bir hata oluştu.'
-            });
-        }
+    // ... kaydet ...
+    socket.emit('authResponse', {
+        success: true,
+        action: 'register',
+        username: username,
+        teamName: newUser.teamName,
+        teamLogo: newUser.teamLogo,
+        message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
     });
+});
+
+// server.js - loginUser
+socket.on('loginUser', async (data) => {
+    const { email, password } = data;
+    // ... validasyonlar ...
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (user && user.password === password) {
+        // ... güncelleme ...
+        socket.emit('authResponse', {
+            success: true,
+            action: 'login',
+            username: user.username,
+            teamName: user.teamName,
+            teamLogo: user.teamLogo,
+            message: 'Giriş başarılı!'
+        });
+    }
+});
 
     socket.on('forgotPassword', async (data) => {
         const { email } = data;
