@@ -3,68 +3,23 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const mongoose = require('mongoose');
-const multer = require('multer'); // YENİ
-const fs = require('fs'); // YENİ
 
 const app = express();
 const server = http.createServer(app);
 
-// ============================================================
-// DOSYA YÜKLEME AYARLARI - YENİ
-// ============================================================
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'logo-' + uniqueSuffix + '.png');
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-    fileFilter: function (req, file, cb) {
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
-        if (allowedTypes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Sadece PNG, JPEG ve WEBP formatları desteklenir.'));
-        }
-    }
-});
+// server.js - En üstte
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
+const mongoose = require('mongoose');
 
 // ============================================================
-// DOSYA YÜKLEME ROTASI - YENİ
+// OYUN AYARLARI - BURAYA EKLE
 // ============================================================
-app.post('/upload-logo', upload.single('logo'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Dosya yüklenemedi!' });
-        }
-        
-        const logoUrl = '/uploads/' + req.file.filename;
-        console.log('✅ Logo yüklendi:', logoUrl);
-        res.json({ success: true, logoUrl: logoUrl });
-        
-    } catch (error) {
-        console.error('❌ Logo yükleme hatası:', error);
-        res.status(500).json({ success: false, message: 'Logo yüklenirken hata oluştu!' });
-    }
-});
+let SHOT_DURATION = 5; // Vuruş süresi (saniye)
 
-// Uploads klasörünü statik olarak sun
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ============================================================
-// OYUN AYARLARI
-// ============================================================
-let SHOT_DURATION = 5;
+// ... devam eden kodlar ...
 
 // iOS Safari için CORS ve WebSocket ayarları
 const io = new Server(server, {
@@ -109,7 +64,7 @@ process.on('SIGINT', async () => {
 connectDB();
 
 // ============================================================
-// KULLANICI ŞEMASI (GÜNCELLENDİ)
+// KULLANICI ŞEMASI
 // ============================================================
 const userSchema = new mongoose.Schema({
     username: {
@@ -129,17 +84,6 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    },
-    teamName: {
-        type: String,
-        trim: true,
-        maxlength: 30,
-        default: ''
-    },
-    teamLogo: {
-        type: String,
-        trim: true,
-        default: 'default.png'
     },
     createdAt: {
         type: Date,
@@ -184,6 +128,10 @@ app.get('/health', (req, res) => {
 // ============================================================
 let lobbyPlayers = [];
 let activeRooms = {};
+// server.js - activeRooms tanımından sonra EKLE
+// ============================================================
+// LOCKSTEP SİSTEMİ
+// ============================================================
 const pendingShots = new Map();
 
 function addShotToPending(roomId, playerId, shotData) {
@@ -215,22 +163,29 @@ function addShotToPending(roomId, playerId, shotData) {
         pending.timeout = null;
     }
     
+    // Her iki vuruş da geldi mi?
     if (pending.player1Shot && pending.player2Shot) {
         console.log(`🎯 Her iki vuruş da alındı! ${roomId}`);
+        
         io.to(roomId).emit('lockstep-shots', {
             shot1: pending.player1Shot,
             shot2: pending.player2Shot,
             timestamp: Date.now()
         });
+        
         pendingShots.delete(roomId);
         return;
     }
     
+    // Zaman aşımı: SHOT_DURATION + 1 saniye
     const waitTime = (SHOT_DURATION || 5) * 1000 + 1000;
+    
     pending.timeout = setTimeout(() => {
         console.log(`⏰ Zaman aşımı: ${roomId}`);
+        
         const singleShot = pending.player1Shot || pending.player2Shot;
         const shotTeam = pending.player1Shot ? 1 : 2;
+        
         if (singleShot) {
             io.to(roomId).emit('lockstep-shots', {
                 shot1: shotTeam === 1 ? singleShot : null,
@@ -239,21 +194,23 @@ function addShotToPending(roomId, playerId, shotData) {
                 timeout: true
             });
         }
+        
         pendingShots.delete(roomId);
     }, waitTime);
 }
-
 // ============================================================
-// SOCKET.IO OLAY DİNLEYİCİLERİ
+// SOCKET.IO OLAY DİNLEYİCİLERİ - iOS Safari Uyumlu
 // ============================================================
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
     console.log(`📱 Transport: ${socket.conn.transport.name}`);
     
+    // iOS Safari için transport yükseltme
     socket.on('upgrade', () => {
         console.log(`📱 Transport yükseltildi: ${socket.conn.transport.name}`);
     });
 
+    // Heartbeat (iOS Safari için)
     socket.on('ping', () => {
         socket.emit('pong');
     });
@@ -262,128 +219,105 @@ io.on('connection', (socket) => {
     // AUTH İŞLEMLERİ
     // ============================================================
 
- // server.js - registerUser (GÜNCELLENDİ)
-socket.on('registerUser', async (data) => {
-    const { username, email, password, teamName, teamLogo } = data;
+    socket.on('registerUser', async (data) => {
+        const { username, email, password } = data;
 
-    if (!username || !email || !password) {
-        socket.emit('authResponse', {
-            success: false,
-            message: 'Tüm alanları doldurun!'
-        });
-        return;
-    }
-
-    try {
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
-        if (existingUser) {
+        if (!username || !email || !password) {
             socket.emit('authResponse', {
                 success: false,
-                message: 'Bu e-posta adresi zaten kayıtlı!'
+                message: 'Tüm alanları doldurun!'
             });
             return;
         }
 
-        const existingUsername = await User.findOne({ username: username });
-        if (existingUsername) {
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Bu kullanıcı adı zaten alınmış!'
-            });
-            return;
-        }
-
-        // ★★★ LOGO KONTROLÜ ★★★
-        let logoToSave = 'default.png';
-        if (teamLogo && teamLogo !== 'default.png') {
-            // Base64 ise default kullan (çok büyük)
-            if (teamLogo.startsWith('data:')) {
-                console.warn('⚠️ Base64 logo tespit edildi, default kullanılıyor');
-                logoToSave = 'default.png';
-            } else {
-                logoToSave = teamLogo;
+        try {
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'Bu e-posta adresi zaten kayıtlı!'
+                });
+                return;
             }
-        }
-        
-        console.log('📝 Kaydedilecek logo:', logoToSave);
 
-        const newUser = new User({
-            username: username.trim(),
-            email: email.toLowerCase().trim(),
-            password: password,
-            teamName: teamName || '',
-            teamLogo: logoToSave,
-            lastLogin: new Date()
-        });
+            const existingUsername = await User.findOne({ username: username });
+            if (existingUsername) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'Bu kullanıcı adı zaten alınmış!'
+                });
+                return;
+            }
 
-        await newUser.save();
-        console.log(`✅ Yeni kayıt: ${username} (${email})`);
-        console.log(`🏆 Takım: ${newUser.teamName || 'İsimsiz'}, Logo: ${newUser.teamLogo}`);
+            const newUser = new User({
+                username: username.trim(),
+                email: email.toLowerCase().trim(),
+                password: password,
+                lastLogin: new Date()
+            });
 
-        socket.emit('authResponse', {
-            success: true,
-            action: 'register',
-            username: username,
-            teamName: newUser.teamName,
-            teamLogo: newUser.teamLogo, // ★★★ LOGO GÖNDER ★★★
-            message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-        });
+            await newUser.save();
+            console.log(`✅ Yeni kayıt: ${username} (${email})`);
 
-    } catch (error) {
-        console.error('❌ Kayıt hatası:', error);
-        socket.emit('authResponse', {
-            success: false,
-            message: 'Kayıt sırasında bir hata oluştu.'
-        });
-    }
-});
+            socket.emit('authResponse', {
+                success: true,
+                action: 'register',
+                username: username,
+                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+            });
 
-// server.js - loginUser (GÜNCELLENDİ)
-socket.on('loginUser', async (data) => {
-    const { email, password } = data;
-
-    if (!email || !password) {
-        socket.emit('authResponse', {
-            success: false,
-            message: 'E-posta ve şifre girin!'
-        });
-        return;
-    }
-
-    try {
-        const user = await User.findOne({ email: email.toLowerCase().trim() });
-
-        if (!user || user.password !== password) {
+        } catch (error) {
+            console.error('❌ Kayıt hatası:', error);
             socket.emit('authResponse', {
                 success: false,
-                message: 'E-posta veya şifre hatalı!'
+                message: 'Kayıt sırasında bir hata oluştu.'
+            });
+        }
+    });
+
+    socket.on('loginUser', async (data) => {
+        const { email, password } = data;
+
+        if (!email || !password) {
+            socket.emit('authResponse', {
+                success: false,
+                message: 'E-posta ve şifre girin!'
             });
             return;
         }
 
-        user.lastLogin = new Date();
-        await user.save();
+        try {
+            const user = await User.findOne({ email: email.toLowerCase().trim() });
 
-        console.log(`🔑 Giriş: ${user.username}`);
-        console.log(`🏆 Takım: ${user.teamName || 'İsimsiz'}, Logo: ${user.teamLogo}`);
+            if (!user || user.password !== password) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'E-posta veya şifre hatalı!'
+                });
+                return;
+            }
 
-        socket.emit('authResponse', {
-            success: true,
-            action: 'login',
-            username: user.username,
-            teamName: user.teamName,
-            teamLogo: user.teamLogo, // ★★★ LOGO GÖNDER ★★★
-            message: 'Giriş başarılı!'
-        });
+            user.lastLogin = new Date();
+            await user.save();
 
-    } catch (error) {
-        console.error('❌ Giriş hatası:', error);
-        socket.emit('authResponse', {
-            success: false,
-            message: 'Giriş sırasında bir hata oluştu.'
-        });
-    }
-});
+            console.log(`🔑 Giriş: ${user.username}`);
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'login',
+                username: user.username,
+                message: 'Giriş başarılı!'
+            });
+
+        } catch (error) {
+            console.error('❌ Giriş hatası:', error);
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Giriş sırasında bir hata oluştu.'
+            });
+        }
+    });
+
     socket.on('forgotPassword', async (data) => {
         const { email } = data;
         try {
@@ -395,6 +329,7 @@ socket.on('loginUser', async (data) => {
                 });
                 return;
             }
+
             socket.emit('authResponse', {
                 success: true,
                 action: 'forgot',
@@ -413,29 +348,37 @@ socket.on('loginUser', async (data) => {
     // LOBBY İŞLEMLERİ
     // ============================================================
 
-    socket.on("join-lobby", (playerData) => {
-        console.log(`📥 join-lobby alındı:`, playerData);
-        
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+socket.on("join-lobby", (playerData) => {
+    console.log(`📥 join-lobby alındı:`, playerData);
+    console.log(`📱 Socket ID: ${socket.id}`);
+    console.log(`📱 Transport: ${socket.conn.transport.name}`);
+    
+    // Eski kaydı kaldır
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
 
-        const player = {
-            id: socket.id,
-            name: playerData?.name || "Oyuncu",
-            logo: playerData?.logo || "default.png"
-        };
+    const player = {
+        id: socket.id,
+        name: playerData?.name || "Oyuncu",
+        logo: playerData?.logo || "default.png"
+    };
 
-        lobbyPlayers.push(player);
-        console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
+    lobbyPlayers.push(player);
+    console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
+    console.log(`📊 Lobby listesi:`, lobbyPlayers);
 
-        io.emit('update-lobby-players', lobbyPlayers);
-        socket.emit('update-lobby-players', lobbyPlayers);
-    });
+    // TÜM oyunculara lobby listesini gönder
+    io.emit('update-lobby-players', lobbyPlayers);
+    
+    // Yeni katılan oyuncuya özel olarak da gönder
+    socket.emit('update-lobby-players', lobbyPlayers);
+});
 
-    socket.on('leave-lobby', () => {
-        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-        io.emit('update-lobby-players', lobbyPlayers);
-        console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
-    });
+socket.on('leave-lobby', () => {
+    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+    io.emit('update-lobby-players', lobbyPlayers);
+    console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
+    console.log(`📊 Kalan oyuncular:`, lobbyPlayers);
+});
 
     // ============================================================
     // DAVET İŞLEMLERİ
@@ -539,6 +482,7 @@ socket.on('loginUser', async (data) => {
             });
 
             console.log(`🎮 Maç başlıyor: ${roomId}`);
+
             io.to(roomId).emit('match-go', { pins: allPins });
         }
     });
@@ -551,22 +495,24 @@ socket.on('loginUser', async (data) => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
-    socket.on('playerShot', ({ roomId, shotData }) => {
-        if (!roomId || !activeRooms[roomId]) {
-            console.warn('⚠️ Geçersiz oda:', roomId);
-            return;
-        }
-        addShotToPending(roomId, socket.id, shotData);
-    });
+   socket.on('playerShot', ({ roomId, shotData }) => {
+    if (!roomId || !activeRooms[roomId]) {
+        console.warn('⚠️ Geçersiz oda:', roomId);
+        return;
+    }
+    addShotToPending(roomId, socket.id, shotData);
+});
 
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
-
-    socket.on('goal-scored', ({ roomId, scoringTeam }) => {
-        console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
-        socket.to(roomId).emit('opponent-goal', { scoringTeam });
-    });
+    // GOL SENKRONİZASYONU
+// server.js
+socket.on('goal-scored', ({ roomId, scoringTeam }) => {
+    console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
+    // SADECE karşı tarafa gönder (kendine değil!)
+    socket.to(roomId).emit('opponent-goal', { scoringTeam });
+});
 
     // ============================================================
     // BAĞLANTI KESİLME
