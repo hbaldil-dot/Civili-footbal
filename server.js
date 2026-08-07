@@ -3,9 +3,63 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const mongoose = require('mongoose');
+const multer = require('multer'); // YENİ
+const fs = require('fs'); // YENİ
 
 const app = express();
 const server = http.createServer(app);
+
+// ============================================================
+// DOSYA YÜKLEME AYARLARI - YENİ
+// ============================================================
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'logo-' + uniqueSuffix + '.png');
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Sadece PNG, JPEG ve WEBP formatları desteklenir.'));
+        }
+    }
+});
+
+// ============================================================
+// DOSYA YÜKLEME ROTASI - YENİ
+// ============================================================
+app.post('/upload-logo', upload.single('logo'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Dosya yüklenemedi!' });
+        }
+        
+        const logoUrl = '/uploads/' + req.file.filename;
+        console.log('✅ Logo yüklendi:', logoUrl);
+        res.json({ success: true, logoUrl: logoUrl });
+        
+    } catch (error) {
+        console.error('❌ Logo yükleme hatası:', error);
+        res.status(500).json({ success: false, message: 'Logo yüklenirken hata oluştu!' });
+    }
+});
+
+// Uploads klasörünü statik olarak sun
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ============================================================
 // OYUN AYARLARI
