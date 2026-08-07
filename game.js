@@ -2407,7 +2407,20 @@ function joinOnlineGame() {
     });
     showLobbyScreen(); 
 }
+function updateBallPhysics() {
+    // Örnek mevcut hız güncellemeleri:
+    // ball.x += ball.vx;
+    // ball.y += ball.vy;
 
+    // Hızı %12 yavaşlatma çarpanı (1 - 0.12 = 0.88)
+    const speedReductionFactor = 0.88;
+
+    ball.vx *= speedReductionFactor;
+    ball.vy *= speedReductionFactor;
+
+    // Sürtünme veya durma eşiği (Çok yavaşladığında durdurmak için)
+    if (Math.abs(ball.vx) < 0.1) ball.vx = 0;
+    if (Math.abs(ball.vy) < 0.1) ball.vy = 0;
 // ============================================================
 // BAŞLANGIÇ
 // ============================================================
