@@ -2911,50 +2911,31 @@ function handleAuthSubmit(event, action) {
 }
 
 // ============================================================
-// TAKIM LOGO FONKSİYONLARI (KAYIT FORMU İÇİN)
+// LOGO YÜKLEME - DOSYA OLARAK GÖNDER
 // ============================================================
 
-function loadAuthTeamLogos() {
-    const regGrid = document.getElementById('reg-team-logo-grid');
-    if (!regGrid) return;
+async function uploadLogoToServer(file) {
+    const formData = new FormData();
+    formData.append('logo', file);
     
-    // Sadece kayıt formu görünürken yükle
-    const formRegister = document.getElementById('form-register');
-    if (!formRegister || formRegister.classList.contains('hidden')) return;
-    
-    regGrid.innerHTML = '';
-    
-    teamLogos.forEach((logo) => {
-        const btn = document.createElement('button');
-        btn.className = 'team-logo-btn';
-        btn.dataset.logo = logo.file;
-        btn.title = logo.name;
+    try {
+        const response = await fetch('/upload-logo', {
+            method: 'POST',
+            body: formData
+        });
         
-        const img = document.createElement('img');
-        img.src = `takimlar/${logo.file}`;
-        img.alt = logo.name;
-        img.onerror = function() { this.src = 'takimlar/default.png'; };
-        
-        btn.appendChild(img);
-        
-        btn.onclick = function(e) {
-            e.stopPropagation();
-            regGrid.querySelectorAll('.team-logo-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            const preview = document.getElementById('reg-uploaded-logo-preview');
-            if (preview) {
-                preview.src = `takimlar/${logo.file}`;
-                preview.style.borderColor = '#2ecc71';
-            }
-            
-            console.log('🏆 Hazır logo seçildi:', logo.file);
-        };
-        
-        regGrid.appendChild(btn);
-    });
-    
-    console.log('✅ Kayıt formu logoları yüklendi');
+        const result = await response.json();
+        if (result.success) {
+            console.log('✅ Logo sunucuya yüklendi:', result.logoUrl);
+            return result.logoUrl;
+        } else {
+            console.error('❌ Logo yükleme başarısız:', result.message);
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Logo yükleme hatası:', error);
+        return null;
+    }
 }
 
 function setupLogoUpload() {
@@ -2963,7 +2944,7 @@ function setupLogoUpload() {
     
     if (!input || !preview) return;
     
-    input.onchange = function(e) {
+    input.onchange = async function(e) {
         const file = e.target.files[0];
         if (!file) return;
         
@@ -2973,6 +2954,7 @@ function setupLogoUpload() {
             return;
         }
         
+        // Önizleme için resmi 100x100 boyutlandır
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
@@ -2991,21 +2973,47 @@ function setupLogoUpload() {
                 ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 100, 100);
                 
                 const resizedDataUrl = canvas.toDataURL('image/png');
-                
                 preview.src = resizedDataUrl;
                 preview.style.borderColor = '#2ecc71';
                 
+                // Grid'deki aktif seçimi kaldır
                 const grid = document.getElementById('reg-team-logo-grid');
                 if (grid) {
                     grid.querySelectorAll('.team-logo-btn').forEach(b => b.classList.remove('active'));
                 }
                 
-                console.log('✅ Logo yüklendi ve 100x100 boyutlandı');
+                // Dosyayı sunucuya yükle
+                uploadLogoToServer(file).then(logoUrl => {
+                    if (logoUrl) {
+                        // Yüklenen logo URL'sini sakla
+                        preview.dataset.uploadedUrl = logoUrl;
+                        console.log('✅ Logo sunucuya kaydedildi:', logoUrl);
+                    }
+                });
             };
             img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     };
+}
+
+function getSelectedTeamLogo() {
+    // Önce hazır logolardan seçili olanı kontrol et
+    const grid = document.getElementById('reg-team-logo-grid');
+    if (grid) {
+        const activeBtn = grid.querySelector('.team-logo-btn.active');
+        if (activeBtn) {
+            return activeBtn.dataset.logo;
+        }
+    }
+    
+    // Yüklenen logoyu kontrol et
+    const preview = document.getElementById('reg-uploaded-logo-preview');
+    if (preview && preview.dataset.uploadedUrl) {
+        return preview.dataset.uploadedUrl; // Sunucu URL'si
+    }
+    
+    return 'default.png';
 }
 
 function getSelectedTeamLogo() {
