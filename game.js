@@ -3765,8 +3765,8 @@ function handleAuthSubmit(event, action) {
     }
 }
 
+// continueAsGuest - Misafir girişi
 function continueAsGuest() {
-    console.log('🎮 Misafir girişi yapılıyor...');
     var authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) {
         authOverlay.style.display = 'none';
@@ -3780,7 +3780,35 @@ function continueAsGuest() {
     if (playerNameInput && (!playerNameInput.value || playerNameInput.value === 'Oyuncu')) {
         playerNameInput.value = 'Misafir_' + Math.floor(Math.random() * 1000);
     }
-    console.log('✅ Misafir girişi başarılı, ana menü açıldı.');
+}
+
+// sendInvite - Davet gönderme
+function sendInvite(targetId) {
+    if (!socket) return;
+    socket.emit('send-invite', targetId);
+}
+
+// broadcastMyPinMove - Pin hareketini yayınla
+function broadcastMyPinMove(pin) {
+    if (!socket || gameMode !== 'online' || currentPhase !== 'setup') return;
+    var index = -1;
+    var count = 0;
+    for (var i = 0; i < pins.length; i++) {
+        var p = pins[i];
+        if (!p.isPost && p.team === myTeamNumber) {
+            if (p === pin) { index = count; break; }
+            count++;
+        }
+    }
+    if (index !== -1) {
+        socket.emit('sync-pin-move', {
+            roomId: currentRoomId,
+            team: myTeamNumber,
+            index: index,
+            x: pin.x,
+            y: pin.y
+        });
+    }
 }
 
 if (socket) {
