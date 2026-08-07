@@ -485,7 +485,31 @@ server.listen(PORT, () => {
     // ============================================================
     // OYUN SENKRONİZASYONU
     // ============================================================
+// server.js içine örnek oyun döngüsü ve konum senkronizasyonu
+const TICK_RATE = 20; // Saniyedeki güncelleme sayısı
 
+setInterval(() => {
+  rooms.forEach((room, roomCode) => {
+    if (room.state === 'playing' && room.ball) {
+      // 1. Basit fizik hesaplaması (Sürtünme ve hareket sunucuda yapılır)
+      room.ball.x += room.ball.vx;
+      room.ball.y += room.ball.vy;
+      room.ball.vx *= 0.88; // Belirttiğimiz hız azaltma çarpanı
+      room.ball.vy *= 0.88;
+
+      if (Math.abs(room.ball.vx) < 0.05) room.ball.vx = 0;
+      if (Math.abs(room.ball.vy) < 0.05) room.ball.vy = 0;
+
+      // 2. Güncel konumu odadaki herkese gönder
+      io.to(roomCode).emit('ball_sync', {
+        x: room.ball.x,
+        y: room.ball.y,
+        vx: room.ball.vx,
+        vy: room.ball.vy
+      });
+    }
+  });
+}, 1000 / TICK_RATE);
     socket.on('sync-pin-move', ({ roomId, team, index, x, y }) => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
