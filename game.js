@@ -1,17 +1,17 @@
 // ============================================================
-// SABİT SÜRELER
+// SABİT SÜRELER - EN BAŞTA TANIMLANMALI
 // ============================================================
 let MATCH_DURATION = 90;
 let SHOT_DURATION = 5;
 let isSoundOn = true;
 
 // ============================================================
-// FİZİK SABİTLERİ
+// FİZİK SABİTLERİ - OPTİMİZE EDİLMİŞ
 // ============================================================
 const PHYSICS = {
     FRICTION: 0.985,
     MAX_SPEED: 12,
-    SUB_STEPS: 9,
+    SUB_STEPS: 12, // 16 ile 9 arası optimum
     SHOT_POWER_MULTIPLIER: 0.14,
     WALL_BOUNCE: 0.85,
     PIN_BOUNCE: 0.85,
@@ -100,6 +100,12 @@ var goalAnimationStartTime = 0;
 var GOAL_ANIMATION_DURATION = 3000;
 var goalImage = null;
 var fieldImage = null;
+var audioCtx = null;
+
+// ============================================================
+// iOS SAFARI TESPİTİ
+// ============================================================
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 // ============================================================
 // SAHA RESMİ
@@ -146,7 +152,7 @@ function hideField() {
 }
 
 // ============================================================
-// ÇİZİM
+// ÇİZİM FONKSİYONLARI - GAME(30)'DEN ALINDI
 // ============================================================
 function drawFieldLinesOnly() {
     ctx.clearRect(0, 0, width, height);
@@ -187,6 +193,9 @@ function drawPlayerWithLogo(x, y, logoFile) {
     ctx.translate(x, y);
     var size = cap.radius * 1.4;
     var logo = logoFile && loadedLogos[logoFile] ? loadedLogos[logoFile] : null;
+    
+    var shouldFlip = (gameMode === 'online' && myTeamNumber === 2);
+    
     ctx.shadowColor = 'rgba(0,0,0,0.3)';
     ctx.shadowBlur = 8;
     ctx.fillStyle = 'rgba(255,255,255,0.05)';
@@ -194,6 +203,7 @@ function drawPlayerWithLogo(x, y, logoFile) {
     ctx.arc(0, 0, size, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
+    
     if (logo) {
         ctx.save();
         ctx.beginPath();
@@ -201,7 +211,13 @@ function drawPlayerWithLogo(x, y, logoFile) {
         ctx.closePath();
         ctx.clip();
         var logoSize = (size - 2) * 2;
-        ctx.drawImage(logo, -(size - 2), -(size - 2), logoSize, logoSize);
+        if (shouldFlip) {
+            ctx.translate(0, 0);
+            ctx.rotate(Math.PI);
+            ctx.drawImage(logo, -(size - 2), -(size - 2), logoSize, logoSize);
+        } else {
+            ctx.drawImage(logo, -(size - 2), -(size - 2), logoSize, logoSize);
+        }
         ctx.restore();
         ctx.strokeStyle = 'rgba(255,255,255,0.3)';
         ctx.lineWidth = 1.5;
@@ -250,6 +266,9 @@ function drawFieldLines() {
     ctx.stroke();
 }
 
+// ============================================================
+// ANA ÇİZİM - GAME(30)'DEN ALINDI
+// ============================================================
 function draw() {
     ctx.clearRect(0, 0, width, height);
     if (fieldImage) {
@@ -265,7 +284,73 @@ function draw() {
         ctx.rotate(Math.PI);
         ctx.translate(-width / 2, -height / 2);
     }
-    drawFieldLines();
+    
+    var goalLeft = (width - goalWidth) / 2;
+    var goalRight = (width + goalWidth) / 2;
+    var pBoxX1 = (width - goalWidth * 2.2) / 2;
+    var penaltyBoxH = height * 0.15;
+    
+    // Saha çizgileri
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(width / 2, height / 2, 45, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeRect(pBoxX1, 0, goalWidth * 2.2, penaltyBoxH);
+    ctx.strokeRect(pBoxX1, height - penaltyBoxH, goalWidth * 2.2, penaltyBoxH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, goalHeight);
+    ctx.lineTo(goalRight, goalHeight);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, height - goalHeight);
+    ctx.lineTo(goalRight, height - goalHeight);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, goalHeight - 10);
+    ctx.lineTo(goalLeft, goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalRight, goalHeight - 10);
+    ctx.lineTo(goalRight, goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalLeft, height - goalHeight - 10);
+    ctx.lineTo(goalLeft, height - goalHeight + 10);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(goalRight, height - goalHeight - 10);
+    ctx.lineTo(goalRight, height - goalHeight + 10);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width, 0);
+    ctx.lineTo(width, height);
+    ctx.stroke();
+    
+    // Setup alanı
+    if (currentPhase === 'setup') {
+        ctx.fillStyle = 'rgba(46, 204, 113, 0.05)';
+        ctx.strokeStyle = 'rgba(46, 204, 113, 0.15)';
+        ctx.lineWidth = 2;
+        ctx.fillRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
+        ctx.strokeRect(10, goalHeight + 10, width - 20, height - (goalHeight * 2) - 20);
+    }
+    
+    // PIN'leri çiz
     for (var i = 0; i < pins.length; i++) {
         var pin = pins[i];
         if (pin.isPost) {
@@ -288,9 +373,13 @@ function draw() {
             drawPlayerWithLogo(pin.x, pin.y, logoFile);
         }
     }
+    
+    // TOP
     if (currentPhase === 'playing' || currentPhase === 'setup') {
         drawSoccerBall(cap.x, cap.y, cap.radius, cap.rotation);
     }
+    
+    // Vuruş çizgisi
     if (currentPhase === 'playing' && isDraggingBall) {
         var dx = dragStart.x - dragCurrent.x;
         var dy = dragStart.y - dragCurrent.y;
@@ -310,9 +399,23 @@ function draw() {
             ctx.lineTo(endX, endY);
             ctx.stroke();
             ctx.setLineDash([]);
+            // Ok ucu
+            var arrowSize = 10;
+            var angle = Math.atan2(dy, dx);
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - Math.cos(angle - 0.5) * arrowSize, 
+                       endY - Math.sin(angle - 0.5) * arrowSize);
+            ctx.lineTo(endX - Math.cos(angle + 0.5) * arrowSize, 
+                       endY - Math.sin(angle + 0.5) * arrowSize);
+            ctx.closePath();
+            ctx.fill();
             ctx.restore();
         }
     }
+    
+    // GOL ANİMASYONU - GAME(30)'DEN ALINDI
     if (goalAnimation) {
         var elapsed = Date.now() - goalAnimationStartTime;
         var progress = Math.min(elapsed / GOAL_ANIMATION_DURATION, 1);
@@ -321,35 +424,54 @@ function draw() {
         ctx.save();
         ctx.translate(width / 2, height / 2);
         ctx.scale(scale, scale);
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = 'rgba(255, 215, 0, ' + (alpha * 0.7) + ')';
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.fillStyle = 'rgba(255, 215, 0, ' + (Math.max(0, alpha) * 0.7) + ')';
         ctx.font = 'bold 36px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,' + (alpha * 0.5) + ')';
+        ctx.shadowColor = 'rgba(0,0,0,' + (Math.max(0, alpha) * 0.5) + ')';
         ctx.shadowBlur = 20;
         ctx.fillText('⚽ GOAL! ⚽', 0, 0);
+        // Işıltılar
+        for (var s = 0; s < 12; s++) {
+            var ang = (s / 12) * Math.PI * 2 + progress * 0.5;
+            var dist2 = 60 + Math.sin(progress * 8 + s * 1.2) * 15;
+            var size2 = 4 + Math.sin(progress * 10 + s * 1.8) * 2;
+            ctx.fillStyle = 'rgba(255, 215, 0, ' + (Math.max(0, alpha) * 0.2) + ')';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(Math.cos(ang) * dist2, Math.sin(ang) * dist2, size2, 0, Math.PI * 2);
+            ctx.fill();
+        }
         ctx.restore();
-        if (progress >= 1) goalAnimation = null;
+        if (progress >= 1) {
+            goalAnimation = null;
+        }
     }
     ctx.restore();
 }
 
 // ============================================================
-// FİZİK
+// FİZİK MOTORU - GAME(30)'DEN OPTİMİZE EDİLDİ
 // ============================================================
 function updatePhysics() {
     if (currentPhase !== 'playing') return;
+    
     var currentSpeed = Math.hypot(cap.vx, cap.vy);
     if (currentSpeed > PHYSICS.MAX_SPEED) {
         cap.vx = (cap.vx / currentSpeed) * PHYSICS.MAX_SPEED;
         cap.vy = (cap.vy / currentSpeed) * PHYSICS.MAX_SPEED;
     }
+    
     for (var step = 0; step < PHYSICS.SUB_STEPS; step++) {
         cap.x += cap.vx / PHYSICS.SUB_STEPS;
         cap.y += cap.vy / PHYSICS.SUB_STEPS;
+        
+        // Duvar çarpışmaları
         if (cap.x - cap.radius < 0) { cap.x = cap.radius; cap.vx *= -PHYSICS.WALL_BOUNCE; playSound('hit'); }
         if (cap.x + cap.radius > width) { cap.x = width - cap.radius; cap.vx *= -PHYSICS.WALL_BOUNCE; playSound('hit'); }
+        
+        // ÜST KALE (Takım 1 gol atar)
         if (cap.y - cap.radius <= goalHeight) {
             var goalLeft = (width - goalWidth) / 2;
             var goalRight = (width + goalWidth) / 2;
@@ -362,6 +484,8 @@ function updatePhysics() {
                 playSound('hit');
             }
         }
+        
+        // ALT KALE (Takım 2 gol atar)
         if (cap.y + cap.radius >= height - goalHeight) {
             var goalLeft2 = (width - goalWidth) / 2;
             var goalRight2 = (width + goalWidth) / 2;
@@ -374,6 +498,8 @@ function updatePhysics() {
                 playSound('hit');
             }
         }
+        
+        // Pin çarpışmaları
         for (var i = 0; i < pins.length; i++) {
             var pin = pins[i];
             if (pin.isPost) continue;
@@ -391,22 +517,30 @@ function updatePhysics() {
             }
         }
     }
+    
     cap.vx *= PHYSICS.FRICTION;
     cap.vy *= PHYSICS.FRICTION;
+    
     if (Math.hypot(cap.vx, cap.vy) < 0.05) {
         cap.vx = 0;
         cap.vy = 0;
     }
+    
     if (Math.hypot(cap.vx, cap.vy) > 0.1) {
         cap.rotation += (cap.vx + cap.vy) * 0.02;
     }
+    
     if (gameMode === 'ai' && turn === 2 && Math.hypot(cap.vx, cap.vy) < 0.1) {
         runAIMove();
     }
 }
 
+// ============================================================
+// GOL İŞLEME
+// ============================================================
 function handleGoalScored(scoringTeam) {
     console.log('⚽ Gol! Takım ' + scoringTeam);
+    
     if (scoringTeam === 1) {
         score.p1++;
         document.getElementById('score-p1').innerText = score.p1;
@@ -414,9 +548,11 @@ function handleGoalScored(scoringTeam) {
         score.p2++;
         document.getElementById('score-p2').innerText = score.p2;
     }
+    
     if (gameMode === 'online' && socket && currentRoomId) {
         socket.emit('goal-scored', { roomId: currentRoomId, scoringTeam: scoringTeam });
     }
+    
     triggerGoalAnimation();
     cap.x = width / 2;
     cap.y = height / 2;
@@ -447,14 +583,16 @@ function performShot(startX, startY, endX, endY) {
 }
 
 // ============================================================
-// SES
+// SES SİSTEMİ - GAME(30)'DEN ALINDI
 // ============================================================
 var audioElements = { hit: null, goal: null };
 
 function preloadSounds() {
     try {
         audioElements.hit = new Audio('sesler/Carpma.mp3');
+        audioElements.hit.preload = 'auto';
         audioElements.goal = new Audio('sesler/gol.mp3');
+        audioElements.goal.preload = 'auto';
     } catch(e) {}
 }
 
@@ -469,7 +607,7 @@ function playSound(type) {
             audioElements.goal.play().catch(function() {});
         } else if (type === 'kick') {
             try {
-                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 var osc = audioCtx.createOscillator();
                 var gain = audioCtx.createGain();
                 osc.connect(gain);
@@ -508,7 +646,16 @@ function loadSoundSettings() {
 }
 
 // ============================================================
-// SOCKET BAĞLANTISI
+// GOL ANİMASYONU TRIGGER
+// ============================================================
+function triggerGoalAnimation() {
+    goalAnimation = true;
+    goalAnimationStartTime = Date.now();
+    playSound('goal');
+}
+
+// ============================================================
+// SOCKET BAĞLANTISI - GAME(30)'DEN ALINDI
 // ============================================================
 if (typeof io !== 'undefined') {
     try {
@@ -516,16 +663,35 @@ if (typeof io !== 'undefined') {
             ? undefined
             : window.location.origin;
         
-        socket = io(serverUrl, {
+        var socketOptions = {
             transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
+            reconnectionAttempts: 10,
             reconnectionDelay: 1000,
-            timeout: 20000
-        });
+            reconnectionDelayMax: 5000,
+            timeout: 20000,
+            autoConnect: true,
+            forceNew: true,
+            upgrade: true,
+            rememberUpgrade: true
+        };
+        
+        if (isIOS) {
+            socketOptions.transports = ['websocket', 'polling'];
+            socketOptions.forceNew = true;
+        }
+        
+        socket = io(serverUrl, socketOptions);
         
         socket.on('connect', function() {
             console.log('✅ Sunucuya bağlandı! ID:', socket.id);
+            if (isIOS) {
+                setInterval(function() {
+                    if (socket && socket.connected) {
+                        socket.emit('ping');
+                    }
+                }, 15000);
+            }
         });
         
         socket.on('disconnect', function() {
@@ -534,6 +700,11 @@ if (typeof io !== 'undefined') {
         
         socket.on('connect_error', function(error) {
             console.warn('⚠️ Bağlantı hatası:', error.message);
+            if (isIOS) {
+                setTimeout(function() {
+                    if (socket) socket.connect();
+                }, 2000);
+            }
         });
         
         socket.on('update-lobby-players', function(players) {
@@ -611,6 +782,14 @@ if (typeof io !== 'undefined') {
                     turn = ball.turn;
                     updateHUDTurn();
                 }
+                if (ball.score_p1 !== undefined && score.p1 !== ball.score_p1) {
+                    score.p1 = ball.score_p1;
+                    document.getElementById('score-p1').innerText = score.p1;
+                }
+                if (ball.score_p2 !== undefined && score.p2 !== ball.score_p2) {
+                    score.p2 = ball.score_p2;
+                    document.getElementById('score-p2').innerText = score.p2;
+                }
             }
         });
         
@@ -670,13 +849,17 @@ if (typeof io !== 'undefined') {
             exitToMenu();
         });
         
+        socket.on('pong', function() {
+            console.log('💓 Heartbeat alındı (iOS Safari)');
+        });
+        
     } catch(e) {
         console.error('❌ Socket bağlantı hatası:', e);
     }
 }
 
 // ============================================================
-// LOBBY
+// LOBBY FONKSİYONLARI - GAME(31)'DEN ALINDI
 // ============================================================
 function updateLobbyUI() {
     var listContainer = document.getElementById('lobby-list');
@@ -729,7 +912,7 @@ function closeOnlineLobby() {
 }
 
 // ============================================================
-// TAKIM SEÇİMİ
+// TAKIM SEÇİMİ - GAME(31)'DEN ALINDI
 // ============================================================
 function loadTeamLogoImage(logoFile) {
     return new Promise(function(resolve) {
@@ -786,7 +969,7 @@ function updateSelectedTeamName() {
 }
 
 // ============================================================
-// MENÜLER
+// MENÜLER - GAME(31)'DEN ALINDI
 // ============================================================
 function openTeamSelectPopup() {
     var popup = document.getElementById('team-select-popup');
@@ -861,7 +1044,7 @@ function closeSettingsPopup() {
 }
 
 // ============================================================
-// 2 KİŞİLİK
+// 2 KİŞİLİK - GAME(31)'DEN ALINDI
 // ============================================================
 function openLocalTeamSelect() {
     var popup = document.getElementById('local-team-select');
@@ -977,7 +1160,7 @@ function startLocalGameWithTeams() {
 }
 
 // ============================================================
-// OYUN
+// OYUN - GAME(31)'DEN ALINDI
 // ============================================================
 function startLocalGame(mode, level) {
     gameMode = mode;
@@ -1159,12 +1342,6 @@ function updateHUDTurn() {
     }
 }
 
-function triggerGoalAnimation() {
-    goalAnimation = true;
-    goalAnimationStartTime = Date.now();
-    playSound('goal');
-}
-
 function exitToMenu() {
     if (timerInterval) clearInterval(timerInterval);
     if (shotTimerInterval) clearInterval(shotTimerInterval);
@@ -1209,7 +1386,7 @@ function broadcastMyPinMove(pin) {
 }
 
 // ============================================================
-// AI
+// AI SİSTEMİ - GAME(30)'DEN ALINDI
 // ============================================================
 function getAIParameters() {
     switch (aiLevel) {
@@ -1269,7 +1446,7 @@ function calculateAITarget(params) {
 }
 
 // ============================================================
-// AUTH
+// AUTH - GAME(31)'DEN ALINDI
 // ============================================================
 function switchAuthTab(tab) {
     var formLogin = document.getElementById('form-login');
@@ -1325,7 +1502,7 @@ function continueAsGuest() {
 }
 
 // ============================================================
-// AYARLAR
+// AYARLAR - GAME(31)'DEN ALINDI
 // ============================================================
 function setMatchDuration(seconds) {
     MATCH_DURATION = seconds;
@@ -1435,7 +1612,7 @@ function selectStadium(stadiumKey, texturePath) {
 }
 
 // ============================================================
-// CANVAS OLAYLARI
+// CANVAS OLAYLARI - GAME(30)'DEN ALINDI
 // ============================================================
 function getCanvasTouchPos(e) {
     var rect = canvas.getBoundingClientRect();
