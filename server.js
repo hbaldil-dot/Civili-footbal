@@ -316,52 +316,52 @@ io.on('connection', (socket) => {
     }
 });
 
-    socket.on('loginUser', async (data) => {
-        const { email, password } = data;
+ // server.js - loginUser (GÜNCELLENDİ)
+socket.on('loginUser', async (data) => {
+    const { email, password } = data;
 
-        if (!email || !password) {
+    if (!email || !password) {
+        socket.emit('authResponse', {
+            success: false,
+            message: 'E-posta ve şifre girin!'
+        });
+        return;
+    }
+
+    try {
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+        if (!user || user.password !== password) {
             socket.emit('authResponse', {
                 success: false,
-                message: 'E-posta ve şifre girin!'
+                message: 'E-posta veya şifre hatalı!'
             });
             return;
         }
 
-        try {
-            const user = await User.findOne({ email: email.toLowerCase().trim() });
+        user.lastLogin = new Date();
+        await user.save();
 
-            if (!user || user.password !== password) {
-                socket.emit('authResponse', {
-                    success: false,
-                    message: 'E-posta veya şifre hatalı!'
-                });
-                return;
-            }
+        console.log(`🔑 Giriş: ${user.username}`);
+        console.log(`🏆 Takım: ${user.teamName || 'İsimsiz'}, Logo: ${user.teamLogo}`);
 
-            user.lastLogin = new Date();
-            await user.save();
+        socket.emit('authResponse', {
+            success: true,
+            action: 'login',
+            username: user.username,
+            teamName: user.teamName,
+            teamLogo: user.teamLogo, // ★★★ LOGO BURADA GÖNDERİLİYOR ★★★
+            message: 'Giriş başarılı!'
+        });
 
-            console.log(`🔑 Giriş: ${user.username}`);
-            console.log(`🏆 Takım: ${user.teamName || 'İsimsiz'}`);
-
-            socket.emit('authResponse', {
-                success: true,
-                action: 'login',
-                username: user.username,
-                teamName: user.teamName,
-                teamLogo: user.teamLogo,
-                message: 'Giriş başarılı!'
-            });
-
-        } catch (error) {
-            console.error('❌ Giriş hatası:', error);
-            socket.emit('authResponse', {
-                success: false,
-                message: 'Giriş sırasında bir hata oluştu.'
-            });
-        }
-    });
-
+    } catch (error) {
+        console.error('❌ Giriş hatası:', error);
+        socket.emit('authResponse', {
+            success: false,
+            message: 'Giriş sırasında bir hata oluştu.'
+        });
+    }
+});
     socket.on('forgotPassword', async (data) => {
         const { email } = data;
         try {
