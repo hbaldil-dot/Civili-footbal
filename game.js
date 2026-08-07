@@ -1020,7 +1020,7 @@ drawFieldLinesOnly();
 console.log('Çivili Futbol Başlatıldı!');            socketOptions.transports = ['websocket', 'polling'];
             socketOptions.forceNew = true;
             console.log('📱 iOS Safari modu aktif');
-        }
+    
 
 socket = io(serverUrl, socketOptions);
 
