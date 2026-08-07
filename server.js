@@ -7,19 +7,10 @@ const mongoose = require('mongoose');
 const app = express();
 const server = http.createServer(app);
 
-// server.js - En üstte
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const mongoose = require('mongoose');
-
 // ============================================================
-// OYUN AYARLARI - BURAYA EKLE
+// OYUN AYARLARI
 // ============================================================
-let SHOT_DURATION = 5; // Vuruş süresi (saniye)
-
-// ... devam eden kodlar ...
+let SHOT_DURATION = 5;
 
 // iOS Safari için CORS ve WebSocket ayarları
 const io = new Server(server, {
@@ -64,17 +55,46 @@ process.on('SIGINT', async () => {
 connectDB();
 
 // ============================================================
-// KULLANICI ŞEMASI
+// KULLANICI ŞEMASI (GÜNCELLENDİ)
 // ============================================================
-// server.js - userSchema
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, trim: true, minlength: 2, maxlength: 30 },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true },
-    teamName: { type: String, trim: true, maxlength: 30, default: '' },
-    teamLogo: { type: String, trim: true, default: 'default.png' }, // Dosya adı veya base64
-    createdAt: { type: Date, default: Date.now },
-    lastLogin: { type: Date, default: Date.now },
+    username: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 2,
+        maxlength: 30
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    teamName: {
+        type: String,
+        trim: true,
+        maxlength: 30,
+        default: ''
+    },
+    teamLogo: {
+        type: String,
+        trim: true,
+        default: 'default.png'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now
+    },
     stats: {
         totalMatches: { type: Number, default: 0 },
         wins: { type: Number, default: 0 },
@@ -110,10 +130,6 @@ app.get('/health', (req, res) => {
 // ============================================================
 let lobbyPlayers = [];
 let activeRooms = {};
-// server.js - activeRooms tanımından sonra EKLE
-// ============================================================
-// LOCKSTEP SİSTEMİ
-// ============================================================
 const pendingShots = new Map();
 
 function addShotToPending(roomId, playerId, shotData) {
@@ -145,29 +161,22 @@ function addShotToPending(roomId, playerId, shotData) {
         pending.timeout = null;
     }
     
-    // Her iki vuruş da geldi mi?
     if (pending.player1Shot && pending.player2Shot) {
         console.log(`🎯 Her iki vuruş da alındı! ${roomId}`);
-        
         io.to(roomId).emit('lockstep-shots', {
             shot1: pending.player1Shot,
             shot2: pending.player2Shot,
             timestamp: Date.now()
         });
-        
         pendingShots.delete(roomId);
         return;
     }
     
-    // Zaman aşımı: SHOT_DURATION + 1 saniye
     const waitTime = (SHOT_DURATION || 5) * 1000 + 1000;
-    
     pending.timeout = setTimeout(() => {
         console.log(`⏰ Zaman aşımı: ${roomId}`);
-        
         const singleShot = pending.player1Shot || pending.player2Shot;
         const shotTeam = pending.player1Shot ? 1 : 2;
-        
         if (singleShot) {
             io.to(roomId).emit('lockstep-shots', {
                 shot1: shotTeam === 1 ? singleShot : null,
@@ -176,23 +185,21 @@ function addShotToPending(roomId, playerId, shotData) {
                 timeout: true
             });
         }
-        
         pendingShots.delete(roomId);
     }, waitTime);
 }
+
 // ============================================================
-// SOCKET.IO OLAY DİNLEYİCİLERİ - iOS Safari Uyumlu
+// SOCKET.IO OLAY DİNLEYİCİLERİ
 // ============================================================
 io.on('connection', (socket) => {
     console.log(`⚡ Yeni bağlantı: ${socket.id}`);
     console.log(`📱 Transport: ${socket.conn.transport.name}`);
     
-    // iOS Safari için transport yükseltme
     socket.on('upgrade', () => {
         console.log(`📱 Transport yükseltildi: ${socket.conn.transport.name}`);
     });
 
-    // Heartbeat (iOS Safari için)
     socket.on('ping', () => {
         socket.emit('pong');
     });
@@ -201,46 +208,112 @@ io.on('connection', (socket) => {
     // AUTH İŞLEMLERİ
     // ============================================================
 
-// server.js - registerUser
-socket.on('registerUser', async (data) => {
-    const { username, email, password, teamName, teamLogo } = data;
-    // ... validasyonlar ...
-    const newUser = new User({
-        username: username.trim(),
-        email: email.toLowerCase().trim(),
-        password: password,
-        teamName: teamName || '',
-        teamLogo: teamLogo || 'default.png',
-        lastLogin: new Date()
-    });
-    // ... kaydet ...
-    socket.emit('authResponse', {
-        success: true,
-        action: 'register',
-        username: username,
-        teamName: newUser.teamName,
-        teamLogo: newUser.teamLogo,
-        message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
-    });
-});
+    socket.on('registerUser', async (data) => {
+        const { username, email, password, teamName, teamLogo } = data;
 
-// server.js - loginUser
-socket.on('loginUser', async (data) => {
-    const { email, password } = data;
-    // ... validasyonlar ...
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (user && user.password === password) {
-        // ... güncelleme ...
-        socket.emit('authResponse', {
-            success: true,
-            action: 'login',
-            username: user.username,
-            teamName: user.teamName,
-            teamLogo: user.teamLogo,
-            message: 'Giriş başarılı!'
-        });
-    }
-});
+        if (!username || !email || !password) {
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Tüm alanları doldurun!'
+            });
+            return;
+        }
+
+        try {
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'Bu e-posta adresi zaten kayıtlı!'
+                });
+                return;
+            }
+
+            const existingUsername = await User.findOne({ username: username });
+            if (existingUsername) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'Bu kullanıcı adı zaten alınmış!'
+                });
+                return;
+            }
+
+            const newUser = new User({
+                username: username.trim(),
+                email: email.toLowerCase().trim(),
+                password: password,
+                teamName: teamName || '',
+                teamLogo: teamLogo || 'default.png',
+                lastLogin: new Date()
+            });
+
+            await newUser.save();
+            console.log(`✅ Yeni kayıt: ${username} (${email})`);
+            console.log(`🏆 Takım: ${newUser.teamName || 'İsimsiz'}`);
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'register',
+                username: username,
+                teamName: newUser.teamName,
+                teamLogo: newUser.teamLogo,
+                message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
+            });
+
+        } catch (error) {
+            console.error('❌ Kayıt hatası:', error);
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Kayıt sırasında bir hata oluştu.'
+            });
+        }
+    });
+
+    socket.on('loginUser', async (data) => {
+        const { email, password } = data;
+
+        if (!email || !password) {
+            socket.emit('authResponse', {
+                success: false,
+                message: 'E-posta ve şifre girin!'
+            });
+            return;
+        }
+
+        try {
+            const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+            if (!user || user.password !== password) {
+                socket.emit('authResponse', {
+                    success: false,
+                    message: 'E-posta veya şifre hatalı!'
+                });
+                return;
+            }
+
+            user.lastLogin = new Date();
+            await user.save();
+
+            console.log(`🔑 Giriş: ${user.username}`);
+            console.log(`🏆 Takım: ${user.teamName || 'İsimsiz'}`);
+
+            socket.emit('authResponse', {
+                success: true,
+                action: 'login',
+                username: user.username,
+                teamName: user.teamName,
+                teamLogo: user.teamLogo,
+                message: 'Giriş başarılı!'
+            });
+
+        } catch (error) {
+            console.error('❌ Giriş hatası:', error);
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Giriş sırasında bir hata oluştu.'
+            });
+        }
+    });
 
     socket.on('forgotPassword', async (data) => {
         const { email } = data;
@@ -253,7 +326,6 @@ socket.on('loginUser', async (data) => {
                 });
                 return;
             }
-
             socket.emit('authResponse', {
                 success: true,
                 action: 'forgot',
@@ -272,37 +344,29 @@ socket.on('loginUser', async (data) => {
     // LOBBY İŞLEMLERİ
     // ============================================================
 
-socket.on("join-lobby", (playerData) => {
-    console.log(`📥 join-lobby alındı:`, playerData);
-    console.log(`📱 Socket ID: ${socket.id}`);
-    console.log(`📱 Transport: ${socket.conn.transport.name}`);
-    
-    // Eski kaydı kaldır
-    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+    socket.on("join-lobby", (playerData) => {
+        console.log(`📥 join-lobby alındı:`, playerData);
+        
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
 
-    const player = {
-        id: socket.id,
-        name: playerData?.name || "Oyuncu",
-        logo: playerData?.logo || "default.png"
-    };
+        const player = {
+            id: socket.id,
+            name: playerData?.name || "Oyuncu",
+            logo: playerData?.logo || "default.png"
+        };
 
-    lobbyPlayers.push(player);
-    console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
-    console.log(`📊 Lobby listesi:`, lobbyPlayers);
+        lobbyPlayers.push(player);
+        console.log(`👤 ${player.name} lobiye katıldı (${lobbyPlayers.length} oyuncu)`);
 
-    // TÜM oyunculara lobby listesini gönder
-    io.emit('update-lobby-players', lobbyPlayers);
-    
-    // Yeni katılan oyuncuya özel olarak da gönder
-    socket.emit('update-lobby-players', lobbyPlayers);
-});
+        io.emit('update-lobby-players', lobbyPlayers);
+        socket.emit('update-lobby-players', lobbyPlayers);
+    });
 
-socket.on('leave-lobby', () => {
-    lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
-    io.emit('update-lobby-players', lobbyPlayers);
-    console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
-    console.log(`📊 Kalan oyuncular:`, lobbyPlayers);
-});
+    socket.on('leave-lobby', () => {
+        lobbyPlayers = lobbyPlayers.filter(p => p.id !== socket.id);
+        io.emit('update-lobby-players', lobbyPlayers);
+        console.log(`👤 Oyuncu lobiden ayrıldı: ${socket.id}`);
+    });
 
     // ============================================================
     // DAVET İŞLEMLERİ
@@ -406,7 +470,6 @@ socket.on('leave-lobby', () => {
             });
 
             console.log(`🎮 Maç başlıyor: ${roomId}`);
-
             io.to(roomId).emit('match-go', { pins: allPins });
         }
     });
@@ -419,24 +482,22 @@ socket.on('leave-lobby', () => {
         socket.to(roomId).emit('sync-setup-pin-move', { team, index, x, y });
     });
 
-   socket.on('playerShot', ({ roomId, shotData }) => {
-    if (!roomId || !activeRooms[roomId]) {
-        console.warn('⚠️ Geçersiz oda:', roomId);
-        return;
-    }
-    addShotToPending(roomId, socket.id, shotData);
-});
+    socket.on('playerShot', ({ roomId, shotData }) => {
+        if (!roomId || !activeRooms[roomId]) {
+            console.warn('⚠️ Geçersiz oda:', roomId);
+            return;
+        }
+        addShotToPending(roomId, socket.id, shotData);
+    });
 
     socket.on('syncBallPosition', ({ roomId, ballState }) => {
         socket.to(roomId).emit('correctBallPosition', ballState);
     });
-    // GOL SENKRONİZASYONU
-// server.js
-socket.on('goal-scored', ({ roomId, scoringTeam }) => {
-    console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
-    // SADECE karşı tarafa gönder (kendine değil!)
-    socket.to(roomId).emit('opponent-goal', { scoringTeam });
-});
+
+    socket.on('goal-scored', ({ roomId, scoringTeam }) => {
+        console.log(`⚽ Gol! Takım ${scoringTeam} gol attı (Oda: ${roomId})`);
+        socket.to(roomId).emit('opponent-goal', { scoringTeam });
+    });
 
     // ============================================================
     // BAĞLANTI KESİLME
