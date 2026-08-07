@@ -262,7 +262,8 @@ io.on('connection', (socket) => {
     // AUTH İŞLEMLERİ
     // ============================================================
 
-  socket.on('registerUser', async (data) => {
+ // server.js - registerUser (GÜNCELLENDİ)
+socket.on('registerUser', async (data) => {
     const { username, email, password, teamName, teamLogo } = data;
 
     if (!username || !email || !password) {
@@ -274,17 +275,38 @@ io.on('connection', (socket) => {
     }
 
     try {
-        // ... mevcut kodlar ...
-        
-        // Eğer logo bir URL ise (yüklenmiş dosya), doğrudan kaydet
-        let logoToSave = teamLogo || 'default.png';
-        
-        // Eğer logo base64 ise (çok uzun), default kullan
-        if (logoToSave && logoToSave.startsWith('data:')) {
-            console.warn('⚠️ Base64 logo tespit edildi, default kullanılıyor');
-            logoToSave = 'default.png';
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Bu e-posta adresi zaten kayıtlı!'
+            });
+            return;
+        }
+
+        const existingUsername = await User.findOne({ username: username });
+        if (existingUsername) {
+            socket.emit('authResponse', {
+                success: false,
+                message: 'Bu kullanıcı adı zaten alınmış!'
+            });
+            return;
+        }
+
+        // ★★★ LOGO KONTROLÜ ★★★
+        let logoToSave = 'default.png';
+        if (teamLogo && teamLogo !== 'default.png') {
+            // Base64 ise default kullan (çok büyük)
+            if (teamLogo.startsWith('data:')) {
+                console.warn('⚠️ Base64 logo tespit edildi, default kullanılıyor');
+                logoToSave = 'default.png';
+            } else {
+                logoToSave = teamLogo;
+            }
         }
         
+        console.log('📝 Kaydedilecek logo:', logoToSave);
+
         const newUser = new User({
             username: username.trim(),
             email: email.toLowerCase().trim(),
@@ -303,7 +325,7 @@ io.on('connection', (socket) => {
             action: 'register',
             username: username,
             teamName: newUser.teamName,
-            teamLogo: newUser.teamLogo,
+            teamLogo: newUser.teamLogo, // ★★★ LOGO GÖNDER ★★★
             message: 'Kayıt başarıyla oluşturuldu! Hoş geldin.'
         });
 
@@ -316,7 +338,7 @@ io.on('connection', (socket) => {
     }
 });
 
- // server.js - loginUser (GÜNCELLENDİ)
+// server.js - loginUser (GÜNCELLENDİ)
 socket.on('loginUser', async (data) => {
     const { email, password } = data;
 
@@ -350,7 +372,7 @@ socket.on('loginUser', async (data) => {
             action: 'login',
             username: user.username,
             teamName: user.teamName,
-            teamLogo: user.teamLogo, // ★★★ LOGO BURADA GÖNDERİLİYOR ★★★
+            teamLogo: user.teamLogo, // ★★★ LOGO GÖNDER ★★★
             message: 'Giriş başarılı!'
         });
 
