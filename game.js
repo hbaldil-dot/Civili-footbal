@@ -263,6 +263,7 @@ function draw() {
         try {
             ctx.drawImage(fieldImage, 0, 0, width, height);
         } catch(e) {
+    console.error('❌ Socket bağlantı hatası:', e);
             ctx.fillStyle = '#2e7d32';
             ctx.fillRect(0, 0, width, height);
         }
@@ -713,48 +714,35 @@ if (typeof io !== 'undefined') {
             console.log('✅ Sunucuya bağlandı! ID:', socket.id);
         });
         
-        socket.on('disconnect', () => {
-            console.warn('⚠️ Bağlantı kesildi');
-        });
-        
-        socket.on('connect_error', (error) => {
-            console.warn('⚠️ Bağlantı hatası:', error.message);
-        });
-        
-        // Lobby güncelleme
-       socket.on('update-lobby-players', function(players) {
-    // ...
+      socket.on('disconnect', function() {
+    console.warn('⚠️ Bağlantı kesildi');
 });
-            console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
-            onlinePlayers = players || [];
-            updateLobbyUI();
-        });
-        
-        // Davet
-        socket.on('receive-invite', (data) => {
-            if (confirm(`${data.fromName} seni maça davet ediyor! Kabul et?`)) {
-                socket.emit('accept-invite', data.fromId);
-            }
-        });
-        
-        // Maç başlangıcı
-        socket.on('start-online-match', (data) => {
-            console.log('🎮 MAÇ BAŞLANGIÇ:', data);
-            currentRoomId = data.roomId;
-            myTeamNumber = data.team;
-            opponentLogoData = data.opponentLogo || 'default.png';
-            isOnlineMatch = true;
-            
-            loadTeamLogoImage(opponentLogoData);
-            
-            document.getElementById('online-lobby').style.display = 'none';
-            document.getElementById('top-bar').style.display = 'flex';
-            matchSecondsLeft = MATCH_DURATION;
-            document.getElementById('time-board').innerText = matchSecondsLeft + 's';
-            
-            setTimeout(() => updateScoreLogos(), 100);
-            startSetupPhase();
-        });
+
+socket.on('connect_error', function(error) {
+    console.warn('⚠️ Bağlantı hatası:', error.message);
+});
+
+socket.on('receive-invite', function(data) {
+    if (confirm(data.fromName + ' seni maça davet ediyor! Kabul et?')) {
+        socket.emit('accept-invite', data.fromId);
+    }
+});
+
+socket.on('start-online-match', function(data) {
+    console.log('🎮 MAÇ BAŞLANGIÇ:', data);
+    currentRoomId = data.roomId;
+    myTeamNumber = data.team;
+    opponentLogoData = data.opponentLogo || 'default.png';
+    isOnlineMatch = true;
+    
+    loadTeamLogoImage(opponentLogoData);
+    document.getElementById('online-lobby').style.display = 'none';
+    document.getElementById('top-bar').style.display = 'flex';
+    matchSecondsLeft = MATCH_DURATION;
+    document.getElementById('time-board').innerText = matchSecondsLeft + 's';
+    setTimeout(function() { updateScoreLogos(); }, 100);
+    startSetupPhase();
+});
         
         // Rakip gol
         socket.on('opponent-goal', (data) => {
@@ -1044,62 +1032,88 @@ console.log("🎮 Çivili Futbol Başlatıldı!");            socketOptions.tran
         // LOBBY OLAYLARI
         // ============================================================
         
-        socket.on('update-lobby-players', (players) => {
-            console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
-            onlinePlayers = players;
-            updateLobbyUI();
-        });
+    // Lobby güncelleme
+socket.on('update-lobby-players', function(players) {
+    console.log('🔄 Lobby güncellendi:', players.length, 'oyuncu');
+    onlinePlayers = players || [];
+    updateLobbyUI();
+});
 
-        // ============================================================
-        // ODA OLAYLARI
-        // ============================================================
-        
-        socket.on('start-online-match', (data) => {
-            console.log('🎮 MAÇ BAŞLANGIÇ:', data);
-            currentRoomId = data.roomId;
-            myTeamNumber = data.team;
-            opponentLogoData = data.opponentLogo || 'default.png';
-            aiTeamLogo = opponentLogoData;
-            isOnlineMatch = true;
-            
-            console.log('📊 Benim takımım:', myTeamNumber);
-            console.log('📊 Rakip logosu:', opponentLogoData);
-            
-            // Rakip logosunu yükle
-            if (opponentLogoData) {
-                loadTeamLogoImage(opponentLogoData);
-            }
-            
-            document.getElementById('online-lobby').style.display = 'none';
-            document.getElementById('top-bar').style.display = 'flex';
-            matchSecondsLeft = MATCH_DURATION;
-            const timeBoard = document.getElementById('time-board');
-            if (timeBoard) timeBoard.innerText = matchSecondsLeft + 's';
-            
-            setTimeout(() => {
-                updateScoreLogos();
-            }, 100);
-            
-            startSetupPhase();
-        });
+// Rakip gol
+socket.on('opponent-goal', function(data) {
+    console.log('📥 Rakip gol bildirimi:', data);
+    if (currentPhase === 'playing' && isOnlineMatch) {
+        if (data.scoringTeam === 1) {
+            score.p1++;
+            document.getElementById('score-p1').innerText = score.p1;
+        } else {
+            score.p2++;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+        triggerGoalAnimation();
+        cap.x = width / 2;
+        cap.y = height / 2;
+        cap.vx = 0;
+        cap.vy = 0;
+        turn = data.scoringTeam;
+        updateHUDTurn();
+        resetShotTimer();
+    }
+});
 
-        socket.on('opponent-disconnected', () => {
-            alert("⚠️ Rakip oyundan ayrıldı!");
-            exitToMenu();
-        });
+// Rakip vuruş
+socket.on('opponentShot', function(shotData) {
+    if (gameMode === 'online' && currentPhase === 'playing') {
+        var dx = (shotData.startX - shotData.endX) * PHYSICS.SHOT_POWER_MULTIPLIER;
+        var dy = (shotData.startY - shotData.endY) * PHYSICS.SHOT_POWER_MULTIPLIER;
+        cap.vx = dx;
+        cap.vy = dy;
+        playSound('kick');
+        turn = myTeamNumber;
+        updateHUDTurn();
+        resetShotTimer();
+    }
+});
 
-        socket.on('opponentShot', (shotData) => {
-            if (gameMode === 'online' && currentPhase === 'playing') {
-                cap.vx = (shotData.startX - shotData.endX) * 0.13;
-                cap.vy = (shotData.startY - shotData.endY) * 0.13;
-                playSound('kick');
-                turn = myTeamNumber;
-                updateHUDTurn();
-                resetShotTimer();
-            }
-        });
+// Top pozisyonu düzeltme
+socket.on('correctBallPosition', function(data) {
+    if (gameMode === 'online' && currentPhase === 'playing') {
+        var ball = data.ballState;
+        var diff = Math.hypot(cap.x - ball.x, cap.y - ball.y);
+        if (diff > PHYSICS.POSITION_TOLERANCE) {
+            cap.x = cap.x + (ball.x - cap.x) * 0.3;
+            cap.y = cap.y + (ball.y - cap.y) * 0.3;
+            cap.vx = ball.vx || 0;
+            cap.vy = ball.vy || 0;
+        }
+        if (ball.turn && turn !== ball.turn) {
+            turn = ball.turn;
+            updateHUDTurn();
+        }
+        if (ball.score_p1 !== undefined && score.p1 !== ball.score_p1) {
+            score.p1 = ball.score_p1;
+            document.getElementById('score-p1').innerText = score.p1;
+        }
+        if (ball.score_p2 !== undefined && score.p2 !== ball.score_p2) {
+            score.p2 = ball.score_p2;
+            document.getElementById('score-p2').innerText = score.p2;
+        }
+    }
+});
 
-       // sync-setup-pin-move
+// Auth cevapları
+socket.on('authResponse', function(data) {
+    alert(data.message);
+    if (data.success && data.username) {
+        document.getElementById('player-name').value = data.username;
+        if (data.action === 'login' || data.action === 'register') {
+            document.getElementById('auth-modal-overlay').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+        }
+    }
+});
+
+// sync-setup-pin-move
 socket.on('sync-setup-pin-move', function(data) {
     if (currentPhase === 'setup') {
         var count = 0;
